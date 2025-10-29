@@ -72,39 +72,27 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
-    slugs: Slug;
-    rights: Right;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
-    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
-    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'media';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    slugs: SlugsSelect<false> | SlugsSelect<true>;
-    rights: RightsSelect<false> | RightsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
-    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
-    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -112,7 +100,6 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
@@ -295,7 +282,6 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
-  folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -368,32 +354,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
- */
-export interface FolderInterface {
-  id: string;
-  name: string;
-  folder?: (string | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: string | FolderInterface;
-        }
-      | {
-          relationTo?: 'media';
-          value: string | Media;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  folderType?: 'media'[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
@@ -423,8 +383,6 @@ export interface Category {
 export interface User {
   id: string;
   name?: string | null;
-  admin?: boolean | null;
-  role?: (string | null) | Right;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -442,55 +400,6 @@ export interface User {
       }[]
     | null;
   password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rights".
- */
-export interface Right {
-  id: string;
-  name?: string | null;
-  'rights-list'?:
-    | {
-        collections?: (string | Slug)[] | null;
-        'create-collection-own'?: boolean | null;
-        'read-collection-own'?: boolean | null;
-        'read-collection-others'?: boolean | null;
-        'upd-collection-own'?: boolean | null;
-        'upd-collection-others'?: boolean | null;
-        'del-collection-own'?: boolean | null;
-        'del-collection-others'?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-  'field-rights'?:
-    | {
-        collectionSlug: string | Slug;
-        field?:
-          | {
-              fields?: string[] | null;
-              'field-read'?: boolean | null;
-              'field-edit'?: boolean | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "slugs".
- */
-export interface Slug {
-  id: string;
-  slug?: string | null;
-  display?: string | null;
-  active?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -910,23 +819,6 @@ export interface Search {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
@@ -1045,14 +937,6 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'slugs';
-        value: string | Slug;
-      } | null)
-    | ({
-        relationTo: 'rights';
-        value: string | Right;
-      } | null)
-    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -1069,8 +953,8 @@ export interface PayloadLockedDocument {
         value: string | Search;
       } | null)
     | ({
-        relationTo: 'payload-folders';
-        value: string | FolderInterface;
+        relationTo: 'payload-jobs';
+        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1287,7 +1171,6 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
-  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1400,8 +1283,6 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
-  admin?: T;
-  role?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1418,53 +1299,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "slugs_select".
- */
-export interface SlugsSelect<T extends boolean = true> {
-  slug?: T;
-  display?: T;
-  active?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rights_select".
- */
-export interface RightsSelect<T extends boolean = true> {
-  name?: T;
-  'rights-list'?:
-    | T
-    | {
-        collections?: T;
-        'create-collection-own'?: T;
-        'read-collection-own'?: T;
-        'read-collection-others'?: T;
-        'upd-collection-own'?: T;
-        'upd-collection-others'?: T;
-        'del-collection-own'?: T;
-        'del-collection-others'?: T;
-        id?: T;
-      };
-  'field-rights'?:
-    | T
-    | {
-        collectionSlug?: T;
-        field?:
-          | T
-          | {
-              fields?: T;
-              'field-read'?: T;
-              'field-edit'?: T;
-              id?: T;
-            };
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1660,14 +1494,6 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
@@ -1694,18 +1520,6 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders_select".
- */
-export interface PayloadFoldersSelect<T extends boolean = true> {
-  name?: T;
-  folder?: T;
-  documentsAndFolders?: T;
-  folderType?: T;
   updatedAt?: T;
   createdAt?: T;
 }
