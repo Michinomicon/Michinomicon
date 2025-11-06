@@ -8,6 +8,8 @@ import type { Header } from '@/payload-types'
 
 import { Logo } from '@/components/Logo/Logo'
 import { HeaderNav } from './Nav'
+import { ModeToggle } from '@/providers/Theme/mode-toggle'
+import { ColorThemeToggle } from '@/providers/Theme/color-theme-toggle'
 
 interface HeaderClientProps {
   data: Header
@@ -36,6 +38,10 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
           <Logo loading="eager" priority="high" className="invert dark:invert-0" />
         </Link>
         <HeaderNav data={data} />
+            <div className="flex gap-2">
+              <ModeToggle />
+              <ColorThemeToggle />
+            </div>
       </div>
     </header>
   )

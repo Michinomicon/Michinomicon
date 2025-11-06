@@ -1,7 +1,11 @@
 import Script from 'next/script'
 import React from 'react'
 
-import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
+// import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
+
+const defaultTheme = 'light';
+const themeLocalStorageKey = 'payload-theme'
+
 
 export const InitTheme: React.FC = () => {
   return (

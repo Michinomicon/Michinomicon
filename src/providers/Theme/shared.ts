@@ -1,10 +1,8 @@
-import type { Theme } from './types'
+// import { ThemeMode } from "./ModeSelector/types"
 
-export const themeLocalStorageKey = 'payload-theme'
+export type ThemeMode = 'dark' | 'light'
 
-export const defaultTheme = 'light'
-
-export const getImplicitPreference = (): Theme | null => {
+export const getImplicitPreference = (): ThemeMode | null => {
   const mediaQuery = '(prefers-color-scheme: dark)'
   const mql = window.matchMedia(mediaQuery)
   const hasImplicitPreference = typeof mql.matches === 'boolean'

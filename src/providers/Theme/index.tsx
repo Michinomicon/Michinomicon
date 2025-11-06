@@ -1,57 +1,122 @@
-'use client'
+"use client";
 
-import React, { createContext, useCallback, use, useEffect, useState } from 'react'
+import * as React from "react";
+import {
+  ThemeProvider as NextThemesProvider,
+  useTheme as useNextTheme,
+} from "next-themes";
 
-import type { Theme, ThemeContextType } from './types'
-
-import canUseDOM from '@/utilities/canUseDOM'
-import { defaultTheme, getImplicitPreference, themeLocalStorageKey } from './shared'
-import { themeIsValid } from './types'
-
-const initialContext: ThemeContextType = {
-  setTheme: () => null,
-  theme: undefined,
+interface ColorThemeContextType {
+  colorTheme: string | null;
+  setColorTheme: (theme: string | null) => void;
 }
 
-const ThemeContext = createContext(initialContext)
+const ColorThemeContext = React.createContext<
+  ColorThemeContextType | undefined
+>(undefined);
 
-export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme | undefined>(
-    canUseDOM ? (document.documentElement.getAttribute('data-theme') as Theme) : undefined,
-  )
+export function ColorThemeProvider({
+  children,
+  defaultColorTheme = null,
+  storageKey = "payload-theme",
+}: {
+  children: React.ReactNode;
+  defaultColorTheme?: string | null;
+  storageKey?: string;
+}) {
+  const [colorTheme, setColorThemeState] = React.useState<string | null>(null);
+  const [isClient, setIsClient] = React.useState(false);
 
-  const setTheme = useCallback((themeToSet: Theme | null) => {
-    if (themeToSet === null) {
-      window.localStorage.removeItem(themeLocalStorageKey)
-      const implicitPreference = getImplicitPreference()
-      document.documentElement.setAttribute('data-theme', implicitPreference || '')
-      if (implicitPreference) setThemeState(implicitPreference)
+  // Handle client-side mounting to avoid hydration mismatch
+  React.useEffect(() => {
+    setIsClient(true);
+    const stored = localStorage.getItem(storageKey);
+    setColorThemeState(stored || defaultColorTheme);
+  }, [defaultColorTheme, storageKey]);
+
+  // Apply color theme to document
+  React.useEffect(() => {
+    if (!isClient) return;
+
+    const root = document.documentElement;
+
+    // Apply color theme
+    if (colorTheme) {
+      root.setAttribute("data-theme", colorTheme);
     } else {
-      setThemeState(themeToSet)
-      window.localStorage.setItem(themeLocalStorageKey, themeToSet)
-      document.documentElement.setAttribute('data-theme', themeToSet)
+      root.removeAttribute("data-theme");
     }
-  }, [])
+  }, [colorTheme, isClient]);
 
-  useEffect(() => {
-    let themeToSet: Theme = defaultTheme
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
+  // Save to localStorage
+  React.useEffect(() => {
+    if (!isClient) return;
 
-    if (themeIsValid(preference)) {
-      themeToSet = preference
+    if (colorTheme) {
+      localStorage.setItem(storageKey, colorTheme);
     } else {
-      const implicitPreference = getImplicitPreference()
-
-      if (implicitPreference) {
-        themeToSet = implicitPreference
-      }
+      localStorage.removeItem(storageKey);
     }
+  }, [colorTheme, storageKey, isClient]);
 
-    document.documentElement.setAttribute('data-theme', themeToSet)
-    setThemeState(themeToSet)
-  }, [])
+  const setColorTheme = React.useCallback((theme: string | null) => {
+    setColorThemeState(theme);
+  }, []);
 
-  return <ThemeContext value={{ setTheme, theme }}>{children}</ThemeContext>
+  const value = React.useMemo(
+    () => ({
+      colorTheme,
+      setColorTheme,
+    }),
+    [colorTheme, setColorTheme]
+  );
+
+  return (
+    <ColorThemeContext.Provider value={value}>
+      {children}
+    </ColorThemeContext.Provider>
+  );
 }
 
-export const useTheme = (): ThemeContextType => use(ThemeContext)
+export function useColorTheme() {
+  const context = React.useContext(ColorThemeContext);
+  if (context === undefined) {
+    throw new Error("useColorTheme must be used within a ColorThemeProvider");
+  }
+  return context;
+}
+
+export function useTheme() {
+  const nextTheme = useNextTheme();
+  const colorTheme = useColorTheme();
+
+  return {
+    // Next-themes functionality (mode switching)
+    theme: nextTheme.theme,
+    setTheme: nextTheme.setTheme,
+    themes: nextTheme.themes,
+    systemTheme: nextTheme.systemTheme,
+    resolvedTheme: nextTheme.resolvedTheme,
+
+    // Color theme functionality
+    colorTheme: colorTheme.colorTheme,
+    setColorTheme: colorTheme.setColorTheme,
+  };
+}
+
+export function ThemeProvider({
+  children,
+  defaultColorTheme = "violet",
+  ...props
+}: React.ComponentProps<typeof NextThemesProvider> & {
+  children: React.ReactNode;
+  defaultColorTheme?: string;
+}) {
+  return (
+    <NextThemesProvider {...props}>
+      <ColorThemeProvider defaultColorTheme={defaultColorTheme}>
+        {children}
+      </ColorThemeProvider>
+    </NextThemesProvider>
+  );
+}
