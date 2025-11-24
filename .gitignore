@@ -41,10 +41,8 @@ next-env.d.ts
 
 # Payload default media upload directory
 public/media/
-
 public/robots.txt
 public/sitemap*.xml
-
 
 # Playwright
 node_modules/
