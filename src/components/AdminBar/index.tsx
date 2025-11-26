@@ -56,7 +56,7 @@ export const AdminBar: React.FC<{
       <div className="container">
         <PayloadAdminBar
           {...adminBarProps}
-          className='py-2 bg-background text-foreground'
+          className="py-2 bg-background text-foreground"
           classNames={{
             controls: 'font-medium text-foreground',
             logo: 'text-foreground',
