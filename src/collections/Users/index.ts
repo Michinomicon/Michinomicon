@@ -21,6 +21,11 @@ export const Users: CollectionConfig = {
       name: 'name',
       type: 'text',
     },
+    {
+      name: "admin",
+      label: "Admin?",
+      type: "checkbox"
+    }
   ],
   timestamps: true,
 }
