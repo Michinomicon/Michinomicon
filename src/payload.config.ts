@@ -17,6 +17,8 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { Slugs } from './collections/Slugs'
+import { Rights } from './collections/Rights'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -79,7 +81,10 @@ export default buildConfig({
   }),
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  collections: [Pages, Posts, Media, Categories, Users],
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URI || '',
+  }),
+  collections: [Pages, Posts, Media, Categories, Users, Slugs, Rights],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [

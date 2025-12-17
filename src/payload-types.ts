@@ -72,6 +72,8 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
+    slugs: Slug;
+    rights: Right;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -94,6 +96,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    slugs: SlugsSelect<false> | SlugsSelect<true>;
+    rights: RightsSelect<false> | RightsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -419,6 +423,7 @@ export interface Category {
 export interface User {
   id: string;
   name?: string | null;
+  admin?: boolean | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -781,6 +786,56 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slugs".
+ */
+export interface Slug {
+  id: string;
+  slug?: string | null;
+  display?: string | null;
+  active?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rights".
+ */
+export interface Right {
+  id: string;
+  name?: string | null;
+  rights?:
+    | {
+        collections?: (string | Slug)[] | null;
+        'read-collection-own'?: boolean | null;
+        'read-collection-others'?: boolean | null;
+        'create-collection-own'?: boolean | null;
+        'create-collection-others'?: boolean | null;
+        'upd-collection-own'?: boolean | null;
+        'upd-collection-others'?: boolean | null;
+        'del-collection-own'?: boolean | null;
+        'del-collection-others'?: boolean | null;
+        id?: string | null;
+      }[]
+    | null;
+  'field-rights'?:
+    | {
+        collectionSlug: string | Slug;
+        field?:
+          | {
+              fields?: string[] | null;
+              'field-read'?: boolean | null;
+              'field-edit'?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -988,6 +1043,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
+      } | null)
+    | ({
+        relationTo: 'slugs';
+        value: string | Slug;
+      } | null)
+    | ({
+        relationTo: 'rights';
+        value: string | Right;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1337,6 +1400,7 @@ export interface CategoriesSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  admin?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1353,6 +1417,54 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slugs_select".
+ */
+export interface SlugsSelect<T extends boolean = true> {
+  slug?: T;
+  display?: T;
+  active?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rights_select".
+ */
+export interface RightsSelect<T extends boolean = true> {
+  name?: T;
+  rights?:
+    | T
+    | {
+        collections?: T;
+        'read-collection-own'?: T;
+        'read-collection-others'?: T;
+        'create-collection-own'?: T;
+        'create-collection-others'?: T;
+        'upd-collection-own'?: T;
+        'upd-collection-others'?: T;
+        'del-collection-own'?: T;
+        'del-collection-others'?: T;
+        id?: T;
+      };
+  'field-rights'?:
+    | T
+    | {
+        collectionSlug?: T;
+        field?:
+          | T
+          | {
+              fields?: T;
+              'field-read'?: T;
+              'field-edit'?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
