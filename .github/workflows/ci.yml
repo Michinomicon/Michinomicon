@@ -49,7 +49,8 @@ jobs:
       #     fi
 
       - name: Build Application
-        run: pnpm build
+        # run: pnpm build
+        run: pnpm next build --experimental-build-mode compile
         # Payload requires these env vars to validate config during build
         env:
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
