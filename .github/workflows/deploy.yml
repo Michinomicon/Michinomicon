@@ -75,20 +75,26 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # Navigate to app directory
-            cd /var/www/michinomicon-dev
-            
-            # Load Node/NVM environment if necessary (common VPS issue)
+            # 1. Load NVM (Node Version Manager)
             export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            
+            # 2. Add PNPM to PATH (Crucial Fix)
+            # Standalone pnpm is usually installed here, but non-interactive shells miss it
+            export PNPM_HOME="$HOME/.local/share/pnpm"
+            export PATH="$PNPM_HOME:$PATH"
+            
+            # 3. Navigate to folder
+            cd /var/www/michinomicon-dev
 
-            # Install dependencies
-            echo "Installing dependencies..."
+            # 4. Verify tools exist (Optional debugging)
+            echo "Using Node: $(node -v)"
+            echo "Using PNPM: $(pnpm -v)"
+            
+            # 5. Install & Build
+            echo "Installing..."
             pnpm install --frozen-lockfile
-
-            # Build Payload
-            # This ensures 'sharp' and other binaries are built for the correct OS
-            echo "Building Payload..."
+            echo "Building..."
             pnpm build
 
             # Run Migrations (Optional - usually recommended)
@@ -98,6 +104,9 @@ jobs:
             # Restart Application using PM2
             echo "Restarting PM2..."
             pm2 reload ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
+
+            # Save the PM2 list so it resurrects on server reboot
+            pm2 save
       
       # ===============================================================
       ## Depreciated
