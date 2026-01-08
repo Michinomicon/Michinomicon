@@ -30,7 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build for production
-        run: pnpm next build --experimental-build-mode generate-env
+        run: pnpm next build
         env:
           NODE_ENV: production
 
