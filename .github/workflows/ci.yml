@@ -13,7 +13,7 @@ jobs:
     # strategy allows you to test against multiple node versions if necessary
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [22.x]
 
     # configuration to run a database if your tests require a live connection
     # remove comments below if using MongoDB for integration tests
