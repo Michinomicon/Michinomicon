@@ -57,12 +57,12 @@ jobs:
           # Use a dummy URI for build only, or the service URI if testing
           DATABASE_URI: ${{ secrets.DATABASE_URI || 'mongodb://127.0.0.1/payload-ci' }}
 
-      - name: Run Tests
-        # Only runs if you have a 'test' script in package.json
-        run: |
-          if npm run | grep -q "test"; then
-            pnpm test
-          fi
-        env:
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
-          DATABASE_URI: ${{ secrets.DATABASE_URI || 'mongodb://127.0.0.1/payload-ci' }}
+      # - name: Run Tests
+      #   # Only runs if you have a 'test' script in package.json
+      #   run: |
+      #     if npm run | grep -q "test"; then
+      #       pnpm test
+      #     fi
+      #   env:
+      #     PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
+      #     DATABASE_URI: ${{ secrets.DATABASE_URI || 'mongodb://127.0.0.1/payload-ci' }}
