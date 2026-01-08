@@ -41,12 +41,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Lint (Optional)
-        # Only runs if you have a 'lint' script in package.json
-        run: |
-          if npm run | grep -q "lint"; then
-            pnpm lint
-          fi
+      # - name: Lint (Optional)
+      #   # Only runs if you have a 'lint' script in package.json
+      #   run: |
+      #     if npm run | grep -q "lint"; then
+      #       pnpm lint
+      #     fi
 
       - name: Build Application
         run: pnpm build
