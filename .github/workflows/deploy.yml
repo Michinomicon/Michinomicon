@@ -20,33 +20,86 @@ jobs:
         with:
           version: latest
 
-      - name: Use Node.js 22
-        uses: actions/setup-node@v4
+      # 1. Prepare files for transfer
+      # We do NOT build here to avoid 'glibc' or binary mismatches.
+      # We only sync source code, package files, and public assets.
+      - name: Copy files to VPS via Rsync
+        uses: appleboy/scp-action@v0.1.7
         with:
-          node-version: 22
-          cache: 'pnpm'
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          # Source files to upload
+          source: "src,package.json,pnpm-lock.yaml,payload.config.ts,tsconfig.json,public"
+          # Remote path on the VPS
+          target: "/var/www/michinomicon-dev"
+          # Clean up naming if syncing directly to folder
+          strip_components: 0 
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      # 2. Execute Build and Restart on Remote Server
+      - name: Remote Build & Restart
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            # Navigate to app directory
+            cd /var/www/michinomicon-dev
+            
+            # Load Node/NVM environment if necessary (common VPS issue)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-      - name: Build for production
-        run: pnpm next build
-        env:
-          NODE_ENV: production
+            # Install dependencies
+            echo "Installing dependencies..."
+            pnpm install --frozen-lockfile
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+            # Build Payload
+            # This ensures 'sharp' and other binaries are built for the correct OS
+            echo "Building Payload..."
+            pnpm build
 
-      - name: Deploy to server
-        run: |
-          scp -r ./dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/michinomicon-dev/
-          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl reload nginx"
+            # Run Migrations (Optional - usually recommended)
+            # echo "Running Migrations..."
+            # pnpm payload migrate
 
-      - name: Verify deployment
-        run: |
-          sleep 10
-          curl -f ${{ secrets.APP_URL }} || exit 1
+            # Restart Application using PM2
+            echo "Restarting PM2..."
+            pm2 reload ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
+      
+      # ===============================================================
+      ## Depreciated
+      # ===============================================================
+      # - name: Use Node.js 22
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: 22
+      #     cache: 'pnpm'
+
+      # - name: Install dependencies
+      #   run: pnpm install --frozen-lockfile
+
+      # - name: Build for production
+      #   run: pnpm next build
+      #   env:
+      #     NODE_ENV: production
+
+      # - name: Setup SSH
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+      # - name: Deploy to server
+      #   run: |
+      #     scp -r ./dist/* ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/var/www/michinomicon-dev/
+      #     ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "sudo systemctl reload nginx"
+
+      # - name: Verify deployment
+      #   run: |
+      #     sleep 10
+      #     curl -f ${{ secrets.APP_URL }} || exit 1
