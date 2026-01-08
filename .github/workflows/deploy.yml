@@ -26,10 +26,10 @@ jobs:
       - name: Copy files to VPS via Rsync
         uses: appleboy/scp-action@v0.1.7
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 22 }}
           # Source files to upload
           source: "src,package.json,pnpm-lock.yaml,payload.config.ts,tsconfig.json,public"
           # Remote path on the VPS
@@ -41,10 +41,10 @@ jobs:
       - name: Remote Build & Restart
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USERNAME }}
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.VPS_PORT || 22 }}
+          port: ${{ secrets.SSH_PORT || 22 }}
           script: |
             # Navigate to app directory
             cd /var/www/michinomicon-dev
