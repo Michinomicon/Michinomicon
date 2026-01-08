@@ -47,7 +47,7 @@ jobs:
             --exclude '.git/' \
             --exclude 'node_modules/' \
             --exclude '.env' \
-            ./ vps:/var/www/my-payload-app/
+            ./ vps:/var/www/michinomicon-dev/
           
       # # 1. Prepare files for transfer
       # # We do NOT build here to avoid 'glibc' or binary mismatches.
