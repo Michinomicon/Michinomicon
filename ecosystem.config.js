@@ -2,9 +2,7 @@ module.exports = {
   apps: [
     {
       name: "michinomicon-dev",
-      script: "pnpm",
-      args: "start",
-      // script: "dist/server.js", // Check your build output location!
+      script: "dist/server.js",
       // If using Payload 3.0 with Next.js, use: script: "npm", args: "start"
       env_production: {
         NODE_ENV: "production",
