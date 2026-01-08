@@ -24,23 +24,47 @@ jobs:
         run: |
           # Try to reach the server on defined port with a 5-second timeout
           nc -zv -w 5 ${{ secrets.SSH_HOST }} ${{ secrets.SSH_PORT }}
+
+      # 1. Setup SSH Key for Rsync
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          cat >>~/.ssh/config <<END
+          Host vps
+            HostName ${{ secrets.SSH_HOST }}
+            User ${{ secrets.SSH_USER }}
+            Port ${{ secrets.SSH_PORT }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          END
+
+      # 2. Use native Rsync (More reliable than scp-action)
+      - name: Deploy with Rsync
+        run: |
+          rsync -avz --delete \
+            --exclude '.git/' \
+            --exclude 'node_modules/' \
+            --exclude '.env' \
+            ./ vps:/var/www/my-payload-app/
           
-      # 1. Prepare files for transfer
-      # We do NOT build here to avoid 'glibc' or binary mismatches.
-      # We only sync source code, package files, and public assets.
-      - name: Copy files to VPS via Rsync
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          # Source files to upload
-          source: "src,package.json,pnpm-lock.yaml,payload.config.ts,tsconfig.json,public"
-          # Remote path on the VPS
-          target: "/var/www/michinomicon-dev"
-          # Clean up naming if syncing directly to folder
-          strip_components: 0 
+      # # 1. Prepare files for transfer
+      # # We do NOT build here to avoid 'glibc' or binary mismatches.
+      # # We only sync source code, package files, and public assets.
+      # - name: Copy files to VPS via Rsync
+      #   uses: appleboy/scp-action@v0.1.7
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     # Source files to upload
+      #     source: "src,package.json,pnpm-lock.yaml,payload.config.ts,tsconfig.json,public"
+      #     # Remote path on the VPS
+      #     target: "/var/www/michinomicon-dev"
+      #     # Clean up naming if syncing directly to folder
+      #     strip_components: 0 
 
       # 2. Execute Build and Restart on Remote Server
       - name: Remote Build & Restart
