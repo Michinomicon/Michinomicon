@@ -21,7 +21,7 @@ jobs:
           version: latest
 
       - name: Test Network Connectivity
-        script: |
+        run: |
           # Try to reach the server on defined port with a 5-second timeout
           nc -zv -w 5 ${{ secrets.SSH_HOST }} ${{ secrets.SSH_PORT }}
           
