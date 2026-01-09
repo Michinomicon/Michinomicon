@@ -30,6 +30,7 @@ const nextConfig = {
     return webpackConfig
   },
   output: 'standalone',
+  outputFileTracing: false,
   reactStrictMode: true,
   redirects,
 }
