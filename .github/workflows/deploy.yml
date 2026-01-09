@@ -112,7 +112,7 @@ jobs:
             # --retry-delay 5: Waits 5 seconds between retries
             # --tries 3: Tries 3 times total
             
-            if curl --retry-connrefused --retry-delay 5 --tries 3 --fail http://127.0.0.1:3000/admin/login; then
+            if curl --retry-connrefused --retry-delay 5 --retry 3 --fail http://127.0.0.1:3000/admin/login; then
                 echo "✅ Deployment Successful: App is responding!"
             else
                 echo "❌ Deployment Failed: App is not responding."
