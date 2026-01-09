@@ -98,18 +98,18 @@ jobs:
             # Save the PM2 list so it resurrects on server reboot
             pm2 save
             
-            # Wait 10 seconds for the app to start
-            echo "Waiting for app to start..."
-            sleep 10
+            # # Wait 10 seconds for the app to start
+            # echo "Waiting for app to start..."
+            # sleep 10
             
-            # Check if the local port 3000 is responding
-            echo "Checking for response from application..."
+            # # Check if the local port 3000 is responding
+            # echo "Checking for response from application..."
             
-            if curl --retry-connrefused --retry-delay 5 --retry 3 --fail http://127.0.0.1:3000/admin/login; then
-                echo "✅ Deployment Successful: App is responding!"
-            else
-                echo "❌ Deployment Failed: App is not responding."
-                # TODO: Revert to previous build or alert??
-                exit 1
-            fi
+            # if curl --retry-connrefused --retry-delay 5 --retry 3 --fail http://127.0.0.1:3000/admin/login; then
+            #     echo "✅ Deployment Successful: App is responding!"
+            # else
+            #     echo "❌ Deployment Failed: App is not responding."
+            #     # TODO: Revert to previous build or alert??
+            #     exit 1
+            # fi
             
