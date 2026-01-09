@@ -29,9 +29,6 @@ const eslintConfig = [
         },
       ],
     },
-    plugins: {
-      'react-hooks': 'react-hooks',
-    },
   },
   {
     ignores: ['.next/'],
