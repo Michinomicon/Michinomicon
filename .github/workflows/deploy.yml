@@ -92,24 +92,15 @@ jobs:
 
             # Run PayloadCMS Migrations
             # echo "Running PayloadCMS Migrations..."
-            # pnpm payload migrate
+            pnpm payload migrate
 
-      - name: Restart and Perform Health Check
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: ${{ secrets.SSH_PORT }}
-          script: |
-            
             # Restart Application using PM2
             echo "Restarting with PM2..."
             pm2 restart ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
-
+            
             # Save the PM2 list so it resurrects on server reboot
             pm2 save
-
+            
             # Wait 10 seconds for the app to start
             echo "Waiting for app to start..."
             sleep 10
@@ -118,7 +109,7 @@ jobs:
             echo "Checking for response from application..."
             
             # --retry-connrefused: Retries if the server is not up yet
-            # --waitretry 5: Waits 5 seconds between retries
+            # --retry-delay 5: Waits 5 seconds between retries
             # --tries 3: Tries 3 times total
             
             if curl --retry-connrefused --retry-delay 5 --tries 3 --fail http://127.0.0.1:3000/admin/login; then
@@ -128,4 +119,39 @@ jobs:
                 # TODO: Revert to previous build or alert??
                 exit 1
             fi
+
+      # - name: Restart and Perform Health Check
+      #   uses: appleboy/ssh-action@v1.0.3
+      #   with:
+      #     host: ${{ secrets.SSH_HOST }}
+      #     username: ${{ secrets.SSH_USER }}
+      #     key: ${{ secrets.SSH_PRIVATE_KEY }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     script: |
+            
+      #       # Restart Application using PM2
+      #       echo "Restarting with PM2..."
+      #       pm2 restart ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
+
+      #       # Save the PM2 list so it resurrects on server reboot
+      #       pm2 save
+
+      #       # Wait 10 seconds for the app to start
+      #       echo "Waiting for app to start..."
+      #       sleep 10
+            
+      #       # Check if the local port 3000 is responding
+      #       echo "Checking for response from application..."
+            
+      #       # --retry-connrefused: Retries if the server is not up yet
+      #       # --waitretry 5: Waits 5 seconds between retries
+      #       # --tries 3: Tries 3 times total
+            
+      #       if curl --retry-connrefused --retry-delay 5 --tries 3 --fail http://127.0.0.1:3000/admin/login; then
+      #           echo "✅ Deployment Successful: App is responding!"
+      #       else
+      #           echo "❌ Deployment Failed: App is not responding."
+      #           # TODO: Revert to previous build or alert??
+      #           exit 1
+      #       fi
             
