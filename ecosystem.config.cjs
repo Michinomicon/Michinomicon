@@ -2,8 +2,9 @@ module.exports = {
   apps: [
     {
       name: "michinomicon-dev",
-      script: "node", 
-      args: ".next/standalone/server.js",
+      interpreter: "none",
+      script: "pnpm", 
+      args: "start",
       // Force PM2 to read the .env file in the current directory
       env_file: '.env',
       env_production: {
