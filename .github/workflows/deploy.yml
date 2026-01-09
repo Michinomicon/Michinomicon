@@ -47,8 +47,8 @@ jobs:
             --exclude '.env' \
             ./ vps:/var/www/michinomicon-dev/
 
-      # 2. Execute Build and Restart on Remote Server
-      - name: Remote Build & Restart
+      
+      - name: Execute Install & Build on Remote Server
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -56,13 +56,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # Load NVM (Node Version Manager)
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            # # Load NVM (Node Version Manager)
+            # export NVM_DIR="$HOME/.nvm"
+            # [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             
-            # Add PNPM to PATH
-            export PNPM_HOME="$HOME/.local/share/pnpm"
-            export PATH="$PNPM_HOME:$PATH"
+            # # Add PNPM to PATH
+            # export PNPM_HOME="$HOME/.local/share/pnpm"
+            # export PATH="$PNPM_HOME:$PATH"
             
             # Navigate to project folder
             cd /var/www/michinomicon-dev
@@ -72,6 +72,7 @@ jobs:
             echo "Using PNPM: $(pnpm -v)"
 
             # Recreate .env file on VPS using values from Github Actions Secrets
+            echo "Recreating .env file..."
             echo "NODE_ENV=production" > .env
             echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> .env
             echo "PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}" >> .env
@@ -80,9 +81,11 @@ jobs:
             echo "PREVIEW_SECRET=${{ secrets.PREVIEW_SECRET }}" >> .env
             echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
             
-            # Install & Build project
+            # Install project
             echo "Installing..."
             pnpm install --frozen-lockfile
+
+            # Build project
             echo "Building..."
             pnpm build:prod
 
@@ -90,9 +93,38 @@ jobs:
             # echo "Running PayloadCMS Migrations..."
             # pnpm payload migrate
 
+      - name: Restart and Perform Health Check
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+
             # Restart Application using PM2
-            echo "Restarting PM2..."
-            pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
+            echo "Restarting with PM2..."
+            pm2 restart ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
 
             # Save the PM2 list so it resurrects on server reboot
             pm2 save
+
+            # Wait 10 seconds for the app to start
+            echo "Waiting for app to start..."
+            sleep 10
+            
+            # Check if the local port 3000 is responding
+            echo "Checking for response from application..."
+            
+            # --retry-connrefused: Retries if the server is not up yet
+            # --waitretry 5: Waits 5 seconds between retries
+            # --tries 3: Tries 3 times total
+            
+            if curl --retry-connrefused --waitretry 5 --tries 3 --fail http://127.0.0.1:3000/admin/login; then
+                echo "✅ Deployment Successful: App is responding!"
+            else
+                echo "❌ Deployment Failed: App is not responding."
+                # TODO: Revert to previous build or alert??
+                exit 1
+            fi
+            
