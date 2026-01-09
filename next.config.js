@@ -29,7 +29,7 @@ const nextConfig = {
 
     return webpackConfig
   },
-  // output: 'standalone',
+  output: 'standalone',
   reactStrictMode: true,
   redirects,
 }
