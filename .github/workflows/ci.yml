@@ -17,11 +17,11 @@ jobs:
 
     # configuration to run a database if your tests require a live connection
     # remove comments below if using MongoDB for integration tests
-    # services:
-    #   mongodb:
-    #     image: mongo:latest
-    #     ports:
-    #       - 27017:27017
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
 
     steps:
       - name: Checkout source code
@@ -45,8 +45,8 @@ jobs:
         run: pnpm lint
 
       - name: Build Application
-        # run: pnpm build
-        run: pnpm next build --experimental-build-mode compile
+        run: pnpm build
+        # run: pnpm next build --experimental-build-mode compile
         # Payload requires these env vars to validate config during build
         env:
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
