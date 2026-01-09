@@ -54,7 +54,7 @@ jobs:
           DATABASE_URI: ${{ secrets.DATABASE_URI || 'mongodb://127.0.0.1/payload-ci' }}
 
       - name: Run Tests
-        run: pnpm test
+        run: pnpm exec playwright install && pnpm test
         env:
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
           DATABASE_URI: ${{ secrets.DATABASE_URI || 'mongodb://127.0.0.1/payload-ci' }}
