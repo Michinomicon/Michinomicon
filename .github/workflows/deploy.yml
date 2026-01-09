@@ -56,13 +56,13 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # # Load NVM (Node Version Manager)
-            # export NVM_DIR="$HOME/.nvm"
-            # [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+            # Load NVM (Node Version Manager)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
             
-            # # Add PNPM to PATH
-            # export PNPM_HOME="$HOME/.local/share/pnpm"
-            # export PATH="$PNPM_HOME:$PATH"
+            # Add PNPM to PATH
+            export PNPM_HOME="$HOME/.local/share/pnpm"
+            export PATH="$PNPM_HOME:$PATH"
             
             # Navigate to project folder
             cd /var/www/michinomicon-dev
