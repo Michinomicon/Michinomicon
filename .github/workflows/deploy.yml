@@ -87,7 +87,7 @@ jobs:
 
             # Build project
             echo "Building..."
-            pnpm build:prod
+            pnpm dev:build
 
             # Run PayloadCMS Migrations
             # echo "Running PayloadCMS Migrations..."
