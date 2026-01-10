@@ -2,7 +2,7 @@ module.exports = {
   apps: [
     {
       name: "michinomicon-dev",
-      script: "pnpm start", 
+      script: "start", 
       // Force PM2 to read the .env file in the current directory
       env_file: '.env',
       env_production: {
