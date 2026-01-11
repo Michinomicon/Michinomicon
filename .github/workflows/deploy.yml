@@ -87,7 +87,7 @@ jobs:
 
             # Build project
             echo "Building..."
-            pnpm build
+            pnpm cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build
 
             # Run PayloadCMS Migrations
             # echo "Running PayloadCMS Migrations..."
@@ -95,8 +95,7 @@ jobs:
 
             # Restart Application using PM2
             echo "reload with PM2..."
-            pm2 reload ecosystem.config.cjs --env production --update-env
-            # || pm2 start ecosystem.config.cjs --env production --update-env
+            pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
             
             # # Wait 10 seconds for the app to start
             # echo "Waiting for app to start..."
