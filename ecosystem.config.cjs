@@ -3,18 +3,18 @@ module.exports = {
     {
       name: "michinomicon-dev",
       script: "pnpm", 
-      args: "dev:prod",
+      args: "start",
       interpreter: "none", 
       // Force PM2 to read the .env file in the current directory
       env_file: '.env',
       env_production: {
         NODE_ENV: "production",
         PAYLOAD_CONFIG_PATH: "src/payload.config.ts",
-        // Email Settings
-        SMTP_HOST: "live.smtp.mailtrap.io",
-        SMTP_PORT: "587",
-        SMTP_USER: "api",
-        // SMTP_PASS: mailtrap API key will be loaded from .env
+        // // Email Settings
+        // SMTP_HOST: "live.smtp.mailtrap.io",
+        // SMTP_PORT: "587",
+        // SMTP_USER: "api",
+        // // SMTP_PASS: mailtrap API key will be loaded from .env
       },
     },
   ],

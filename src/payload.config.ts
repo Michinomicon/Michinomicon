@@ -65,7 +65,7 @@ export default buildConfig({
     },
   },
   email: nodemailerAdapter({
-    defaultFromAddress: 'info@mail.awgrm.com',
+    defaultFromAddress: 'system@awgrm.com',
     defaultFromName: 'Michinomicon Dev',
     // Nodemailer transportOptions
     transportOptions: {
