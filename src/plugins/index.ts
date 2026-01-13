@@ -12,6 +12,7 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
+import { hasAccess } from '@/utilities/accessFunctions'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
@@ -27,6 +28,15 @@ export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages', 'posts'],
     overrides: {
+      admin: {
+        group: 'Plugins',
+      },
+      access: {
+        read: hasAccess('redirects', 'read'),
+        create: hasAccess('redirects', 'create'),
+        update: hasAccess('redirects', 'upd'),
+        delete: hasAccess('redirects', 'del'),
+      },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -58,7 +68,27 @@ export const plugins: Plugin[] = [
     fields: {
       payment: false,
     },
+    formSubmissionOverrides: {
+      admin: {
+        group: 'Plugins',
+      },
+      access: {
+        read: hasAccess('formSubmissions', 'read'),
+        delete: hasAccess('formSubmissions', 'del'),
+        create: hasAccess('formSubmissions', 'create'),
+        update: hasAccess('formSubmissions', 'upd'),
+      },
+    },
     formOverrides: {
+      admin: {
+        group: 'Plugins',
+      },
+      access: {
+        read: hasAccess('forms', 'read'),
+        create: hasAccess('forms', 'create'),
+        update: hasAccess('forms', 'upd'),
+        delete: hasAccess('forms', 'del'),
+      },
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
           if ('name' in field && field.name === 'confirmationMessage') {
@@ -84,6 +114,15 @@ export const plugins: Plugin[] = [
     collections: ['posts'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
+      admin: {
+        group: 'Plugins',
+      },
+      access: {
+        read: hasAccess('search', 'read'),
+        create: hasAccess('search', 'create'),
+        update: hasAccess('search', 'upd'),
+        delete: hasAccess('search', 'del'),
+      },
       fields: ({ defaultFields }) => {
         return [...defaultFields, ...searchFields]
       },

@@ -8,8 +8,7 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { hasAccess } from '@/utilities/accessFunctions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,11 +16,14 @@ const dirname = path.dirname(filename)
 export const Media: CollectionConfig = {
   slug: 'media',
   folders: true,
+  admin: {
+    group: 'Globals'
+  },
   access: {
-    create: authenticated,
-    delete: authenticated,
-    read: anyone,
-    update: authenticated,
+    read: hasAccess('media', 'read'),
+    create: hasAccess('media', 'create'),
+    update: hasAccess('media', 'upd'),
+    delete: hasAccess('media', 'del'),
   },
   fields: [
     {

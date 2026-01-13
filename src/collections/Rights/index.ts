@@ -1,7 +1,22 @@
+import { hasAccess } from "@/utilities/accessFunctions";
 import { CollectionConfig } from "payload";
 
 export const Rights: CollectionConfig = {
     slug: "rights",
+    access: {
+        read: hasAccess("rights", "read"),
+        create: hasAccess("rights", "create"),
+        update: hasAccess("rights", "upd"),
+        delete: hasAccess("rights", "del"),
+    },
+    admin:{
+        defaultColumns: ["name"],
+        useAsTitle: "name",
+        group: "Admin"
+    },
+    defaultPopulate: {
+        name: true,
+    },
     fields: [
         {
             type: "text",
@@ -16,7 +31,7 @@ export const Rights: CollectionConfig = {
                 {
                     type: "array",
                     label: "Rights",
-                    name: "rights",
+                    name: "rights-list",
                     fields: [
                         {
                             type: "row",
@@ -35,6 +50,19 @@ export const Rights: CollectionConfig = {
                             fields: [
                                 {
                                     type: "checkbox",
+                                    name: "create-collection-own",
+                                    label: "Create Collection Own",
+                                    admin: {
+                                        width: "100%"
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            type: "row",
+                            fields: [
+                                {
+                                    type: "checkbox",
                                     name: "read-collection-own",
                                     label: "Read Collection Own",
                                     admin: {
@@ -45,27 +73,6 @@ export const Rights: CollectionConfig = {
                                     type: "checkbox",
                                     name: "read-collection-others",
                                     label: "Read Collection Others",
-                                    admin: {
-                                        width: "50%"
-                                    }
-                                },
-                            ]
-                        },
-                        {
-                            type: "row",
-                            fields: [
-                                {
-                                    type: "checkbox",
-                                    name: "create-collection-own",
-                                    label: "Create Collection Own",
-                                    admin: {
-                                        width: "50%"
-                                    }
-                                },
-                                {
-                                    type: "checkbox",
-                                    name: "create-collection-others",
-                                    label: "Create Collection Others",
                                     admin: {
                                         width: "50%"
                                     }

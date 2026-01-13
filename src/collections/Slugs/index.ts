@@ -1,10 +1,17 @@
+import { hasAccess } from "@/utilities/accessFunctions";
 import { CollectionConfig } from "payload";
 
 export const Slugs: CollectionConfig = {
     slug: "slugs",
+    access: {
+        read: hasAccess("slugs", "read"),
+        create: hasAccess("slugs", "create"),
+        update: hasAccess("slugs", "upd"),
+        delete: hasAccess("slugs", "del"),
+    },
     admin: {
         useAsTitle: "slug",
-        group: "Globals"
+        group: "Admin"
     },
     fields: [
         {
