@@ -14,6 +14,7 @@ import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { hasAccess } from '@/utilities/accessFunctions'
 import { getAppName } from '@/utilities/getAppName'
+import { hasAccess } from '@/utilities/accessFunctions'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   const appName = getAppName()

@@ -25,6 +25,7 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'payload'
 import { hasAccess } from '@/utilities/accessFunctions'
+import { hasAccess } from '@/utilities/accessFunctions'
 
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
