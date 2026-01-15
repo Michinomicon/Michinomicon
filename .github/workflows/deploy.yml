@@ -1,4 +1,4 @@
-name: Deploy ${{ vars.APP_NAME}} to Production
+name: Deploy to Production
 
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
             --exclude '.git/' \
             --exclude 'node_modules/' \
             --exclude '.env' \
-            ./ vps:/var/www/michinomicon-dev/
+            ./ vps:/${{vars.TARGET_DIR}}/
 
       
       - name: Execute Install & Build on Remote Server
@@ -62,16 +62,18 @@ jobs:
             export PNPM_HOME="$HOME/.local/share/pnpm"
             export PATH="$PNPM_HOME:$PATH"
             
-            # Navigate to project folder
-            cd /var/www/michinomicon-dev
+            # Navigate to project directory
+            cd /${{vars.TARGET_DIR}}
 
             # Verify Node and PNPM exist
             echo "Using Node: $(node -v)"
             echo "Using PNPM: $(pnpm -v)"
 
-            # Recreate .env file on VPS using values from Github Actions Secrets
-            echo "Recreating .env file..."
+            # Create .env file on VPS using values from Github Actions Secrets
+            echo "Creating .env file..."
             echo "NODE_ENV=production" > .env
+            echo "APP_NAME=${{vars.APP_NAME}}" >> .env
+            echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
             echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> .env
             echo "PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}" >> .env
             echo "NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}" >> .env
@@ -80,22 +82,26 @@ jobs:
             echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
             echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
             echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+
+            echo "Running scripts/deploy.sh..."
+            chmod +x scripts/deploy.sh
+            scripts/deploy.sh
             
             # Install project
-            echo "Installing..."
-            pnpm install --frozen-lockfile
+            # echo "Installing..."
+            # pnpm install --frozen-lockfile
 
             # Build project
-            echo "Building..."
-            pnpm cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build
+            # echo "Building..."
+            # pnpm cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build
 
             # Run PayloadCMS Migrations
             # echo "Running PayloadCMS Migrations..."
             # pnpm payload migrate
 
             # Restart Application using PM2
-            echo "reload with PM2..."
-            pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
+            # echo "reload with PM2..."
+            # pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
             
             # # Wait 10 seconds for the app to start
             # echo "Waiting for app to start..."
