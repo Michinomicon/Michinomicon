@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME:$PATH"
+
 # stops the execution immediately if any command fails (returns non-zero)
 set -e
 
