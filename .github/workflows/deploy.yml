@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Deploy ${{ vars.APP_NAME}} to Production
 
 on:
   push:
