@@ -3,34 +3,25 @@
 # stops the execution immediately if any command fails (returns non-zero)
 set -e
 
-# ----------------------
-# Load Environment Variables
-# ----------------------
-if [ -f .env ]; then
-  # export all variables defined in .env
-  set -a
-  source .env
-  set +a
-  echo "🟢 Loaded environment variables from current .env"
-else
-  echo "🟡 Warning: .env file not found in current directory."
-fi
-
-# ----------------------
-# Configuration
-# ----------------------
-
-# The absolute path to the project directory on the VPS
-TARGET_DIR="${TARGET_DIR}"
-
 # The name of the application in PM2
 # Must match name in ecosystem.config.cjs
-PM2_NAME="${APP_NAME}"
+APP_NAME="$1"
+
+# The absolute path to the project directory on the VPS
+TARGET_DIR="${2:-$(pwd)}"
+
+# Validation: Check if arguments were provided
+if [ -z "$APP_NAME" ]; then
+  echo "    🔴 Error: Missing argument for application name"
+  echo "Usage: ./deploy.sh <app_name> [target_directory]"
+  echo "Example: ./deploy.sh my-app /var/www/my-app"
+  exit 1
+fi
 
 # ----------------------
 # Deployment
 # ----------------------
-echo "🟡 Deploying application '$PM2_NAME' to '$TARGET_DIR'..."
+echo "🟡 Deploying application '$APP_NAME' to '$TARGET_DIR'..."
 
 # 1. Navigate to project directory
 if [ -d "$TARGET_DIR" ]; then
@@ -59,17 +50,17 @@ echo "    🟢 Application built."
 
 echo "    🟡 Running application..."
 # Check if the app is already running in PM2
-if pm2 list | grep -q "$PM2_NAME"; then
+if pm2 list | grep -q "$APP_NAME"; then
     echo "    🟡 Application is running in PM2. Reloading application..."
     # Reload the app and update environment variables
-    pm2 reload "$PM2_NAME" --update-env
+    pm2 reload "$APP_NAME" --update-env
     # Reset restart counters
-    pm2 reset "$PM2_NAME"
+    pm2 reset "$APP_NAME"
     echo "    🟢 Application reloaded."
 else
     # Start the app if it's not running
     echo "    🟡 Application is not running in PM2. Starting application..."
-    pm2 start npm --name "$PM2_NAME" -- start
+    pm2 start npm --name "$APP_NAME" -- start
     echo "    🟢 Application started."
 fi
 
