@@ -59,18 +59,18 @@ jobs:
           script: |
             
             # Add PNPM to PATH
-            export PNPM_HOME="$HOME/.local/share/pnpm"
-            export PATH="$PNPM_HOME:$PATH"
+            # export PNPM_HOME="$HOME/.local/share/pnpm"
+            # export PATH="$PNPM_HOME:$PATH"
             
             # Navigate to project directory
             cd /${{vars.TARGET_DIR}}
 
             # Verify Node and PNPM exist
-            echo "Using Node: $(node -v)"
-            echo "Using PNPM: $(pnpm -v)"
+            # echo "Using Node: $(node -v)"
+            # echo "Using PNPM: $(pnpm -v)"
 
-            echo "APP_NAME=${{vars.APP_NAME}}"
-            echo "TARGET_DIR=${{vars.TARGET_DIR}}"
+            # echo "APP_NAME=${{vars.APP_NAME}}"
+            # echo "TARGET_DIR=${{vars.TARGET_DIR}}"
 
             
             # Create .env file on VPS using values from Github Actions Secrets
@@ -89,7 +89,7 @@ jobs:
 
             echo "Running scripts/deploy.sh..."
             chmod +x scripts/deploy.sh
-            scripts/deploy.sh
+            scripts/deploy.sh ${{vars.APP_NAME}}
             
             # Install project
             # echo "Installing..."
