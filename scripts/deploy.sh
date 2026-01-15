@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# 🟡🟢🔴
-
 # ----------------------
 # Load Environment Variables
 # ----------------------
@@ -20,23 +18,23 @@ fi
 # ----------------------
 
 # The absolute path to the project directory on the VPS
-TARGET_DIR="${TARGET_DIR:-$(pwd)}"
+TARGET_DIR="${TARGET_DIR}"
 
 # The name of the application in PM2
-# (Ensure this matches the name used in your ecosystem.config.js or previous start command)
+# Must match name in ecosystem.config.cjs
 PM2_NAME="${APP_NAME}"
 
 # ----------------------
 # Deployment
 # ----------------------
-echo "🟡 Deploying application '$PM2_NAME'..."
+echo "🟡 Deploying application '$PM2_NAME' to '$TARGET_DIR'..."
 
 # 1. Navigate to project directory
-if [ -d "$PROJECT_DIR" ]; then
-  cd "$PROJECT_DIR"
-  echo "    🟢 Navigated to $PROJECT_DIR"
+if [ -d "$TARGET_DIR" ]; then
+  cd "$TARGET_DIR"
+  echo "    🟢 Navigated to $TARGET_DIR"
 else
-  echo "    🔴 Error: Project directory $PROJECT_DIR does not exist."
+  echo "    🔴 Error: Target directory $TARGET_DIR does not exist."
   exit 1
 fi
 
