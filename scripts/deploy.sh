@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# stops the execution immediately if any command fails (returns non-zero)
+set -e
+
 # ----------------------
 # Load Environment Variables
 # ----------------------
@@ -65,7 +68,7 @@ if pm2 list | grep -q "$PM2_NAME"; then
     echo "    🟢 Application reloaded."
 else
     # Start the app if it's not running
-    echo "    🟡 Application is running in PM2. Starting application..."
+    echo "    🟡 Application is not running in PM2. Starting application..."
     pm2 start npm --name "$PM2_NAME" -- start
     echo "    🟢 Application started."
 fi
@@ -75,5 +78,21 @@ echo "    🟡 Saving PM2 process list..."
 pm2 save
 echo "    🟢 PM2 Process list saved."
 
-echo "🟢 Application '$PM2_NAME' deployed."
-pm2 list
+# ----------------------
+# Verify PM2 Process status
+# ----------------------
+
+echo "    🟡 Waiting 5 seconds for app to initialize..."
+sleep 5
+
+echo "    🟡 Verifying PM2 process status..."
+APP_STATUS=$(pm2 jlist | grep -o "\"name\":\"$APP_NAME\"[^}]*\"status\":\"[^\"]*\"" | grep -o "\"status\":\"[^\"]*\"" | cut -d'"' -f4)
+
+if [ "$APP_STATUS" == "online" ]; then
+    echo "    🟢 '$APP_NAME' is: '$APP_STATUS', Application deployed. "
+    exit 0
+else
+    echo "    🔴 '$APP_NAME' is: '$APP_STATUS', Application NOT deployed. "
+    # We force a non-zero exit code so GitHub Actions marks the job as FAILED
+    exit 1
+fi
