@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "michinomicon-dev",
+      name: "michinomicon",
       script: "pnpm", 
       args: "start",
       interpreter: "none", 
@@ -10,12 +10,22 @@ module.exports = {
       env_production: {
         NODE_ENV: "production",
         PAYLOAD_CONFIG_PATH: "src/payload.config.ts",
-        // // Email Settings
-        // SMTP_HOST: "live.smtp.mailtrap.io",
-        // SMTP_PORT: "587",
-        // SMTP_USER: "api",
-        // // SMTP_PASS: mailtrap API key will be loaded from .env
       },
     },
   ],
+  // Deployment Configuration
+  // deploy : {
+  //   production : {
+  //     //"user" : process.env.SSH_USER,
+  //     //"host" : process.env.SSH_HOST,
+  //     //"ref"  : "origin/main",
+  //     //"repo" : "git@github.com:profile/repo.git",
+  //     //"path" : "/var/www/app-name",
+  //     //"pre-setup" : "echo 'commands or local script path to be run on the host before the setup process starts'",
+  //     //"post-setup": "echo 'commands or a script path to be run on the host after cloning the repo'",
+  //     //"pre-deploy" : "pm2 startOrRestart ecosystem.json --env production",
+  //     //"post-deploy" : "pm2 startOrRestart ecosystem.json --env production",
+  //     //"pre-deploy-local" : "echo 'This is a local executed command'"
+  //   }
+  // }
 };
