@@ -69,6 +69,10 @@ jobs:
             echo "Using Node: $(node -v)"
             echo "Using PNPM: $(pnpm -v)"
 
+            echo "APP_NAME=${{vars.APP_NAME}}"
+            echo "TARGET_DIR=${{vars.TARGET_DIR}}"
+
+            
             # Create .env file on VPS using values from Github Actions Secrets
             echo "Creating .env file..."
             echo "NODE_ENV=production" > .env
