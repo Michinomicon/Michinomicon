@@ -12,26 +12,6 @@ const ColorThemeContext = React.createContext<ColorThemeContextType | undefined>
 
 const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME
 const ColorThemeStorageKey = 'michnomicon-theme'
-const ThemeModeStorageKey = 'theme'
-
-// export function getImplicitModePreference(): string | null {
-//   const mediaQuery = '(prefers-color-scheme: dark)'
-//   const mql = window.matchMedia(mediaQuery)
-//   const hasImplicitPreference = typeof mql.matches === 'boolean'
-
-//   if (hasImplicitPreference) {
-//     return mql.matches ? 'dark' : 'light'
-//   }
-
-//   return null
-// }
-
-// export function getThemeModePreference() {
-//   const storedThemeMode = localStorage.getItem(ThemeModeStorageKey)
-//   const implicitThemeMode = getImplicitModePreference()
-//   const themeMode = storedThemeMode ?? implicitThemeMode
-//   return themeMode && themeMode === 'dark' ? 'dark' : 'light'
-// }
 
 export function ColorThemeProvider({
   children,

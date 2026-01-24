@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { ChevronDownIcon, Palette } from 'lucide-react'
+import { Palette } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -29,7 +29,7 @@ const themes: Array<{ id: string; label: string }> = [
 ]
 
 export function ColorThemeToggle() {
-  const { colorTheme, setColorTheme } = useTheme()
+  const { setColorTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
   // Avoid hydration mismatch
