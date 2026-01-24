@@ -1,3 +1,4 @@
+/* Theme (Light Mode) */
 [data-theme="blue"] {
   --radius: 0.5rem;
   --background: oklch(1.000 0.000 0);
@@ -33,7 +34,9 @@
   --sidebar-ring: oklch(0.586 0.198 265.52443238120657);
 }
 
-.dark[data-theme="blue"]{
+/* Theme (Dark Mode) */
+.dark[data-theme="blue"],
+[data-mode="dark"][data-theme="blue"] {
   --background: oklch(0.201 0.023 268.8147588052373);
   --foreground: oklch(0.960 0.003 270.09853561079785);
   --card: oklch(0.240 0.031 268.6173536549138);

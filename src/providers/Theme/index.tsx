@@ -1,94 +1,110 @@
-"use client";
+'use client'
 
-import * as React from "react";
-import {
-  ThemeProvider as NextThemesProvider,
-  useTheme as useNextTheme,
-} from "next-themes";
+import * as React from 'react'
+import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from 'next-themes'
 
 interface ColorThemeContextType {
-  colorTheme: string | null;
-  setColorTheme: (theme: string | null) => void;
+  colorTheme: string | null
+  setColorTheme: (theme: string | null) => void
 }
 
-const ColorThemeContext = React.createContext<
-  ColorThemeContextType | undefined
->(undefined);
+const ColorThemeContext = React.createContext<ColorThemeContextType | undefined>(undefined)
+
+const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME
+const ColorThemeStorageKey = 'michnomicon-theme'
+const ThemeModeStorageKey = 'theme'
+
+// export function getImplicitModePreference(): string | null {
+//   const mediaQuery = '(prefers-color-scheme: dark)'
+//   const mql = window.matchMedia(mediaQuery)
+//   const hasImplicitPreference = typeof mql.matches === 'boolean'
+
+//   if (hasImplicitPreference) {
+//     return mql.matches ? 'dark' : 'light'
+//   }
+
+//   return null
+// }
+
+// export function getThemeModePreference() {
+//   const storedThemeMode = localStorage.getItem(ThemeModeStorageKey)
+//   const implicitThemeMode = getImplicitModePreference()
+//   const themeMode = storedThemeMode ?? implicitThemeMode
+//   return themeMode && themeMode === 'dark' ? 'dark' : 'light'
+// }
 
 export function ColorThemeProvider({
   children,
-  defaultColorTheme = null,
-  storageKey = "payload-theme",
+  defaultColorTheme = DefaultColorTheme,
+  storageKey = ColorThemeStorageKey,
 }: {
-  children: React.ReactNode;
-  defaultColorTheme?: string | null;
-  storageKey?: string;
+  children: React.ReactNode
+  defaultColorTheme?: string
+  storageKey?: string
 }) {
-  const [colorTheme, setColorThemeState] = React.useState<string | null>(null);
-  const [isClient, setIsClient] = React.useState(false);
+  const [colorTheme, setColorThemeState] = React.useState<string | null>(DefaultColorTheme)
+  const [isClient, setIsClient] = React.useState(false)
 
   // Handle client-side mounting to avoid hydration mismatch
   React.useEffect(() => {
-    setIsClient(true);
-    const stored = localStorage.getItem(storageKey);
-    setColorThemeState(stored || defaultColorTheme);
-  }, [defaultColorTheme, storageKey]);
+    setIsClient(true)
+    const storedColorTheme = localStorage.getItem(storageKey)
+
+    setColorThemeState(storedColorTheme ?? defaultColorTheme)
+  }, [defaultColorTheme, storageKey])
 
   // Apply color theme to document
   React.useEffect(() => {
-    if (!isClient) return;
+    if (!isClient) return
 
-    const root = document.documentElement;
+    const root = document.documentElement
 
     // Apply color theme
     if (colorTheme) {
-      root.setAttribute("data-theme", colorTheme);
+      root.setAttribute('data-theme', colorTheme)
     } else {
-      root.removeAttribute("data-theme");
+      root.setAttribute('data-theme', DefaultColorTheme)
+      // root.removeAttribute('data-theme')
     }
-  }, [colorTheme, isClient]);
+  }, [colorTheme, isClient])
 
   // Save to localStorage
   React.useEffect(() => {
-    if (!isClient) return;
+    if (!isClient) return
 
     if (colorTheme) {
-      localStorage.setItem(storageKey, colorTheme);
+      localStorage.setItem(storageKey, colorTheme)
     } else {
-      localStorage.removeItem(storageKey);
+      localStorage.removeItem(storageKey)
     }
-  }, [colorTheme, storageKey, isClient]);
+  }, [colorTheme, storageKey, isClient])
 
   const setColorTheme = React.useCallback((theme: string | null) => {
-    setColorThemeState(theme);
-  }, []);
+    setColorThemeState(theme)
+  }, [])
 
   const value = React.useMemo(
     () => ({
       colorTheme,
       setColorTheme,
     }),
-    [colorTheme, setColorTheme]
-  );
+    [colorTheme, setColorTheme],
+  )
 
-  return (
-    <ColorThemeContext.Provider value={value}>
-      {children}
-    </ColorThemeContext.Provider>
-  );
+  return <ColorThemeContext.Provider value={value}>{children}</ColorThemeContext.Provider>
 }
 
 export function useColorTheme() {
-  const context = React.useContext(ColorThemeContext);
+  const context = React.useContext(ColorThemeContext)
   if (context === undefined) {
-    throw new Error("useColorTheme must be used within a ColorThemeProvider");
+    throw new Error('useColorTheme must be used within a ColorThemeProvider')
   }
-  return context;
+  return context
 }
 
 export function useTheme() {
-  const nextTheme = useNextTheme();
-  const colorTheme = useColorTheme();
+  const nextTheme = useNextTheme()
+  const colorTheme = useColorTheme()
 
   return {
     // Next-themes functionality (mode switching)
@@ -101,22 +117,20 @@ export function useTheme() {
     // Color theme functionality
     colorTheme: colorTheme.colorTheme,
     setColorTheme: colorTheme.setColorTheme,
-  };
+  }
 }
 
 export function ThemeProvider({
   children,
-  defaultColorTheme = "violet",
+  defaultColorTheme = DefaultColorTheme,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider> & {
-  children: React.ReactNode;
-  defaultColorTheme?: string;
+  children: React.ReactNode
+  defaultColorTheme?: string
 }) {
   return (
     <NextThemesProvider {...props}>
-      <ColorThemeProvider defaultColorTheme={defaultColorTheme}>
-        {children}
-      </ColorThemeProvider>
+      <ColorThemeProvider defaultColorTheme={defaultColorTheme}>{children}</ColorThemeProvider>
     </NextThemesProvider>
-  );
+  )
 }

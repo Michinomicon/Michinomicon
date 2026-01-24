@@ -9,21 +9,21 @@ import { AdminBar } from '@/components/AdminBar'
 import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
-// import { InitTheme } from '@/providers/Theme/InitTheme'
+
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 
 import './globals.css'
-import './themes/minimal-red.css'
-import './themes/minimal-blue.css'
-import './themes/minimal-green.css'
-import './themes/minimal-orange.css'
-import './themes/minimal-rose.css'
-import './themes/minimal-violet.css'
-import './themes/minimal-yellow.css'
-import './themes/blue.css'
-import './themes/purple.css'
-import './themes/blue.css'
+// import './themes/minimal-red.css'
+// import './themes/minimal-blue.css'
+// import './themes/minimal-green.css'
+// import './themes/minimal-orange.css'
+// import './themes/minimal-rose.css'
+// import './themes/minimal-violet.css'
+// import './themes/minimal-yellow.css'
+// import './themes/blue.css'
+// import './themes/purple.css'
+// import './themes/blue.css'
 
 import { getServerSideURL } from '@/utilities/getURL'
 
@@ -44,17 +44,17 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               preview: isEnabled,
               className: '"bg-background text-foreground"',
               classNames: {
-                controls: "bg-background text-foreground",
-                create: "",
-                edit: "",
-                logo: "",
-                logout: "",
-                preview: "",
-                user: "",
+                controls: 'bg-background text-foreground',
+                create: '',
+                edit: '',
+                logo: '',
+                logout: '',
+                preview: '',
+                user: '',
               },
               style: {
-                color:'inherit'
-              }
+                color: 'inherit',
+              },
             }}
           />
 

@@ -5,6 +5,9 @@ declare global {
       DATABASE_URI: string
       NEXT_PUBLIC_SERVER_URL: string
       VERCEL_PROJECT_PRODUCTION_URL: string
+      DEFAULT_COLOR_THEME: string
+      APP_NAME: string
+      APP_ENV: string
     }
   }
 }

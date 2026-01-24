@@ -33,7 +33,8 @@
   --sidebar-ring: oklch(0.562 0.258 320.47900878638563);
 }
 
-.dark[data-theme="purple"]{
+.dark[data-theme="purple"],
+[data-mode="dark"][data-theme="purple"]{
   --background: oklch(0.184 0.038 321.41995827133337);
   --foreground: oklch(0.960 0.004 321.0748521949527);
   --card: oklch(0.226 0.054 321.439306816796);

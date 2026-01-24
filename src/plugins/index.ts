@@ -13,9 +13,12 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { hasAccess } from '@/utilities/accessFunctions'
+import { getAppName } from '@/utilities/getAppName'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  const appName = getAppName()
+  const title = (doc?.title ?? 'Untitled') + ' | ' + appName
+  return title
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {

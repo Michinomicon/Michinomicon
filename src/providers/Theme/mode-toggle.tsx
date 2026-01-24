@@ -1,41 +1,70 @@
-"use client";
+'use client'
 
-import * as React from "react";
-import { Moon, Sun } from "lucide-react";
+import * as React from 'react'
+import { Moon, Sun, SunMoon } from 'lucide-react'
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+// import { Button } from '@/components/ui/button'
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from '@/components/ui/dropdown-menu'
 
-import { useTheme } from ".";
+import { useTheme } from '.'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+
+// function getToggleContent(themeMode: string | undefined) {
+//   switch (themeMode) {
+//     case 'light':
+//       return <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
+//     case 'dark':
+//       return <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
+//     default:
+//       return <SunMoon className="h-[1.2rem] w-[1.2rem] transition-all" />
+//   }
+// }
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const { setTheme, theme } = useTheme()
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+    <ToggleGroup
+      asChild
+      variant="outline"
+      type="single"
+      size="sm"
+      defaultValue="system"
+      aria-label="Toggle theme dark mode"
+      value={theme}
+      onValueChange={(value) => {
+        if (value) setTheme(value)
+      }}
+    >
+      <ToggleGroupItem value="light" aria-label="Light mode">
+        <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
+      </ToggleGroupItem>
+      <ToggleGroupItem value="dark" aria-label="Dark mode">
+        <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
+      </ToggleGroupItem>
+      <ToggleGroupItem value="system" aria-label="Follow system">
+        <SunMoon className="h-[1.2rem] w-[1.2rem] transition-all" />
+      </ToggleGroupItem>
+    </ToggleGroup>
+  )
+  // return (
+  //   <DropdownMenu>
+  //     <DropdownMenuTrigger asChild>
+  //       <Button variant="outline" size="icon">
+  //         {getToggleContent(theme)}
+  //         <span className="sr-only">Toggle theme</span>
+  //       </Button>
+  //     </DropdownMenuTrigger>
+  //     <DropdownMenuContent align="end">
+  //       <DropdownMenuItem onClick={() => setTheme('light')}>Light</DropdownMenuItem>
+  //       <DropdownMenuItem onClick={() => setTheme('dark')}>Dark</DropdownMenuItem>
+  //       <DropdownMenuItem onClick={() => setTheme('system')}>System</DropdownMenuItem>
+  //     </DropdownMenuContent>
+  //   </DropdownMenu>
+  // )
 }

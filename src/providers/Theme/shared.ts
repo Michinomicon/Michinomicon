@@ -1,15 +1,13 @@
-// import { ThemeMode } from "./ModeSelector/types"
+// export type ThemeMode = 'dark' | 'light'
 
-export type ThemeMode = 'dark' | 'light'
+// export const getImplicitPreference = (): ThemeMode | null => {
+//   const mediaQuery = '(prefers-color-scheme: dark)'
+//   const mql = window.matchMedia(mediaQuery)
+//   const hasImplicitPreference = typeof mql.matches === 'boolean'
 
-export const getImplicitPreference = (): ThemeMode | null => {
-  const mediaQuery = '(prefers-color-scheme: dark)'
-  const mql = window.matchMedia(mediaQuery)
-  const hasImplicitPreference = typeof mql.matches === 'boolean'
+//   if (hasImplicitPreference) {
+//     return mql.matches ? 'dark' : 'light'
+//   }
 
-  if (hasImplicitPreference) {
-    return mql.matches ? 'dark' : 'light'
-  }
-
-  return null
-}
+//   return null
+// }
