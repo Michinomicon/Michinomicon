@@ -43,8 +43,17 @@ jobs:
         run: |
           rsync -avz --delete \
             --exclude '.git/' \
+            --exclude '.github/' \
+            --exclude '.vscode/' \
+            --exclude 'playwright-report/' \
+            --exclude 'test-results/' \
             --exclude 'node_modules/' \
+            --exclude '.next/' \
             --exclude '.env' \
+            --exclude '.env.*' \
+            --exclude '*.env' \
+            --exclude 'docker-compose.yml' \
+            --exclude 'Dockerfile' \
             ./ vps:/${{vars.TARGET_DIR}}/
 
       
@@ -64,14 +73,6 @@ jobs:
             
             # Navigate to project directory
             cd /${{vars.TARGET_DIR}}
-
-            # Verify Node and PNPM exist
-            # echo "Using Node: $(node -v)"
-            # echo "Using PNPM: $(pnpm -v)"
-
-            # echo "APP_NAME=${{vars.APP_NAME}}"
-            # echo "TARGET_DIR=${{vars.TARGET_DIR}}"
-
             
             # Create .env file on VPS using values from Github Actions Secrets
             echo "Creating .env file..."
@@ -90,35 +91,4 @@ jobs:
             echo "Running scripts/deploy.sh..."
             chmod +x scripts/deploy.sh
             scripts/deploy.sh ${{vars.APP_NAME}}
-            
-            # Install project
-            # echo "Installing..."
-            # pnpm install --frozen-lockfile
-
-            # Build project
-            # echo "Building..."
-            # pnpm cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build
-
-            # Run PayloadCMS Migrations
-            # echo "Running PayloadCMS Migrations..."
-            # pnpm payload migrate
-
-            # Restart Application using PM2
-            # echo "reload with PM2..."
-            # pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
-            
-            # # Wait 10 seconds for the app to start
-            # echo "Waiting for app to start..."
-            # sleep 10
-            
-            # # Check if the local port 3000 is responding
-            # echo "Checking for response from application..."
-            
-            # if curl --retry-connrefused --retry-delay 5 --retry 3 --fail http://127.0.0.1:3000; then
-            #     echo "✅ Deployment Successful: App is responding!"
-            # else
-            #     echo "❌ Deployment Failed: App is not responding."
-            #     # TODO: Revert to previous build or alert??
-            #     exit 1
-            # fi
             
