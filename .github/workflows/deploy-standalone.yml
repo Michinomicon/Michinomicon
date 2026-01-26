@@ -11,6 +11,13 @@ jobs:
 
     environment: production # Use GitHub environments for protection
 
+    # linting and type checking require a live connection to DB
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
     steps:          
       - name: Checkout source code
         uses: actions/checkout@v4
