@@ -1,8 +1,8 @@
 name: Deploy (standalone) to Production
 
 on:
-  # push:
-    # branches: [main]
+  push:
+    branches: [main]
   workflow_dispatch: # Allow manual triggers
 
 jobs:
