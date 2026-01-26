@@ -11,23 +11,15 @@ jobs:
 
     environment: production # Use GitHub environments for protection
 
-    # linting and type checking require a live connection to DB
-    services:
-      mongodb:
-        image: mongo:latest
-        ports:
-          - 27017:27017
-        # Payload requires a Replica Set for transactions
-        options: >-
-          --health-cmd "mongosh --eval 'rs.initiate()'" 
-          --health-interval 10s 
-          --health-timeout 5s 
-          --health-retries 5
-        command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
-
     steps:          
       - name: Checkout source code
         uses: actions/checkout@v4
+
+      - name: Start MongoDB Atlas Local
+        uses: mongodb/atlas-github-action@v0.2.0
+        with:
+          # Starts a local mongod replica instance on port 27017
+          args: deployments setup local-test --type local --port 27017 --bindIpAll --force
 
         # Create .env file on VPS using values from Github Actions Secrets
       - name: Create Production .env
