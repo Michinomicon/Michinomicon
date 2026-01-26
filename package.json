@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
-    "build:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build",
+    "build:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && next build",
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",

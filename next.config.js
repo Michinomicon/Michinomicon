@@ -32,6 +32,9 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   redirects,
+  outputFileTracingIncludes: {
+    '/': ['ecosystem.config.cjs'],
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
