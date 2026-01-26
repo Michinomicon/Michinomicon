@@ -1,7 +1,7 @@
 name: Deploy (standalone) to Production
 
 on:
-  push:
+  # push:
     # branches: [main]
   workflow_dispatch: # Allow manual triggers
 
@@ -14,6 +14,22 @@ jobs:
     steps:          
       - name: Checkout source code
         uses: actions/checkout@v4
+
+        # Create .env file on VPS using values from Github Actions Secrets
+      - name: Create Production .env
+        run : |
+          echo "Creating Production .env file..."
+          echo "NODE_ENV=production" > .env.production
+          echo "APP_NAME=${{vars.APP_NAME}}" >> .env
+          echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
+          echo "DATABASE_URI=${{ secrets.VPS_DATABASE_URI }}" >> .env
+          echo "PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}" >> .env
+          echo "NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}" >> .env
+          echo "CRON_SECRET=${{ secrets.CRON_SECRET }}" >> .env
+          echo "PREVIEW_SECRET=${{ secrets.PREVIEW_SECRET }}" >> .env
+          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
+          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
 
       - name: Install pnpm (v10.27)
         uses: pnpm/action-setup@v4
@@ -35,6 +51,7 @@ jobs:
 
       - name: Prepare Standalone Artifact
         run: |
+          cp -r .env.production .next/standalone/.env
           mkdir -p .next/standalone/public
           mkdir -p .next/standalone/scripts
           mkdir -p .next/standalone/.next/static
@@ -89,19 +106,7 @@ jobs:
             # Navigate to project directory
             cd /${{vars.TARGET_DIR}}
             
-            # Create .env file on VPS using values from Github Actions Secrets
-            echo "Creating Production .env file..."
-            echo "NODE_ENV=production" > .env
-            echo "APP_NAME=${{vars.APP_NAME}}" >> .env
-            echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
-            echo "DATABASE_URI=${{ secrets.VPS_DATABASE_URI }}" >> .env
-            echo "PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}" >> .env
-            echo "NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}" >> .env
-            echo "CRON_SECRET=${{ secrets.CRON_SECRET }}" >> .env
-            echo "PREVIEW_SECRET=${{ secrets.PREVIEW_SECRET }}" >> .env
-            echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
-            echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
-            echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+
 
             echo "Running scripts/deploy.sh..."
             chmod +x scripts/deploy.sh
