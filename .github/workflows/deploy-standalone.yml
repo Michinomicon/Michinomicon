@@ -98,13 +98,12 @@ jobs:
 
       - name: Deploy using Rsync
         run: |
-          rsync -avzP --delete \
-            --exclude 'node_modules/' \
-            --exclude '.env' \
-            --exclude '.env.*' \
-            --exclude '*.env' \
-            .next/standalone/ vps:/${{vars.TARGET_DIR}}/
+          rsync -avzP --delete .next/standalone/ vps:/${{vars.TARGET_DIR}}/
 
+            # --exclude 'node_modules/' \
+            # --exclude '.env' \
+            # --exclude '.env.*' \
+            # --exclude '*.env' \
       
       - name: Execute deploy.sh on remote sever
         uses: appleboy/ssh-action@v1.0.3
@@ -131,3 +130,4 @@ jobs:
             
             # echo "Starting standalone server with PM2..."
             pm2 start ecosystem.config.cjs --name ${{vars.APP_NAME}} --env production --update-env
+            pm2 save
