@@ -17,9 +17,8 @@ jobs:
 
       - name: Start MongoDB Atlas Local
         uses: mongodb/atlas-github-action@v0.2.0
-        with:
-          # Starts a local mongod replica instance on port 27017
-          args: deployments setup local-test --type local --port 27017 --bindIpAll --force
+      - name: Use AtlasCLI
+        run: atlas deployments setup local-test --type local --port 27017 --bindIpAll --force
 
         # Create .env file on VPS using values from Github Actions Secrets
       - name: Create Production .env
