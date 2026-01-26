@@ -22,17 +22,11 @@ jobs:
           mongodb-replica-set: test-rs
           mongodb-port: 27017
 
-      # - name: Start MongoDB Atlas Local
-      #   uses: mongodb/atlas-github-action@v0.2.0
-      #   run: atlas config set silence_storage_warning true
-      # - name: Use AtlasCLI
-      #   run: atlas deployments setup local-test --type local --port 27017 --bindIpAll --force
-
         # Create .env file on VPS using values from Github Actions Secrets
       - name: Create Production .env
         run : |
           echo "Creating Production .env file..."
-          echo "NODE_ENV=production" > .env.production
+          echo "NODE_ENV=production" > .env
           echo "APP_NAME=${{vars.APP_NAME}}" >> .env
           echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
           echo "DATABASE_URI=${{ secrets.VPS_DATABASE_URI }}" >> .env
@@ -68,7 +62,7 @@ jobs:
 
       - name: Prepare Standalone Artifact
         run: |
-          cp -r .env.production .next/standalone/.env
+          cp -r .env .next/standalone/.env
           mkdir -p .next/standalone/public
           mkdir -p .next/standalone/scripts
           mkdir -p .next/standalone/.next/static
@@ -129,5 +123,20 @@ jobs:
             # scripts/deploy.sh ${{vars.APP_NAME}}
             
             # echo "Starting standalone server with PM2..."
-            pm2 start ecosystem.config.cjs --name ${{vars.APP_NAME}} --env production --update-env
+            pm2 start ecosystem.config.cjs --env production --update-env
             pm2 save
+
+            echo "    ⤵️ Waiting 5 seconds for app to initialize..."
+            sleep 5
+            
+            echo "    ⤵️ Verifying PM2 process status..."
+            APP_STATUS=$(pm2 jlist | grep -o "\"name\":\"${{vars.APP_NAME}}\"[^}]*\"status\":\"[^\"]*\"" | grep -o "\"status\":\"[^\"]*\"" | cut -d'"' -f4)
+            
+            if [ "$APP_STATUS" == "online" ]; then
+                echo "    ✅ '${{vars.APP_NAME}}' is: '$APP_STATUS', Application deployed. "
+                exit 0
+            else
+                echo "    ❌ '${{vars.APP_NAME}}' is: '$APP_STATUS', Application NOT deployed. "
+                # We force a non-zero exit code so GitHub Actions marks the job as FAILED
+                exit 1
+            fi
