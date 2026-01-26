@@ -15,10 +15,18 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      - name: Start MongoDB Atlas Local
-        uses: mongodb/atlas-github-action@v0.2.0
-      - name: Use AtlasCLI
-        run: atlas deployments setup local-test --type local --port 27017 --bindIpAll --force
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.1
+        with:
+          mongodb-version: 8.0
+          mongodb-replica-set: test-rs
+          mongodb-port: 27017
+
+      # - name: Start MongoDB Atlas Local
+      #   uses: mongodb/atlas-github-action@v0.2.0
+      #   run: atlas config set silence_storage_warning true
+      # - name: Use AtlasCLI
+      #   run: atlas deployments setup local-test --type local --port 27017 --bindIpAll --force
 
         # Create .env file on VPS using values from Github Actions Secrets
       - name: Create Production .env
