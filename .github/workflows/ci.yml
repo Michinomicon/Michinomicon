@@ -10,13 +10,11 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    # strategy allows you to test against multiple node versions if necessary
     strategy:
       matrix:
         node-version: [22.x]
 
-    # configuration to run a database if your tests require a live connection
-    # remove comments below if using MongoDB for integration tests
+    # tests require a live connection to DB
     services:
       mongodb:
         image: mongo:latest
