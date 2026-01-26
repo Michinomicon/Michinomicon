@@ -62,7 +62,8 @@ jobs:
 
       - name: Build Project
         run: pnpm build
-        # Point to the service container (localhost because of mapped ports)
+        env:
+          # Point to the service container (localhost because of mapped ports)
           DATABASE_URI: mongodb://localhost:27017/payload-test
           PAYLOAD_SECRET: testing-secret
 
