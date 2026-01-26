@@ -6,6 +6,11 @@ import { defineConfig, devices } from '@playwright/test'
  */
 import 'dotenv/config'
 
+/** TODO:
+ * Create `.env.CI` file to use during CI
+ */
+process.env.APP_NAME = 'Test Application Name'
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */

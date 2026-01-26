@@ -1,16 +1,7 @@
 import { test, expect, Page } from '@playwright/test'
 
-/** TODO
- *
- * Update `playwright.config.ts` with global environment variables that apply to all tests
- */
-
 test.describe('Frontend', () => {
   let page: Page
-
-  test.beforeAll(() => {
-    process.env.APP_NAME = 'Test Application Name'
-  })
 
   test.beforeAll(async ({ browser }, testInfo) => {
     const context = await browser.newContext()
