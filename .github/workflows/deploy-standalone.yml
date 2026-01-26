@@ -50,8 +50,12 @@ jobs:
           node-version: '24.13.0'
           cache: 'pnpm'
 
-      - name: Install Dependencies
+      - name: Install Dependencies via PNPM
         run: pnpm install --frozen-lockfile
+
+
+      - name: Install Playwright incl. dependancies
+        run: npx playwright install --with-deps
 
       - name: Build Project
         run: pnpm build
