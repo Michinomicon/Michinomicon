@@ -17,6 +17,13 @@ jobs:
         image: mongo:latest
         ports:
           - 27017:27017
+        # Payload requires a Replica Set for transactions
+        options: >-
+          --health-cmd "mongosh --eval 'rs.initiate()'" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+        command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
 
     steps:          
       - name: Checkout source code
@@ -55,6 +62,9 @@ jobs:
 
       - name: Build Project
         run: pnpm build
+        # Point to the service container (localhost because of mapped ports)
+          DATABASE_URI: mongodb://localhost:27017/payload-test
+          PAYLOAD_SECRET: testing-secret
 
       - name: Prepare Standalone Artifact
         run: |
