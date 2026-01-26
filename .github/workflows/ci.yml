@@ -49,6 +49,7 @@ jobs:
         # run: pnpm next build --experimental-build-mode compile
         # Payload requires these env vars to validate config during build
         env:
+          APP_NAME: ${{vars.APP_NAME || 'APP_NAME'}}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
           # Use a dummy URI for build only, or the service URI if testing
           DATABASE_URI: ${{ secrets.DATABASE_URI || 'mongodb://127.0.0.1/payload-ci' }}
@@ -56,5 +57,6 @@ jobs:
       - name: Run Tests
         run: pnpm exec playwright install && pnpm test
         env:
+          APP_NAME: ${{vars.APP_NAME || 'APP_NAME'}}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
           DATABASE_URI: ${{ secrets.DATABASE_URI || 'mongodb://127.0.0.1/payload-ci' }}
