@@ -127,7 +127,8 @@ jobs:
             # scripts/deploy.sh ${{vars.APP_NAME}}
             
             # echo "Starting standalone server with PM2..."
-            pm2 start ecosystem.config.cjs --env production --update-env
+            pm2 reload ecosystem.config.cjs --env production --update-env
+            pm2 reset
             pm2 save
 
             echo "    ⤵️ Waiting 5 seconds for app to initialize..."
