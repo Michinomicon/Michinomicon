@@ -125,7 +125,9 @@ jobs:
             
 
 
-            echo "Running scripts/deploy.sh..."
-            chmod +x scripts/deploy.sh
-            scripts/deploy.sh ${{vars.APP_NAME}}
+            # echo "Running scripts/deploy.sh..."
+            # chmod +x scripts/deploy.sh
+            # scripts/deploy.sh ${{vars.APP_NAME}}
             
+            # echo "Starting standalone server with PM2..."
+            pm2 start ecosystem.config.cjs --name ${{vars.APP_NAME}} --env production --update-env
