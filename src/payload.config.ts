@@ -25,7 +25,7 @@ const dirname = path.dirname(filename)
 
 export default buildConfig({
   db: mongooseAdapter({
-    url: process.env.DATABASE_URI,
+    url: process.env.DATABASE_URI || 'mongodb://DATABASE_URI',
     connectOptions: {
       dbName: process.env.DATABASE_NAME,
     },
@@ -81,9 +81,6 @@ export default buildConfig({
   }),
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
-  }),
   collections: [Pages, Posts, Media, Categories, Users, Slugs, Rights],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
@@ -91,7 +88,7 @@ export default buildConfig({
     ...plugins,
     // storage-adapter-placeholder
   ],
-  secret: process.env.PAYLOAD_SECRET,
+  secret: process.env.PAYLOAD_SECRET || 'PAYLOAD_SECRET',
   sharp,
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
