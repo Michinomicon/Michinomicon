@@ -2,7 +2,7 @@
 import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
-import React, { Fragment } from 'react'
+import React, { Fragment, useRef } from 'react'
 
 import type { Post } from '@/payload-types'
 
@@ -28,6 +28,8 @@ export const Card: React.FC<{
   const titleToUse = titleFromProps || title
   const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
   const href = `/${relationTo}/${slug}`
+  const cardCurrentRef = useRef(card.ref.current)
+  const linkCurrentRef = useRef(link.ref.current)
 
   return (
     <article
@@ -35,7 +37,7 @@ export const Card: React.FC<{
         'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
         className,
       )}
-      ref={card.ref}
+      ref={cardCurrentRef}
     >
       <div className="relative w-full ">
         {!metaImage && <div className="">No image</div>}
@@ -71,7 +73,7 @@ export const Card: React.FC<{
         {titleToUse && (
           <div className="prose">
             <h3>
-              <Link className="not-prose" href={href} ref={link.ref}>
+              <Link className="not-prose" href={href} ref={linkCurrentRef}>
                 {titleToUse}
               </Link>
             </h3>

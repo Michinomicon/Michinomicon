@@ -32,6 +32,51 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.769 0.188 70.08);
+    --font-sans: Merriweather Sans, ui-sans-serif, sans-serif, system-ui;
+  --font-serif: Merriweather, ui-serif, serif;
+  --font-mono: Roboto Mono, ui-monospace, monospace;
+  --radius: 0.625rem;
+  --shadow-x: 0;
+  --shadow-y: 1px;
+  --shadow-blur: 3px;
+  --shadow-spread: 0px;
+  --shadow-opacity: 0.1;
+  --shadow-color: oklch(0 0 0);
+  --shadow-2xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-xs: 0 1px 3px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 1px 2px -1px hsl(0 0% 0% / 0.1);
+  --shadow-md: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.1);
+  --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 4px 6px -1px hsl(0 0% 0% / 0.1);
+  --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.1), 0 8px 10px -1px hsl(0 0% 0% / 0.1);
+  --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+  --tracking-normal: 0.025em;
+  --spacing: 0.25rem;
+  --radius: 0.5rem;
+
+  --pattern-background-color: var(--background);
+  --pattern-primary-color: var(--color-chart-5);
+  --pattern-tertiary-color: var(--color-cyan-200);
+  --pattern-accent-color: var(--color-chart-3);
+  --pattern-secondary-color: var(--color-chart-4);
+
+  --pattern-overlay-color: var(--pattern-background-color);
+  --pattern-overlay-opacity: 0;
+  --pattern-overlay-inactive-opacity: 0;
+
+  --pattern-transition-duration: 0.8s;
+  --pattern-transition-delay: 0.6s;
+
+  --pattern-outer-fill-color: var(--pattern-primary-color);
+  --pattern-pupil-fill-color: var(--pattern-accent-color);
+  --pattern-ring-fill-color: var(--pattern-secondary-color);
+  --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+  --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) calc(l - 0.1) c h);
+  --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color)calc(l - 0.1) c h);
+  --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) calc(l - 0.1) c h);
+  --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) calc(l - 0.1) c h);
+
 }
 
 /* Yellow Theme (Dark Mode) */
@@ -68,4 +113,28 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.769 0.188 70.08);
+
+  --pattern-background-color: var(--background);
+  --pattern-primary-color: var(--color-chart-5);
+  --pattern-tertiary-color: var(--color-cyan-200);
+  --pattern-accent-color: var(--color-chart-3);
+  --pattern-secondary-color: var(--color-chart-4);
+
+  --pattern-overlay-color: var(--pattern-background-color);
+  --pattern-overlay-opacity: 0.8;
+  --pattern-overlay-inactive-opacity: 0.8;
+
+  --pattern-transition-duration: 0.8s;
+  --pattern-transition-delay: 0.6s;
+
+  --pattern-outer-fill-color: var(--pattern-primary-color);
+  --pattern-pupil-fill-color: var(--pattern-accent-color);
+  --pattern-ring-fill-color: var(--pattern-secondary-color);
+  --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+  --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) l c calc(h + 180));
+  --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color) l c calc(h + 180));
+  --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) l c calc(h + 180));
+  --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) l c calc(h + 180));
+
 }

@@ -6,6 +6,7 @@ import type { Header } from '@/payload-types'
 
 export async function Header() {
   const headerData: Header = await getCachedGlobal('header', 1)()
+  const appTitle: string | undefined = process.env.APP_NAME
 
-  return <HeaderClient data={headerData} />
+  return <HeaderClient appTitle={appTitle} data={headerData} />
 }

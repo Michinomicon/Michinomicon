@@ -9,22 +9,14 @@ import { AdminBar } from '@/components/AdminBar'
 import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
+
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { draftMode } from 'next/headers'
 
 import './globals.css'
-// import './themes/minimal-red.css'
-// import './themes/minimal-blue.css'
-// import './themes/minimal-green.css'
-// import './themes/minimal-orange.css'
-// import './themes/minimal-rose.css'
-// import './themes/minimal-violet.css'
-// import './themes/minimal-yellow.css'
-// import './themes/blue.css'
-// import './themes/purple.css'
-// import './themes/blue.css'
 
 import { getServerSideURL } from '@/utilities/getURL'
+import InteractiveBackground from '@/components/InteractiveBackground'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -32,18 +24,24 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
-        {/* <InitTheme /> */}
-        <link href="/favicon.ico" rel="icon" sizes="32x32" />
-        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="msapplication-config" content="/browserconfig.xml" />
+        <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
+        <InteractiveBackground />
         <Providers>
           <AdminBar
             adminBarProps={{
               preview: isEnabled,
-              className: '"bg-background text-foreground"',
+              className: '"bg-card text-foreground"',
               classNames: {
-                controls: 'bg-background text-foreground',
+                controls: 'bg-card text-foreground',
                 create: '',
                 edit: '',
                 logo: '',
@@ -58,7 +56,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
 
           <Header />
-          {children}
+          <div id="mainContent" className="bg-background m-32 z-0">
+            {children}
+          </div>
           <Footer />
         </Providers>
       </body>

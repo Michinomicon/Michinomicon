@@ -52,12 +52,40 @@
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
   --tracking-normal: 0.025em;
   --spacing: 0.25rem;
+
+  --pattern-background-color: var(--sidebar);
+  /* --pattern-primary-color: var(--color-purple-400);
+  --pattern-tertiary-color: var(--color-cyan-700);
+  --pattern-accent-color: var(--color-red-400);
+  --pattern-secondary-color: var(--color-amber-200);
+  --pattern-overlay-opacity: 0;
+  --pattern-overlay-inactive-opacity: 0;
+  --pattern-transition-duration: 0.2s;
+  --pattern-transition-delay: 0.1s;
+
+  --pattern-outer-fill-color: var(--pattern-primary-color);
+  --pattern-pupil-fill-color: var(--pattern-accent-color);
+  --pattern-ring-fill-color: var(--pattern-secondary-color);
+  --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+  --pattern-outer-active-fill-color: oklch(
+      from var(--pattern-outer-fill-color) calc(l + 2) c h
+  );
+  --pattern-pupil-active-fill-color: oklch(
+      from var(--pattern-pupil-fill-color) calc(l + 2) c h
+  );
+  --pattern-ring-active-fill-color: oklch(
+      from var(--pattern-ring-fill-color) calc(l + 2) c h
+  );
+  --pattern-tears-active-fill-color: oklch(
+      from var(--pattern-tears-fill-color) calc(l + 2) c h
+  ); */
 }
 
 /* Theme (Dark Mode) */
 .dark[data-theme="fii-one"],
 [data-mode="dark"][data-theme="fii-one"] {
-  --background: oklch(0.2685 0.0063 34.2976);
+  --background: oklch(27.782% 0.01778 310.013);
   --foreground: oklch(0.9561 0.0215 294.5939);
   --card: oklch(0.2161 0.0061 56.0434);
   --card-foreground: oklch(0.9584 0.0257 308.1633);
@@ -107,4 +135,26 @@
   --shadow-lg: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 4px 6px -1px hsl(0 0% 0% / 0.10);
   --shadow-xl: 0 1px 3px 0px hsl(0 0% 0% / 0.10), 0 8px 10px -1px hsl(0 0% 0% / 0.10);
   --shadow-2xl: 0 1px 3px 0px hsl(0 0% 0% / 0.25);
+
+  --pattern-background-color: var(--sidebar);
+  --pattern-primary-color: var(--color-violet-400);
+  --pattern-tertiary-color: var(--color-cyan-700);
+  --pattern-accent-color: var(--color-red-700);
+  --pattern-secondary-color: var(--color-orange-200);
+
+  --pattern-overlay-color: oklch(from var(--pattern-background-color) calc(l - 2) c h);
+  --pattern-overlay-opacity: 0.8;
+  --pattern-overlay-inactive-opacity: 0.8;
+  --pattern-transition-duration: 0.8s;
+  --pattern-transition-delay: 0.6s;
+
+  --pattern-outer-fill-color: var(--pattern-primary-color);
+  --pattern-pupil-fill-color: var(--pattern-accent-color);
+  --pattern-ring-fill-color: var(--pattern-secondary-color);
+  --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+  --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) l c calc(h + 180));
+  --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color) l c calc(h + 180));
+  --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) l c calc(h + 180));
+  --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) l c calc(h + 180));
 }

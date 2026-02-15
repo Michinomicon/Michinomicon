@@ -31,6 +31,14 @@ export default buildConfig({
     },
   }),
   admin: {
+    // autoLogin:
+    //   process.env.NODE_ENV === 'development'
+    //     ? {
+    //         email: 'test@michinomicon.com',
+    //         password: 'test',
+    //         prefillOnly: true,
+    //       }
+    //     : false,
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below.

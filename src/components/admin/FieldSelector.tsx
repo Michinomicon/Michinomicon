@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react'
 import { useFormFields, useConfig, useField, Select } from '@payloadcms/ui'
 import type { ClientCollectionConfig, ClientField, ClientTab, FieldClientComponent } from 'payload'
-import { tabHasName } from 'payload/shared'
 
 export function getFieldName<T extends ClientField>(field: T) {
   if ('name' in field) {

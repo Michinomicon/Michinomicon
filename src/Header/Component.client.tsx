@@ -10,9 +10,10 @@ import { usePathname } from 'next/navigation'
 
 interface HeaderClientProps {
   data: Header
+  appTitle?: string | undefined
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [themeMode, setThemeMode] = useState<string | null>(null)
   const [themeColor, setThemeColor] = useState<string | null>(null)
@@ -38,10 +39,14 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   }, [headerThemeColor])
 
   return (
-    <header className={`container relative z-20`} data-theme={themeColor} data-mode={themeMode}>
+    <header
+      className={`container relative z-20 bg-background`}
+      data-theme={themeColor}
+      data-mode={themeMode}
+    >
       <div className="py-8 flex justify-between">
         <Link href="/">
-          <Logo loading="eager" priority="high" className="invert dark:invert-0" />
+          <Logo text={appTitle} loading="eager" priority="high" />
         </Link>
         <HeaderNav data={data} />
         <div className="flex gap-2">

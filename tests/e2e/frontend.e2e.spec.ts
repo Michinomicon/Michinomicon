@@ -16,6 +16,6 @@ test.describe('Frontend', () => {
 
     const heading = page.locator('h1').first()
 
-    await expect(heading).toHaveText('home-static title')
+    await expect(heading).toHaveText('Under Construction.')
   })
 })

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { Palette } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
@@ -17,24 +17,19 @@ import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 const themes: Array<{ id: string; label: string }> = [
   { id: 'default', label: 'Default' },
   { id: 'fii-one', label: 'Fii One' },
-  { id: 'minimal-red', label: 'Minimal Red' },
-  { id: 'minimal-rose', label: 'Minimal Rose' },
-  { id: 'minimal-orange', label: 'Minimal Orange' },
-  { id: 'minimal-green', label: 'Minimal Green' },
-  { id: 'minimal-blue', label: 'Minimal Blue' },
-  { id: 'minimal-yellow', label: 'Minimal Yellow' },
-  { id: 'minimal-violet', label: 'Minimal Violet' },
-  { id: 'blue', label: 'Blue' },
   { id: 'purple', label: 'Purple' },
+  // { id: 'minimal-red', label: 'Minimal Red' },
+  // { id: 'minimal-rose', label: 'Minimal Rose' },
+  // { id: 'minimal-orange', label: 'Minimal Orange' },
+  // { id: 'minimal-green', label: 'Minimal Green' },
+  // { id: 'minimal-blue', label: 'Minimal Blue' },
+  // { id: 'minimal-yellow', label: 'Minimal Yellow' },
+  // { id: 'minimal-violet', label: 'Minimal Violet' },
+  // { id: 'blue', label: 'Blue' },
 ]
 
 export function ColorThemeToggle() {
   const { setColorTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  // Avoid hydration mismatch
-  useEffect(() => setMounted(true), [])
-  if (!mounted) return null
 
   return (
     <ButtonGroup>
@@ -48,10 +43,6 @@ export function ColorThemeToggle() {
             <Button variant="outline">
               <Palette className="h-[1.2rem] w-[1.2rem]" />
             </Button>
-            {/* <span className="sr-only">Toggle color theme</span>
-            <span className="ml-2 hidden sm:inline-block">
-              {themes.find((t) => t.id === colorTheme)?.label || 'Default'}
-            </span> */}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {themes.map((theme) => (
