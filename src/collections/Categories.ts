@@ -3,7 +3,6 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '../access/anyone'
 import { slugField } from 'payload'
 import { hasAccess } from '@/utilities/accessFunctions'
-import { hasAccess } from '@/utilities/accessFunctions'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
