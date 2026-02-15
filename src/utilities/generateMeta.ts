@@ -29,9 +29,9 @@ export const generateMeta = async (args: {
 
   const appName = getAppName()
 
-  const title = (doc?.meta?.title ?? 'Untitled') + ' | ' + appName
+  const title = doc?.meta?.title ? doc?.meta?.title + ' | ' + appName : appName
 
-  return {
+  const metaData: Metadata = {
     description: doc?.meta?.description,
     openGraph: mergeOpenGraph({
       description: doc?.meta?.description || '',
@@ -47,4 +47,8 @@ export const generateMeta = async (args: {
     }),
     title,
   }
+
+  console.log(`generateMeta => `, metaData)
+
+  return metaData
 }

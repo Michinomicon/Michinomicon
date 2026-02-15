@@ -5,10 +5,11 @@ import React from 'react'
 import type { Footer } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
+import { getAppName } from '@/utilities/getAppName'
 
 export async function Footer() {
   const footerData: Footer = await getCachedGlobal('footer', 1)()
-  const appTitle: string | undefined = process.env.APP_NAME
+  const appTitle: string = getAppName()
   const navItems = footerData?.navItems || []
 
   return (

@@ -17,7 +17,7 @@ import { getAppName } from '@/utilities/getAppName'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
   const appName = getAppName()
-  const title = (doc?.title ?? 'Untitled') + ' | ' + appName
+  const title = doc?.meta?.title ? doc?.meta?.title + ' | ' + appName : ''
   return title
 }
 
@@ -35,7 +35,7 @@ export const plugins: Plugin[] = [
         group: 'Plugins',
       },
       access: {
-        // TODO - Wont build is using hasAccess
+        // TODO - Wont build if using hasAccess
         read: (): AccessResult => true, //hasAccess('redirects', 'read'),
         create: hasAccess('redirects', 'create'),
         update: hasAccess('redirects', 'upd'),
