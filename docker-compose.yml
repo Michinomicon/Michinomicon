@@ -1,21 +1,8 @@
-version: '3'
+# version: '3'
 
 services:
-  payload:
-    image: node:18-alpine
-    ports:
-      - '3000:3000'
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
-    working_dir: /home/node/app/
-    command: sh -c "yarn install && yarn dev"
-    depends_on:
-      - mongo
-    env_file:
-      - .env
-
   mongo:
+    container_name: mongo
     image: mongo:latest
     ports:
       - '27017:27017'
@@ -23,8 +10,28 @@ services:
       - --storageEngine=wiredTiger
     volumes:
       - data:/data/db
+    env_file:
+      - .env
     logging:
       driver: none
+  
+  payload:
+    container_name: payload
+    # image: node:22-alpine
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    # working_dir: /home/node/app/
+    # command: sh -c "pnpm install && pnpm dev"
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env  
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - mongo
 
 volumes:
   data:

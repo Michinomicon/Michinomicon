@@ -17,7 +17,7 @@ export const Media: CollectionConfig = {
   slug: 'media',
   folders: true,
   admin: {
-    group: 'Globals'
+    group: 'Globals',
   },
   access: {
     read: hasAccess('media', 'read'),

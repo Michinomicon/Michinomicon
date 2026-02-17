@@ -23,7 +23,7 @@ import { hasAccess } from '@/utilities/accessFunctions'
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    read: hasAccess('pages', 'read'),
+    read: () => true, //hasAccess('pages', 'read'),
     create: hasAccess('pages', 'create'),
     update: hasAccess('pages', 'upd'),
     delete: hasAccess('pages', 'del'),

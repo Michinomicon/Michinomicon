@@ -1,29 +1,43 @@
-import clsx from 'clsx'
 import React from 'react'
+import LogoImage from 'public/burger-drooling.png'
 
 interface Props {
+  text?: string | undefined
   className?: string
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
 }
 
 export const Logo = (props: Props) => {
-  const { loading: loadingFromProps, priority: priorityFromProps, className } = props
+  const { text, loading: loadingFromProps, priority: priorityFromProps, className } = props
 
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
 
   return (
     /* eslint-disable @next/next/no-img-element */
-    <img
-      alt="Payload Logo"
-      width={193}
-      height={34}
-      loading={loading}
-      fetchPriority={priority}
-      decoding="async"
-      className={clsx('max-w-[9.375rem] w-full h-[34px]', className)}
-      src="https://raw.githubusercontent.com/payloadcms/payload/main/packages/ui/src/assets/payload-logo-light.svg"
-    />
+    <div className={`flex flex-nowrap justify-center items-center ${className}`}>
+      <img
+        alt="Logo"
+        width={34}
+        height={34}
+        loading={loading}
+        fetchPriority={priority}
+        decoding="async"
+        src={LogoImage.src}
+      />
+      {text && (
+        <svg width="280" height="34" xmlns="http://www.w3.org/2000/svg">
+          <text
+            x="10"
+            y="32"
+            className="ml-2 text-4xl no-underline"
+            fill={'var(--muted-foreground)'}
+          >
+            {text}
+          </text>
+        </svg>
+      )}
+    </div>
   )
 }

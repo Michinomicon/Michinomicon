@@ -4,6 +4,7 @@ import type { Media, Page, Post, Config } from '../payload-types'
 
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getServerSideURL } from './getURL'
+import { getAppName } from './getAppName'
 
 const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   const serverUrl = getServerSideURL()
@@ -26,11 +27,11 @@ export const generateMeta = async (args: {
 
   const ogImage = getImageURL(doc?.meta?.image)
 
-  const title = doc?.meta?.title
-    ? doc?.meta?.title + ' | Payload Website Template'
-    : 'Payload Website Template'
+  const appName = getAppName()
 
-  return {
+  const title = doc?.meta?.title ? doc?.meta?.title + ' | ' + appName : appName
+
+  const metaData: Metadata = {
     description: doc?.meta?.description,
     openGraph: mergeOpenGraph({
       description: doc?.meta?.description || '',
@@ -46,4 +47,8 @@ export const generateMeta = async (args: {
     }),
     title,
   }
+
+  console.log(`generateMeta => `, metaData)
+
+  return metaData
 }

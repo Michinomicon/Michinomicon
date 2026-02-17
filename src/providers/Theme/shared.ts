@@ -1,17 +1,13 @@
-import type { Theme } from './types'
+// export type ThemeMode = 'dark' | 'light'
 
-export const themeLocalStorageKey = 'payload-theme'
+// export const getImplicitPreference = (): ThemeMode | null => {
+//   const mediaQuery = '(prefers-color-scheme: dark)'
+//   const mql = window.matchMedia(mediaQuery)
+//   const hasImplicitPreference = typeof mql.matches === 'boolean'
 
-export const defaultTheme = 'light'
+//   if (hasImplicitPreference) {
+//     return mql.matches ? 'dark' : 'light'
+//   }
 
-export const getImplicitPreference = (): Theme | null => {
-  const mediaQuery = '(prefers-color-scheme: dark)'
-  const mql = window.matchMedia(mediaQuery)
-  const hasImplicitPreference = typeof mql.matches === 'boolean'
-
-  if (hasImplicitPreference) {
-    return mql.matches ? 'dark' : 'light'
-  }
-
-  return null
-}
+//   return null
+// }

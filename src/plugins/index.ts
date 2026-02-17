@@ -3,7 +3,7 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import { Plugin } from 'payload'
+import { AccessResult, Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -13,9 +13,12 @@ import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { Page, Post } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { hasAccess } from '@/utilities/accessFunctions'
+import { getAppName } from '@/utilities/getAppName'
 
 const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  const appName = getAppName()
+  const title = doc?.meta?.title ? doc?.meta?.title + ' | ' + appName : ''
+  return title
 }
 
 const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
@@ -32,7 +35,8 @@ export const plugins: Plugin[] = [
         group: 'Plugins',
       },
       access: {
-        read: hasAccess('redirects', 'read'),
+        // TODO - Wont build if using hasAccess
+        read: (): AccessResult => true, //hasAccess('redirects', 'read'),
         create: hasAccess('redirects', 'create'),
         update: hasAccess('redirects', 'upd'),
         delete: hasAccess('redirects', 'del'),

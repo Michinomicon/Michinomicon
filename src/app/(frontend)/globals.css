@@ -1,6 +1,172 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin 'tailwindcss-animate';
+@config '../../../tailwind.config.mjs';
+
+@custom-variant dark (&:is(.dark, .dark *, [data-mode="dark"], [data-mode="dark"] * ));
+
+/* Default/Fallback colour theme */
+@import './themes/default.css';
+
+/* Eyes wallpaper */
+@import './themes/eyes-wallpaper.css';
+
+/* IMPORT CUSTOM THEMES HERE */
+@import './themes/fii-one.css';
+@import './themes/purple.css';
+
+/* @import './themes/blue.css'; */
+/* @import './themes/minimal-red.css'; */
+/* @import './themes/minimal-blue.css'; */
+/* @import './themes/minimal-green.css'; */
+/* @import './themes/minimal-orange.css'; */
+/* @import './themes/minimal-rose.css'; */
+/* @import './themes/minimal-violet.css'; */
+/* @import './themes/minimal-yellow.css'; */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  --font-serif: var(--font-serif);
+
+  --radius: var(--radius);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow: var(--shadow);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  --border: 1px solid var(--theme-elevation-200);
+
+  --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
+  --tracking-tight: calc(var(--tracking-normal) - 0.025em);
+  --tracking-normal: var(--tracking-normal);
+  --tracking-wide: calc(var(--tracking-normal) + 0.025em);
+  --tracking-wider: calc(var(--tracking-normal) + 0.05em);
+  --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+}
+
+/* @theme inline {
+  --pattern-background-color: oklch(from var(--background) calc(l + 1) c h);
+  --pattern-primary-color: var(--color-violet-300);
+  --pattern-tertiary-color: var(--color-cyan-200);
+  --pattern-accent-color: var(--color-red-400);
+  --pattern-secondary-color: var(--color-orange-200);
+
+  --pattern-overlay-color: var(--background);
+  --pattern-overlay-opacity: 0;
+  --pattern-overlay-inactive-opacity: 0;
+  --pattern-transition-duration: 0.8s;
+  --pattern-transition-delay: 0.6s;
+
+  --pattern-outer-fill-color: var(--pattern-primary-color);
+  --pattern-pupil-fill-color: var(--pattern-accent-color);
+  --pattern-ring-fill-color: var(--pattern-secondary-color);
+  --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+  --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) calc(l - 0.1) c h);
+  --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color)calc(l - 0.1) c h);
+  --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) calc(l - 0.1) c h);
+  --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) calc(l - 0.1) c h);
+}
+
+@layer base {
+    .dark, [data-mode='dark']{
+    --pattern-background-color: oklch(from var(--pattern-background-color) calc(l - 1) c h);
+    --pattern-primary-color: oklch(from var(--pattern-primary-color) calc(l + 0.8) c h);
+    --pattern-tertiary-color: oklch(from var(--pattern-tertiary-color) calc(l + 0.6) c h);
+    --pattern-accent-color: oklch(from var(--pattern-accent-color) calc(l + 0.4) c h);
+    --pattern-secondary-color: oklch(from var(--pattern-secondary-color) calc(l + 0.2) c h);
+
+    --pattern-overlay-color: var(--background);
+    --pattern-overlay-opacity: 0.8;
+    --pattern-overlay-inactive-opacity: 0.8;
+
+    --pattern-transition-duration: 0.8s;
+    --pattern-transition-delay: 0.6s;
+
+    --pattern-outer-fill-color: var(--pattern-primary-color);
+    --pattern-pupil-fill-color: var(--pattern-accent-color);
+    --pattern-ring-fill-color: var(--pattern-secondary-color);
+    --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+    --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) l c calc(h + 180));
+    --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color) l c calc(h + 180));
+    --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) l c calc(h + 180));
+    --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) l c calc(h + 180));
+  }
+} */
+
+body {
+  letter-spacing: var(--tracking-normal);
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50 rounded-4xl;
+  }
+  body {
+    @apply bg-background text-foreground min-h-screen flex flex-col;
+  }
+}
 
 @layer base {
   h1,
@@ -12,92 +178,61 @@
     font-size: unset;
     font-weight: unset;
   }
-
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
-    --card: 240 5% 96%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 240 6% 80%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.2rem;
-
-    --success: 196 52% 74%;
-    --warning: 34 89% 85%;
-    --error: 10 100% 86%;
-  }
-
-  [data-theme='dark'] {
-    --background: 0 0% 0%;
-    --foreground: 210 40% 98%;
-
-    --card: 0 0% 4%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 0, 0%, 15%, 0.8;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-
-    --success: 196 100% 14%;
-    --warning: 34 51% 25%;
-    --error: 10 39% 43%;
-  }
 }
 
-@layer base {
-  * {
-    @apply border-border;
+/** 
+  EYES WALLPAPER
+*/
+#eyesBackgroundContainer {
+  border-radius: 0;
+  #wallpaperOverlay {
+    opacity: var(--pattern-overlay-opacity);
   }
-  body {
-    @apply bg-background text-foreground min-h-[100vh] flex flex-col;
+
+  #wallpaperBase {
+    fill: var(--pattern-background-color);
   }
-}
 
-html {
-  opacity: 0;
-}
+  [theme-group='outer'] {
+    fill: var(--pattern-outer-fill-color);
+  }
+  [theme-group='pupil'] {
+    fill: var(--pattern-pupil-fill-color);
+  }
+  [theme-group='ring'] {
+    fill: var(--pattern-ring-fill-color);
+  }
+  [theme-group='tears'] {
+    fill: var(--pattern-tears-fill-color);
+  }
 
-html[data-theme='dark'],
-html[data-theme='light'] {
-  opacity: initial;
+  #activeTile {
+    /* Within the active wallpaper tile, groups shouldn't be visible unless they are active */
+    :not([cursor-active='true']) > path {
+      opacity: 0;
+      transition:
+        opacity var(--pattern-transition-duration) ease-out var(--pattern-transition-delay),
+        fill var(--pattern-transition-duration) ease-out var(--pattern-transition-delay);
+    }
+
+    /* When the group is active, apply the active fill colors to the paths in that group */
+    [cursor-active='true'] {
+      > path {
+        opacity: 1;
+        transition: none;
+      }
+      [theme-group='outer'] {
+        fill: var(--pattern-outer-active-fill-color);
+      }
+      [theme-group='pupil'] {
+        fill: var(--pattern-pupil-active-fill-color);
+      }
+      [theme-group='ring'] {
+        fill: var(--pattern-ring-active-fill-color);
+      }
+      [theme-group='tears'] {
+        fill: var(--pattern-tears-active-fill-color);
+      }
+    }
+  }
 }

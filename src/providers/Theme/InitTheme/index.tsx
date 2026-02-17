@@ -1,50 +1,53 @@
-import Script from 'next/script'
-import React from 'react'
+// import Script from 'next/script'
+// import React from 'react'
 
-import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
+// // import { defaultTheme, themeLocalStorageKey } from '../ThemeSelector/types'
 
-export const InitTheme: React.FC = () => {
-  return (
-    // eslint-disable-next-line @next/next/no-before-interactive-script-outside-document
-    <Script
-      dangerouslySetInnerHTML={{
-        __html: `
-  (function () {
-    function getImplicitPreference() {
-      var mediaQuery = '(prefers-color-scheme: dark)'
-      var mql = window.matchMedia(mediaQuery)
-      var hasImplicitPreference = typeof mql.matches === 'boolean'
+// const defaultTheme = 'light';
+// const themeLocalStorageKey = 'payload-theme'
 
-      if (hasImplicitPreference) {
-        return mql.matches ? 'dark' : 'light'
-      }
+// export const InitTheme: React.FC = () => {
+//   return (
+//     // eslint-disable-next-line @next/next/no-before-interactive-script-outside-document
+//     <Script
+//       dangerouslySetInnerHTML={{
+//         __html: `
+//   (function () {
+//     function getImplicitPreference() {
+//       var mediaQuery = '(prefers-color-scheme: dark)'
+//       var mql = window.matchMedia(mediaQuery)
+//       var hasImplicitPreference = typeof mql.matches === 'boolean'
 
-      return null
-    }
+//       if (hasImplicitPreference) {
+//         return mql.matches ? 'dark' : 'light'
+//       }
 
-    function themeIsValid(theme) {
-      return theme === 'light' || theme === 'dark'
-    }
+//       return null
+//     }
 
-    var themeToSet = '${defaultTheme}'
-    var preference = window.localStorage.getItem('${themeLocalStorageKey}')
+//     function themeIsValid(theme) {
+//       return theme === 'light' || theme === 'dark'
+//     }
 
-    if (themeIsValid(preference)) {
-      themeToSet = preference
-    } else {
-      var implicitPreference = getImplicitPreference()
+//     var themeToSet = '${defaultTheme}'
+//     var preference = window.localStorage.getItem('${themeLocalStorageKey}')
 
-      if (implicitPreference) {
-        themeToSet = implicitPreference
-      }
-    }
+//     if (themeIsValid(preference)) {
+//       themeToSet = preference
+//     } else {
+//       var implicitPreference = getImplicitPreference()
 
-    document.documentElement.setAttribute('data-theme', themeToSet)
-  })();
-  `,
-      }}
-      id="theme-script"
-      strategy="beforeInteractive"
-    />
-  )
-}
+//       if (implicitPreference) {
+//         themeToSet = implicitPreference
+//       }
+//     }
+
+//     document.documentElement.setAttribute('data-theme', themeToSet)
+//   })();
+//   `,
+//       }}
+//       id="theme-script"
+//       strategy="beforeInteractive"
+//     />
+//   )
+// }
