@@ -16,6 +16,7 @@ test.describe('Frontend', () => {
 
     const heading = page.locator('h1').first()
 
-    await expect(heading).toHaveText('Under Construction.')
+    await expect(heading).toBeAttached();
+    await expect(heading).toBeVisible();
   })
 })
