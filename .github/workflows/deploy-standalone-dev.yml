@@ -9,7 +9,7 @@ jobs:
   standalone-deployment:
     runs-on: ubuntu-latest
 
-    environment: production # Use GitHub environments for protection
+    environment: dev # Use GitHub environments for protection
 
     steps:          
       - name: Checkout source code
@@ -23,7 +23,7 @@ jobs:
           mongodb-port: 27017
 
         # Create .env file on VPS using values from Github Actions Secrets
-      - name: Create Production .env
+      - name: Create Dev .env
         run : |
           echo "Creating Production .env file..."
           echo "NODE_ENV=production" > .env
@@ -135,13 +135,13 @@ jobs:
             sleep 5
             
             echo "    ⤵️ Verifying PM2 process status..."
-            APP_STATUS=$(pm2 jlist | grep -o "\"name\":\"${{vars.APP_NAME}}-production\"[^}]*\"status\":\"[^\"]*\"" | grep -o "\"status\":\"[^\"]*\"" | cut -d'"' -f4)
+            APP_STATUS=$(pm2 jlist | grep -o "\"name\":\"${{vars.APP_NAME}}-dev\"[^}]*\"status\":\"[^\"]*\"" | grep -o "\"status\":\"[^\"]*\"" | cut -d'"' -f4)
             
             if [ "$APP_STATUS" == "online" ]; then
-                echo "    ✅ '${{vars.APP_NAME}}-production' is: '$APP_STATUS', Application deployed. "
+                echo "    ✅ '${{vars.APP_NAME}}-dev' is: '$APP_STATUS', Application deployed. "
                 exit 0
             else
-                echo "    ❌ '${{vars.APP_NAME}}-production' is: '$APP_STATUS', Application NOT deployed. "
+                echo "    ❌ '${{vars.APP_NAME}}-dev' is: '$APP_STATUS', Application NOT deployed. "
                 # We force a non-zero exit code so GitHub Actions marks the job as FAILED
                 exit 1
             fi
