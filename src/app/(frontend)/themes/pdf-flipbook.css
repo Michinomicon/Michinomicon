@@ -1,0 +1,73 @@
+/* The physical page board */
+.flipbook-page {
+  background-color: #fcfaf8; /* Slightly off-white/warm paper color */
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1); /* Subtle edge drop-shadow */
+  position: relative;
+  overflow: hidden;
+  border-radius:0;
+}
+
+.flipbook-page .react-pdf__Page {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent !important;
+    border-radius:0;
+}
+
+.flipbook-page .react-pdf__Page__canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius:0;
+}
+
+.flipbook-page .react-pdf__Page canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  /* object-fit ensures the aspect ratio is respected if the math is off by a pixel */
+  object-fit: contain; 
+}
+
+/* The spine shadow overlay. 
+  This sits ON TOP of the PDF canvas to make the inner edge look curved.
+*/
+.spine-shadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  pointer-events: none; 
+  z-index: 10;
+    border-radius:0;
+}
+
+/* Shadow for pages on the RIGHT side of the book (Odd pages, like Page 1, 3, 5) */
+.flipbook-page.page-right .spine-shadow {
+  /* Darker on the left edge, fading out quickly to the right */
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.02) 4%, rgba(0, 0, 0, 0) 10%);
+}
+
+/* Shadow for pages on the LEFT side of the book (Even pages, like Page 2, 4, 6) */
+.flipbook-page.page-left .spine-shadow {
+  /* Darker on the right edge, fading out quickly to the left */
+  background: linear-gradient(to left, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.02) 4%, rgba(0, 0, 0, 0) 10%);
+}
+
+.flipbook-page.page-cover {
+  background-color: #ffffff;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 0 0 10px rgba(0,0,0,0.2);
+}
+
+.react-pdf__Document,
+.stf__wrapper,
+.flipbook.stf__parent,
+.stf__block,
+.react-pdf__Page,
+.react-pdf__Page__canvas {
+    border-radius: 0;
+}

@@ -9,7 +9,7 @@
     "build:clean": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && next build",
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "dev:clean": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && next build && next dev",
+    "dev:clean": "cross-env NODE_OPTIONS=--no-deprecation--inspect rm -rf .next && next build && pnpm dev",
     "start:standalone": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && next build && node /home/andrew/projects/Michinomicon/ecosystem.config.cjs",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
@@ -25,8 +25,7 @@
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.76.1",
-    "@payloadcms/db-mongodb": "^3.76.1",
-    "@payloadcms/db-postgres": "3.76.1",
+    "@payloadcms/db-mongodb": "3.76.1",
     "@payloadcms/email-nodemailer": "3.76.1",
     "@payloadcms/live-preview-react": "3.76.1",
     "@payloadcms/next": "3.76.1",
@@ -46,6 +45,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-toggle": "^1.1.10",
     "@radix-ui/react-toggle-group": "^1.1.11",
+    "@react-pdf/renderer": "^4.3.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cross-env": "10.1.0",
@@ -62,6 +62,8 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "7.71.1",
+    "react-pageflip": "^2.0.3",
+    "react-pdf": "^9.0.0",
     "sharp": "0.34.5",
     "tailwind-merge": "3.4.0",
     "tailwindcss-animate": "^1.0.7",
@@ -92,7 +94,7 @@
     "vitest": "4.0.18"
   },
   "engines": {
-    "node": ">=22",
+    "node": "^22",
     "pnpm": "^10"
   },
   "pnpm": {
@@ -100,6 +102,12 @@
       "sharp",
       "esbuild",
       "unrs-resolver"
-    ]
+    ],
+    "overrides": {
+      "pdfjs-dist": "4.4.168"
+    }
+  },
+  "resolutions": {
+    "pdfjs-dist": "4.4.168"
   }
 }

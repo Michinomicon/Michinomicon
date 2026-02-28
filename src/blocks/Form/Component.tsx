@@ -13,17 +13,17 @@ import { getClientSideURL } from '@/utilities/getURL'
 
 export type FormBlockType = {
   blockName?: string
-  blockType?: 'formBlock'
+  blockType: 'formBlock'
   enableIntro: boolean
   form: FormType
   introContent?: DefaultTypedEditorState
 }
 
-export const FormBlock: React.FC<
-  {
-    id?: string
-  } & FormBlockType
-> = (props) => {
+export type FormBlockPropType = {
+  id?: string | null
+} & FormBlockType
+
+export const FormBlock: React.FC<FormBlockPropType> = (props) => {
   const {
     enableIntro,
     form: formFromProps,
