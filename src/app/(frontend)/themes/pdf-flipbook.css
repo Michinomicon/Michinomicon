@@ -26,12 +26,7 @@
   border-radius:0;
 }
 
-.flipbook-page .react-pdf__Page canvas {
-  max-width: 100% !important;
-  max-height: 100% !important;
-  /* object-fit ensures the aspect ratio is respected if the math is off by a pixel */
-  object-fit: contain; 
-}
+.flipbook-page 
 
 /* The spine shadow overlay. 
   This sits ON TOP of the PDF canvas to make the inner edge look curved.
@@ -63,11 +58,23 @@
   box-shadow: inset 0 0 10px rgba(0,0,0,0.05), 0 0 10px rgba(0,0,0,0.2);
 }
 
-.react-pdf__Document,
 .stf__wrapper,
 .flipbook.stf__parent,
-.stf__block,
+.stf__block {
+    border-radius: 0;
+}
+
+.react-pdf__Document,
 .react-pdf__Page,
 .react-pdf__Page__canvas {
     border-radius: 0;
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.react-pdf__Page canvas {
+  max-width: 100% !important;
+  max-height: 100% !important;
+  /* object-fit ensures the aspect ratio is respected if the math is off by a pixel */
+  object-fit: contain; 
 }

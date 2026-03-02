@@ -34,6 +34,7 @@
       "@/*": [
         "./src/*"
       ],
+      "flipbook-js": ["node_modules/flipbook-js/dist/flipbook.d.ts"],
     }
   },
   "include": [

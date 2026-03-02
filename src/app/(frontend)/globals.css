@@ -4,6 +4,9 @@
 
 @custom-variant dark (&:is(.dark, .dark *, [data-mode="dark"], [data-mode="dark"] * ));
 
+/* @import 'flipbook-js/style.css'; */
+
+
 /* Styles for the .pdf flipbopok */
 @import './themes/pdf-flipbook.css';
 

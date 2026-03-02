@@ -89,6 +89,9 @@ importers:
       dotenv:
         specifier: 17.2.4
         version: 17.2.4
+      flipbook-js:
+        specifier: ^1.1.1
+        version: 1.1.1
       geist:
         specifier: ^1.7.0
         version: 1.7.0(next@15.4.11(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(sass@1.77.4))
@@ -3293,6 +3296,9 @@ packages:
 
   flatted@3.3.3:
     resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
+
+  flipbook-js@1.1.1:
+    resolution: {integrity: sha512-KEIl0G/2aPhSo5JU3ZDQB8sp2o+x/fqs8V0JOAepW/P3f169wxn2Juppzz8kuWQG/TODeaEKzetf/hZSAF1WGg==}
 
   focus-trap@7.5.4:
     resolution: {integrity: sha512-N7kHdlgsO/v+iD/dMoJKtsSqs5Dz/dXZVebRgJw23LDk+jMi/974zyiOYDziY2JPp8xivq9BmUGwIJMiuSBi7w==}
@@ -9274,6 +9280,8 @@ snapshots:
       keyv: 4.5.4
 
   flatted@3.3.3: {}
+
+  flipbook-js@1.1.1: {}
 
   focus-trap@7.5.4:
     dependencies:
