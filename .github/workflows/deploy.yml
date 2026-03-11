@@ -9,8 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    environment: production # Use GitHub environments for protection
-
     steps:          
       - name: Checkout source code
         uses: actions/checkout@v4
