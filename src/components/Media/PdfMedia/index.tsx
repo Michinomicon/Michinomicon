@@ -9,8 +9,10 @@ import {
   OnDocumentLoadProgress,
   OnDocumentLoadSuccess,
   OnLoadProgressArgs,
+  OnRenderSuccess,
+  PageCallback,
 } from 'react-pdf/dist/esm/shared/types.js'
-import FlipBook from 'flipbook-js'
+import FlipBook, { FlipBookOptions } from 'flipbook-js'
 import { PDFDocumentProxy } from 'pdfjs-dist'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { Button } from '@/components/ui/button'
@@ -19,24 +21,29 @@ import { ChevronLeft, ChevronRight, Expand, Shrink } from 'lucide-react'
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 const fullScreenContainerClasses = `absolute h-[90vw] w-[90vw] ml-[5vw] mt-[10vw] m-auto inset-0 z-9999 bg-neutral-900/95 flex flex-col justify-center items-center p-4 md:p-10 backdrop-blur-sm transition-all duration-300`
-const defaultContainerClasses = `relative` //`relative w-full h-full max-w-full mx-auto flex flex-col justify-center items-center py-10 overflow-hidden transition-all duration-300`
+const defaultContainerClasses = `relative w-full max-w-full max-h-full min-h-[50vh] flex flex-col justify-center items-center py-10 overflow-hidden transition-all duration-300`
+// mx-auto
 
 type SafePdfProps = {
   url: string
 }
 
+type ActivePageRange = { start: number | null; end: number | null }
+
 export const PdfMedia: React.FC<SafePdfProps> = ({ url }) => {
   const [numPages, setNumPages] = useState<number | null>(null)
-  const [currentPage, setCurrentPage] = useState<number>(0)
-  const [renderedPages, setRenderedPages] = useState(0)
-  const flipBookInstance = useRef<FlipBook>(null)
+  const [renderedPages, setRenderedPages] = useState<number>(0)
+  const [allPagesRendered, setAllPagesRendered] = useState<boolean>(false)
+  const [isFileLoaded, setIsFileLoaded] = useState<boolean>(false)
   const [pageWidth, setPageWidth] = useState<number>(400)
   const [pageHeight] = useState<number>(() => pageWidth * 1.4142)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [activePages, setActivePages] = useState<ActivePageRange>({ start: null, end: null })
+
   const containerRef = useRef<HTMLDivElement>(null)
   const documentDivRef = useRef<HTMLDivElement>(null)
   const documentProxyRef = useRef<PDFDocumentProxy>(null)
-  const [activePages, setActivePages] = useState<number[]>([])
+  const flipBookInstance = useRef<FlipBook>(null)
 
   const file = useMemo(() => ({ url }), [url])
 
@@ -84,33 +91,60 @@ export const PdfMedia: React.FC<SafePdfProps> = ({ url }) => {
     return () => observer.disconnect()
   }, [isFullscreen])
 
+  useEffect(() => {
+    const documentProxy = documentProxyRef.current
+    if (!documentProxy) return
+
+    console.log(`isFileLoaded: `, isFileLoaded)
+    const { numPages } = documentProxy
+    console.log(`Page Count: `, numPages)
+    setNumPages(numPages)
+    setActivePages({ start: 0, end: null })
+
+    if (numPages !== null && numPages > 0 && renderedPages === numPages) {
+      console.log(`All pages rendered: ${renderedPages} of ${numPages}`)
+      setAllPagesRendered(true)
+    }
+    // setCurrentPage(1)
+    // setRenderedPages(0)
+  }, [isFileLoaded, renderedPages])
+
   // Document Event Handlers
   const onDocumentLoadSuccess: OnDocumentLoadSuccess = (document: PDFDocumentProxy) => {
     documentProxyRef.current = document
-    const { numPages } = documentProxyRef.current
-    console.log(`onDocumentLoadSuccess: `, numPages, document)
-    setNumPages(numPages)
-    setCurrentPage(0)
-    setRenderedPages(0)
+    console.log(`onDocumentLoadSuccess: `, document)
+    setIsFileLoaded(true)
   }
 
-  const onPageRenderSuccess = () => {
+  const onPageRenderSuccess: OnRenderSuccess = (page: PageCallback) => {
     setRenderedPages((prevCount) => {
       return prevCount + 1
     })
+    console.log(`Rendered Page No. ${page._pageIndex}. ${renderedPages} of ${numPages}`, page)
   }
 
-  const onPageTurn = (): void => {
-    const activePages = flipBookInstance?.current?.getActivePages() ?? []
-    setActivePages(activePages)
-    console.log(`onPageTurn => activePages: ${activePages}`)
-  }
+  // useEffect(() => {  },[]);
 
   useEffect(() => {
-    if (numPages !== null && renderedPages === numPages) {
-      console.log(`All pages rendered: ${renderedPages} of ${numPages}`)
-      // Initialize the vanilla JS plugin on our container ID
-      flipBookInstance.current = new FlipBook('pdfFlipbookContainer', {
+    if (allPagesRendered && isFileLoaded) {
+      const onPageTurn = (): void => {
+        const flipBook = flipBookInstance.current
+        if (!flipBook) return
+
+        const [pageRangeStart, pageRangeEnd] = flipBook.getActivePages() ?? [null, null]
+
+        const pageRange = { start: pageRangeStart ?? null, end: pageRangeEnd ?? null }
+
+        const onPageAfterLastPage = pageRange.start === null && pageRange.end === null
+
+        setActivePages(pageRange)
+
+        if (onPageAfterLastPage) {
+          flipBook.turnPage(1)
+        }
+      }
+
+      const options: Required<FlipBookOptions> = {
         nextButton: document.getElementById('flipbookNextButton'), // next button element
         previousButton: document.getElementById('flipbookPrevButton'), // previous button element
         canClose: true, // book can close on its cover
@@ -119,10 +153,15 @@ export const PdfMedia: React.FC<SafePdfProps> = ({ url }) => {
         onPageTurn: onPageTurn, // callback after page is turned
         initialCall: true, // should the book page calls for attention
         width: '100%', // define width
-        height: `${pageHeight}`, //'300px', // define height
-      })
+        height: `${pageHeight}px`, //'300px', // define height
+      }
+
+      console.log(`FlipBookOptions:`, options)
+
+      // Initialize the vanilla JS plugin on our container ID
+      flipBookInstance.current = new FlipBook('pdfFlipbookContainer', options)
     }
-  }, [activePages, currentPage, numPages, pageHeight, pageWidth, renderedPages])
+  }, [allPagesRendered, isFileLoaded, pageHeight])
 
   const onDocumentLoadProgress: OnDocumentLoadProgress = (
     _loadProgress: OnLoadProgressArgs,
@@ -148,23 +187,48 @@ export const PdfMedia: React.FC<SafePdfProps> = ({ url }) => {
     console.log(`onDocumentError: `, args)
   }
 
-  const containerClasses = isFullscreen ? fullScreenContainerClasses : defaultContainerClasses
-
-  const getPageStateDescription = (activePages: number[], numPages: number | null) => {
-    const leftActivePage = activePages.length >= 0 ? activePages[0] : null
-    const rightActivePage = activePages.length >= 1 ? activePages[1] : null
-
-    return (
-      <span className="whitespace-nowrap">
-        Page
-        {`${activePages.length > 1 ? 's' : ''} ${leftActivePage ? `${Number(leftActivePage) + 1}` : 1} ${rightActivePage ? '| ' + `${Number(rightActivePage) + 1}` : ''} of ${numPages}`}
-      </span>
-    )
+  const getPageStateDescription = (pageRange: ActivePageRange, numPages: number | null) => {
+    const pageRangeStart = pageRange.start ? pageRange.start + 1 : 1
+    const pageRangeEnd = pageRange.end ? ` | ${pageRange.end + 1}` : ''
+    if (numPages && numPages >= 0) {
+      return `Page${pageRange.end ? 's' : ''} ${pageRangeStart}${pageRangeEnd} of ${numPages ?? '--'}`
+    } else {
+      return `No Pages.`
+    }
   }
 
+  const containerClasses = isFullscreen ? fullScreenContainerClasses : defaultContainerClasses
+
   return (
-    <div ref={containerRef} className={containerClasses}>
-      <div id="pdfDocumentContainer" className="h-full">
+    <div className={containerClasses} ref={containerRef}>
+      <div className={`absolute z-10 w-full ml-0 mr-auto flex flex-row flex-nowrap justify-center`}>
+        <ButtonGroup orientation={'horizontal'}>
+          <Button variant={'outline'} id="flipbookPrevButton" disabled={activePages.start === 0}>
+            <ChevronLeft />
+          </Button>
+
+          <Button variant={'outline'}>
+            <span className="whitespace-nowrap w-40">
+              {getPageStateDescription(activePages, numPages)}
+            </span>
+          </Button>
+
+          <Button variant={'outline'} id="flipbookNextButton">
+            <ChevronRight />
+          </Button>
+
+          <Button
+            variant={'outline'}
+            id="flipbook-full-screen"
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            aria-label={isFullscreen ? 'Close fullscreen' : 'Open fullscreen'}
+          >
+            {isFullscreen ? <Shrink /> : <Expand />}
+          </Button>
+        </ButtonGroup>
+      </div>
+
+      <div id="pdfDocumentContainer" style={{ width: '100%', minHeight: pageHeight }}>
         <Document
           inputRef={documentDivRef}
           file={file}
@@ -192,7 +256,6 @@ export const PdfMedia: React.FC<SafePdfProps> = ({ url }) => {
                 <div key={`page_${index + 1}`} className={`c-flipbook__page`}>
                   <Page
                     pageIndex={index}
-                    pageNumber={index + 1}
                     onRenderSuccess={onPageRenderSuccess}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
@@ -209,33 +272,6 @@ export const PdfMedia: React.FC<SafePdfProps> = ({ url }) => {
             </div>
           )}
         </Document>
-      </div>
-
-      <div className="absolute z-10 ml-[50%] mr-auto">
-        <ButtonGroup orientation={'horizontal'}>
-          <Button variant={'outline'} id="flipbookPrevButton" disabled={activePages[0] <= 0}>
-            <ChevronLeft />
-          </Button>
-
-          <Button variant={'outline'}>{getPageStateDescription(activePages, numPages)}</Button>
-
-          <Button
-            variant={'outline'}
-            id="flipbookNextButton"
-            disabled={activePages[1] > 0 && activePages[1] === numPages}
-          >
-            <ChevronRight />
-          </Button>
-
-          <Button
-            variant={'outline'}
-            id="flipbook-full-screen"
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            aria-label={isFullscreen ? 'Close fullscreen' : 'Open fullscreen'}
-          >
-            {isFullscreen ? <Shrink /> : <Expand />}
-          </Button>
-        </ButtonGroup>
       </div>
     </div>
   )
