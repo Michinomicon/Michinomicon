@@ -53,6 +53,3 @@ node_modules/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
-
-# database backups
-db_backups/
