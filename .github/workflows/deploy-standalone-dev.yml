@@ -29,6 +29,7 @@ jobs:
           echo "NODE_ENV=production" > .env
           echo "APP_NAME=${{vars.APP_NAME}}" >> .env
           echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
+          echo "PAYLOAD_MEDIA_DIR=${{vars.PAYLOAD_MEDIA_DIR}}" >> .env
           echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> .env
           echo "PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}" >> .env
           echo "NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}" >> .env
@@ -52,10 +53,6 @@ jobs:
 
       - name: Install Dependencies via PNPM
         run: pnpm install --frozen-lockfile
-
-
-      - name: Install Playwright incl. dependancies
-        run: npx playwright install --with-deps
 
       - name: Build Project
         run: pnpm build
@@ -96,12 +93,10 @@ jobs:
 
       - name: Deploy using Rsync
         run: |
-          rsync -avzP --delete .next/standalone/ vps:/${{vars.TARGET_DIR}}/
-
-            # --exclude 'node_modules/' \
-            # --exclude '.env' \
-            # --exclude '.env.*' \
-            # --exclude '*.env' \
+          rsync -avzP --delete \
+            --exclude 'shared-media/' \
+            --exclude 'logs/' \
+            .next/standalone/ vps:/${{vars.TARGET_DIR}}/
       
       - name: Execute deploy.sh on remote sever
         uses: appleboy/ssh-action@v1.0.3
@@ -112,36 +107,9 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            
-            # Add PNPM to PATH
-            # export PNPM_HOME="$HOME/.local/share/pnpm"
-            # export PATH="$PNPM_HOME:$PATH"
-            
-            # Navigate to project directory
             cd /${{vars.TARGET_DIR}}
             
-
-
-            # echo "Running scripts/deploy.sh..."
-            # chmod +x scripts/deploy.sh
-            # scripts/deploy.sh ${{vars.APP_NAME}}
-            
-            # echo "Starting standalone server with PM2..."
-            pm2 reload ecosystem.config.cjs --env production --update-env
-            pm2 reset
+            # Start or Reload PM2
+            pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production
             pm2 save
 
-            echo "    ⤵️ Waiting 5 seconds for app to initialize..."
-            sleep 5
-            
-            echo "    ⤵️ Verifying PM2 process status..."
-            APP_STATUS=$(pm2 jlist | grep -o "\"name\":\"${{vars.APP_NAME}}-dev\"[^}]*\"status\":\"[^\"]*\"" | grep -o "\"status\":\"[^\"]*\"" | cut -d'"' -f4)
-            
-            if [ "$APP_STATUS" == "online" ]; then
-                echo "    ✅ '${{vars.APP_NAME}}-dev' is: '$APP_STATUS', Application deployed. "
-                exit 0
-            else
-                echo "    ❌ '${{vars.APP_NAME}}-dev' is: '$APP_STATUS', Application NOT deployed. "
-                # We force a non-zero exit code so GitHub Actions marks the job as FAILED
-                exit 1
-            fi
