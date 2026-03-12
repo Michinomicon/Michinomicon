@@ -10,7 +10,7 @@
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:clean": "cross-env NODE_OPTIONS=--no-deprecation--inspect rm -rf .next && next build && pnpm dev",
-    "start:standalone": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && next build && node /home/andrew/projects/Michinomicon/ecosystem.config.cjs",
+    "standalone": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && next build && node .next/standalone/server.js",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
