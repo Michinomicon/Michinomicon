@@ -10,7 +10,6 @@
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "dev:clean": "cross-env NODE_OPTIONS=--no-deprecation--inspect rm -rf .next && next build && pnpm dev",
-    "standalone": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && next build && node .next/standalone/server.js",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",
@@ -21,7 +20,9 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
     "test:e2e": "cross-env NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" pnpm exec playwright test --config=playwright.config.ts",
-    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts"
+    "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
+    "backup": "scripts/db-backup.sh",
+    "restore": "scripts/db-restore.sh"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.76.1",

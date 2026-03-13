@@ -1,15 +1,14 @@
-name: Deploy (standalone) to Dev
+name: Deploy to Dev
 
 on:
   push:
     branches: [dev]
-  workflow_dispatch: # Allow manual triggers
+  workflow_dispatch:
 
 jobs:
   standalone-deployment:
     runs-on: ubuntu-latest
-
-    environment: dev # Use GitHub environments for protection
+    environment: dev
 
     steps:          
       - name: Checkout source code
@@ -23,7 +22,7 @@ jobs:
           mongodb-port: 27017
 
         # Create .env file on VPS using values from Github Actions Secrets
-      - name: Create Dev .env
+      - name: Creating .env
         run : |
           echo "Creating Production .env file..."
           echo "NODE_ENV=production" > .env
@@ -113,5 +112,6 @@ jobs:
             
             # Start or Reload PM2
             pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production
+            pm2 reset
             pm2 save
 
