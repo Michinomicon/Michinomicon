@@ -30,6 +30,7 @@ jobs:
           echo "APP_NAME=${{vars.APP_NAME}}" >> .env
           echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
           echo "PAYLOAD_MEDIA_DIR=${{vars.PAYLOAD_MEDIA_DIR}}" >> .env
+          echo "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}" >> .env
           echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> .env
           echo "PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}" >> .env
           echo "NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}" >> .env
@@ -60,6 +61,7 @@ jobs:
           # Point to the service container (localhost because of mapped ports)
           DATABASE_URI: mongodb://localhost:27017/payload-test
           PAYLOAD_SECRET: testing-secret
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
 
       - name: Prepare Standalone Artifact
         run: |
