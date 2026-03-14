@@ -2,12 +2,11 @@
 
 import dynamic from 'next/dynamic'
 import React from 'react'
+import type { Props } from './types'
+import { Media } from '@/payload-types'
+import { Spinner } from '../ui/spinner'
 
-type SafePdfProps = {
-  url: string
-}
-
-const PdfMediaClient = dynamic<SafePdfProps>(
+const PdfMediaClient = dynamic<Media>(
   () =>
     import('./PdfMedia').then((mod) => {
       return mod.PdfMedia
@@ -15,11 +14,18 @@ const PdfMediaClient = dynamic<SafePdfProps>(
   {
     ssr: false,
     loading: () => (
-      <div className="flex justify-center items-center py-6 h-full">Loading PDF...</div>
+      <div className="flex justify-center items-center py-6 h-full w-full">
+        <Spinner className="size-8" />
+      </div>
     ),
   },
 )
 
-export const PdfMediaWrapper: React.FC<SafePdfProps> = ({ url }) => {
-  return <PdfMediaClient url={url} />
+export const PdfMediaWrapper: React.FC<Props> = (props) => {
+  const { resource } = props
+  if (resource && typeof resource === 'object') {
+    return <PdfMediaClient {...resource} />
+  }
+
+  return null
 }

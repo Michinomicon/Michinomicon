@@ -30,7 +30,7 @@ export const Media: React.FC<Props> = (props) => {
       ) : isImage ? (
         <ImageMedia {...props} />
       ) : isPdf ? (
-        <PdfMediaWrapper url={`${resource?.url}`} />
+        <PdfMediaWrapper {...props} />
       ) : null}
     </Tag>
   )
