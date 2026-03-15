@@ -1,14 +1,23 @@
-name: Deploy to Dev
+name: Deploy
 
 on:
   push:
-    branches: [dev]
-  workflow_dispatch:
+    # Automatically run on pushes to 'dev'
+    branches: [dev] 
+    # Allow manual triggering for prod deployments from 'main'
+  workflow_dispatch: 
 
 jobs:
   standalone-deployment:
     runs-on: ubuntu-latest
-    environment: dev
+    
+    # ONLY IF branch is 'main' or 'dev'
+    if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+    
+    # Use branch to set the environment to pull vars/secrets from
+    # 'main' === 'production'  
+    # 'dev' === 'dev'
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'dev' }}
 
     steps:          
       - name: Checkout source code
@@ -24,7 +33,8 @@ jobs:
         # Create .env file on VPS using values from Github Actions Secrets
       - name: Creating .env
         run : |
-          echo "Creating Production .env file..."
+          echo "Creating .env file for ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}..."
+          
           echo "NODE_ENV=production" > .env
           echo "APP_NAME=${{vars.APP_NAME}}" >> .env
           echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
@@ -98,7 +108,7 @@ jobs:
             --exclude 'logs/' \
             .next/standalone/ vps:/${{vars.TARGET_DIR}}/
       
-      - name: Execute deploy.sh on remote sever
+      - name: Start or Reload using PM2
         uses: appleboy/ssh-action@v1.0.3
         with:
           command_timeout: 30m
