@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [22.x]
+        node-version: [22.x, 24.x]
 
     # tests require a live connection to DB
     services:
@@ -44,7 +44,6 @@ jobs:
 
       - name: Build Application
         run: pnpm build
-        # run: pnpm next build --experimental-build-mode compile
         # Payload requires these env vars to validate config during build
         env:
           APP_NAME: ${{vars.APP_NAME || 'APP_NAME'}}
