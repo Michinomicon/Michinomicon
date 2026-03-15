@@ -20,7 +20,7 @@ export const Media: CollectionConfig = {
     group: 'Globals',
   },
   access: {
-    read: hasAccess('media', 'read'),
+    read: () => true,
     create: hasAccess('media', 'create'),
     update: hasAccess('media', 'upd'),
     delete: hasAccess('media', 'del'),
@@ -43,6 +43,7 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     staticDir: path.resolve(dirname, `../../${process.env.PAYLOAD_MEDIA_DIR}`),
+    mimeTypes: ['image/*', 'video/*', 'application/pdf'],
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [

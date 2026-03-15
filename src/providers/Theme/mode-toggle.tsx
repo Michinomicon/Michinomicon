@@ -26,7 +26,16 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 // }
 
 export function ModeToggle() {
+  const [mounted, setMounted] = React.useState(false)
   const { setTheme, theme } = useTheme()
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return null
+  }
 
   return (
     <ToggleGroup

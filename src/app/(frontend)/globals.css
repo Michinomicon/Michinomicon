@@ -4,6 +4,12 @@
 
 @custom-variant dark (&:is(.dark, .dark *, [data-mode="dark"], [data-mode="dark"] * ));
 
+/* @import 'flipbook-js/style.css'; */
+
+
+/* Styles for the .pdf flipbopok */
+@import './themes/pdf-flipbook.css';
+
 /* Default/Fallback colour theme */
 @import './themes/default.css';
 
@@ -235,4 +241,11 @@ body {
       }
     }
   }
+}
+
+/* Protect react-pdf text layer from Tailwind's Preflight reset */
+.react-pdf__Page__textContent span {
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }

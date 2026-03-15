@@ -21,6 +21,8 @@ const nextConfig = {
     ],
   },
   webpack: (webpackConfig) => {
+    webpackConfig.resolve.alias.canvas = false
+    webpackConfig.resolve.alias.encoding = false
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
@@ -35,6 +37,7 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/': ['ecosystem.config.cjs'],
   },
+  transpilePackages: ['react-pdf'],
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
