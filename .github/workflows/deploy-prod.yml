@@ -1,0 +1,116 @@
+name: Deploy to Prod
+
+on:
+  # only run manually
+  workflow_dispatch:
+  # push:
+  #   branches: [main]
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:          
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.1
+        with:
+          mongodb-version: 8.0
+          mongodb-replica-set: test-rs
+          mongodb-port: 27017
+
+        # Create .env file on VPS using values from Github Actions Secrets
+      - name: Creating .env
+        run : |
+          echo "Creating Production .env file..."
+          echo "NODE_ENV=production" > .env
+          echo "APP_NAME=${{vars.APP_NAME}}" >> .env
+          echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
+          echo "PAYLOAD_MEDIA_DIR=${{vars.PAYLOAD_MEDIA_DIR}}" >> .env
+          echo "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}" >> .env
+          echo "DATABASE_URI=${{ secrets.DATABASE_URI }}" >> .env
+          echo "PAYLOAD_SECRET=${{ secrets.PAYLOAD_SECRET }}" >> .env
+          echo "NEXT_PUBLIC_SERVER_URL=${{ secrets.NEXT_PUBLIC_SERVER_URL }}" >> .env
+          echo "CRON_SECRET=${{ secrets.CRON_SECRET }}" >> .env
+          echo "PREVIEW_SECRET=${{ secrets.PREVIEW_SECRET }}" >> .env
+          echo "SMTP_PASS=${{ secrets.SMTP_PASS }}" >> .env
+          echo "SMTP_USER=${{ secrets.SMTP_USER }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+
+      - name: Install pnpm (v10.27)
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.27
+          run_install: false
+
+      - name: Setup Node.js LTS (v24.13.0)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.13.0'
+          cache: 'pnpm'
+
+      - name: Install Dependencies via PNPM
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Project
+        run: pnpm build
+        env:
+          DATABASE_URI: mongodb://localhost:27017/payload-test
+          PAYLOAD_SECRET: testing-secret
+          NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
+
+      - name: Prepare Standalone Artifact
+        run: |
+          cp -r .env .next/standalone/.env
+          mkdir -p .next/standalone/public
+          mkdir -p .next/standalone/scripts
+          mkdir -p .next/standalone/.next/static
+          cp -r public/* .next/standalone/public/
+          cp -r scripts/* .next/standalone/scripts/
+          cp -r .next/static/* .next/standalone/.next/static/
+
+      - name: Test Network Connectivity
+        run: |
+          # Try to reach the server on defined port with a 5-second timeout
+          echo "Test Network Connectivity with VPS"
+          nc -zv -w 5 ${{ secrets.SSH_HOST }} ${{ secrets.SSH_PORT }}
+
+      - name: Configure SSH for Rsync
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          cat >>~/.ssh/config <<END
+          Host vps
+            HostName ${{ secrets.SSH_HOST }}
+            User ${{ secrets.SSH_USER }}
+            Port ${{ secrets.SSH_PORT }}
+            IdentityFile ~/.ssh/deploy_key
+            StrictHostKeyChecking no
+          END
+
+      - name: Deploy using Rsync
+        run: |
+          rsync -avzP --delete \
+            --exclude 'shared-media/' \
+            --exclude 'logs/' \
+            .next/standalone/ vps:/${{vars.TARGET_DIR}}/
+      
+      - name: Reload (or start) with PM2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          command_timeout: 30m
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /${{vars.TARGET_DIR}}
+            
+            # Start or Reload PM2
+            pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
+            pm2 reset ${{vars.APP_NAME}}-production
+            pm2 save
