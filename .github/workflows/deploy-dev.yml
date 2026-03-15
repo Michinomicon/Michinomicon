@@ -57,7 +57,6 @@ jobs:
       - name: Build Project
         run: pnpm build
         env:
-          # Point to the service container (localhost because of mapped ports)
           DATABASE_URI: mongodb://localhost:27017/payload-test
           PAYLOAD_SECRET: testing-secret
           NEXT_SERVER_ACTIONS_ENCRYPTION_KEY: ${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}
@@ -111,7 +110,7 @@ jobs:
             cd /${{vars.TARGET_DIR}}
             
             # Start or Reload PM2
-            pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production
-            pm2 reset
+            pm2 reload ecosystem.config.cjs --env production --update-env || pm2 start ecosystem.config.cjs --env production --update-env
+            pm2 reset ${{vars.APP_NAME}}-production
             pm2 save
 
