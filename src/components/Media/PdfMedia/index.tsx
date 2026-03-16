@@ -18,19 +18,22 @@ import { ButtonGroup } from '@/components/ui/button-group'
 import { Button } from '@/components/ui/button'
 import { ChevronLeft, ChevronRight, X, FileText, ZoomIn, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { Media } from '@/payload-types'
 import { Field } from '@/components/ui/field'
 import { FieldLabel } from '@/components/ui/field'
 import { Progress } from '@/components/ui/progress'
-import { HoverCard, HoverCardTrigger, HoverCardContent } from '@radix-ui/react-hover-card'
-import { formatFileSize } from '@/utilities/formatFileSize'
+import { isPayloadMedia, PdfMediaProps } from '../types'
+import { getMediaInfo } from '@/utilities/getMediaInfo'
+import Image from 'next/image'
+import { Media } from '@/payload-types'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { TooltipArrow } from '@radix-ui/react-tooltip'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
 type ActivePageRange = { start: number | null; end: number | null }
 
 const OVERSHOOT = 20 // Zoom and Pan Overshoot buffer percentage.
-const ZOOM_AND_PAN_SCALE_FACTOR = 2.5 // zoom strength
+const ZOOM_AND_PAN_SCALE_FACTOR = 1.5 // zoom strength
 const SAFE_X = 128 // Total horizontal padding around PDF flipbook.
 const SAFE_Y = 240 // Total vertical padding around PDF flipbook.
 const MIN_WIDTH_SAFEGUARD = 200
@@ -323,9 +326,8 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
   )
 }
 
-export const PdfMedia: React.FC<Media> = (media) => {
-  const { alt, updatedAt, createdAt, url, filename, filesize } = media
-
+export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
+  const { resource } = props
   const popoverRef = useRef<HTMLDivElement>(null)
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
@@ -355,69 +357,65 @@ export const PdfMedia: React.FC<Media> = (media) => {
     popoverRef.current?.hidePopover()
   }
 
-  const getMediaInfo = () => {
-    return {
-      Filename: filename,
-      'Alt text': alt,
-      Updated: new Date(updatedAt).toUTCString(),
-      Created: new Date(createdAt).toUTCString(),
-      'File size': formatFileSize(filesize),
-    }
-  }
+  if (isPayloadMedia(resource)) {
+    const { title, thumbnailURL } = resource
 
-  return (
-    <>
-      <div className="relative flex flex-col sm:flex-row items-center gap-6 p-6 border rounded-xl shadow-sm bg-card max-w-2xl w-full">
-        <div className="absolute top-2 right-2">
-          <HoverCard openDelay={200} closeDelay={100}>
-            <HoverCardTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                <Info className="h-4 w-4 text-muted-foreground" />
-                <span className="sr-only">PDF Document Info</span>
-              </Button>
-            </HoverCardTrigger>
-            <HoverCardContent
-              side="top"
-              className="bg-popover border border-popover rounded-md shadow-sm p-1 z-100"
-            >
-              {Object.entries(getMediaInfo()).map(([label, value]) => {
-                return (
-                  <div key={label} className="grid grid-cols-3 grid-rows-auto gap-0">
-                    <div className="text-xs text-popover-foreground font-semibold">{label}:</div>
-                    <div className="text-xs text-popover-foreground col-span-2">{value}</div>
-                  </div>
-                )
-              })}
-            </HoverCardContent>
-          </HoverCard>
-        </div>
-        <div className="w-32 shrink-0 overflow-hidden rounded-md shadow-md border bg-neutral-100 flex items-center justify-center min-h-40">
-          <Document file={url} loading={<FileText className="text-neutral-400 animate-pulse" />}>
-            <Page
-              pageNumber={1}
-              width={128}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-            />
-          </Document>
-        </div>
-        <div className="flex flex-col text-center sm:text-left">
-          <div className="flex flex-row w-full">
-            <h3 className="text-lg font-semibold text-foreground mb-1">{alt || filename}</h3>
+    return (
+      <>
+        <div className="relative flex flex-col sm:flex-row items-center gap-6 p-6 border rounded-xl shadow-sm bg-card max-w-2xl w-full">
+          <div className="absolute top-2 right-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                  <Info className="h-4 w-4 text-muted-foreground" />
+                  <span className="sr-only">Document Information</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-80 bg-popover text-popover-foreground border border-popover grid grid-cols-[auto_1fr] gap-0 p-1">
+                {Object.entries(getMediaInfo(props)).map(([label, value]) => {
+                  return (
+                    <React.Fragment key={label}>
+                      <div className="text-xs font-semibold whitespace-nowrap">{label}:</div>
+                      <div className="text-xs whitespace-normal wrap-break-word">{value}</div>
+                    </React.Fragment>
+                  )
+                })}
+                <TooltipArrow className="fill-popover" />
+              </TooltipContent>
+            </Tooltip>
           </div>
-          <Button onClick={handleOpen} className="w-full sm:w-auto self-center sm:self-start">
-            Open
-          </Button>
+          <div className="relative w-32 shrink-0 overflow-hidden rounded-md shadow-md border bg-neutral-100 flex items-center justify-center min-h-40">
+            {thumbnailURL ? (
+              <Image
+                src={thumbnailURL}
+                alt={`Cover for ${title}`}
+                fill
+                sizes="128px"
+                className="object-cover"
+              />
+            ) : (
+              // Fallback icon
+              <FileText className="text-neutral-400 w-12 h-12" />
+            )}
+          </div>
+          <div className="flex flex-col text-center sm:text-left">
+            <div className="flex flex-row w-full">
+              <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
+            </div>
+            <Button onClick={handleOpen} className="w-full sm:w-auto self-center sm:self-start">
+              Open
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <div
-        popover="auto"
-        ref={popoverRef}
-        className="fixed inset-0 w-screen h-screen m-0 p-0 bg-neutral-900/95 backdrop:bg-black/80 border-none outline-none transition-opacity duration-300"
-      >
-        {isPopoverOpen && <FlipbookPopoverContent media={media} onClose={handleClose} />}
-      </div>
-    </>
-  )
+        <div
+          popover="auto"
+          ref={popoverRef}
+          className="fixed inset-0 w-screen h-screen m-0 p-0 bg-neutral-900/95 backdrop:bg-black/80 border-none outline-none transition-opacity duration-300"
+        >
+          {isPopoverOpen && <FlipbookPopoverContent media={resource} onClose={handleClose} />}
+        </div>
+      </>
+    )
+  }
 }

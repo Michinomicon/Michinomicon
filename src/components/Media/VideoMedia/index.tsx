@@ -1,14 +1,20 @@
 'use client'
 
 import { cn } from '@/utilities/ui'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 
-import type { Props as MediaProps } from '../types'
+import type { VideoMediaProps } from '../types'
 
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
-export const VideoMedia: React.FC<MediaProps> = (props) => {
+export const VideoMedia: React.FC<VideoMediaProps> = (props) => {
   const { onClick, resource, videoClassName } = props
+
+  const fileUrl = useMemo(() => {
+    if (resource && typeof resource === 'object') {
+      return resource.url
+    }
+  }, [resource])
 
   const videoRef = useRef<HTMLVideoElement>(null)
   // const [showFallback] = useState<boolean>()
@@ -24,20 +30,21 @@ export const VideoMedia: React.FC<MediaProps> = (props) => {
   }, [])
 
   if (resource && typeof resource === 'object') {
-    const { filename } = resource
+    const { updatedAt } = resource
+    const videoSrc = fileUrl || getMediaUrl(fileUrl, updatedAt)
 
     return (
       <video
-        autoPlay
+        autoPlay={false}
         className={cn(videoClassName)}
-        controls={false}
-        loop
-        muted
+        controls={true}
+        loop={false}
+        muted={true}
         onClick={onClick}
         playsInline
         ref={videoRef}
       >
-        <source src={getMediaUrl(`/media/${filename}`)} />
+        <source src={videoSrc} />
       </video>
     )
   }
