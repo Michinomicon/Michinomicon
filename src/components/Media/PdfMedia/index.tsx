@@ -27,20 +27,22 @@ import Image from 'next/image'
 import { Media } from '@/payload-types'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { TooltipArrow } from '@radix-ui/react-tooltip'
+import { formatFileSize } from '@/utilities/formatFileSize'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
-type ActivePageRange = { start: number | null; end: number | null }
+type ActivePageRange = { start: number | null; end?: number | null }
 
-const OVERSHOOT = 20 // Zoom and Pan Overshoot buffer percentage.
+const OVERSHOOT = 30 // Zoom and Pan Overshoot buffer percentage.
 const ZOOM_AND_PAN_SCALE_FACTOR = 1.5 // zoom strength
-const SAFE_X = 128 // Total horizontal padding around PDF flipbook.
-const SAFE_Y = 240 // Total vertical padding around PDF flipbook.
+const SAFE_X = 80 //128 // Total horizontal padding around PDF flipbook.
+const SAFE_Y = 180 //240 // Total vertical padding around PDF flipbook.
 const MIN_WIDTH_SAFEGUARD = 200
 
-const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = ({
+const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void; isOpen: boolean }> = ({
   media,
   onClose,
+  isOpen,
 }) => {
   const [numPages, setNumPages] = useState<number | null>(null)
   const [renderedPages, setRenderedPages] = useState<number>(0)
@@ -54,6 +56,8 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
   const pageHeight = pageWidth * 1.4142
 
   const [activePages, setActivePages] = useState<ActivePageRange>({ start: null, end: null })
+  const activePageRangeRef = useRef<ActivePageRange>({ start: 0, end: null })
+
   const [isZoomMode, setIsZoomMode] = useState(false)
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50, isHovering: false })
 
@@ -65,6 +69,49 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
     return media.url
   }, [media])
 
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!flipBookInstance.current || !isOpen) {
+        console.debug(`ingoring keyboard events: `, { isOpen: isOpen })
+        return
+      }
+
+      if (e.ctrlKey && e.key === 'z') console.debug(`PDF FLIPBOOK: Pressed Key ${e.key}`)
+
+      switch (e.key) {
+        case 'ArrowRight':
+          if (flipBookInstance.current.isLastPage()) {
+            console.debug(`Pressed next page on last page, jumping to start`)
+            flipBookInstance.current.turnPage(0)
+          } else {
+            flipBookInstance.current.turnPage('forward')
+          }
+          break
+        case 'ArrowLeft':
+          if (!flipBookInstance.current.isFirstPage()) {
+            flipBookInstance.current.turnPage('back')
+          }
+          break
+        case 'z':
+          if (e.ctrlKey) {
+            console.debug(`Pressed CTRL+Z => Toggle Zoom Mode`)
+            setIsZoomMode(!isZoomMode)
+          }
+          break
+        // More key bindings go here
+        default:
+          break
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isOpen, isZoomMode])
+
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
@@ -72,27 +119,35 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
     const { width: containerWidth } = container.getBoundingClientRect()
 
     const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { height: entryHeight } = entry.contentRect
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
+      resizeTimeoutRef.current = setTimeout(() => {
+        for (const entry of entries) {
+          const { height: entryHeight } = entry.contentRect
 
-        const maxAvailableWidth = (containerWidth - SAFE_X) / 2
-        const maxAvailableHeightBasedWidth = (entryHeight - SAFE_Y) / 1.4142
-        const maxPageWidth = (window.innerWidth - window.innerWidth * 0.2) / 2
+          if (containerWidth === 0 || entryHeight === 0) return
 
-        const calculatedWidth = Math.min(
-          maxAvailableWidth,
-          maxAvailableHeightBasedWidth,
-          maxPageWidth,
-        )
+          const maxAvailableWidth = (containerWidth - SAFE_X) / 2
+          const maxAvailableHeightBasedWidth = (entryHeight - SAFE_Y) / 1.4142
+          const maxPageWidth = (window.innerWidth - window.innerWidth * 0.2) / 2
 
-        const finalPageWidth = Math.max(calculatedWidth, MIN_WIDTH_SAFEGUARD)
+          const calculatedWidth = Math.min(
+            maxAvailableWidth,
+            maxAvailableHeightBasedWidth,
+            maxPageWidth,
+          )
 
-        setPageWidth(finalPageWidth)
-      }
+          const finalPageWidth = Math.max(calculatedWidth, MIN_WIDTH_SAFEGUARD)
+
+          setPageWidth(finalPageWidth)
+        }
+      }, 150)
     })
 
     observer.observe(container)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
+    }
   }, [])
 
   useEffect(() => {
@@ -101,9 +156,10 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
 
     const { numPages } = documentProxy
     setNumPages(numPages)
-    setActivePages({ start: 0, end: null })
 
     if (numPages !== null && numPages > 0 && renderedPages === numPages) {
+      setActivePages(activePageRangeRef.current)
+      console.debug(`all pages rendered. `, activePageRangeRef.current)
       setAllPagesRendered(true)
     }
   }, [isFileLoaded, renderedPages])
@@ -124,51 +180,72 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
         const flipBook = flipBookInstance.current
         if (!flipBook) return
 
-        const [pageRangeStart, pageRangeEnd] = flipBook.getActivePages() ?? [null, null]
-        const pageRange = { start: pageRangeStart ?? null, end: pageRangeEnd ?? null }
+        // setIsFirstPageActive(flipBook.isFirstPage())
+        // setIsLastPageActive(flipBook.isLastPage())
+        const [pageRangeStart, pageRangeEnd] = flipBook.getActivePages()
 
-        setActivePages(pageRange)
+        const pageRange = { start: pageRangeStart, end: pageRangeEnd }
+        activePageRangeRef.current = pageRange
+
+        console.debug(`onPageTurn`, activePageRangeRef.current)
+        setActivePages(activePageRangeRef.current)
 
         if (pageRange.start === null && pageRange.end === null) {
+          console.debug(`onPageTurn => Force Page 1`, activePageRangeRef.current)
           flipBook.turnPage(1)
         }
       }
 
       const options: FlipBookOptions = {
-        nextButton: document.getElementById('flipbookNextButton'),
-        previousButton: document.getElementById('flipbookPrevButton'),
         canClose: true,
-        arrowKeys: true,
-        initialActivePage: 0,
+        arrowKeys: false,
+        initialActivePage: activePageRangeRef.current.start ?? 0,
         onPageTurn: onPageTurn,
-        initialCall: true,
+        initialCall: false,
         width: `${pageWidth * 2}px`,
         height: `${pageHeight}px`,
       }
 
+      console.debug(`file is loaded && all pages rendered. `, activePageRangeRef.current)
       flipBookInstance.current = new FlipBook('pdfFlipbookContainer', options)
+
+      return () => {
+        if (flipBookInstance.current) {
+          flipBookInstance.current = null
+          console.debug(`removed flipbook instance`)
+        }
+      }
     }
   }, [allPagesRendered, isFileLoaded, pageHeight, pageWidth])
 
   const getPageNavigationStatus = (pageRange: ActivePageRange, numPages: number | null) => {
-    const pageRangeStart = pageRange.start ? pageRange.start + 1 : 1
-    const pageRangeEnd = pageRange.end ? ` | ${pageRange.end + 1}` : ''
-    return (
-      (!!numPages &&
-        numPages >= 0 &&
-        `Page${pageRange.end ? 's' : ''} ${pageRangeStart}${pageRangeEnd} of ${numPages}`) ||
-      ''
-    )
+    const { start, end } = pageRange
+
+    if (start === null || !numPages || numPages <= 0) {
+      return ''
+    }
+
+    if (start <= 0) {
+      return `Front Cover | ${numPages} Pages`
+    }
+
+    if (start + 1 === numPages) {
+      return `Back Cover | ${numPages} Pages`
+    }
+
+    return `Page${end ? 's' : ''} ${start}${end ? ` | ${end}` : ''} of ${numPages}`
   }
 
   const getDocumentLoadingProgress = () => {
-    const { loaded, total } = loadingProgress
+    const { loaded, total }: OnLoadProgressArgs = loadingProgress
     const progress = total > 0 && loaded < total ? Math.max((loaded / total) * 100, 0) : 0
     return (
       <Field className="flex justify-center items-center py-6 h-full w-xl">
         <FieldLabel htmlFor="progress-loading">
-          <span>Loading</span>
-          <span className="ml-auto">{progress}%</span>
+          <span>
+            Loading {formatFileSize(loaded)} of {formatFileSize(total)}{' '}
+          </span>
+          <span className="ml-auto">{progress.toFixed(0)}%</span>
         </FieldLabel>
         <Progress value={progress} id="progress-loading" />
       </Field>
@@ -176,18 +253,19 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
   }
 
   const getPageRenderingProgress = () => {
-    const progress = Math.max(renderedPages, 0)
+    const rendered = Math.max(renderedPages, 0)
     const max = Math.max(numPages ?? 0)
+    const progress = max > 0 && rendered < max ? Math.max((rendered / max) * 100, 0) : 0
     return (
       <div className="flex items-center justify-center w-full h-full">
         <Field className="flex justify-center items-center py-6 h-full w-xl">
           <FieldLabel htmlFor="progress-rendering">
-            <span>Rendering</span>
-            <span className="ml-auto">
-              Page {progress} of {max}
+            <span>
+              Rendering page {rendered} of {max}
             </span>
+            <span className="ml-auto">{progress.toFixed(0)}%</span>
           </FieldLabel>
-          <Progress value={progress} max={max} id="progress-rendering" />
+          <Progress value={progress} id="progress-rendering" />
         </Field>
       </div>
     )
@@ -219,17 +297,40 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
     setLoadingProgress(loadingProgress)
   }
 
+  const previousPage: React.MouseEventHandler<HTMLButtonElement> = (_event: React.MouseEvent) => {
+    if (!flipBookInstance.current) {
+      console.debug(`clicked previous page, but there is no flipbook instance`)
+      return
+    }
+    console.debug(`clicked previous page,`, activePageRangeRef.current)
+    flipBookInstance.current.turnPage('back')
+  }
+
+  const nextPage: React.MouseEventHandler<HTMLButtonElement> = (_event: React.MouseEvent) => {
+    if (!flipBookInstance.current) {
+      console.debug(`clicked next, but there is no flipbook instance`)
+      return
+    }
+    console.debug(`clicked next page,`, activePageRangeRef.current)
+    flipBookInstance.current.turnPage('forward')
+  }
+
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full flex flex-col items-center pt-20 pb-10 px-8"
+      className="relative w-full h-full flex flex-col items-center pt-10 pb-10 px-8 bg-background"
     >
       <div
         id="pdfDocumentControls"
         className="absolute bottom-4 z-10 w-full flex justify-center gap-4 px-4"
       >
         <ButtonGroup orientation="horizontal">
-          <Button variant="outline" id="flipbookPrevButton" disabled={activePages.start === 0}>
+          <Button
+            variant="outline"
+            id="flipbookPrevButton"
+            onClick={previousPage}
+            disabled={activePages.start === 0 || isZoomMode}
+          >
             <ChevronLeft />
           </Button>
           <Button variant="outline" className="pointer-events-none">
@@ -237,7 +338,12 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
               {getPageNavigationStatus(activePages, numPages)}
             </span>
           </Button>
-          <Button variant="outline" id="flipbookNextButton">
+          <Button
+            variant="outline"
+            id="flipbookNextButton"
+            onClick={nextPage}
+            disabled={isZoomMode}
+          >
             <ChevronRight />
           </Button>
         </ButtonGroup>
@@ -260,7 +366,7 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
 
       <div
         id="pdfDocumentContainer"
-        className="flex items-center justify-center w-full h-full mt-20 mb-10"
+        className="flex items-center justify-center w-full h-full mt-1 mb-10 border border-background"
       >
         <Document
           file={file}
@@ -274,17 +380,19 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
             <div
               id="flipbookOverflowContainer"
               className={cn(
-                'relative transition-all',
-                isZoomMode ? 'cursor-zoom-in overflow-hidden ' : 'cursor-auto',
+                'relative transition-all border w-full h-full bg-card',
+                isZoomMode
+                  ? 'cursor-zoom-in overflow-hidden outline-2 outline-accent outline-offset-8'
+                  : 'cursor-auto',
               )}
-              style={{ width: pageWidth * 2, height: pageHeight }}
+              style={{ width: 100 + pageWidth * 2, height: 100 + pageHeight }}
               onMouseMove={handleZoomAndPanMouseMove}
               onMouseEnter={handleZoomAndPanMouseEnter}
               onMouseLeave={handleZoomAndPanMouseLeave}
             >
               <div
                 id="zoomAndPanLayer"
-                className="w-full h-full ease-out transition-transform duration-100 will-change-transform"
+                className="w-full h-full ease-out transition-transform duration-100 will-change-transform bg-card"
                 style={{
                   transform:
                     isZoomMode && zoomPos.isHovering
@@ -296,8 +404,10 @@ const FlipbookPopoverContent: React.FC<{ media: Media; onClose: () => void }> = 
                 {!allPagesRendered && getPageRenderingProgress()}
 
                 <div
-                  className="c-flipbook w-full h-full absolute top-0 left-0"
+                  className="c-flipbook w-full h-full absolute"
+                  // t-0 l-0
                   id="pdfFlipbookContainer"
+                  style={{ top: 50, left: 50 }}
                   hidden={allPagesRendered ? false : true}
                 >
                   {Array.from(new Array(numPages), (_, index) => (
@@ -331,14 +441,20 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
+  // Track opened state to minimise re-rendering the PDF
+  const [hasOpened, setHasOpened] = useState(false)
+
+  // track the open state without triggering re-renders
+  const isPopoverOpenRef = useRef(false)
+
   useEffect(() => {
     const popover = popoverRef.current
     if (!popover) return
 
     const handleToggle = (e: ToggleEvent) => {
       const isOpenState = e.newState === 'open'
+      isPopoverOpenRef.current = isOpenState
       setIsPopoverOpen(isOpenState)
-
       document.body.style.overflow = isOpenState ? 'hidden' : ''
     }
 
@@ -349,7 +465,31 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
     }
   }, [])
 
+  useEffect(() => {
+    const handleOtherFlipbookOpened = (e: Event) => {
+      const customEvent = e as CustomEvent<{ url: string }>
+
+      const { url } = isPayloadMedia(resource) ? resource : { url: '' }
+
+      // If a different flipbook opens while this one is closed,
+      // then discard the popover for this one to free up memory
+      if (customEvent.detail.url !== url && !isPopoverOpenRef.current) {
+        setHasOpened(false)
+      }
+    }
+
+    // Listen for events from other flipbooks
+    window.addEventListener('flipbook-opened', handleOtherFlipbookOpened)
+
+    return () => {
+      window.removeEventListener('flipbook-opened', handleOtherFlipbookOpened)
+    }
+  }, [resource])
+
   const handleOpen = () => {
+    setHasOpened(true)
+    const { url } = isPayloadMedia(resource) ? resource : { url: '' }
+    window.dispatchEvent(new CustomEvent('flipbook-opened', { detail: { url } }))
     popoverRef.current?.showPopover()
   }
 
@@ -413,7 +553,9 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
           ref={popoverRef}
           className="fixed inset-0 w-screen h-screen m-0 p-0 bg-neutral-900/95 backdrop:bg-black/80 border-none outline-none transition-opacity duration-300"
         >
-          {isPopoverOpen && <FlipbookPopoverContent media={resource} onClose={handleClose} />}
+          {hasOpened && (
+            <FlipbookPopoverContent media={resource} onClose={handleClose} isOpen={isPopoverOpen} />
+          )}
         </div>
       </>
     )
