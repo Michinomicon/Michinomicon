@@ -85,6 +85,7 @@ jobs:
           cp -r public/* .next/standalone/public/
           cp -r scripts/* .next/standalone/scripts/
           cp -r .next/static/* .next/standalone/.next/static/
+          cp -a node_modules/pdfjs-dist .next/standalone/node_modules/
 
       - name: Test Network Connectivity
         run: |
