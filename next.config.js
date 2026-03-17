@@ -10,19 +10,23 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL
 const nextConfig = {
   images: {
     remotePatterns: [
-      ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
+      ...[NEXT_PUBLIC_SERVER_URL].map((item) => {
         const url = new URL(item)
 
         return {
           hostname: url.hostname,
           protocol: url.protocol.replace(':', ''),
+          port: url.port || '',
         }
       }),
     ],
   },
-  webpack: (webpackConfig) => {
-    webpackConfig.resolve.alias.canvas = false
-    webpackConfig.resolve.alias.encoding = false
+  webpack: (webpackConfig, { isServer }) => {
+    if (!isServer) {
+      webpackConfig.resolve.alias.canvas = false
+      webpackConfig.resolve.alias.encoding = false
+    }
+
     webpackConfig.resolve.extensionAlias = {
       '.cjs': ['.cts', '.cjs'],
       '.js': ['.ts', '.tsx', '.js', '.jsx'],
@@ -37,6 +41,7 @@ const nextConfig = {
   outputFileTracingIncludes: {
     '/': ['ecosystem.config.cjs'],
   },
+  serverExternalPackages: ['pdf-img-convert', 'pdfjs-dist', 'canvas'],
   transpilePackages: ['react-pdf'],
 }
 
