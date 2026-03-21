@@ -128,4 +128,6 @@
   --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color) l c calc(h + 180));
   --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) l c calc(h + 180));
   --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) l c calc(h + 180));
+
+  --radius: 0.625rem;
 }

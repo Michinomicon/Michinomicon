@@ -7,6 +7,7 @@ import { MIMEType } from 'util'
 export interface BaseMediaProps {
   alt?: string
   className?: string
+  description?: string
   htmlElement?: ElementType | null
   onClick?: () => void
   onLoad?: () => void

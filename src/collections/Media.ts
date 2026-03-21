@@ -49,7 +49,7 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     staticDir: process.env.PAYLOAD_MEDIA_DIR || path.resolve(dirname, `../../shared-media`),
-    mimeTypes: ['image/*', 'video/*', 'application/pdf'],
+    mimeTypes: ['image/*', 'video/*', 'audio/*', 'application/pdf'],
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     imageSizes: [

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React from 'react'
 import { ImageMedia } from './ImageMedia'
 import { VideoMedia } from './VideoMedia'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
@@ -11,6 +11,8 @@ import {
   isImageMIMEType,
   isVideoMIMEType,
 } from './types'
+import RichText from '@/components/RichText'
+import { cn } from '@/lib/utils'
 
 export const Media: React.FC<MediaProps> = (props) => {
   const {
@@ -18,6 +20,7 @@ export const Media: React.FC<MediaProps> = (props) => {
     className,
     htmlElement = 'div',
     resource,
+    description,
     // Image
     fill,
     imgClassName,
@@ -33,7 +36,7 @@ export const Media: React.FC<MediaProps> = (props) => {
     ...baseProps
   } = props
 
-  const Tag = htmlElement || Fragment
+  // const Tag = htmlElement || Fragment
   const wrapperProps = htmlElement !== null ? { className } : {}
 
   if (isPayloadMedia(resource)) {
@@ -45,9 +48,14 @@ export const Media: React.FC<MediaProps> = (props) => {
         ref: baseProps.ref as React.Ref<HTMLVideoElement>,
       }
       return (
-        <Tag {...wrapperProps}>
+        <React.Fragment {...wrapperProps}>
           <VideoMedia {...videoProps} />
-        </Tag>
+          {resource.caption && (
+            <div className={cn('')}>
+              <RichText data={resource.caption} enableGutter={false} />
+            </div>
+          )}
+        </React.Fragment>
       )
     }
 
@@ -65,17 +73,22 @@ export const Media: React.FC<MediaProps> = (props) => {
         ref: baseProps.ref as React.Ref<HTMLImageElement>,
       }
       return (
-        <Tag {...wrapperProps}>
+        <React.Fragment {...wrapperProps}>
           <ImageMedia {...imageProps} />
-        </Tag>
+        </React.Fragment>
       )
     }
 
     if (isPdfMIMEType(resource.mimeType)) {
       return (
-        <Tag {...wrapperProps}>
-          <PdfMediaWrapper resource={resource} title={title} {...baseProps} />
-        </Tag>
+        <React.Fragment {...wrapperProps}>
+          <PdfMediaWrapper
+            resource={resource}
+            title={title}
+            description={description}
+            {...baseProps}
+          />
+        </React.Fragment>
       )
     }
   }

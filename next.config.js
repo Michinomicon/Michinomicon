@@ -42,7 +42,7 @@ const nextConfig = {
     '/': ['ecosystem.config.cjs'],
   },
   serverExternalPackages: ['pdf-img-convert', 'pdfjs-dist', 'canvas'],
-  transpilePackages: ['react-pdf'],
+  transpilePackages: ['react-pdf', 'flipbook-js'],
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

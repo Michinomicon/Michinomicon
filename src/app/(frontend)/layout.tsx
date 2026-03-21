@@ -56,7 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
 
           <Header />
-          <div id="mainContent" className="bg-background m-16 z-0">
+          <div id="mainContent" className="m-16 z-0">
             {children}
           </div>
           <Footer />
