@@ -5,7 +5,8 @@ import type { Media as MediaType } from '@/payload-types'
 import { MIMEType } from 'util'
 
 export interface BaseMediaProps {
-  alt?: string
+  url?: string
+  title?: string
   className?: string
   description?: string
   htmlElement?: ElementType | null
@@ -15,6 +16,7 @@ export interface BaseMediaProps {
 }
 
 export interface ImageMediaProps extends BaseMediaProps {
+  alt?: string
   fill?: boolean
   imgClassName?: string
   loading?: 'lazy' | 'eager'
@@ -25,7 +27,12 @@ export interface ImageMediaProps extends BaseMediaProps {
   src?: StaticImageData | string
 }
 
+export interface AudioMediaProps extends BaseMediaProps {
+  audioClassName?: string
+}
+
 export interface VideoMediaProps extends BaseMediaProps {
+  alt?: string
   ref?: Ref<HTMLVideoElement | null>
   videoClassName?: string
 }
@@ -37,22 +44,73 @@ export interface PdfMediaProps extends BaseMediaProps {
 export type MediaProps = BaseMediaProps &
   Partial<Omit<ImageMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<VideoMediaProps, keyof BaseMediaProps>> &
+  Partial<Omit<AudioMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<PdfMediaProps, keyof BaseMediaProps>> & {
     ref?: Ref<HTMLImageElement | HTMLVideoElement | HTMLDivElement | null>
   }
 
-export const isPayloadMedia = (resource: BaseMediaProps['resource']): resource is MediaType => {
-  return typeof resource === 'object' && resource !== null && 'mimeType' in resource
+export function isPayloadMedia(resource: unknown): resource is MediaType {
+  return (
+    resource !== undefined &&
+    resource !== null &&
+    typeof resource === 'object' &&
+    'mimeType' in resource
+  )
+}
+
+export const getMIMEType = (mimeType: unknown) => {
+  try {
+    if (mimeType !== null && mimeType !== undefined) {
+      return new MIMEType(mimeType)
+    }
+  } catch (_err) {
+    return null
+  }
+  return null
 }
 
 export const isImageMIMEType = (mimeType: unknown) => {
-  return new MIMEType(String(mimeType)).type === 'image'
+  try {
+    if (mimeType !== null && mimeType !== undefined) {
+      return new MIMEType(mimeType).type === 'image'
+    }
+  } catch (_err) {
+    return false
+  }
+  return false
+}
+
+export const isAudioMIMEType = (mimeType: unknown) => {
+  try {
+    if (mimeType !== null && mimeType !== undefined) {
+      return new MIMEType(String(mimeType)).type === 'audio'
+    }
+  } catch (_err) {
+    return false
+  }
+  return false
 }
 
 export const isVideoMIMEType = (mimeType: unknown) => {
-  return new MIMEType(String(mimeType)).type === 'video'
+  try {
+    if (mimeType !== null && mimeType !== undefined) {
+      return new MIMEType(String(mimeType)).type === 'video'
+    }
+  } catch (_err) {
+    return false
+  }
+  return false
 }
+
 export const isPdfMIMEType = (mimeType: unknown) => {
-  const { type, subtype } = new MIMEType(String(mimeType))
-  return type === 'application' && subtype === 'pdf'
+  try {
+    if (mimeType !== null && mimeType !== undefined) {
+      const mime = new MIMEType(String(mimeType))
+      const { type, subtype } = mime
+      return type === 'application' && subtype === 'pdf'
+    }
+  } catch (_err) {
+    return false
+  }
+  return false
 }

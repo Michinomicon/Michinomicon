@@ -24,7 +24,6 @@ import {
 import { cn } from '@/lib/utils'
 import { Field } from '@/components/ui/field'
 import { isPayloadMedia, PdfMediaProps } from '../types'
-import { getMediaInfo } from '@/utilities/getMediaInfo'
 import Image from 'next/image'
 import { Media } from '@/payload-types'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -39,6 +38,7 @@ import {
 import { FloatingLabelSlider } from '@/components/ui/slider'
 import { asFlipbookSlelector } from './flipbookUtils'
 import TrackLoader from '../AudioTrackLoader'
+import { getMediaResourceInfo } from '@/utilities/getMediaInfo'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
@@ -477,7 +477,9 @@ const FlipbookPopoverContent: React.FC<{
                   orientation={'horizontal'}
                   className="mt-4 mb-2 w-full min-h-1.5 cursor-grab active:cursor-grabbing border-2 border-solid border-accent"
                   aria-label="Page Navigation"
-                  valueLabel={() => getPreviewPageStateDescription(sliderValue[0], numPages)}
+                  valueLabelFormatter={() =>
+                    getPreviewPageStateDescription(sliderValue[0], numPages)
+                  }
                 />
               </Field>
             </div>
@@ -560,7 +562,7 @@ const FlipbookPopoverContent: React.FC<{
               </ButtonGroup>
               <ButtonGroupSeparator />
               <ButtonGroup>
-                <TrackLoader audioUrl={''} audioTitle={'audioTitle'} />
+                <TrackLoader url={'http://example.com/audio'} title={'audioTitle'} />
               </ButtonGroup>
             </ButtonGroup>
           </div>
@@ -742,7 +744,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
                 </Button>
               </TooltipTrigger>
               <TooltipContent className="max-w-80 bg-popover text-popover-foreground border border-popover grid grid-cols-[auto_1fr] gap-0 p-1">
-                {Object.entries(getMediaInfo(props)).map(([label, value]) => {
+                {Object.entries(getMediaResourceInfo(props)).map(([label, value]) => {
                   return (
                     <React.Fragment key={label}>
                       <div className="text-xs font-semibold whitespace-nowrap">{label}:</div>

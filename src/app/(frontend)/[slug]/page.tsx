@@ -67,7 +67,7 @@ export default async function Page({ params: paramsPromise }: Args) {
   const { hero, layout } = page
 
   return (
-    <article className="mx-auto px-6 py-12 z-1">
+    <article className="bg-card text-card-foreground mx-auto px-6 py-12 z-1">
       <PageClient />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound url={url} />

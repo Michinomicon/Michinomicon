@@ -16,7 +16,7 @@ import { draftMode } from 'next/headers'
 import './globals.css'
 
 import { getServerSideURL } from '@/utilities/getURL'
-import InteractiveBackground from '@/components/InteractiveBackground'
+// import InteractiveBackground from '@/components/InteractiveBackground'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
@@ -34,7 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="theme-color" content="#ffffff" />
       </head>
       <body>
-        <InteractiveBackground />
+        {/* <InteractiveBackground /> */}
         <Providers>
           <AdminBar
             adminBarProps={{

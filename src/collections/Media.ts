@@ -9,6 +9,8 @@ import path from 'path'
 import fs from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { hasAccess } from '@/utilities/accessFunctions'
+import { IAudioMetadata } from 'music-metadata'
+import sharp from 'sharp'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -18,6 +20,7 @@ export const Media: CollectionConfig = {
   folders: true,
   admin: {
     group: 'Globals',
+    useAsTitle: 'title',
   },
   disableDuplicate: true,
   access: {
@@ -31,11 +34,42 @@ export const Media: CollectionConfig = {
       name: 'title',
       type: 'text',
       required: true,
+      hooks: {
+        beforeValidate: [
+          ({ value, req, data }) => {
+            if (value) return value
+            // new upload ? grab the filename from the request.
+            if (req?.file?.name) {
+              // Strip file extension
+              return req.file.name.replace(/\.[^/.]+$/, '')
+            }
+            // use the existing filename if no title is present.
+            if (data?.filename) {
+              return data.filename.replace(/\.[^/.]+$/, '')
+            }
+            return value
+          },
+        ],
+      },
     },
     {
       name: 'alt',
       type: 'text',
-      //required: true,
+      admin: {
+        condition: (data) => data?.mimeType?.startsWith('image/'),
+      },
+      hooks: {
+        beforeChange: [
+          ({ value, siblingData }) => {
+            // If the alt field is empty, but a title exists, adopt the title
+            if (!value && siblingData?.title) {
+              return siblingData.title
+            }
+            // else, keep existing
+            return value
+          },
+        ],
+      },
     },
     {
       name: 'caption',
@@ -45,6 +79,137 @@ export const Media: CollectionConfig = {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
       }),
+      admin: {
+        condition: (data) => data?.mimeType?.startsWith('image/'),
+      },
+    },
+    // --- SHARED IMAGE/VIDEO METADATA FIELDS ---
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'width',
+          type: 'number',
+          admin: {
+            readOnly: true,
+            condition: (data) =>
+              data?.mimeType?.startsWith('image/') || data?.mimeType?.startsWith('video/'),
+          },
+        },
+        {
+          name: 'height',
+          type: 'number',
+          admin: {
+            readOnly: true,
+            condition: (data) =>
+              data?.mimeType?.startsWith('image/') || data?.mimeType?.startsWith('video/'),
+          },
+        },
+      ],
+    },
+    // --- SHARED AUDIO/VIDEO METADATA FIELDS ---
+    {
+      name: 'duration',
+      type: 'number',
+      admin: {
+        readOnly: true,
+        description: 'Duration in seconds',
+        condition: (data) =>
+          data?.mimeType?.startsWith('audio/') || data?.mimeType?.startsWith('video/'),
+      },
+    },
+
+    // --- AUDIO ONLY METADATA FIELDS ---
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'artist',
+          type: 'text',
+          admin: {
+            condition: (data) => data?.mimeType?.startsWith('audio/'),
+          },
+        },
+        {
+          name: 'album',
+          type: 'text',
+          admin: {
+            condition: (data) => data?.mimeType?.startsWith('audio/'),
+          },
+        },
+        {
+          name: 'artwork',
+          type: 'text',
+          admin: {
+            readOnly: true,
+            condition: (data) => data?.mimeType?.startsWith('audio/'),
+          },
+        },
+        {
+          name: 'images',
+          type: 'array',
+          fields: [
+            {
+              name: 'image',
+              type: 'text',
+              defaultValue: '',
+            },
+          ],
+          admin: {
+            readOnly: true,
+            condition: (data) => data?.mimeType?.startsWith('audio/'),
+          },
+        },
+        {
+          name: 'genre',
+          type: 'text',
+          admin: {
+            readOnly: true,
+            condition: (data) => data?.mimeType?.startsWith('audio/'),
+          },
+        },
+        {
+          name: 'live',
+          type: 'checkbox',
+          admin: {
+            readOnly: true,
+            condition: (data) => data?.mimeType?.startsWith('audio/'),
+          },
+        },
+      ],
+    },
+
+    // --- IMAGE ONLY METADATA FIELDS ---
+    {
+      type: 'row',
+      fields: [
+        {
+          name: 'format',
+          type: 'text',
+          admin: {
+            readOnly: true,
+            condition: (data) => data?.mimeType?.startsWith('image/'),
+          },
+        },
+        {
+          name: 'hasAlpha',
+          type: 'checkbox',
+          admin: {
+            readOnly: true,
+            condition: (data) => data?.mimeType?.startsWith('image/'),
+          },
+        },
+      ],
+    },
+
+    // --- VIDEO ONLY METADATA FIELDS ---
+    {
+      name: 'codec',
+      type: 'text',
+      admin: {
+        readOnly: true,
+        condition: (data) => data?.mimeType?.startsWith('video/'),
+      },
     },
   ],
   upload: {
@@ -125,9 +290,260 @@ export const Media: CollectionConfig = {
               console.error('Failed to generate PDF thumbnail:', error)
             }
           }
+
+          if (req.file.mimetype.startsWith('image/')) {
+            try {
+              const sharp = (await import('sharp')).default
+
+              // Read the image buffer
+              const metadata: sharp.Metadata = await sharp(req.file.data).metadata()
+
+              data.width = metadata.width || data.width
+              data.height = metadata.height || data.height
+              data.format = metadata.format || data.format
+              data.hasAlpha = metadata.hasAlpha || false
+            } catch (error) {
+              console.error('Failed to parse image metadata:', error)
+            }
+          }
+
+          if (req.file.mimetype.startsWith('audio/')) {
+            try {
+              const mm = await import('music-metadata')
+              const metadata: IAudioMetadata = await mm.parseBuffer(
+                req.file.data,
+                req.file.mimetype,
+              )
+
+              data.artist = metadata.common.artist || data.artist
+              data.album = metadata.common.album || data.album
+              data.duration = metadata.format.duration
+                ? Math.round(metadata.format.duration)
+                : data.duration
+              data.title = metadata.common.title || data.title
+              data.artwork = metadata.common.picture || data.images
+              data.images = metadata.common.picture || data.images
+              data.genre = metadata.common.genre || data.genre
+              data.live = false
+            } catch (error) {
+              console.error('Failed to parse audio metadata:', error)
+            }
+          }
         }
         return data
       },
     ],
   },
 }
+
+/* -------------------------- IMAGE METADATA TYPES --------------------------
+sharp.Metadata  = {
+  orientation: 0,
+  format: 'avif',
+  size: 0,
+  width: 0,
+  height: 0,
+  autoOrient: {
+    width: 0,
+    height: 0
+  },
+  space: 'b-w',
+  channels: 2,
+  depth: 'char',
+  density: 0,
+  chromaSubsampling: '',
+  isProgressive: false,
+  isPalette: false,
+  bitsPerSample: 0,
+  pages: 0,
+  pageHeight: 0,
+  loop: 0,
+  delay: [],
+  pagePrimary: 0,
+  hasProfile: false,
+  hasAlpha: false,
+  exif: undefined,
+  icc: undefined,
+  iptc: undefined,
+  xmp: undefined,
+  xmpAsString: '',
+  tifftagPhotoshop: undefined,
+  compression: 'av1',
+  background: {
+    r: 0,
+    g: 0,
+    b: 0
+  },
+  levels: [],
+  subifds: 0,
+  resolutionUnit: 'inch',
+  formatMagick: '',
+  comments: []
+}
+*/
+
+/* -------------------------- AUDIO METADATA TYPES --------------------------
+IAudioMetadata = {
+  common: {
+    //ICommonTagsResult
+    track: {
+      no: null,
+      of: null
+    },
+    disk: {
+      no: null,
+      of: null
+    },
+    year: 0,
+    title: '',
+    artist: '',
+    artists: [],
+    albumartist: '',
+    albumartists: [],
+    album: '',
+    date: '',
+    originaldate: '',
+    originalyear: 0,
+    releasedate: '',
+    comment: [],
+    genre: [],
+    picture: [],
+    composer: [],
+    lyrics: [],
+    albumsort: '',
+    titlesort: '',
+    work: '',
+    artistsort: '',
+    albumartistsort: '',
+    composersort: '',
+    lyricist: [],
+    writer: [],
+    conductor: [],
+    remixer: [],
+    arranger: [],
+    engineer: [],
+    publisher: [],
+    producer: [],
+    djmixer: [],
+    mixer: [],
+    technician: [],
+    label: [],
+    grouping: '',
+    subtitle: [],
+    description: [],
+    longDescription: '',
+    discsubtitle: [],
+    totaltracks: '',
+    totaldiscs: '',
+    movementTotal: 0,
+    compilation: false,
+    rating: [],
+    bpm: 0,
+    mood: '',
+    media: '',
+    catalognumber: [],
+    tvShow: '',
+    tvShowSort: '',
+    tvSeason: 0,
+    tvEpisode: 0,
+    tvEpisodeId: '',
+    tvNetwork: '',
+    podcast: false,
+    podcasturl: '',
+    releasestatus: '',
+    releasetype: [],
+    releasecountry: '',
+    script: '',
+    language: '',
+    copyright: '',
+    license: '',
+    encodedby: '',
+    encodersettings: '',
+    gapless: false,
+    barcode: '',
+    isrc: [],
+    asin: '',
+    musicbrainz_recordingid: '',
+    musicbrainz_trackid: '',
+    musicbrainz_albumid: '',
+    musicbrainz_artistid: [],
+    musicbrainz_albumartistid: [],
+    musicbrainz_releasegroupid: '',
+    musicbrainz_workid: '',
+    musicbrainz_trmid: '',
+    musicbrainz_discid: '',
+    acoustid_id: '',
+    acoustid_fingerprint: '',
+    musicip_puid: '',
+    musicip_fingerprint: '',
+    website: '',
+    'performer:instrument': [],
+    averageLevel: 0,
+    peakLevel: 0,
+    notes: [],
+    originalalbum: '',
+    originalartist: '',
+    discogs_artist_id: [],
+    discogs_release_id: 0,
+    discogs_label_id: 0,
+    discogs_master_release_id: 0,
+    discogs_votes: 0,
+    discogs_rating: 0,
+    replaygain_track_gain_ratio: 0,
+    replaygain_track_peak_ratio: 0,
+    replaygain_track_gain: IRatio,
+    replaygain_track_peak: IRatio,
+    replaygain_album_gain: IRatio,
+    replaygain_album_peak: IRatio,
+    replaygain_undo: {
+      leftChannel: 0,
+      rightChannel: 0
+    },
+    replaygain_track_minmax: [],
+    replaygain_album_minmax: [],
+    key: '',
+    category: [],
+    hdVideo: 0,
+    keywords: [],
+    movement: '',
+    movementIndex: {
+      no: null,
+      of: null
+    },
+    podcastId: '',
+    showMovement: false,
+    stik: 0,
+    playCounter: 0
+  },
+  format: {
+    // IFormat
+    trackInfo: [],
+    container: '',
+    tagTypes: [],
+    duration: 0,
+    bitrate: 0,
+    sampleRate: 0,
+    bitsPerSample: 0,
+    tool: '',
+    codec: '',
+    codecProfile: '',
+    lossless: false,
+    numberOfChannels: 0,
+    numberOfSamples: 0,
+    audioMD5: Uint8Array<ArrayBufferLike>,
+    chapters: [],
+    creationTime: Date,
+    modificationTime: Date,
+    trackGain: 0,
+    trackPeakLevel: 0,
+    albumGain: 0,
+    hasAudio: false,
+    hasVideo: false
+  },
+  native: {},
+  quality: {
+    // IQualityInformation
+    warnings: []
+  }
+};
+*/

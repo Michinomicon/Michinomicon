@@ -294,6 +294,26 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  width?: number | null;
+  height?: number | null;
+  /**
+   * Duration in seconds
+   */
+  duration?: number | null;
+  artist?: string | null;
+  album?: string | null;
+  artwork?: string | null;
+  images?:
+    | {
+        image?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  genre?: string | null;
+  live?: boolean | null;
+  format?: string | null;
+  hasAlpha?: boolean | null;
+  codec?: string | null;
   folder?: (string | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -302,8 +322,6 @@ export interface Media {
   filename?: string | null;
   mimeType?: string | null;
   filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
   sizes?: {
@@ -1288,6 +1306,23 @@ export interface MediaSelect<T extends boolean = true> {
   title?: T;
   alt?: T;
   caption?: T;
+  width?: T;
+  height?: T;
+  duration?: T;
+  artist?: T;
+  album?: T;
+  artwork?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  genre?: T;
+  live?: T;
+  format?: T;
+  hasAlpha?: T;
+  codec?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1296,8 +1331,6 @@ export interface MediaSelect<T extends boolean = true> {
   filename?: T;
   mimeType?: T;
   filesize?: T;
-  width?: T;
-  height?: T;
   focalX?: T;
   focalY?: T;
   sizes?:
