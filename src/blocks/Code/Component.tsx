@@ -14,7 +14,7 @@ type Props = CodeBlockProps & {
 
 export const CodeBlock: React.FC<Props> = ({ className, code, language }) => {
   return (
-    <div className={[className, 'not-prose'].filter(Boolean).join(' ')}>
+    <div className={[className, 'not-prose', 'code-block'].filter(Boolean).join(' ')}>
       <Code code={code} language={language} />
     </div>
   )

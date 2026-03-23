@@ -2,6 +2,7 @@ import React from 'react'
 import { HeaderThemeProvider } from './HeaderTheme'
 import { ThemeProvider } from './Theme'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { AudioTrackProvider } from './Audio'
 
 export const Providers: React.FC<{
   children: React.ReactNode
@@ -16,7 +17,7 @@ export const Providers: React.FC<{
     >
       <HeaderThemeProvider>
         <TooltipProvider delayDuration={800} skipDelayDuration={500}>
-          {children}
+          <AudioTrackProvider>{children}</AudioTrackProvider>
         </TooltipProvider>
       </HeaderThemeProvider>
     </ThemeProvider>

@@ -17,3 +17,76 @@
   /* object-fit ensures the aspect ratio is respected if the math is off by a pixel */
   object-fit: contain; 
 }
+
+/* override native flipbook-js hover animations */
+.c-flipbook-custom{
+  
+  .c-flipbook__page:nth-child(2n).is-active {
+      transform: rotateY(0deg) !important;
+  }
+
+  .c-flipbook__page.is-active:not(:hover) {
+    transform: rotateY(0deg) !important;
+}
+
+  .c-flipbook__page:nth-child(2n).is-active:hover {
+      transform: rotateY(0deg) !important;
+  }
+
+  .c-flipbook__page:nth-child(odd).is-active {
+      transform: rotateY(0deg) !important;
+  }
+
+  .c-flipbook__page:nth-child(odd).is-active:hover {
+      transform: rotateY(0deg) !important;
+  }
+  .c-flipbook__page:nth-child(odd).is-active:hover {
+      transform: rotateY(0deg) !important;
+  }
+
+
+  .c-flipbook__page.is-active:not(.hover-prev-active) {
+    transform: rotateY(0) !important;
+}
+
+  .c-flipbook__page.is-active:not(.hover-next-active) {
+    transform: rotateY(0) !important;
+}
+
+
+}
+
+/* IF .hover-prev-active show animations */
+.c-flipbook-custom.hover-prev-active {
+
+
+  .c-flipbook__page:nth-child(2n).is-active {
+      transform: rotateY(10deg)  !important;
+  }
+
+  .c-flipbook__page:nth-child(2n).is-active:hover {
+      transform: rotateY(15deg) !important;
+  }
+
+  .c-flipbook__page:nth-child(2n).is-active:hover {
+    transform: rotateY(5deg) !important;
+  }
+}
+
+/* IF .hover-next-active show animations */
+.c-flipbook-custom.hover-next-active {
+
+
+  .c-flipbook__page:nth-child(odd).is-active {
+      transform: rotateY(-10deg) !important;
+  }
+
+  .c-flipbook__page:nth-child(odd).is-active:hover {
+    transform: rotateY(-5deg) !important;
+  }
+
+  .c-flipbook__page:nth-child(odd).is-active:hover {
+      transform: rotateY(-15deg) !important;
+  }
+
+}

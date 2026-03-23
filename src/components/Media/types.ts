@@ -2,18 +2,23 @@ import type { StaticImageData } from 'next/image'
 import type { ElementType, Ref } from 'react'
 
 import type { Media as MediaType } from '@/payload-types'
-import { MIMEType } from 'util'
+
+export type MediaMetaData = { [key: string]: string }
 
 export interface BaseMediaProps {
-  alt?: string
+  url?: string
+  title?: string
   className?: string
+  description?: string
   htmlElement?: ElementType | null
   onClick?: () => void
   onLoad?: () => void
   resource?: MediaType | string | number | null
+  metadata?: MediaMetaData
 }
 
 export interface ImageMediaProps extends BaseMediaProps {
+  alt?: string
   fill?: boolean
   imgClassName?: string
   loading?: 'lazy' | 'eager'
@@ -24,7 +29,12 @@ export interface ImageMediaProps extends BaseMediaProps {
   src?: StaticImageData | string
 }
 
+export interface AudioMediaProps extends BaseMediaProps {
+  audioClassName?: string
+}
+
 export interface VideoMediaProps extends BaseMediaProps {
+  alt?: string
   ref?: Ref<HTMLVideoElement | null>
   videoClassName?: string
 }
@@ -36,22 +46,16 @@ export interface PdfMediaProps extends BaseMediaProps {
 export type MediaProps = BaseMediaProps &
   Partial<Omit<ImageMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<VideoMediaProps, keyof BaseMediaProps>> &
+  Partial<Omit<AudioMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<PdfMediaProps, keyof BaseMediaProps>> & {
     ref?: Ref<HTMLImageElement | HTMLVideoElement | HTMLDivElement | null>
   }
 
-export const isPayloadMedia = (resource: BaseMediaProps['resource']): resource is MediaType => {
-  return typeof resource === 'object' && resource !== null && 'mimeType' in resource
-}
-
-export const isImageMIMEType = (mimeType: unknown) => {
-  return new MIMEType(String(mimeType)).type === 'image'
-}
-
-export const isVideoMIMEType = (mimeType: unknown) => {
-  return new MIMEType(String(mimeType)).type === 'video'
-}
-export const isPdfMIMEType = (mimeType: unknown) => {
-  const { type, subtype } = new MIMEType(String(mimeType))
-  return type === 'application' && subtype === 'pdf'
+export function isPayloadMedia(resource: unknown): resource is MediaType {
+  return (
+    resource !== undefined &&
+    resource !== null &&
+    typeof resource === 'object' &&
+    'mimeType' in resource
+  )
 }

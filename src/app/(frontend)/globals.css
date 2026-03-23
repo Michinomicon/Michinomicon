@@ -4,20 +4,15 @@
 
 @custom-variant dark (&:is(.dark, .dark *, [data-mode="dark"], [data-mode="dark"] * ));
 
-/* @import 'flipbook-js/style.css'; */
-
-
 /* Styles for the .pdf flipbopok */
 @import './themes/pdf-flipbook.css';
-
-/* Default/Fallback colour theme */
-@import './themes/default.css';
 
 /* Eyes wallpaper */
 @import './themes/eyes-wallpaper.css';
 
 /* IMPORT CUSTOM THEMES HERE */
 @import './themes/fii-one.css';
+@import './themes/simple.css';
 @import './themes/purple.css';
 
 /* @import './themes/blue.css'; */
@@ -82,8 +77,6 @@
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
 
-  --border: 1px solid var(--theme-elevation-200);
-
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-normal: var(--tracking-normal);
@@ -92,85 +85,13 @@
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
 
-/* @theme inline {
-  --pattern-background-color: oklch(from var(--background) calc(l + 1) c h);
-  --pattern-primary-color: var(--color-violet-300);
-  --pattern-tertiary-color: var(--color-cyan-200);
-  --pattern-accent-color: var(--color-red-400);
-  --pattern-secondary-color: var(--color-orange-200);
-
-  --pattern-overlay-color: var(--background);
-  --pattern-overlay-opacity: 0;
-  --pattern-overlay-inactive-opacity: 0;
-  --pattern-transition-duration: 0.8s;
-  --pattern-transition-delay: 0.6s;
-
-  --pattern-outer-fill-color: var(--pattern-primary-color);
-  --pattern-pupil-fill-color: var(--pattern-accent-color);
-  --pattern-ring-fill-color: var(--pattern-secondary-color);
-  --pattern-tears-fill-color: var(--pattern-tertiary-color);
-
-  --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) calc(l - 0.1) c h);
-  --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color)calc(l - 0.1) c h);
-  --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) calc(l - 0.1) c h);
-  --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) calc(l - 0.1) c h);
-}
-
-@layer base {
-    .dark, [data-mode='dark']{
-    --pattern-background-color: oklch(from var(--pattern-background-color) calc(l - 1) c h);
-    --pattern-primary-color: oklch(from var(--pattern-primary-color) calc(l + 0.8) c h);
-    --pattern-tertiary-color: oklch(from var(--pattern-tertiary-color) calc(l + 0.6) c h);
-    --pattern-accent-color: oklch(from var(--pattern-accent-color) calc(l + 0.4) c h);
-    --pattern-secondary-color: oklch(from var(--pattern-secondary-color) calc(l + 0.2) c h);
-
-    --pattern-overlay-color: var(--background);
-    --pattern-overlay-opacity: 0.8;
-    --pattern-overlay-inactive-opacity: 0.8;
-
-    --pattern-transition-duration: 0.8s;
-    --pattern-transition-delay: 0.6s;
-
-    --pattern-outer-fill-color: var(--pattern-primary-color);
-    --pattern-pupil-fill-color: var(--pattern-accent-color);
-    --pattern-ring-fill-color: var(--pattern-secondary-color);
-    --pattern-tears-fill-color: var(--pattern-tertiary-color);
-
-    --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) l c calc(h + 180));
-    --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color) l c calc(h + 180));
-    --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) l c calc(h + 180));
-    --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) l c calc(h + 180));
-  }
-} */
-
-body {
-  letter-spacing: var(--tracking-normal);
-}
-
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
 @layer base {
   * {
-    @apply border-border outline-ring/50 rounded-4xl;
+    @apply border-border rounded-(--radius) outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground min-h-screen flex flex-col;
+    @apply bg-background text-foreground;
+    letter-spacing: var(--tracking-normal);
   }
 }
 
@@ -249,3 +170,57 @@ body {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+
+/** TEMPLATE FOR THEME VARIABLE FOR INTERACTIVE WALLPAPER */
+
+/* @theme inline {
+  --pattern-background-color: oklch(from var(--background) calc(l + 1) c h);
+  --pattern-primary-color: var(--color-violet-300);
+  --pattern-tertiary-color: var(--color-cyan-200);
+  --pattern-accent-color: var(--color-red-400);
+  --pattern-secondary-color: var(--color-orange-200);
+
+  --pattern-overlay-color: var(--background);
+  --pattern-overlay-opacity: 0;
+  --pattern-overlay-inactive-opacity: 0;
+  --pattern-transition-duration: 0.8s;
+  --pattern-transition-delay: 0.6s;
+
+  --pattern-outer-fill-color: var(--pattern-primary-color);
+  --pattern-pupil-fill-color: var(--pattern-accent-color);
+  --pattern-ring-fill-color: var(--pattern-secondary-color);
+  --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+  --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) calc(l - 0.1) c h);
+  --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color)calc(l - 0.1) c h);
+  --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) calc(l - 0.1) c h);
+  --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) calc(l - 0.1) c h);
+}
+
+@layer base {
+    .dark, [data-mode='dark']{
+    --pattern-background-color: oklch(from var(--pattern-background-color) calc(l - 1) c h);
+    --pattern-primary-color: oklch(from var(--pattern-primary-color) calc(l + 0.8) c h);
+    --pattern-tertiary-color: oklch(from var(--pattern-tertiary-color) calc(l + 0.6) c h);
+    --pattern-accent-color: oklch(from var(--pattern-accent-color) calc(l + 0.4) c h);
+    --pattern-secondary-color: oklch(from var(--pattern-secondary-color) calc(l + 0.2) c h);
+
+    --pattern-overlay-color: var(--background);
+    --pattern-overlay-opacity: 0.8;
+    --pattern-overlay-inactive-opacity: 0.8;
+
+    --pattern-transition-duration: 0.8s;
+    --pattern-transition-delay: 0.6s;
+
+    --pattern-outer-fill-color: var(--pattern-primary-color);
+    --pattern-pupil-fill-color: var(--pattern-accent-color);
+    --pattern-ring-fill-color: var(--pattern-secondary-color);
+    --pattern-tears-fill-color: var(--pattern-tertiary-color);
+
+    --pattern-outer-active-fill-color: oklch(from var(--pattern-outer-fill-color) l c calc(h + 180));
+    --pattern-pupil-active-fill-color: oklch(from var(--pattern-pupil-fill-color) l c calc(h + 180));
+    --pattern-ring-active-fill-color: oklch(from var(--pattern-ring-fill-color) l c calc(h + 180));
+    --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) l c calc(h + 180));
+  }
+} */

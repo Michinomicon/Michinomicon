@@ -16,7 +16,7 @@ import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 
 const themes: Array<{ id: string; label: string }> = [
   { id: 'default', label: 'Default' },
-  { id: 'fii-one', label: 'Fii One' },
+  { id: 'simple', label: 'Simple' },
   { id: 'purple', label: 'Purple' },
   // { id: 'minimal-red', label: 'Minimal Red' },
   // { id: 'minimal-rose', label: 'Minimal Rose' },
