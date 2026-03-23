@@ -47,8 +47,5 @@ export const generateMeta = async (args: {
     }),
     title,
   }
-
-  console.log(`generateMeta => `, metaData)
-
   return metaData
 }

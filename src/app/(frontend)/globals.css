@@ -4,22 +4,15 @@
 
 @custom-variant dark (&:is(.dark, .dark *, [data-mode="dark"], [data-mode="dark"] * ));
 
-/* Styles required for PDFs */
-/* @import 'react-pdf/dist/Page/AnnotationLayer.css';
-@import 'react-pdf/dist/Page/TextLayer.css'; */
-
-
 /* Styles for the .pdf flipbopok */
 @import './themes/pdf-flipbook.css';
-
-/* Default/Fallback colour theme */
-@import './themes/default.css';
 
 /* Eyes wallpaper */
 @import './themes/eyes-wallpaper.css';
 
 /* IMPORT CUSTOM THEMES HERE */
 @import './themes/fii-one.css';
+@import './themes/simple.css';
 @import './themes/purple.css';
 
 /* @import './themes/blue.css'; */
@@ -179,7 +172,7 @@
 }
 
 
-
+/** TEMPLATE FOR THEME VARIABLE FOR INTERACTIVE WALLPAPER */
 
 /* @theme inline {
   --pattern-background-color: oklch(from var(--background) calc(l + 1) c h);

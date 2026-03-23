@@ -1,15 +1,7 @@
-import {
-  isPayloadMedia,
-  getMIMEType,
-  AudioMediaProps,
-  ImageMediaProps,
-  PdfMediaProps,
-  VideoMediaProps,
-} from '@/components/Media/types'
 import { Media } from '@/payload-types'
 import { formatFileSize } from './formatFileSize'
 
-export type AudioMediaInfo = {
+export type AudioMediaMetaData = {
   [Prop in keyof Required<
     Pick<
       Media,
@@ -35,7 +27,7 @@ export type AudioMediaInfo = {
   >]: string
 }
 
-export type VideoMediaInfo = {
+export type VideoMediaMetaData = {
   [Prop in keyof Required<
     Pick<
       Media,
@@ -59,7 +51,7 @@ export type VideoMediaInfo = {
   >]: string
 }
 
-export type PdfMediaInfo = {
+export type PdfMediaMetaData = {
   [Prop in keyof Required<
     Pick<
       Media,
@@ -75,7 +67,7 @@ export type PdfMediaInfo = {
   >]: string
 }
 
-export type ImageMediaInfo = {
+export type ImageMediaMetaData = {
   [Prop in keyof Required<
     Pick<
       Media,
@@ -100,10 +92,7 @@ export type ImageMediaInfo = {
   >]: string
 }
 
-const getFormattedMediaInfoPropertyValue = (
-  prop: keyof Required<Media>,
-  resource: Media,
-): string => {
+const getMetaDataValue = (prop: keyof Required<Media>, resource: Media): string => {
   switch (prop) {
     case 'updatedAt':
       return resource[prop] ? new Date(resource[prop]).toUTCString() : ''
@@ -116,8 +105,8 @@ const getFormattedMediaInfoPropertyValue = (
   }
 }
 
-export const getPDFMediaInfo = (resource: Media): PdfMediaInfo => {
-  const info: PdfMediaInfo = {
+export const getPDFMediaMetaData = (resource: Media): PdfMediaMetaData => {
+  const info: PdfMediaMetaData = {
     title: '',
     updatedAt: '',
     createdAt: '',
@@ -127,15 +116,15 @@ export const getPDFMediaInfo = (resource: Media): PdfMediaInfo => {
     mimeType: '',
     filesize: '',
   }
-  for (const prop of Object.keys(info) as Array<keyof PdfMediaInfo>) {
-    info[prop] = getFormattedMediaInfoPropertyValue(prop, resource)
+  for (const prop of Object.keys(info) as Array<keyof PdfMediaMetaData>) {
+    info[prop] = getMetaDataValue(prop, resource)
   }
 
   return info
 }
 
-export const getVideoMediaInfo = (resource: Media): VideoMediaInfo => {
-  const info: VideoMediaInfo = {
+export const getVideoMediaMetaData = (resource: Media): VideoMediaMetaData => {
+  const info: VideoMediaMetaData = {
     title: '',
     updatedAt: '',
     createdAt: '',
@@ -153,14 +142,14 @@ export const getVideoMediaInfo = (resource: Media): VideoMediaInfo => {
     duration: '',
     codec: '',
   }
-  for (const prop of Object.keys(info) as Array<keyof VideoMediaInfo>) {
-    info[prop] = getFormattedMediaInfoPropertyValue(prop, resource)
+  for (const prop of Object.keys(info) as Array<keyof VideoMediaMetaData>) {
+    info[prop] = getMetaDataValue(prop, resource)
   }
   return info
 }
 
-export const getImageMediaInfo = (resource: Media): ImageMediaInfo => {
-  const info: ImageMediaInfo = {
+export const getImageMediaMetaData = (resource: Media): ImageMediaMetaData => {
+  const info: ImageMediaMetaData = {
     title: '',
     updatedAt: '',
     createdAt: '',
@@ -179,14 +168,14 @@ export const getImageMediaInfo = (resource: Media): ImageMediaInfo => {
     focalX: '',
     focalY: '',
   }
-  for (const prop of Object.keys(info) as Array<keyof ImageMediaInfo>) {
-    info[prop] = getFormattedMediaInfoPropertyValue(prop, resource)
+  for (const prop of Object.keys(info) as Array<keyof ImageMediaMetaData>) {
+    info[prop] = getMetaDataValue(prop, resource)
   }
   return info
 }
 
-export const getAudioMediaInfo = (resource: Media): AudioMediaInfo => {
-  const info: AudioMediaInfo = {
+export const getAudioMediaMetaData = (resource: Media): AudioMediaMetaData => {
+  const info: AudioMediaMetaData = {
     title: '',
     updatedAt: '',
     createdAt: '',
@@ -206,40 +195,8 @@ export const getAudioMediaInfo = (resource: Media): AudioMediaInfo => {
     artist: '',
     album: '',
   }
-  for (const prop of Object.keys(info) as Array<keyof AudioMediaInfo>) {
-    info[prop] = getFormattedMediaInfoPropertyValue(prop, resource)
+  for (const prop of Object.keys(info) as Array<keyof AudioMediaMetaData>) {
+    info[prop] = getMetaDataValue(prop, resource)
   }
   return info
-}
-
-export const getMediaResourceInfo = (
-  mediaProps: PdfMediaProps | VideoMediaProps | AudioMediaProps | ImageMediaProps,
-):
-  | ImageMediaInfo
-  | VideoMediaInfo
-  | AudioMediaInfo
-  | PdfMediaInfo
-  | { error: 'No information.' } => {
-  const { resource } = mediaProps
-  if (isPayloadMedia(resource)) {
-    const mime = getMIMEType(resource.mimeType)
-    if (mime) {
-      switch (mime.type) {
-        case 'image':
-          return getImageMediaInfo(resource)
-        case 'video':
-          return getVideoMediaInfo(resource)
-        case 'audio':
-          return getAudioMediaInfo(resource)
-        case 'application':
-          if (mime.subtype === 'pdf') {
-            return getPDFMediaInfo(resource)
-          }
-          break
-        default:
-          break
-      }
-    }
-  }
-  return { error: 'No information.' }
 }

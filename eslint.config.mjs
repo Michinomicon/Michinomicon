@@ -7,6 +7,7 @@ const eslintConfig = defineConfig([
   ...nextTs,
   globalIgnores(['node_modules/**', '.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
   {
+    files: ['**/*.{ts,tsx}'],
     rules: {
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-empty-object-type': 'warn',

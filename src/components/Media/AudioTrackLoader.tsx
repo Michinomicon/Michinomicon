@@ -17,19 +17,6 @@ export default function TrackLoader({
   genre,
   live,
 }: Track) {
-  console.debug(`TrackLoader => track:`, {
-    id,
-    url,
-    title,
-    artist,
-    artwork,
-    images,
-    duration,
-    album,
-    genre,
-    live,
-  })
-
   const { setAudioTracks } = useAudioTracks()
 
   useEffect(() => {
@@ -46,7 +33,7 @@ export default function TrackLoader({
         genre,
         live,
       }
-      console.debug(`TrackLoader => setAudioTracks => track:`, track)
+      console.debug(`TrackLoader set the audio track:`, { track: track })
       setAudioTracks([track])
     }
 
@@ -54,6 +41,12 @@ export default function TrackLoader({
       // Cleanup on unmount
       setAudioTracks([])
     }
+
+    /**  
+      To avoid excessesive renders only url is added
+      since url is unique and track specific 
+      if url changes, the audio track must have changed.
+    */
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, setAudioTracks])

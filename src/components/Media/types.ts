@@ -2,7 +2,8 @@ import type { StaticImageData } from 'next/image'
 import type { ElementType, Ref } from 'react'
 
 import type { Media as MediaType } from '@/payload-types'
-import { MIMEType } from 'util'
+
+export type MediaMetaData = { [key: string]: string }
 
 export interface BaseMediaProps {
   url?: string
@@ -13,6 +14,7 @@ export interface BaseMediaProps {
   onClick?: () => void
   onLoad?: () => void
   resource?: MediaType | string | number | null
+  metadata?: MediaMetaData
 }
 
 export interface ImageMediaProps extends BaseMediaProps {
@@ -56,61 +58,4 @@ export function isPayloadMedia(resource: unknown): resource is MediaType {
     typeof resource === 'object' &&
     'mimeType' in resource
   )
-}
-
-export const getMIMEType = (mimeType: unknown) => {
-  try {
-    if (mimeType !== null && mimeType !== undefined) {
-      return new MIMEType(mimeType)
-    }
-  } catch (_err) {
-    return null
-  }
-  return null
-}
-
-export const isImageMIMEType = (mimeType: unknown) => {
-  try {
-    if (mimeType !== null && mimeType !== undefined) {
-      return new MIMEType(mimeType).type === 'image'
-    }
-  } catch (_err) {
-    return false
-  }
-  return false
-}
-
-export const isAudioMIMEType = (mimeType: unknown) => {
-  try {
-    if (mimeType !== null && mimeType !== undefined) {
-      return new MIMEType(String(mimeType)).type === 'audio'
-    }
-  } catch (_err) {
-    return false
-  }
-  return false
-}
-
-export const isVideoMIMEType = (mimeType: unknown) => {
-  try {
-    if (mimeType !== null && mimeType !== undefined) {
-      return new MIMEType(String(mimeType)).type === 'video'
-    }
-  } catch (_err) {
-    return false
-  }
-  return false
-}
-
-export const isPdfMIMEType = (mimeType: unknown) => {
-  try {
-    if (mimeType !== null && mimeType !== undefined) {
-      const mime = new MIMEType(String(mimeType))
-      const { type, subtype } = mime
-      return type === 'application' && subtype === 'pdf'
-    }
-  } catch (_err) {
-    return false
-  }
-  return false
 }

@@ -1,5 +1,5 @@
 /* Theme (Light Mode) */
-[data-theme="fii-one"] {
+[data-theme="default"] {
   --background: oklch(0.9888 0.0073 312.3033);
   --foreground: oklch(0.4016 0.1971 277.5035);
   --card: oklch(0.9770 0.0140 308.2990);
@@ -83,8 +83,8 @@
 }
 
 /* Theme (Dark Mode) */
-.dark[data-theme="fii-one"],
-[data-mode="dark"][data-theme="fii-one"] {
+.dark[data-theme="default"],
+[data-mode="dark"][data-theme="default"] {
   --background: oklch(27.782% 0.01778 310.013);
   --foreground: oklch(0.9561 0.0215 294.5939);
   --card: oklch(0.2161 0.0061 56.0434);

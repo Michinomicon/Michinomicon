@@ -1,5 +1,5 @@
-/* Default Theme (Light Mode) */
-[data-theme='default'] {
+/* Simple Theme (Light Mode) */
+[data-theme='simple'] {
   --background: oklch(0.9831 0.0029 308.4282);
   --foreground: oklch(0.1946 0.0421 305.9101);
   --card: oklch(0.9662 0.0058 308.3938);
@@ -78,9 +78,9 @@
 
 }
 
-/* Default Theme (Dark Mode) */
-.dark[data-theme='default'],
-[data-mode='dark'][data-theme='default'] {
+/* Simple Theme (Dark Mode) */
+.dark[data-theme='simple'],
+[data-mode='dark'][data-theme='simple'] {
   --background: oklch(0.1311 0.0259 308.2244);
   --foreground: oklch(0.9831 0.0029 308.4282);
   --card: oklch(0.1642 0.0346 305.9803);
