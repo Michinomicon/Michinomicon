@@ -124,3 +124,23 @@ export const LastPageActiveSelector = asFlipbookSlelector('page', [
   FlipbookPageStateClassIndex.lastPage,
   FlipbookPageStateClassIndex.isActive,
 ])
+
+export function clearFlipbookPageIsActiveClasses(flipbookElementId: string) {
+  const flipbookContainer: HTMLElement | null = document.getElementById(flipbookElementId)
+  if (!flipbookContainer) {
+    console.debug(
+      `Error clearing 'is-active' classes from flipbook pages. Flipbook Container Element not found.`,
+    )
+    return
+  }
+
+  // Clear current DOM state
+  const pages = flipbookContainer.querySelectorAll(asFlipbookSlelector('page'))
+  pages.forEach((page) => {
+    if (page.classList.contains('is-active')) {
+      const pageNumber = page.querySelector('.react-pdf__Page')?.getAttribute('data-page-number')
+      console.debug(`cleared 'is-active' from data-page-number="${pageNumber}"`, page)
+    }
+    page.classList.remove('is-active')
+  })
+}
