@@ -1,12 +1,18 @@
 'use client'
 
-import React, { useState, useMemo, useRef, useEffect } from 'react'
+import React, { useState, useMemo, useRef, useEffect, Fragment } from 'react'
 import { Document, Page, pdfjs } from 'react-pdf'
 import 'flipbook-js/style.css'
 import FlipBook, { FlipBookOptions } from 'flipbook-js'
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
 import 'react-pdf/dist/esm/Page/TextLayer.css'
-import { OnDocumentLoadSuccess, OnItemClickArgs } from 'react-pdf/dist/esm/shared/types.js'
+import {
+  OnDocumentLoadProgress,
+  OnDocumentLoadSuccess,
+  OnItemClickArgs,
+  OnLoadProgressArgs,
+  PageCallback,
+} from 'react-pdf/dist/esm/shared/types.js'
 
 import { ButtonGroup, ButtonGroupSeparator } from '@/components/ui/button-group'
 import { Button } from '@/components/ui/button'
@@ -20,6 +26,7 @@ import {
   SquareArrowOutUpRight,
   ChevronFirst,
   ChevronLast,
+  Check,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Field } from '@/components/ui/field'
@@ -34,9 +41,22 @@ import {
   ItemTitle,
   ItemDescription,
   ItemActions,
+  ItemFooter,
+  ItemGroup,
 } from '@/components/ui/item'
 import { FloatingLabelSlider } from '@/components/ui/slider'
-import { asFlipbookSlelector } from './flipbookUtils'
+import {
+  asFlipbookSlelector,
+  clearFlipbookPageIsActiveClasses,
+  FirstPageActiveSelector,
+  FlipbookPageStateClassIndex,
+  FlipbookStateClassIndex,
+  getFlipbookState,
+  LastPageActiveSelector,
+} from './flipbookUtils'
+import { formatFileSize } from '@/utilities/formatFileSize'
+import { Progress } from '@/components/ui/progress'
+import { Spinner } from '@/components/ui/spinner'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
@@ -55,15 +75,23 @@ const FlipbookPopoverContent: React.FC<{
   disableHoverAnim?: boolean
 }> = ({ media, onClose, isOpen, disableHoverAnim = false }) => {
   const [documentLoaded, setDocumentLoaded] = useState<boolean>(false)
+  const [flipbookRenderCount, setFlipbookRenderCount] = useState<number>(0)
+  const [fileloadingProgress, setFileLoadingProgress] = useState<OnLoadProgressArgs>({
+    loaded: 0,
+    total: 0,
+  })
+  const [loadedPagesCount, setLoadedPagesCount] = useState<number>(0)
+  const [renderedPagesCount, setRenderedPagesCount] = useState<number>(0)
+
   const [numPages, setNumPages] = useState<number | null>(null)
+
   const [pageWidth, setPageWidth] = useState<number | null>(null)
   const pageHeight = Math.max(Number(pageWidth), 0) * 1.4142
   const bookWidth = Math.max(Number(pageWidth), 0) * 2
 
   const [activePages, setActivePages] = useState<number[] | null>([0])
-  const [isFirstPage, setIsFirstPage] = useState<boolean>(false)
-  const [isLastPage, setIsLastPage] = useState<boolean>(false)
   const activePageRangeRef = useRef<number[] | null>([0])
+  const totalPagesAcrossRendersRef = useRef<number>(0)
 
   const [isZoomMode, setIsZoomMode] = useState<boolean>(false)
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50, isHovering: false })
@@ -82,6 +110,467 @@ const FlipbookPopoverContent: React.FC<{
   const file = useMemo(() => {
     return media.url
   }, [media])
+
+  const isFullyRendered = useMemo(() => {
+    return numPages && numPages > 0 && renderedPagesCount === numPages
+  }, [numPages, renderedPagesCount])
+
+  const onDocumentLoadSuccess: OnDocumentLoadSuccess = ({ numPages }) => {
+    setNumPages(numPages)
+    console.log(`Successfully loaded ${numPages} page document.`)
+    setDocumentLoaded(true)
+  }
+
+  const getPreviewPageStateDescription = (previewIndex: number, total: number | null) => {
+    if (!total) return 'No Pages.'
+    if (previewIndex === 0) return `Page 1 of ${total}`
+    if (previewIndex === total - 1) return `Page ${total} of ${total}`
+    const isRight = previewIndex % 2 === 0
+    const leftPage = isRight ? previewIndex : previewIndex + 1
+    const rightPage = leftPage + 1
+    return `Pages ${leftPage} | ${rightPage} of ${total}`
+  }
+
+  const handleZoomAndPanMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isZoomMode) return
+    const rect = e.currentTarget.getBoundingClientRect()
+    const rawX = (e.clientX - rect.left) / rect.width
+    const rawY = (e.clientY - rect.top) / rect.height
+    const x = rawX * (100 + OVERSHOOT * 2) - OVERSHOOT
+    const y = rawY * (100 + OVERSHOOT * 2) - OVERSHOOT
+
+    setZoomPos({ x, y, isHovering: true })
+  }
+
+  const handleZoomAndPanMouseEnter = () => {
+    if (!isZoomMode) return
+    setZoomPos((prev) => ({ ...prev, isHovering: true }))
+  }
+
+  const handleZoomAndPanMouseLeave = () => {
+    setZoomPos((prev) => ({ ...prev, isHovering: false }))
+  }
+
+  const handleSliderCommit = (val: number[]) => {
+    // kill any existing timers
+    if (sliderTimeoutRef.current) clearTimeout(sliderTimeoutRef.current)
+    // new 250ms countdown
+    sliderTimeoutRef.current = setTimeout(() => {
+      const targetPage = val[0]
+      if (activePages && !activePages.includes(targetPage)) {
+        goToSpecificPage(targetPage)
+      }
+      sliderPopoverRef.current?.hidePopover()
+    }, 250)
+  }
+
+  const goToSpecificPage = (args?: Partial<OnItemClickArgs> | number, force: boolean = false) => {
+    const destPageIndex =
+      typeof args === 'object' ? args.pageIndex : typeof args === 'number' ? args : undefined
+
+    if (destPageIndex === undefined) {
+      console.debug(`PDF Navigation Error. Invalid Page Index:`, args)
+      return
+    }
+
+    const currentActive = activePageRangeRef.current
+
+    if (currentActive === null || !Array.isArray(currentActive)) {
+      console.debug(`PDF Navigation Error. Invalid Active Page Range:`, currentActive)
+      return
+    }
+
+    if (currentActive.includes(destPageIndex) && !force) {
+      console.debug(`PDF Navigation Error. Already on page with index ${destPageIndex}.`)
+      return
+    }
+
+    if (!flipBookRef || !flipBookRef.current) {
+      console.debug(`PDF Navigation Error. Flipbook Instance not found.`)
+      return
+    }
+
+    const flipbookContainer: HTMLElement | null = document.getElementById(FLIPBOOK_ELEMENT_ID)
+
+    if (!flipbookContainer) {
+      console.debug(`PDF Navigation Error. Flipbook Container Element not found.`)
+      return
+    }
+    const pages = flipbookContainer.querySelectorAll(asFlipbookSlelector('page'))
+    const pageCount: number = pages.length
+    pages.forEach((page) => page.classList.remove(FlipbookPageStateClassIndex.isActive))
+
+    // In flipbook-js (with covers), even indices are on the right, odd are on the left
+    const isTargetRight: boolean = destPageIndex % 2 === 0
+    const targetRight: number = isTargetRight ? destPageIndex : destPageIndex + 1
+    const targetLeft: number = targetRight - 1
+
+    // determine direction
+    const validActive: number[] = currentActive.filter(
+      (pageIndex): pageIndex is number => pageIndex !== null && pageIndex !== undefined,
+    )
+    const currentMax: number = Math.max(...validActive)
+    const direction: 'forward' | 'back' = destPageIndex > currentMax ? 'forward' : 'back'
+
+    // get page just before target and turn the page
+    if (direction === 'forward') {
+      const prevLeft: number = targetLeft - 2
+      const prevRight: number = targetRight - 2
+
+      if (prevLeft >= 0 && pages[prevLeft]) {
+        pages[prevLeft].classList.add(FlipbookPageStateClassIndex.isActive)
+        if (pages[prevLeft].classList.contains(FlipbookPageStateClassIndex.firstPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atFrontCover)
+        }
+        if (pages[prevLeft].classList.contains(FlipbookPageStateClassIndex.lastPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atBackCover)
+        }
+      }
+      if (prevRight >= 0 && pages[prevRight]) {
+        pages[prevRight].classList.add(FlipbookPageStateClassIndex.isActive)
+        if (pages[prevRight].classList.contains(FlipbookPageStateClassIndex.firstPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atFrontCover)
+        }
+        if (pages[prevRight].classList.contains(FlipbookPageStateClassIndex.lastPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atBackCover)
+        }
+      }
+
+      flipBookRef.current.turnPage('forward')
+    } else {
+      const nextLeft = targetLeft + 2
+      const nextRight = targetRight + 2
+
+      if (nextLeft < pageCount && pages[nextLeft]) {
+        pages[nextLeft].classList.add(FlipbookPageStateClassIndex.isActive)
+        if (pages[nextLeft].classList.contains(FlipbookPageStateClassIndex.firstPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atFrontCover)
+        }
+        if (pages[nextLeft].classList.contains(FlipbookPageStateClassIndex.lastPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atBackCover)
+        }
+      }
+      if (nextRight < pageCount && pages[nextRight]) {
+        pages[nextRight].classList.add(FlipbookPageStateClassIndex.isActive)
+        if (pages[nextRight].classList.contains(FlipbookPageStateClassIndex.firstPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atFrontCover)
+        }
+        if (pages[nextRight].classList.contains(FlipbookPageStateClassIndex.lastPage)) {
+          flipbookContainer.classList.add(FlipbookStateClassIndex.atBackCover)
+        }
+      }
+
+      flipBookRef.current.turnPage('back')
+    }
+  }
+
+  const goToFirstPage: React.MouseEventHandler<HTMLButtonElement> = (_event) => {
+    const flipbookElement = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    if (!flipBookRef || !flipBookRef.current || !numPages || !flipbookElement) return
+
+    const activePageCheck = flipBookRef.current.getActivePages().includes(0)
+    const firstPageCheck = flipBookRef.current.isFirstPage()
+
+    if (activePageCheck || firstPageCheck) return
+
+    goToSpecificPage(0)
+  }
+
+  const goToLastPage: React.MouseEventHandler<HTMLButtonElement> = (_event) => {
+    const flipbookElement = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    if (!flipBookRef || !flipBookRef.current || !numPages || !flipbookElement) return
+
+    const activePageCheck = flipBookRef.current.getActivePages().includes(numPages - 1)
+    const lastPageCheck = flipBookRef.current.isLastPage()
+
+    if (activePageCheck || lastPageCheck) return
+
+    goToSpecificPage(numPages - 1)
+  }
+
+  const previousPage: React.MouseEventHandler<HTMLButtonElement> = (_event?: React.MouseEvent) => {
+    if (!flipBookRef || !flipBookRef.current || !numPages) return
+    flipBookRef.current.turnPage('back')
+  }
+
+  const nextPage: React.MouseEventHandler<HTMLButtonElement> = (_event?: React.MouseEvent) => {
+    if (!flipBookRef || !flipBookRef.current || !numPages) return
+    flipBookRef.current.turnPage('forward')
+  }
+
+  const mouseEnterPreviousPageButton: React.MouseEventHandler<HTMLButtonElement> = (
+    _event: React.MouseEvent,
+  ) => {
+    if (!flipBookRef || !flipBookRef.current || !numPages) return
+    triggerPageHover('prev')
+  }
+
+  const mouseEnterNextPageButton: React.MouseEventHandler<HTMLButtonElement> = (
+    _event: React.MouseEvent,
+  ) => {
+    if (!flipBookRef || !flipBookRef.current || !numPages) return
+    triggerPageHover('next')
+  }
+
+  const triggerPageHover = (direction: 'prev' | 'next') => {
+    if (disableHoverAnim || isZoomMode) return
+    const container = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    if (container) {
+      container.classList.add(direction === 'prev' ? 'hover-prev-active' : 'hover-next-active')
+    }
+  }
+
+  const clearPageHover = () => {
+    const container = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    if (container) {
+      container.classList.remove('hover-prev-active', 'hover-next-active')
+    }
+  }
+
+  const onClickDocumentItem = ({ pageIndex }: OnItemClickArgs) => {
+    goToSpecificPage(pageIndex)
+  }
+
+  const onClickZoomModeButton: React.MouseEventHandler<HTMLButtonElement> = (
+    _event: React.MouseEvent,
+  ) => {
+    setIsZoomMode(!isZoomMode)
+  }
+
+  const onPageSliderValueChange = (val: number[]) => {
+    setSliderValue(val)
+    goToSpecificPage(val[0])
+  }
+
+  const getPageSliderValueFormatter: (value: number) => React.ReactNode = (_value: number) => {
+    return getPreviewPageStateDescription(sliderValue[0], numPages)
+  }
+
+  const getLoadingProgress = (): React.ReactNode => {
+    const totalPages = numPages && numPages > 0 ? numPages : 0
+    const isFirstRender = flipbookRenderCount === 0
+    const showDataTransfer = !documentLoaded || isFirstRender
+    const showPageProcessing = isFirstRender || loadedPagesCount <= totalPages
+    // File Loading progress bar
+    const { loaded: fileDataLoaded, total: totalFileSize }: OnLoadProgressArgs = fileloadingProgress
+    const formattedDataTransfered = formatFileSize(fileDataLoaded)
+    const fileTransferProgress =
+      fileDataLoaded > 0 ? Math.max((fileDataLoaded / totalFileSize) * 100, 0) : 0
+    const doneTransfer = fileTransferProgress >= 99
+
+    // Page Rendering progress
+    const renderingProgress =
+      renderedPagesCount > 0 ? Math.max((renderedPagesCount / totalPages) * 100, 0) : 0
+    const doneRendering = renderingProgress >= 99
+
+    // Page Loading progress
+    const loadingProgress =
+      loadedPagesCount > 0 ? Math.max((loadedPagesCount / totalPages) * 100, 0) : 0
+    const doneLoading = loadingProgress >= 99
+
+    return (
+      <div className="flex w-full max-w-xl flex-col gap-4 my-auto">
+        <span className=" text-3xl font-semibold text-center">
+          {isFirstRender ? 'Creating Flipbook' : 'Updating Flipbook'}
+        </span>
+
+        <ItemGroup className="gap-4">
+          {showDataTransfer && (
+            <Item variant="muted">
+              <ItemMedia>
+                {doneTransfer ? (
+                  <Check className="size-8 text-green-700  dark:text-green-300" />
+                ) : (
+                  <Spinner className="size-8" />
+                )}
+              </ItemMedia>
+              <ItemContent
+                className={cn('text-lg', doneTransfer ? 'text-muted-foreground' : 'font-semibold')}
+              >
+                <div>
+                  {fileTransferProgress.toFixed(0)}%{' '}
+                  <span className="ml-3">
+                    {doneTransfer ? 'Data Transferred' : 'Transferring Data...'}
+                  </span>
+                </div>
+              </ItemContent>
+              <ItemContent
+                className={cn(
+                  'text-lg flex-none',
+                  doneTransfer ? 'text-muted-foreground' : 'font-semibold',
+                )}
+              >
+                <span className="ml-auto">{formattedDataTransfered}</span>
+              </ItemContent>
+              <ItemFooter>
+                <Progress
+                  value={fileTransferProgress}
+                  id="progress-document-loading"
+                  className={doneTransfer ? '[&>div]:bg-green-400' : ''}
+                />
+              </ItemFooter>
+            </Item>
+          )}
+
+          {showPageProcessing && (
+            <Item variant="muted">
+              <ItemMedia>
+                {doneLoading ? (
+                  <Check className="size-8 text-green-700  dark:text-green-300" />
+                ) : (
+                  <Spinner className="size-8" />
+                )}
+              </ItemMedia>
+              <ItemContent
+                className={cn('text-lg', doneLoading ? 'text-muted-foreground' : 'font-semibold')}
+              >
+                <div>
+                  {loadingProgress.toFixed(0)}%
+                  <span className="ml-3">
+                    {doneLoading ? 'Pages Processed' : 'Processing Pages...'}
+                  </span>
+                </div>
+              </ItemContent>
+              <ItemContent
+                className={cn(
+                  'text-lg flex-none',
+                  doneLoading ? 'text-muted-foreground' : 'font-semibold',
+                )}
+              >
+                <span className="ml-auto">{loadedPagesCount}</span>
+              </ItemContent>
+              <ItemFooter>
+                <Progress
+                  value={loadingProgress}
+                  id="progress-page-loading"
+                  className={doneLoading ? '[&>div]:bg-green-400' : ''}
+                />
+              </ItemFooter>
+            </Item>
+          )}
+
+          <Item variant="muted">
+            <ItemMedia>
+              {doneRendering ? (
+                <Check className="size-8 text-green-700  dark:text-green-300" />
+              ) : (
+                <Spinner className="size-8" />
+              )}
+            </ItemMedia>
+            <ItemContent
+              className={cn('text-lg', doneRendering ? 'text-muted-foreground' : 'font-semibold')}
+            >
+              <div>
+                {fileTransferProgress.toFixed(0)}%
+                <span className="ml-3">
+                  {doneRendering ? 'Pages Rendered' : 'Rendering Pages...'}
+                </span>
+              </div>
+            </ItemContent>
+            <ItemContent
+              className={cn(
+                'text-lg flex-none',
+                doneRendering ? 'text-muted-foreground' : 'font-semibold',
+              )}
+            >
+              <span className="ml-auto">{renderedPagesCount}</span>
+            </ItemContent>
+            <ItemFooter>
+              <Progress
+                value={renderingProgress}
+                id="progress-page-rendering"
+                className={doneRendering ? '[&>div]:bg-green-400' : ''}
+              />
+            </ItemFooter>
+          </Item>
+        </ItemGroup>
+
+        <Button
+          variant="secondary"
+          size="lg"
+          onClick={onClose}
+          aria-label="Close flipbook"
+          className="w-fit mx-auto"
+        >
+          <X /> Cancel
+        </Button>
+      </div>
+    )
+  }
+
+  const onDocumentLoadProgress: OnDocumentLoadProgress = (
+    loadingProgress: OnLoadProgressArgs,
+  ): void => {
+    setFileLoadingProgress(loadingProgress)
+  }
+
+  const onPageLoadSuccess = (_page: PageCallback) => {
+    setLoadedPagesCount((prev) => prev + 1)
+  }
+
+  const onPageRenderSuccess = (_page: PageCallback) => {
+    setRenderedPagesCount((prev) => prev + 1)
+  }
+
+  const atFrontCover = (): boolean => {
+    const flipbookContainer: HTMLElement | null = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    const flipbookState = getFlipbookState(flipbookContainer)
+    if (flipbookState) return flipbookState.atFrontCover
+    return false
+  }
+
+  const atBackCover = (): boolean => {
+    const flipbookContainer: HTMLElement | null = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    const flipbookState = getFlipbookState(flipbookContainer)
+    if (flipbookState) return flipbookState.atBackCover
+    return false
+  }
+
+  const isBackNavigationDisabled = (): boolean => {
+    const flipbookContainer: HTMLElement | null = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    if (flipbookContainer) {
+      const flipbookState = getFlipbookState(flipbookContainer)
+      const atFrontCover = flipbookState?.atFrontCover ?? false
+      const firstPageIsActive =
+        flipbookContainer.querySelectorAll(FirstPageActiveSelector).length > 0
+      return atFrontCover || firstPageIsActive
+    }
+    return false
+  }
+
+  const isForwardNavigationDisabled = (): boolean => {
+    const flipbookContainer: HTMLElement | null = document.getElementById(FLIPBOOK_ELEMENT_ID)
+    if (flipbookContainer) {
+      const flipbookState = getFlipbookState(flipbookContainer)
+      const atBackCover = flipbookState?.atBackCover ?? false
+      const lastPageIsActive = flipbookContainer.querySelectorAll(LastPageActiveSelector).length > 0
+      return atBackCover || lastPageIsActive
+    }
+    return false
+  }
+
+  React.useEffect(() => {
+    setSliderValue([0])
+    setActivePages([0])
+    setRenderedPagesCount(0)
+  }, [pageWidth])
+
+  React.useEffect(() => {
+    if (isFullyRendered === true) {
+      setFlipbookRenderCount((prev) => {
+        return prev + 1
+      })
+      const previousNumPages = totalPagesAcrossRendersRef.current ?? 0
+      const restoredActivePage = Math.max(...(activePageRangeRef.current ?? [0]), 0)
+      if (previousNumPages > 0 && restoredActivePage >= previousNumPages) {
+        // overriding default behaviour to reach back page
+        goToSpecificPage(previousNumPages - 1, true)
+        goToSpecificPage(previousNumPages, true)
+      } else {
+        goToSpecificPage(restoredActivePage, true)
+      }
+    }
+  }, [isFullyRendered])
 
   useEffect(() => {
     if (!sliderTimeoutRef || !sliderTimeoutRef.current) {
@@ -160,7 +649,7 @@ const FlipbookPopoverContent: React.FC<{
 
   // Flipbook sizing and Resizing
   useEffect(() => {
-    if (!documentLoaded || !containerRef || !containerRef.current) return
+    if (!numPages || !containerRef || !containerRef.current) return
     const container = containerRef.current
     const { width: containerWidth } = container.getBoundingClientRect()
 
@@ -194,29 +683,20 @@ const FlipbookPopoverContent: React.FC<{
       observer.disconnect()
       if (resizeTimeoutRef.current) clearTimeout(resizeTimeoutRef.current)
     }
-  }, [documentLoaded])
-
-  const onDocumentLoadSuccess: OnDocumentLoadSuccess = ({ numPages }) => {
-    setNumPages(numPages)
-    console.log(`Successfully loaded ${numPages} pages.`)
-    setActivePages(activePageRangeRef.current)
-    setDocumentLoaded(true)
-  }
+  }, [numPages])
 
   // when file is loaded, create the flipbook
   useEffect(() => {
-    if (documentLoaded && pageWidth) {
+    if (numPages && pageWidth) {
       const onPageTurn = (): void => {
         if (!flipBookRef || !flipBookRef.current) return
 
         const flipbookActivePages = flipBookRef.current.getActivePages() ?? [0]
         setActivePages(flipbookActivePages)
-        setIsFirstPage(flipBookRef.current.isFirstPage())
-        setIsLastPage(flipBookRef.current.isLastPage())
+        activePageRangeRef.current = flipbookActivePages
         const sliderActivePage =
           flipbookActivePages.filter((p) => p !== null && p !== undefined)[0] || 0
         setSliderValue([sliderActivePage])
-        activePageRangeRef.current = flipbookActivePages
       }
 
       const options: Required<FlipBookOptions> = {
@@ -231,230 +711,43 @@ const FlipbookPopoverContent: React.FC<{
         previousButton: null,
       }
 
-      flipBookRef.current = new FlipBook(FLIPBOOK_ELEMENT_ID, options)
+      if (flipBookRef.current === null) {
+        flipBookRef.current = new FlipBook(FLIPBOOK_ELEMENT_ID, options)
 
-      if (flipBookRef.current) {
-        // Required to override the click event listeners that flipbook-js wraps the entire page with
-        const originalTurnPage = flipBookRef.current.turnPage.bind(flipBookRef.current)
-        flipBookRef.current.turnPage = (direction: number | 'forward' | 'back') => {
-          // If the user just clicked a PDF link, do not turn the page
-          if (isLinkClickRef.current) {
-            return
+        if (flipBookRef.current) {
+          // Required to override the click event listeners that flipbook-js wraps the entire page with
+          const originalTurnPage = flipBookRef.current.turnPage.bind(flipBookRef.current)
+          flipBookRef.current.turnPage = (direction: number | 'forward' | 'back') => {
+            // If the user just clicked a PDF link, do not turn the page
+            if (isLinkClickRef.current) {
+              return
+            }
+            // If we haven't flagged the click event target as being on a annotation layer link, then proceed as normal.
+            originalTurnPage(direction)
           }
-          // If we haven't flagged the click event target as being on a annotation layer link, then proceed as normal.
-          originalTurnPage(direction)
         }
-
-        setIsFirstPage(flipBookRef.current.isFirstPage())
-        setIsLastPage(flipBookRef.current.isLastPage())
       }
     }
     return () => {
       if (flipBookRef.current !== null) {
+        totalPagesAcrossRendersRef.current = numPages ? numPages - 1 : 0
+        const flipbookActivePages = flipBookRef.current.getActivePages() ?? [0]
+        activePageRangeRef.current = flipbookActivePages
+        console.debug(`clearing flipBook.(${JSON.stringify(flipbookActivePages)})[${numPages}]`)
         flipBookRef.current = null
+        clearFlipbookPageIsActiveClasses(FLIPBOOK_ELEMENT_ID)
       }
     }
-  }, [documentLoaded, pageHeight, pageWidth])
-
-  const getPreviewPageStateDescription = (previewIndex: number, total: number | null) => {
-    if (!total) return 'No Pages.'
-    if (previewIndex === 0) return `Page 1 of ${total}`
-    if (previewIndex === total - 1) return `Page ${total} of ${total}`
-    const isRight = previewIndex % 2 === 0
-    const leftPage = isRight ? previewIndex : previewIndex + 1
-    const rightPage = leftPage + 1
-    return `Pages ${leftPage} | ${rightPage} of ${total}`
-  }
-
-  const handleZoomAndPanMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isZoomMode) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    const rawX = (e.clientX - rect.left) / rect.width
-    const rawY = (e.clientY - rect.top) / rect.height
-    const x = rawX * (100 + OVERSHOOT * 2) - OVERSHOOT
-    const y = rawY * (100 + OVERSHOOT * 2) - OVERSHOOT
-
-    setZoomPos({ x, y, isHovering: true })
-  }
-
-  const handleZoomAndPanMouseEnter = () => {
-    if (!isZoomMode) return
-    setZoomPos((prev) => ({ ...prev, isHovering: true }))
-  }
-
-  const handleZoomAndPanMouseLeave = () => {
-    setZoomPos((prev) => ({ ...prev, isHovering: false }))
-  }
-
-  const handleSliderCommit = (val: number[]) => {
-    // kill any existing timers
-    if (sliderTimeoutRef.current) clearTimeout(sliderTimeoutRef.current)
-    // new 250ms countdown
-    sliderTimeoutRef.current = setTimeout(() => {
-      const targetPage = val[0]
-      if (activePages && !activePages.includes(targetPage)) {
-        goToSpecificPage(targetPage)
-      }
-      sliderPopoverRef.current?.hidePopover()
-    }, 250)
-  }
-
-  const goToSpecificPage = (args?: Partial<OnItemClickArgs> | number) => {
-    const destPageIndex =
-      typeof args === 'object' ? args.pageIndex : typeof args === 'number' ? args : undefined
-    if (destPageIndex === undefined) {
-      console.debug(`PDF Navigation Error. Invalid Page Index:`, args)
-      return
-    }
-
-    const currentActive = activePageRangeRef.current
-    if (currentActive === null || !Array.isArray(currentActive)) {
-      console.debug(`PDF Navigation Error. Invalid Active Page Range:`, currentActive)
-      return
-    }
-
-    if (currentActive.includes(destPageIndex)) {
-      return
-    }
-
-    if (!flipBookRef || !flipBookRef.current) {
-      console.debug(`PDF Navigation Error. Flipbook Instance not found.`)
-      return
-    }
-
-    const flipbookContainer: HTMLElement | null = document.getElementById(FLIPBOOK_ELEMENT_ID)
-    if (!flipbookContainer) {
-      console.debug(`PDF Navigation Error. Flipbook Container Element not found.`)
-      return
-    }
-
-    // Clear current DOM state
-    const pages = flipbookContainer.querySelectorAll(asFlipbookSlelector('page'))
-    const pageCount: number = pages.length
-    pages.forEach((page) => page.classList.remove('is-active'))
-
-    // In flipbook-js (with covers), even indices are on the right, odd are on the left
-    const isTargetRight: boolean = destPageIndex % 2 === 0
-    const targetRight: number = isTargetRight ? destPageIndex : destPageIndex + 1
-    const targetLeft: number = targetRight - 1
-
-    // determine direction
-    const validActive: number[] = currentActive.filter(
-      (pageIndex): pageIndex is number => pageIndex !== null && pageIndex !== undefined,
-    )
-    const currentMax: number = Math.max(...validActive)
-    const direction: 'forward' | 'back' = destPageIndex > currentMax ? 'forward' : 'back'
-
-    // get page just before target and turn the page
-    if (direction === 'forward') {
-      const prevLeft: number = targetLeft - 2
-      const prevRight: number = targetRight - 2
-
-      if (prevLeft >= 0 && pages[prevLeft]) pages[prevLeft].classList.add('is-active')
-      if (prevRight >= 0 && pages[prevRight]) pages[prevRight].classList.add('is-active')
-
-      flipBookRef.current.turnPage('forward')
-    } else {
-      const nextLeft = targetLeft + 2
-      const nextRight = targetRight + 2
-
-      if (nextLeft < pageCount && pages[nextLeft]) pages[nextLeft].classList.add('is-active')
-      if (nextRight < pageCount && pages[nextRight]) pages[nextRight].classList.add('is-active')
-
-      flipBookRef.current.turnPage('back')
-    }
-  }
-
-  const goToFirstPage: React.MouseEventHandler<HTMLButtonElement> = (_event) => {
-    const flipbookElement = document.getElementById(FLIPBOOK_ELEMENT_ID)
-    if (!flipBookRef || !flipBookRef.current || !numPages || !flipbookElement) return
-
-    const activePageCheck = flipBookRef.current.getActivePages().includes(0)
-    const firstPageCheck = flipBookRef.current.isFirstPage()
-
-    if (activePageCheck || firstPageCheck) return
-
-    goToSpecificPage(0)
-  }
-
-  const goToLastPage: React.MouseEventHandler<HTMLButtonElement> = (_event) => {
-    const flipbookElement = document.getElementById(FLIPBOOK_ELEMENT_ID)
-    if (!flipBookRef || !flipBookRef.current || !numPages || !flipbookElement) return
-
-    const activePageCheck = flipBookRef.current.getActivePages().includes(numPages - 1)
-    const lastPageCheck = flipBookRef.current.isLastPage()
-
-    if (activePageCheck || lastPageCheck) return
-
-    goToSpecificPage(numPages - 1)
-  }
-
-  const previousPage: React.MouseEventHandler<HTMLButtonElement> = (_event: React.MouseEvent) => {
-    if (!flipBookRef || !flipBookRef.current || !numPages) return
-    flipBookRef.current.turnPage('back')
-  }
-
-  const nextPage: React.MouseEventHandler<HTMLButtonElement> = (_event: React.MouseEvent) => {
-    if (!flipBookRef || !flipBookRef.current || !numPages) return
-    flipBookRef.current.turnPage('forward')
-  }
-
-  const mouseEnterPreviousPageButton: React.MouseEventHandler<HTMLButtonElement> = (
-    _event: React.MouseEvent,
-  ) => {
-    if (!flipBookRef || !flipBookRef.current || !numPages) return
-    triggerPageHover('prev')
-  }
-
-  const mouseEnterNextPageButton: React.MouseEventHandler<HTMLButtonElement> = (
-    _event: React.MouseEvent,
-  ) => {
-    if (!flipBookRef || !flipBookRef.current || !numPages) return
-    triggerPageHover('next')
-  }
-
-  const triggerPageHover = (direction: 'prev' | 'next') => {
-    if (disableHoverAnim || isZoomMode) return
-    const container = document.getElementById(FLIPBOOK_ELEMENT_ID)
-    if (container) {
-      container.classList.add(direction === 'prev' ? 'hover-prev-active' : 'hover-next-active')
-    }
-  }
-
-  const clearPageHover = () => {
-    const container = document.getElementById(FLIPBOOK_ELEMENT_ID)
-    if (container) {
-      container.classList.remove('hover-prev-active', 'hover-next-active')
-    }
-  }
-
-  const onClickDocumentItem = ({ pageIndex }: OnItemClickArgs) => {
-    goToSpecificPage(pageIndex)
-  }
-
-  const onClickZoomModeButton: React.MouseEventHandler<HTMLButtonElement> = (
-    _event: React.MouseEvent,
-  ) => {
-    setIsZoomMode(!isZoomMode)
-  }
-
-  const onPageSliderValueChange = (val: number[]) => {
-    setSliderValue(val)
-    goToSpecificPage(val[0])
-  }
-
-  const getPageSliderValueFormatter: (value: number) => React.ReactNode = (_value: number) => {
-    return getPreviewPageStateDescription(sliderValue[0], numPages)
-  }
+  }, [numPages, pageHeight, pageWidth])
 
   const pageSliderMaxValue = numPages ? Math.max(numPages - 1, 1) : 1
   const pageSliderWidthStyles = { width: bookWidth }
 
   const flipbookElementStyles = {
     top: 75,
-    left: isFirstPage
+    left: atFrontCover()
       ? 'calc(50px + calc(-25% + 0px))'
-      : isLastPage
+      : atBackCover()
         ? 'calc(50px + calc(25% + 0px))'
         : 50,
   }
@@ -480,7 +773,7 @@ const FlipbookPopoverContent: React.FC<{
       ref={containerRef}
       className="relative w-full h-full flex flex-col items-center pt-10 pb-10 px-8 bg-background overflow-hidden"
     >
-      {documentLoaded && numPages && pageWidth && (
+      {isFullyRendered && (
         <React.Fragment>
           <div
             id="pdfDocumentControls"
@@ -510,7 +803,7 @@ const FlipbookPopoverContent: React.FC<{
                   onClick={goToFirstPage}
                   onMouseEnter={mouseEnterPreviousPageButton}
                   onMouseLeave={clearPageHover}
-                  disabled={isFirstPage || isZoomMode}
+                  disabled={isBackNavigationDisabled() || isZoomMode}
                 >
                   <ChevronFirst />
                 </Button>
@@ -520,7 +813,7 @@ const FlipbookPopoverContent: React.FC<{
                   onClick={previousPage}
                   onMouseEnter={mouseEnterPreviousPageButton}
                   onMouseLeave={clearPageHover}
-                  disabled={isFirstPage || isZoomMode}
+                  disabled={isBackNavigationDisabled() || isZoomMode}
                 >
                   <ChevronLeft />
                 </Button>
@@ -535,7 +828,7 @@ const FlipbookPopoverContent: React.FC<{
                   onClick={nextPage}
                   onMouseEnter={mouseEnterNextPageButton}
                   onMouseLeave={clearPageHover}
-                  disabled={isLastPage || isZoomMode}
+                  disabled={isForwardNavigationDisabled() || isZoomMode}
                 >
                   <ChevronRight />
                 </Button>
@@ -545,7 +838,7 @@ const FlipbookPopoverContent: React.FC<{
                   onClick={goToLastPage}
                   onMouseEnter={mouseEnterNextPageButton}
                   onMouseLeave={clearPageHover}
-                  disabled={isLastPage || isZoomMode}
+                  disabled={isForwardNavigationDisabled() || isZoomMode}
                 >
                   <ChevronLast />
                 </Button>
@@ -578,7 +871,7 @@ const FlipbookPopoverContent: React.FC<{
             onClick={previousPage}
             onMouseEnter={mouseEnterPreviousPageButton}
             onMouseLeave={clearPageHover}
-            disabled={isFirstPage || isZoomMode}
+            disabled={isBackNavigationDisabled() || isZoomMode}
             aria-label="Previous Page"
           >
             <ChevronLeft className="w-12 h-12" />
@@ -591,7 +884,7 @@ const FlipbookPopoverContent: React.FC<{
             onClick={nextPage}
             onMouseEnter={mouseEnterNextPageButton}
             onMouseLeave={clearPageHover}
-            disabled={isLastPage || isZoomMode}
+            disabled={isForwardNavigationDisabled() || isZoomMode}
             aria-label="Next Page"
           >
             <ChevronRight className="w-12 h-12" />
@@ -599,36 +892,47 @@ const FlipbookPopoverContent: React.FC<{
         </React.Fragment>
       )}
 
+      {!isFullyRendered && getLoadingProgress()}
+
       <div
         id="pdfDocumentContainer"
-        className="flex items-center justify-center w-full h-full mt-1 mb-10 border border-background"
+        className={cn(
+          'flex items-center justify-center w-full h-full mt-1 mb-10 border border-background',
+          isFullyRendered
+            ? 'opacity-100 transition-opacity duration-500'
+            : 'opacity-0 pointer-events-none absolute',
+        )}
       >
         <Document
           file={file}
           onLoadSuccess={onDocumentLoadSuccess}
+          onLoadProgress={onDocumentLoadProgress}
+          loading={<></>}
           onItemClick={onClickDocumentItem}
-          className="flex items-center justify-center w-full h-full"
+          externalLinkTarget="_blank"
+          className={cn('flex items-center justify-center w-full h-full')}
         >
-          {numPages && pageWidth && (
+          <div
+            id="flipbookOverflowContainer"
+            className={flipbookOverflowContainerClasses}
+            style={flipbookOverflowContainerStyles}
+            onMouseMove={handleZoomAndPanMouseMove}
+            onMouseEnter={handleZoomAndPanMouseEnter}
+            onMouseLeave={handleZoomAndPanMouseLeave}
+          >
             <div
-              id="flipbookOverflowContainer"
-              className={flipbookOverflowContainerClasses}
-              style={flipbookOverflowContainerStyles}
-              onMouseMove={handleZoomAndPanMouseMove}
-              onMouseEnter={handleZoomAndPanMouseEnter}
-              onMouseLeave={handleZoomAndPanMouseLeave}
+              id="zoomAndPanLayer"
+              className="w-full h-full ease-out transition-transform duration-100 will-change-transform bg-card"
+              style={zoomAndPanLayerStyles}
             >
               <div
-                id="zoomAndPanLayer"
-                className="w-full h-full ease-out transition-transform duration-100 will-change-transform bg-card"
-                style={zoomAndPanLayerStyles}
+                className={cn('c-flipbook-custom c-flipbook w-full h-full absolute')}
+                id={FLIPBOOK_ELEMENT_ID}
+                style={flipbookElementStyles}
               >
-                <div
-                  className="c-flipbook-custom c-flipbook w-full h-full absolute"
-                  id={FLIPBOOK_ELEMENT_ID}
-                  style={flipbookElementStyles}
-                >
-                  {Array.from(new Array(numPages), (_, index) => (
+                {numPages &&
+                  pageWidth &&
+                  Array.from(new Array(numPages), (_, index) => (
                     <div key={`page_${index + 1}`} className="c-flipbook__page">
                       <Page
                         pageIndex={index}
@@ -636,14 +940,15 @@ const FlipbookPopoverContent: React.FC<{
                         renderAnnotationLayer={true}
                         width={pageWidth}
                         height={pageHeight}
+                        onLoadSuccess={onPageLoadSuccess}
+                        onRenderSuccess={onPageRenderSuccess}
                         className="bg-transparent"
                       />
                     </div>
                   ))}
-                </div>
               </div>
             </div>
-          )}
+          </div>
         </Document>
       </div>
     </div>
