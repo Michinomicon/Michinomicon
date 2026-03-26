@@ -6,9 +6,11 @@ import { Slider as SliderPrimitive } from 'radix-ui'
 import { cn } from '@/lib/utils'
 
 import { Badge } from '@/components/ui/badge'
+import { VariantProps } from 'class-variance-authority'
 
 interface FloatingLabelSliderProps extends React.ComponentProps<typeof SliderPrimitive.Root> {
   valueLabelFormatter?: (value: number) => React.ReactNode
+  badgeVariant?: VariantProps<typeof Badge>['variant']
 }
 
 function FloatingLabelSlider({
@@ -19,13 +21,13 @@ function FloatingLabelSlider({
   max = 100,
   valueLabelFormatter,
   onValueChange,
+  badgeVariant,
   ...props
 }: FloatingLabelSliderProps) {
   const [internalValues, setInternalValues] = React.useState<number[]>(() =>
     Array.isArray(value) ? value : Array.isArray(defaultValue) ? defaultValue : [min, max],
   )
 
-  // Sync with external state if the component is controlled
   React.useEffect(() => {
     if (Array.isArray(value)) {
       setInternalValues(value)
@@ -57,20 +59,23 @@ function FloatingLabelSlider({
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
-        className="bg-primary/30 rounded-full data-horizontal:h-1 data-vertical:w-1 relative grow overflow-hidden data-horizontal:w-full data-vertical:h-full"
+        className="bg-input/30 rounded-full data-horizontal:h-1 data-vertical:w-1 relative grow overflow-hidden data-horizontal:w-full data-vertical:h-full"
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
-          className="bg-primary absolute select-none data-horizontal:h-full data-vertical:w-full"
+          className="bg-input absolute select-none data-horizontal:h-full data-vertical:w-full"
         />
       </SliderPrimitive.Track>
       {internalValues.map((val, index) => (
         <SliderPrimitive.Thumb
           data-slot="slider-thumb"
           key={index}
-          className="border-ring ring-ring/50 relative size-3 rounded-full border bg-accent transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
+          className="border-ring ring-ring/50 relative size-3 rounded-full border bg-input transition-[color,box-shadow] after:absolute after:-inset-2 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 block shrink-0 select-none disabled:pointer-events-none disabled:opacity-50"
         >
-          <Badge className="absolute -top-4 left-1/2 -translate-x-1/2 -translate-y-1/2 px-1 text-xs min-w-5 justify-center pointer-events-none border-muted-accent bg-accent text-accent-foreground hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:hidden">
+          <Badge
+            variant={badgeVariant}
+            className="absolute -top-4.5 left-1/2 -translate-x-1/2 -translate-y-1/2 px-1 text-xs min-w-5 justify-center pointer-events-none border-input shadow hover:bg-primary/90 hover:ring-3 focus-visible:ring-3 focus-visible:outline-hidden active:ring-3 disabled:pointer-events-none disabled:hidden"
+          >
             {valueLabelFormatter ? valueLabelFormatter(val) : val}
           </Badge>
         </SliderPrimitive.Thumb>

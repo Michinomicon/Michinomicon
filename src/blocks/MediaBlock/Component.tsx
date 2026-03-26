@@ -22,7 +22,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
   const {
     // captionClassName,
     className,
-    enableGutter = true,
+    enableGutter = false,
     imgClassName,
     media,
     staticImage,
@@ -36,7 +36,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
     <div
       className={cn(
         '',
-        'media-block ',
+        'media-block bg-card border border-primary/30',
         {
           container: enableGutter,
         },
@@ -44,11 +44,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
       )}
     >
       {(media || staticImage) && (
-        <Media
-          imgClassName={cn('border border-border', imgClassName)}
-          resource={media}
-          src={staticImage}
-        />
+        <Media imgClassName={cn('', imgClassName)} resource={media} src={staticImage} />
       )}
       {/* {caption && (
         <div

@@ -87,7 +87,7 @@
 
 @layer base {
   * {
-    @apply border-border rounded-(--radius) outline-ring/50;
+    @apply rounded-(--radius) outline-ring/50 border-primary/30 ;
   }
   body {
     @apply bg-background text-foreground;
@@ -110,13 +110,23 @@
 /** 
   EYES WALLPAPER
 */
-#eyesBackgroundContainer {
+
+.dark {
+  .eyes-background-container.spotlight-disabled{
+      .eyes-background-base{
+        fill-opacity: 0.6;
+      }
+    }
+  }
+
+.eyes-background-container {
   border-radius: 0;
-  #wallpaperOverlay {
+
+  .eyes-background-overlay {
     opacity: var(--pattern-overlay-opacity);
   }
 
-  #wallpaperBase {
+  .eyes-background-base {
     fill: var(--pattern-background-color);
   }
 
@@ -133,7 +143,7 @@
     fill: var(--pattern-tears-fill-color);
   }
 
-  #activeTile {
+  .eyes-background-active-tile {
     /* Within the active wallpaper tile, groups shouldn't be visible unless they are active */
     :not([cursor-active='true']) > path {
       opacity: 0;
