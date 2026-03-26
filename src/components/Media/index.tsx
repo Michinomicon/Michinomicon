@@ -45,16 +45,20 @@ export const Media: React.FC<MediaProps> = (props) => {
 
   const wrapperProps = htmlElement !== null ? { className } : {}
 
-  if (!isPayloadMedia(resource)) {
+  const getMediaPlaceholder = (message: string, details?: string) => {
     return (
       <React.Fragment>
-        <p>
-          {MESSAGE_FAILED_TO_RENDER}
-          <br />
-          <pre>{MESSAGE_RESOURCE_MISSING}</pre>
-        </p>
+        <details>
+          <summary>{MESSAGE_FAILED_TO_RENDER}</summary>
+          {message}
+          {details}
+        </details>
       </React.Fragment>
     )
+  }
+
+  if (!isPayloadMedia(resource)) {
+    return getMediaPlaceholder(MESSAGE_RESOURCE_MISSING, `src: ${JSON.stringify(src)}`)
   }
 
   const mimeType: string | null | undefined = resource.mimeType
@@ -62,15 +66,7 @@ export const Media: React.FC<MediaProps> = (props) => {
   const mime: MIMEType | null = getMIMEType(mimeType)
 
   if (!mime) {
-    return (
-      <React.Fragment>
-        <p>
-          {MESSAGE_FAILED_TO_RENDER}
-          <br />
-          <pre>{MESSAGE_MIME_MISSING}</pre>
-        </p>
-      </React.Fragment>
-    )
+    return getMediaPlaceholder(MESSAGE_MIME_MISSING, `( ${resource.mimeType} ) [${resource.id}]`)
   }
 
   switch (mime.type) {
@@ -144,16 +140,6 @@ export const Media: React.FC<MediaProps> = (props) => {
         )
       }
     default:
-      return (
-        <React.Fragment>
-          <p>
-            {MESSAGE_FAILED_TO_RENDER}
-            <br />
-            <pre>
-              {MESSAGE_MIME_UNSUPPORTED} `[${mime.essence}]`
-            </pre>
-          </p>
-        </React.Fragment>
-      )
+      return getMediaPlaceholder(MESSAGE_MIME_UNSUPPORTED, `( ${mime.essence} ) [${resource.id}]`)
   }
 }

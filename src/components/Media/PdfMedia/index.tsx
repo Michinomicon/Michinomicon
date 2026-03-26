@@ -57,6 +57,8 @@ import {
 import { formatFileSize } from '@/utilities/formatFileSize'
 import { Progress } from '@/components/ui/progress'
 import { Spinner } from '@/components/ui/spinner'
+import InteractiveBackground from '@/components/InteractiveBackground'
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 
@@ -80,7 +82,7 @@ const FlipbookPopoverContent: React.FC<{
     loaded: 0,
     total: 0,
   })
-  const [loadedPagesCount, setLoadedPagesCount] = useState<number>(0)
+  const [processedPagesCount, setLoadedPagesCount] = useState<number>(0)
   const [renderedPagesCount, setRenderedPagesCount] = useState<number>(0)
 
   const [numPages, setNumPages] = useState<number | null>(null)
@@ -112,13 +114,40 @@ const FlipbookPopoverContent: React.FC<{
   }, [media])
 
   const isFullyRendered = useMemo(() => {
-    return numPages && numPages > 0 && renderedPagesCount === numPages
+    return numPages !== null && numPages > 0 && renderedPagesCount === numPages
   }, [numPages, renderedPagesCount])
 
   const onDocumentLoadSuccess: OnDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages)
     console.log(`Successfully loaded ${numPages} page document.`)
     setDocumentLoaded(true)
+  }
+
+  const getPageSlideTooltipContent = (previewIndex: number, total: number | null) => {
+    const tooltipStyles = 'mx-1.5 text-lg'
+    if (!total) {
+      return <span className={tooltipStyles}>No Pages.</span>
+    }
+    if (previewIndex === 0) {
+      return <span className={tooltipStyles}>Page 1 of {total}</span>
+    }
+    if (previewIndex === total - 1) {
+      return (
+        <span className={tooltipStyles}>
+          Page {total} of {total}
+        </span>
+      )
+    }
+    const isRight = previewIndex % 2 === 0
+    const leftPage = isRight ? previewIndex : previewIndex + 1
+    const rightPage = leftPage + 1
+    return (
+      <span className={tooltipStyles}>
+        {leftPage}
+        {' | '}
+        {rightPage}
+      </span>
+    )
   }
 
   const getPreviewPageStateDescription = (previewIndex: number, total: number | null) => {
@@ -339,163 +368,13 @@ const FlipbookPopoverContent: React.FC<{
 
   const onPageSliderValueChange = (val: number[]) => {
     setSliderValue(val)
-    goToSpecificPage(val[0])
+    if (!activePageRangeRef.current?.includes(val[0])) {
+      goToSpecificPage(val[0])
+    }
   }
 
   const getPageSliderValueFormatter: (value: number) => React.ReactNode = (_value: number) => {
-    return getPreviewPageStateDescription(sliderValue[0], numPages)
-  }
-
-  const getLoadingProgress = (): React.ReactNode => {
-    const totalPages = numPages && numPages > 0 ? numPages : 0
-    const isFirstRender = flipbookRenderCount === 0
-    const showDataTransfer = !documentLoaded || isFirstRender
-    const showPageProcessing = isFirstRender || loadedPagesCount <= totalPages
-    // File Loading progress bar
-    const { loaded: fileDataLoaded, total: totalFileSize }: OnLoadProgressArgs = fileloadingProgress
-    const formattedDataTransfered = formatFileSize(fileDataLoaded)
-    const fileTransferProgress =
-      fileDataLoaded > 0 ? Math.max((fileDataLoaded / totalFileSize) * 100, 0) : 0
-    const doneTransfer = fileTransferProgress >= 99
-
-    // Page Rendering progress
-    const renderingProgress =
-      renderedPagesCount > 0 ? Math.max((renderedPagesCount / totalPages) * 100, 0) : 0
-    const doneRendering = renderingProgress >= 99
-
-    // Page Loading progress
-    const loadingProgress =
-      loadedPagesCount > 0 ? Math.max((loadedPagesCount / totalPages) * 100, 0) : 0
-    const doneLoading = loadingProgress >= 99
-
-    return (
-      <div className="flex w-full max-w-xl flex-col gap-4 my-auto">
-        <span className=" text-3xl font-semibold text-center">
-          {isFirstRender ? 'Creating Flipbook' : 'Updating Flipbook'}
-        </span>
-
-        <ItemGroup className="gap-4">
-          {showDataTransfer && (
-            <Item variant="muted">
-              <ItemMedia>
-                {doneTransfer ? (
-                  <Check className="size-8 text-green-700  dark:text-green-300" />
-                ) : (
-                  <Spinner className="size-8" />
-                )}
-              </ItemMedia>
-              <ItemContent
-                className={cn('text-lg', doneTransfer ? 'text-muted-foreground' : 'font-semibold')}
-              >
-                <div>
-                  {fileTransferProgress.toFixed(0)}%{' '}
-                  <span className="ml-3">
-                    {doneTransfer ? 'Data Transferred' : 'Transferring Data...'}
-                  </span>
-                </div>
-              </ItemContent>
-              <ItemContent
-                className={cn(
-                  'text-lg flex-none',
-                  doneTransfer ? 'text-muted-foreground' : 'font-semibold',
-                )}
-              >
-                <span className="ml-auto">{formattedDataTransfered}</span>
-              </ItemContent>
-              <ItemFooter>
-                <Progress
-                  value={fileTransferProgress}
-                  id="progress-document-loading"
-                  className={doneTransfer ? '[&>div]:bg-green-400' : ''}
-                />
-              </ItemFooter>
-            </Item>
-          )}
-
-          {showPageProcessing && (
-            <Item variant="muted">
-              <ItemMedia>
-                {doneLoading ? (
-                  <Check className="size-8 text-green-700  dark:text-green-300" />
-                ) : (
-                  <Spinner className="size-8" />
-                )}
-              </ItemMedia>
-              <ItemContent
-                className={cn('text-lg', doneLoading ? 'text-muted-foreground' : 'font-semibold')}
-              >
-                <div>
-                  {loadingProgress.toFixed(0)}%
-                  <span className="ml-3">
-                    {doneLoading ? 'Pages Processed' : 'Processing Pages...'}
-                  </span>
-                </div>
-              </ItemContent>
-              <ItemContent
-                className={cn(
-                  'text-lg flex-none',
-                  doneLoading ? 'text-muted-foreground' : 'font-semibold',
-                )}
-              >
-                <span className="ml-auto">{loadedPagesCount}</span>
-              </ItemContent>
-              <ItemFooter>
-                <Progress
-                  value={loadingProgress}
-                  id="progress-page-loading"
-                  className={doneLoading ? '[&>div]:bg-green-400' : ''}
-                />
-              </ItemFooter>
-            </Item>
-          )}
-
-          <Item variant="muted">
-            <ItemMedia>
-              {doneRendering ? (
-                <Check className="size-8 text-green-700  dark:text-green-300" />
-              ) : (
-                <Spinner className="size-8" />
-              )}
-            </ItemMedia>
-            <ItemContent
-              className={cn('text-lg', doneRendering ? 'text-muted-foreground' : 'font-semibold')}
-            >
-              <div>
-                {fileTransferProgress.toFixed(0)}%
-                <span className="ml-3">
-                  {doneRendering ? 'Pages Rendered' : 'Rendering Pages...'}
-                </span>
-              </div>
-            </ItemContent>
-            <ItemContent
-              className={cn(
-                'text-lg flex-none',
-                doneRendering ? 'text-muted-foreground' : 'font-semibold',
-              )}
-            >
-              <span className="ml-auto">{renderedPagesCount}</span>
-            </ItemContent>
-            <ItemFooter>
-              <Progress
-                value={renderingProgress}
-                id="progress-page-rendering"
-                className={doneRendering ? '[&>div]:bg-green-400' : ''}
-              />
-            </ItemFooter>
-          </Item>
-        </ItemGroup>
-
-        <Button
-          variant="secondary"
-          size="lg"
-          onClick={onClose}
-          aria-label="Close flipbook"
-          className="w-fit mx-auto"
-        >
-          <X /> Cancel
-        </Button>
-      </div>
-    )
+    return getPageSlideTooltipContent(sliderValue[0], numPages)
   }
 
   const onDocumentLoadProgress: OnDocumentLoadProgress = (
@@ -740,11 +619,123 @@ const FlipbookPopoverContent: React.FC<{
     }
   }, [numPages, pageHeight, pageWidth])
 
+  const getProgressItem = ({
+    completedLabel,
+    currentValue,
+    inProgressLabel,
+    inProgressValue,
+    totalValue,
+    completedValue,
+  }: {
+    completedLabel: string
+    currentValue: number
+    inProgressValue: string | number
+    inProgressLabel: string
+    totalValue: number
+    completedValue: string | number
+  }) => {
+    const progressPercent = currentValue > 0 ? Math.max((currentValue / totalValue) * 100, 0) : 0
+    const isCompleted = progressPercent >= 100
+    const itemContentStyle = isCompleted ? 'text-lg text-muted-foreground' : 'text-lg font-semibold'
+    const statusIconStyle = isCompleted ? 'size-8 text-green-700  dark:text-green-300' : 'size-8'
+    const progressBarStyle = isCompleted ? '[&>div]:bg-green-400' : ''
+
+    const statusIcon = isCompleted ? (
+      <Check className={statusIconStyle} />
+    ) : (
+      <Spinner className={statusIconStyle} />
+    )
+
+    const itemLabelContent = isCompleted ? (
+      completedLabel
+    ) : (
+      <span>
+        {progressPercent.toFixed(0)}%<span className="ml-3">{inProgressLabel}</span>
+      </span>
+    )
+
+    const itemDescriptionContent = (
+      <span className="ml-auto">{isCompleted ? completedValue : inProgressValue}</span>
+    )
+    return (
+      <Item variant="muted">
+        <ItemMedia>{statusIcon}</ItemMedia>
+        <ItemContent className={itemContentStyle}>{itemLabelContent}</ItemContent>
+        <ItemContent className={cn('flex-none', itemContentStyle)}>
+          {itemDescriptionContent}
+        </ItemContent>
+        <ItemFooter>
+          <Progress value={progressPercent} className={progressBarStyle} />
+        </ItemFooter>
+      </Item>
+    )
+  }
+
+  const getLoadingProgressComponent = (): React.ReactNode => {
+    const totalPages = numPages && numPages > 0 ? numPages : 0
+    const isFirstRender = flipbookRenderCount < 1
+    const showDataTransfer = !documentLoaded || isFirstRender
+    const showPageProcessing = isFirstRender || processedPagesCount <= totalPages
+    const { loaded: fileDataLoaded, total: totalFileSize }: OnLoadProgressArgs = fileloadingProgress
+    const cardTitle = isFirstRender ? 'Creating Flipbook' : 'Updating Flipbook'
+
+    return (
+      <div className="z-50 flex w-full h-full flex-col items-center gap-4 pointer-events-none">
+        <Card className="w-full max-w-3xl my-auto pointer-events-auto">
+          <CardHeader>
+            <CardTitle className=" text-3xl font-semibold text-center">{cardTitle}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ItemGroup className="gap-4">
+              {showDataTransfer &&
+                getProgressItem({
+                  completedLabel: 'Data Transfer Complete',
+                  currentValue: fileDataLoaded,
+                  totalValue: totalFileSize,
+                  inProgressValue: formatFileSize(fileDataLoaded),
+                  completedValue: formatFileSize(fileDataLoaded),
+                  inProgressLabel: 'Transferring Data...',
+                })}
+              {showPageProcessing &&
+                getProgressItem({
+                  currentValue: processedPagesCount,
+                  totalValue: totalPages,
+                  completedLabel: 'Page Processing Complete',
+                  completedValue: `${processedPagesCount} Pages`,
+                  inProgressValue: `${processedPagesCount} / ${totalPages} Pages`,
+                  inProgressLabel: 'Processing Pages...',
+                })}
+              {getProgressItem({
+                currentValue: renderedPagesCount,
+                totalValue: totalPages,
+                completedLabel: 'Page Rendering Complete',
+                completedValue: `${renderedPagesCount} Pages`,
+                inProgressValue: `${renderedPagesCount} / ${totalPages} Pages`,
+                inProgressLabel: 'Rendering Pages...',
+              })}
+            </ItemGroup>
+          </CardContent>
+          <CardFooter>
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={onClose}
+              aria-label="Close flipbook"
+              className="w-fit mx-auto"
+            >
+              <X /> Cancel
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    )
+  }
+
   const pageSliderMaxValue = numPages ? Math.max(numPages - 1, 1) : 1
   const pageSliderWidthStyles = { width: bookWidth }
 
   const flipbookElementStyles = {
-    top: 75,
+    top: 15,
     left: atFrontCover()
       ? 'calc(50px + calc(-25% + 0px))'
       : atBackCover()
@@ -758,26 +749,30 @@ const FlipbookPopoverContent: React.FC<{
     transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
   }
 
-  const flipbookOverflowContainerStyles = { width: 100 + bookWidth, height: 100 + pageHeight }
+  const flipbookOverflowContainerStyles = { width: 100 + bookWidth, height: 30 + pageHeight }
   const flipbookOverflowContainerClasses = cn(
     'relative transition-all border w-full h-full bg-card',
     isZoomMode
-      ? 'cursor-zoom-in overflow-hidden outline-2 outline-accent outline-offset-8'
+      ? 'cursor-zoom-in overflow-hidden outline-2 outline-primary outline-offset-6'
       : 'cursor-auto',
   )
   const floatingNextButtonStyles = { right: `calc(calc(50% - 120px) - ${pageWidth}px)` }
   const floatingPreviousButtonnStyles = { left: `calc(calc(50% - 120px) - ${pageWidth}px)` }
 
+  const readyToMapPages = numPages !== null && numPages > 0 && pageWidth !== null
+
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full flex flex-col items-center pt-10 pb-10 px-8 bg-background overflow-hidden"
+      className="relative w-screen h-screen flex flex-col items-center bg-background overflow-hidden"
     >
+      <InteractiveBackground enableSpotlight={isFullyRendered} />
       {isFullyRendered && (
         <React.Fragment>
           <div
             id="pdfDocumentControls"
-            className="absolute bg-background border border-card bottom-0 z-10 w-full flex flex-col justify-center items-center gap-0 px-2 py-0 pb-2 "
+            style={{ maxWidth: flipbookOverflowContainerStyles.width }}
+            className={`absolute bg-card border border-primary/20 bottom-0 z-10 w-full flex flex-col justify-center items-center gap-0 px-2 py-0 pb-2 `}
           >
             <div className="flex justify-center w-full gap-0 p-0">
               <Field style={pageSliderWidthStyles}>
@@ -789,8 +784,9 @@ const FlipbookPopoverContent: React.FC<{
                   max={pageSliderMaxValue}
                   step={1}
                   orientation={'horizontal'}
-                  className="mt-4 mb-2 w-full min-h-1.5 cursor-grab active:cursor-grabbing border-2 border-solid border-accent"
+                  className="mt-4 mb-2 w-full min-h-1.5 cursor-grab active:cursor-grabbing border-2 border-solid border-input"
                   aria-label="Page Navigation"
+                  badgeVariant="default"
                   valueLabelFormatter={getPageSliderValueFormatter}
                 />
               </Field>
@@ -798,7 +794,7 @@ const FlipbookPopoverContent: React.FC<{
             <ButtonGroup orientation="horizontal">
               <ButtonGroup orientation="horizontal">
                 <Button
-                  variant="outline"
+                  variant="default"
                   id="flipbookFirstButton"
                   onClick={goToFirstPage}
                   onMouseEnter={mouseEnterPreviousPageButton}
@@ -808,7 +804,7 @@ const FlipbookPopoverContent: React.FC<{
                   <ChevronFirst />
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="default"
                   id="flipbookPrevButton"
                   onClick={previousPage}
                   onMouseEnter={mouseEnterPreviousPageButton}
@@ -817,13 +813,13 @@ const FlipbookPopoverContent: React.FC<{
                 >
                   <ChevronLeft />
                 </Button>
-                <Button variant="outline" className="w-32 sm:w-40 [anchor-name:--slider-btn]">
+                <Button variant="default" className="w-32 sm:w-40 [anchor-name:--slider-btn]">
                   <span className="whitespace-nowrap text-center">
                     {getPreviewPageStateDescription(sliderValue[0], numPages)}
                   </span>
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="default"
                   id="flipbookNextButton"
                   onClick={nextPage}
                   onMouseEnter={mouseEnterNextPageButton}
@@ -833,7 +829,7 @@ const FlipbookPopoverContent: React.FC<{
                   <ChevronRight />
                 </Button>
                 <Button
-                  variant="outline"
+                  variant="default"
                   id="flipbookLastButton"
                   onClick={goToLastPage}
                   onMouseEnter={mouseEnterNextPageButton}
@@ -847,7 +843,7 @@ const FlipbookPopoverContent: React.FC<{
 
               <ButtonGroup orientation="horizontal">
                 <Button
-                  variant={isZoomMode ? 'default' : 'outline'}
+                  variant={isZoomMode ? 'secondary' : 'default'}
                   onClick={onClickZoomModeButton}
                   aria-label="Toggle zoom and pan"
                   title="Toggle zoom and pan"
@@ -857,7 +853,7 @@ const FlipbookPopoverContent: React.FC<{
               </ButtonGroup>
               <ButtonGroupSeparator />
               <ButtonGroup orientation="horizontal">
-                <Button variant="outline" onClick={onClose} aria-label="Close flipbook">
+                <Button variant="default" onClick={onClose} aria-label="Close flipbook">
                   <X /> Close
                 </Button>
               </ButtonGroup>
@@ -866,7 +862,9 @@ const FlipbookPopoverContent: React.FC<{
 
           {/* Floating Left "Previous" Button*/}
           <button
-            className="absolute  top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-primary/20 hover:bg-primary/40 text-primary-foreground/50 hover:text-primary-foreground transition-all duration-300 disabled:opacity-0 disabled:pointer-events-none"
+            className={cn([
+              `absolute  top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-primary/20 hover:bg-primary/40 text-foreground/50 hover:text-foreground transition-all duration-300 disabled:opacity-0 disabled:pointer-events-none`,
+            ])}
             style={floatingPreviousButtonnStyles}
             onClick={previousPage}
             onMouseEnter={mouseEnterPreviousPageButton}
@@ -879,7 +877,9 @@ const FlipbookPopoverContent: React.FC<{
 
           {/* Floating Right "Next" Button*/}
           <button
-            className="absolute  top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-primary/20 hover:bg-primary/40 text-primary-foreground/50 hover:text-primary-foreground transition-all duration-300 disabled:opacity-0 disabled:pointer-events-none"
+            className={cn([
+              `absolute  top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-primary/20 hover:bg-primary/40 text-foreground/50 hover:text-foreground transition-all duration-300 disabled:opacity-0 disabled:pointer-events-none`,
+            ])}
             style={floatingNextButtonStyles}
             onClick={nextPage}
             onMouseEnter={mouseEnterNextPageButton}
@@ -892,12 +892,13 @@ const FlipbookPopoverContent: React.FC<{
         </React.Fragment>
       )}
 
-      {!isFullyRendered && getLoadingProgress()}
+      {!isFullyRendered && getLoadingProgressComponent()}
 
       <div
         id="pdfDocumentContainer"
+        style={{ marginTop: 30 }}
         className={cn(
-          'flex items-center justify-center w-full h-full mt-1 mb-10 border border-background',
+          'relative flex items-center justify-center max-h-screen border-2 border-background',
           isFullyRendered
             ? 'opacity-100 transition-opacity duration-500'
             : 'opacity-0 pointer-events-none absolute',
@@ -910,7 +911,7 @@ const FlipbookPopoverContent: React.FC<{
           loading={<></>}
           onItemClick={onClickDocumentItem}
           externalLinkTarget="_blank"
-          className={cn('flex items-center justify-center w-full h-full')}
+          className={cn('flex items-center justify-center w-full')}
         >
           <div
             id="flipbookOverflowContainer"
@@ -922,18 +923,22 @@ const FlipbookPopoverContent: React.FC<{
           >
             <div
               id="zoomAndPanLayer"
-              className="w-full h-full ease-out transition-transform duration-100 will-change-transform bg-card"
+              className={cn(
+                'w-full h-full ease-out transition-transform duration-100 will-change-transform bg-card',
+              )}
               style={zoomAndPanLayerStyles}
             >
               <div
-                className={cn('c-flipbook-custom c-flipbook w-full h-full absolute')}
+                className={cn('c-flipbook-custom c-flipbook absolute pointer-events-none')}
                 id={FLIPBOOK_ELEMENT_ID}
                 style={flipbookElementStyles}
               >
-                {numPages &&
-                  pageWidth &&
+                {readyToMapPages &&
                   Array.from(new Array(numPages), (_, index) => (
-                    <div key={`page_${index + 1}`} className="c-flipbook__page">
+                    <div
+                      key={`page_${index + 1}`}
+                      className={cn('c-flipbook__page pointer-events-auto')}
+                    >
                       <Page
                         pageIndex={index}
                         renderTextLayer={false}
@@ -1023,7 +1028,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
       <React.Fragment>
         <Item
           variant="outline"
-          className="relative flex flex-row bg-card text-card-foreground border border-card shadow-none w-full max-w-lg"
+          className="relative flex flex-row bg-card text-card-foreground border border-card shadow-none w-full"
         >
           <div className="absolute top-2 right-2">
             <Tooltip>
@@ -1070,7 +1075,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
             <ItemDescription>{description}</ItemDescription>
           </ItemContent>
           <ItemActions className="flex flex-col">
-            <Button size="lg" variant="secondary" onClick={handleOpen} className="">
+            <Button size="lg" variant="default" onClick={handleOpen} className="">
               Open
               <SquareArrowOutUpRight data-icon="inline-end" />
             </Button>

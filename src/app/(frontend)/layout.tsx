@@ -46,8 +46,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="theme-color" content="#5a168c" />
       </head>
       <body>
-        <InteractiveBackground />
         <Providers>
+          <InteractiveBackground enableSpotlight={true} enableReactiveTile={true} />
           <AdminBar
             adminBarProps={{
               preview: isEnabled,
@@ -70,7 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <Header />
           <div
             id="mainContent"
-            className="relative min-h-screen p-6 md:p-12 max-w-7xl mx-auto pointer-events-none"
+            className="bg-background/40 text-foreground relative min-h-screen p-6 md:p-12 max-w-7xl mx-auto pointer-events-none *:pointer-events-auto"
           >
             {children}
           </div>

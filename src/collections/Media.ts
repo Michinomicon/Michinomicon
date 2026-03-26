@@ -6,11 +6,9 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 import path from 'path'
-import fs from 'fs/promises'
 import { fileURLToPath } from 'url'
 import { hasAccess } from '@/utilities/accessFunctions'
-import { IAudioMetadata } from 'music-metadata'
-import sharp from 'sharp'
+import { mediaCollectionBeforeChange } from '@/hooks/mediaCollectionBeforeChange'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -252,87 +250,7 @@ export const Media: CollectionConfig = {
     ],
   },
   hooks: {
-    beforeChange: [
-      async ({ data, req, operation }) => {
-        if ((operation === 'create' || operation === 'update') && req.file) {
-          if (req.file.mimetype === 'application/pdf') {
-            try {
-              const pdf2imgModule = await import('pdf-img-convert')
-              const pdf2img = pdf2imgModule.default || pdf2imgModule
-              const pdfImageArray = await pdf2img.convert(req.file.data, {
-                width: 400, // thumbnail width
-                page_numbers: [1], // first page
-                base64: false, // FALSE => Uint8Array buffer
-              })
-
-              if (pdfImageArray && pdfImageArray.length > 0) {
-                const imageBuffer = Buffer.from(pdfImageArray[0])
-                const baseName = (data.filename || req.file.name).replace(/\.pdf$/i, '')
-                const thumbnailFilename = `${baseName}-thumbnail.png`
-                const uploadConfig = req.payload.collections['media'].config.upload as {
-                  staticDir: string
-                }
-                const resolvedStaticDir = uploadConfig.staticDir
-                const uploadPath = path.join(resolvedStaticDir, thumbnailFilename)
-                await fs.writeFile(uploadPath, imageBuffer)
-
-                data.sizes = data.sizes || {}
-                data.sizes.thumbnail = {
-                  filename: thumbnailFilename,
-                  filesize: imageBuffer.length,
-                  mimeType: 'image/png',
-                  width: 400,
-                  height: null,
-                }
-                console.log('PDF thumbnail generated successfully.', data)
-              }
-            } catch (error) {
-              console.error('Failed to generate PDF thumbnail:', error)
-            }
-          }
-
-          if (req.file.mimetype.startsWith('image/')) {
-            try {
-              const sharp = (await import('sharp')).default
-
-              // Read the image buffer
-              const metadata: sharp.Metadata = await sharp(req.file.data).metadata()
-
-              data.width = metadata.width || data.width
-              data.height = metadata.height || data.height
-              data.format = metadata.format || data.format
-              data.hasAlpha = metadata.hasAlpha || false
-            } catch (error) {
-              console.error('Failed to parse image metadata:', error)
-            }
-          }
-
-          if (req.file.mimetype.startsWith('audio/')) {
-            try {
-              const mm = await import('music-metadata')
-              const metadata: IAudioMetadata = await mm.parseBuffer(
-                req.file.data,
-                req.file.mimetype,
-              )
-
-              data.artist = metadata.common.artist || data.artist
-              data.album = metadata.common.album || data.album
-              data.duration = metadata.format.duration
-                ? Math.round(metadata.format.duration)
-                : data.duration
-              data.title = metadata.common.title || data.title
-              data.artwork = metadata.common.picture || data.images
-              data.images = metadata.common.picture || data.images
-              data.genre = metadata.common.genre || data.genre
-              data.live = false
-            } catch (error) {
-              console.error('Failed to parse audio metadata:', error)
-            }
-          }
-        }
-        return data
-      },
-    ],
+    beforeChange: [mediaCollectionBeforeChange],
   },
 }
 
