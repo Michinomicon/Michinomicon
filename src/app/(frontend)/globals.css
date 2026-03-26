@@ -4,20 +4,15 @@
 
 @custom-variant dark (&:is(.dark, .dark *, [data-mode="dark"], [data-mode="dark"] * ));
 
-/* @import 'flipbook-js/style.css'; */
-
-
 /* Styles for the .pdf flipbopok */
 @import './themes/pdf-flipbook.css';
-
-/* Default/Fallback colour theme */
-@import './themes/default.css';
 
 /* Eyes wallpaper */
 @import './themes/eyes-wallpaper.css';
 
 /* IMPORT CUSTOM THEMES HERE */
 @import './themes/fii-one.css';
+@import './themes/simple.css';
 @import './themes/purple.css';
 
 /* @import './themes/blue.css'; */
@@ -82,8 +77,6 @@
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
 
-  --border: 1px solid var(--theme-elevation-200);
-
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
   --tracking-normal: var(--tracking-normal);
@@ -91,6 +84,105 @@
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 }
+
+@layer base {
+  * {
+    @apply rounded-(--radius) outline-ring/50 border-primary/30 ;
+  }
+  body {
+    @apply bg-background text-foreground;
+    letter-spacing: var(--tracking-normal);
+  }
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-size: unset;
+    font-weight: unset;
+  }
+}
+
+/** 
+  EYES WALLPAPER
+*/
+
+.dark {
+  .eyes-background-container.spotlight-disabled{
+      .eyes-background-base{
+        fill-opacity: 0.6;
+      }
+    }
+  }
+
+.eyes-background-container {
+  border-radius: 0;
+
+  .eyes-background-overlay {
+    opacity: var(--pattern-overlay-opacity);
+  }
+
+  .eyes-background-base {
+    fill: var(--pattern-background-color);
+  }
+
+  [theme-group='outer'] {
+    fill: var(--pattern-outer-fill-color);
+  }
+  [theme-group='pupil'] {
+    fill: var(--pattern-pupil-fill-color);
+  }
+  [theme-group='ring'] {
+    fill: var(--pattern-ring-fill-color);
+  }
+  [theme-group='tears'] {
+    fill: var(--pattern-tears-fill-color);
+  }
+
+  .eyes-background-active-tile {
+    /* Within the active wallpaper tile, groups shouldn't be visible unless they are active */
+    :not([cursor-active='true']) > path {
+      opacity: 0;
+      transition:
+        opacity var(--pattern-transition-duration) ease-out var(--pattern-transition-delay),
+        fill var(--pattern-transition-duration) ease-out var(--pattern-transition-delay);
+    }
+
+    /* When the group is active, apply the active fill colors to the paths in that group */
+    [cursor-active='true'] {
+      > path {
+        opacity: 1;
+        transition: none;
+      }
+      [theme-group='outer'] {
+        fill: var(--pattern-outer-active-fill-color);
+      }
+      [theme-group='pupil'] {
+        fill: var(--pattern-pupil-active-fill-color);
+      }
+      [theme-group='ring'] {
+        fill: var(--pattern-ring-active-fill-color);
+      }
+      [theme-group='tears'] {
+        fill: var(--pattern-tears-active-fill-color);
+      }
+    }
+  }
+}
+
+/* Protect react-pdf text layer from Tailwind's Preflight reset */
+.react-pdf__Page__textContent span {
+  line-height: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+
+/** TEMPLATE FOR THEME VARIABLE FOR INTERACTIVE WALLPAPER */
 
 /* @theme inline {
   --pattern-background-color: oklch(from var(--background) calc(l + 1) c h);
@@ -142,110 +234,3 @@
     --pattern-tears-active-fill-color: oklch(from var(--pattern-tears-fill-color) l c calc(h + 180));
   }
 } */
-
-body {
-  letter-spacing: var(--tracking-normal);
-}
-
-/*
-  The default border color has changed to `currentcolor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentcolor);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50 rounded-4xl;
-  }
-  body {
-    @apply bg-background text-foreground min-h-screen flex flex-col;
-  }
-}
-
-@layer base {
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-size: unset;
-    font-weight: unset;
-  }
-}
-
-/** 
-  EYES WALLPAPER
-*/
-#eyesBackgroundContainer {
-  border-radius: 0;
-  #wallpaperOverlay {
-    opacity: var(--pattern-overlay-opacity);
-  }
-
-  #wallpaperBase {
-    fill: var(--pattern-background-color);
-  }
-
-  [theme-group='outer'] {
-    fill: var(--pattern-outer-fill-color);
-  }
-  [theme-group='pupil'] {
-    fill: var(--pattern-pupil-fill-color);
-  }
-  [theme-group='ring'] {
-    fill: var(--pattern-ring-fill-color);
-  }
-  [theme-group='tears'] {
-    fill: var(--pattern-tears-fill-color);
-  }
-
-  #activeTile {
-    /* Within the active wallpaper tile, groups shouldn't be visible unless they are active */
-    :not([cursor-active='true']) > path {
-      opacity: 0;
-      transition:
-        opacity var(--pattern-transition-duration) ease-out var(--pattern-transition-delay),
-        fill var(--pattern-transition-duration) ease-out var(--pattern-transition-delay);
-    }
-
-    /* When the group is active, apply the active fill colors to the paths in that group */
-    [cursor-active='true'] {
-      > path {
-        opacity: 1;
-        transition: none;
-      }
-      [theme-group='outer'] {
-        fill: var(--pattern-outer-active-fill-color);
-      }
-      [theme-group='pupil'] {
-        fill: var(--pattern-pupil-active-fill-color);
-      }
-      [theme-group='ring'] {
-        fill: var(--pattern-ring-active-fill-color);
-      }
-      [theme-group='tears'] {
-        fill: var(--pattern-tears-active-fill-color);
-      }
-    }
-  }
-}
-
-/* Protect react-pdf text layer from Tailwind's Preflight reset */
-.react-pdf__Page__textContent span {
-  line-height: 1 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}

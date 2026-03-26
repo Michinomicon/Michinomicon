@@ -6,7 +6,7 @@
   "tailwind": {
     "config": "tailwind.config.mjs",
     "css": "src/app/(frontend)/globals.css",
-    "baseColor": "zinc",
+    "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
@@ -18,5 +18,7 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@audio": "https://audio-ui.xyz/r/{name}.json"
+  }
 }

@@ -10,7 +10,7 @@ interface ColorThemeContextType {
 
 const ColorThemeContext = React.createContext<ColorThemeContextType | undefined>(undefined)
 
-const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME
+const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME ?? 'default'
 const ColorThemeStorageKey = 'michnomicon-theme'
 
 export function ColorThemeProvider({
@@ -44,7 +44,6 @@ export function ColorThemeProvider({
       root.setAttribute('data-theme', colorTheme)
     } else {
       root.setAttribute('data-theme', DefaultColorTheme)
-      // root.removeAttribute('data-theme')
     }
   }, [colorTheme, isClient])
 

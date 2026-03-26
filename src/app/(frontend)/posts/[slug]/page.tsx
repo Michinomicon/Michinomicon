@@ -28,9 +28,11 @@ export async function generateStaticParams() {
     },
   })
 
-  const params = posts.docs.map(({ slug }) => {
-    return { slug }
-  })
+  const params = posts.docs
+    .filter((doc) => doc.slug)
+    .map(({ slug }) => {
+      return { slug: String(slug) }
+    })
 
   return params
 }
@@ -52,7 +54,7 @@ export default async function Post({ params: paramsPromise }: Args) {
   if (!post) return <PayloadRedirects url={url} />
 
   return (
-    <article className="pt-16 pb-16">
+    <article className="article-post pt-16 pb-16 bg-card/50 text-card-foreground pointer-events-auto border border-primary/30">
       <PageClient />
 
       {/* Allows redirects for valid pages too */}

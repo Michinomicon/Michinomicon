@@ -1,5 +1,4 @@
-import React from 'react'
-import LogoImage from 'public/burger-drooling.png'
+import LogoImage from 'public/icons/favicon-512x512.png'
 
 interface Props {
   text?: string | undefined

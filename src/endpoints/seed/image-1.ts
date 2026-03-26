@@ -64,4 +64,5 @@ export const image1: Omit<Media, 'createdAt' | 'id' | 'updatedAt'> = {
       version: 1,
     },
   },
+  title: '',
 }

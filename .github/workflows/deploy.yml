@@ -21,7 +21,12 @@ jobs:
 
     steps:          
       - name: Checkout source code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
+
+      - name: Install canvas dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libcairo2-dev libpango1.0-dev libjpeg-dev libgif-dev librsvg2-dev
 
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.12.1
@@ -56,7 +61,7 @@ jobs:
           run_install: false
 
       - name: Setup Node.js LTS (v24.13.0)
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24.13.0'
           cache: 'pnpm'
@@ -80,6 +85,7 @@ jobs:
           cp -r public/* .next/standalone/public/
           cp -r scripts/* .next/standalone/scripts/
           cp -r .next/static/* .next/standalone/.next/static/
+          cp -a node_modules/pdfjs-dist .next/standalone/node_modules/
 
       - name: Test Network Connectivity
         run: |
