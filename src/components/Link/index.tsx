@@ -3,7 +3,7 @@ import { cn } from '@/utilities/ui'
 import Link from 'next/link'
 import React from 'react'
 
-import type { Page, Post } from '@/payload-types'
+import type { Page, Post, WikiCategory, WikiPage } from '@/payload-types'
 
 type CMSLinkType = {
   appearance?: 'inline' | ButtonProps['variant']
@@ -12,8 +12,8 @@ type CMSLinkType = {
   label?: string | null
   newTab?: boolean | null
   reference?: {
-    relationTo: 'pages' | 'posts'
-    value: Page | Post | string | number
+    relationTo: 'pages' | 'posts' | 'wiki-pages' | 'wiki-categories'
+    value: Page | Post | WikiPage | WikiCategory | string | number
   } | null
   size?: ButtonProps['size'] | null
   type?: 'custom' | 'reference' | null
@@ -33,12 +33,23 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
     url,
   } = props
 
-  const href =
-    type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
-          reference.value.slug
-        }`
-      : url
+  let href = url
+
+  if (type === 'reference' && typeof reference?.value === 'object' && reference.value.slug) {
+    const relation = reference.relationTo
+    const slug = reference.value.slug
+
+    if (relation === 'pages') {
+      href = `/${slug}`
+    } else if (relation === 'posts') {
+      href = `/posts/${slug}`
+    } else if (relation === 'wiki-pages') {
+      href = `/wiki/${slug}`
+    } else if (relation === 'wiki-categories') {
+      // if category archive page
+      href = `/wiki/category/${slug}`
+    }
+  }
 
   if (!href) return null
 

@@ -14,7 +14,7 @@ type WallpaperPreferences = {
 const WallpaperContext = createContext<WallpaperPreferences | undefined>(undefined)
 
 export function WallpaperProvider({ children }: { children: ReactNode }) {
-  const [globalSpotlight, setGlobalSpotlight] = useState(true)
+  const [globalSpotlight, setGlobalSpotlight] = useState(false)
   const [globalReactiveTile, setGlobalReactiveTile] = useState(true)
 
   // Load preferences from localStorage on mount

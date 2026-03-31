@@ -74,6 +74,8 @@ export interface Config {
     users: User;
     slugs: Slug;
     rights: Right;
+    'wiki-categories': WikiCategory;
+    'wiki-pages': WikiPage;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -98,6 +100,8 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     slugs: SlugsSelect<false> | SlugsSelect<true>;
     rights: RightsSelect<false> | RightsSelect<true>;
+    'wiki-categories': WikiCategoriesSelect<false> | WikiCategoriesSelect<true>;
+    'wiki-pages': WikiPagesSelect<false> | WikiPagesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -189,6 +193,14 @@ export interface Page {
               | ({
                   relationTo: 'posts';
                   value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'wiki-pages';
+                  value: string | WikiPage;
+                } | null)
+              | ({
+                  relationTo: 'wiki-categories';
+                  value: string | WikiCategory;
                 } | null);
             url?: string | null;
             label: string;
@@ -512,6 +524,62 @@ export interface Slug {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "wiki-pages".
+ */
+export interface WikiPage {
+  id: string;
+  title: string;
+  category: string | WikiCategory;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedPages?: (string | WikiPage)[] | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "wiki-categories".
+ */
+export interface WikiCategory {
+  id: string;
+  title: string;
+  /**
+   * Leave blank for top-level categories. Select a parent to nest this category.
+   */
+  parent?: (string | null) | WikiCategory;
+  /**
+   * Used to force a specific sorting order in the sidebar (e.g., 1, 2, 3).
+   */
+  order?: number | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
@@ -543,6 +611,14 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'wiki-pages';
+                value: string | WikiPage;
+              } | null)
+            | ({
+                relationTo: 'wiki-categories';
+                value: string | WikiCategory;
               } | null);
           url?: string | null;
           label: string;
@@ -593,6 +669,14 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'wiki-pages';
+                value: string | WikiPage;
+              } | null)
+            | ({
+                relationTo: 'wiki-categories';
+                value: string | WikiCategory;
               } | null);
           url?: string | null;
           label: string;
@@ -1071,6 +1155,14 @@ export interface PayloadLockedDocument {
         value: string | Right;
       } | null)
     | ({
+        relationTo: 'wiki-categories';
+        value: string | WikiCategory;
+      } | null)
+    | ({
+        relationTo: 'wiki-pages';
+        value: string | WikiPage;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -1502,6 +1594,34 @@ export interface RightsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "wiki-categories_select".
+ */
+export interface WikiCategoriesSelect<T extends boolean = true> {
+  title?: T;
+  parent?: T;
+  order?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "wiki-pages_select".
+ */
+export interface WikiPagesSelect<T extends boolean = true> {
+  title?: T;
+  category?: T;
+  content?: T;
+  relatedPages?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -1794,6 +1914,14 @@ export interface Header {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'wiki-pages';
+                value: string | WikiPage;
+              } | null)
+            | ({
+                relationTo: 'wiki-categories';
+                value: string | WikiCategory;
               } | null);
           url?: string | null;
           label: string;
@@ -1823,6 +1951,14 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'wiki-pages';
+                value: string | WikiPage;
+              } | null)
+            | ({
+                relationTo: 'wiki-categories';
+                value: string | WikiCategory;
               } | null);
           url?: string | null;
           label: string;

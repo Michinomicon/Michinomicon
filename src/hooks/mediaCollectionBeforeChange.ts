@@ -71,7 +71,7 @@ const applicationPdfBeforeChangeTasks = async ({
     const baseName = (data.filename || req.file.name).replace(/\.pdf$/i, '')
 
     for (const { name, width } of configuredUploadImageSizes) {
-      if (width) {
+      if (width !== undefined) {
         const pdfImageArray = await pdf2img.convert(req.file.data, {
           width: width,
           page_numbers: [1],
@@ -95,7 +95,7 @@ const applicationPdfBeforeChangeTasks = async ({
         }
       }
     }
-    console.log('PDF thumbnails generated successfully for all sizes.')
+    console.debug('PDF thumbnails generated successfully for all sizes.', data.sizes)
   } catch (error) {
     console.error('Failed to generate PDF thumbnails:', error)
     return data
@@ -112,7 +112,7 @@ const imageBeforeChangeTasks = async ({
 }): Promise<Partial<Media>> => {
   if (!req.file?.mimetype.startsWith('image/')) {
     console.error(
-      `applicationPdfBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "application/pdf"`,
+      `imageBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "image/"`,
       JSON.stringify(req),
     )
     return data
@@ -144,7 +144,7 @@ const audioBeforeChangeTasks = async ({
 }): Promise<Partial<Media>> => {
   if (!req.file?.mimetype.startsWith('audio/')) {
     console.error(
-      `applicationPdfBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "application/pdf"`,
+      `audioBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "audio/"`,
       JSON.stringify(req),
     )
     return data
@@ -154,16 +154,42 @@ const audioBeforeChangeTasks = async ({
     const mm = await import('music-metadata')
     const metadata: IAudioMetadata = await mm.parseBuffer(req.file.data, req.file.mimetype)
 
+    const uploadConfig = req.payload.collections['media'].config.upload as {
+      staticDir: string
+    }
+
+    const resolvedStaticDir = uploadConfig.staticDir
+    const fileName = data.filename || req.file.name
+    const { base } = path.parse(fileName)
+
     const { common } = metadata
+
+    const metaDataPictures = common.picture ?? []
+    const dataImages = data.images ?? []
+
+    for (const art of metaDataPictures) {
+      const imageBuffer = Buffer.from(art.data)
+      const sizeFilename = `${base}-${art.name}.png`
+      const uploadPath = path.join(resolvedStaticDir, sizeFilename)
+      await fs.writeFile(uploadPath, imageBuffer)
+
+      dataImages.push({
+        image: sizeFilename,
+      })
+    }
+
+    console.log('Collected albumn art:', JSON.stringify(dataImages))
 
     data.artist = common.artist || data.artist
     data.album = common.album || data.album
     data.duration = metadata.format.duration ? Math.round(metadata.format.duration) : data.duration
     data.title = common.title || data.title
     data.artwork = JSON.stringify(common.picture || data.images)
-    // data.images = common.picture || data.images
-    // data.genre = common.genre || data.genre
+    data.images = dataImages
+    data.genre = common.genre ? common.genre[0] : data.genre
     data.live = false
+
+    console.log('updated audio data:', JSON.stringify(data))
   } catch (error) {
     console.error('Failed to parse audio metadata:', error)
   }
@@ -172,11 +198,11 @@ const audioBeforeChangeTasks = async ({
 }
 
 export const mediaCollectionBeforeChange: CollectionBeforeChangeHook<Media> = async ({
-  //collection,     //:SanitizedCollectionConfig;   The Collection in which this Hook is running against.
-  //context,        //:RequestContext;              Custom context passed between hooks. More details.
+  collection, //:SanitizedCollectionConfig;   The Collection in which this Hook is running against.
+  context, //:RequestContext;              Custom context passed between hooks. More details.
   data, //:Partial<T>;                  The incoming data passed through the operation.
   operation, //:CreateOrUpdateOperation;     The name of the operation that this hook is running within.
-  // originalDoc,    //?: T;                         The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.
+  originalDoc, //?: T;                         The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.
   req, //:PayloadRequest;              The Web Request object. This is mocked for Local API operations.
 }) => {
   // Need the id? Don't expect it in `data`.
@@ -192,6 +218,17 @@ export const mediaCollectionBeforeChange: CollectionBeforeChangeHook<Media> = as
     }
 
     if (req.file.mimetype.startsWith('audio/')) {
+      console.debug(
+        'mediaCollectionBeforeChange => audio/',
+        JSON.stringify({
+          collection: collection,
+          context: context,
+          originalDoc: originalDoc,
+          data: data,
+          operation: operation,
+          req: req,
+        }),
+      )
       return audioBeforeChangeTasks({ data, req })
     }
   }

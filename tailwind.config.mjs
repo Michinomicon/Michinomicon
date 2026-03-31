@@ -117,6 +117,9 @@ const config = {
                 fontWeight: 'normal',
                 marginBottom: '0.25em',
               },
+              article: {
+                maxWidth: 'unset',
+              },
             },
           ],
         },

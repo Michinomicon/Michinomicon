@@ -86,6 +86,9 @@
 }
 
 @layer base {
+  :root{
+    --header-height: 5rem;
+  }
   * {
     @apply rounded-(--radius) outline-ring/50 border-primary/30 ;
   }

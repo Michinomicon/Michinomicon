@@ -20,8 +20,8 @@ type InteractiveBackgroundProps = {
 }
 
 export default function InteractiveBackground({
-  enableSpotlight: localSpotlight = true,
-  enableReactiveTile: localReactiveTile = true,
+  enableSpotlight: localSpotlight,
+  enableReactiveTile: localReactiveTile,
 }: InteractiveBackgroundProps) {
   const instanceId = useId()
   const { globalSpotlight, globalReactiveTile } = useWallpaper()

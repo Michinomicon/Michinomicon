@@ -46,31 +46,34 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="theme-color" content="#5a168c" />
       </head>
       <body>
+        <AdminBar
+          adminBarProps={{
+            preview: isEnabled,
+            className: '',
+            classNames: {
+              controls: '',
+              create: '',
+              edit: '',
+              logo: '',
+              logout: '',
+              preview: '',
+              user: '',
+            },
+            style: {
+              color: 'white',
+              position: 'absolute',
+              backgroundColor: 'orange',
+            },
+          }}
+        />
         <Providers>
-          <InteractiveBackground enableSpotlight={true} enableReactiveTile={true} />
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-              className: '"bg-card text-foreground"',
-              classNames: {
-                controls: 'bg-card text-foreground',
-                create: '',
-                edit: '',
-                logo: '',
-                logout: '',
-                preview: '',
-                user: '',
-              },
-              style: {
-                color: 'inherit',
-              },
-            }}
-          />
+          <InteractiveBackground enableSpotlight={false} enableReactiveTile={true} />
 
           <Header />
+
           <div
             id="mainContent"
-            className="bg-background/40 text-foreground relative min-h-screen p-6 md:p-12 max-w-7xl mx-auto pointer-events-none *:pointer-events-auto"
+            className="bg-background/40 text-foreground relative min-h-screen pointer-events-none *:pointer-events-auto" // p-6 md:p-12  mx-auto max-w-7xl
           >
             {children}
           </div>

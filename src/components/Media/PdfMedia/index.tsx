@@ -429,8 +429,15 @@ const FlipbookPopoverContent: React.FC<{
   }
 
   React.useEffect(() => {
-    setSliderValue([0])
-    setActivePages([0])
+    const container = containerRef.current
+    if (container) {
+      const [left, right] = activePages ?? [0]
+      container?.setAttribute('data-active-page-left', String(left))
+      container?.setAttribute('data-active-page-right', String(right))
+    }
+  }, [activePages])
+
+  React.useEffect(() => {
     setRenderedPagesCount(0)
   }, [pageWidth])
 
@@ -439,6 +446,7 @@ const FlipbookPopoverContent: React.FC<{
       setFlipbookRenderCount((prev) => {
         return prev + 1
       })
+
       const previousNumPages = totalPagesAcrossRendersRef.current ?? 0
       const restoredActivePage = Math.max(...(activePageRangeRef.current ?? [0]), 0)
       if (previousNumPages > 0 && restoredActivePage >= previousNumPages) {

@@ -7,6 +7,7 @@ import { ColorThemeToggle } from '@/providers/Theme/color-theme-toggle'
 import type { Header } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 
 interface HeaderClientProps {
   data: Header
@@ -21,6 +22,8 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data }) =>
   const { headerThemeMode, setHeaderThemeMode, headerThemeColor, setHeaderThemeColor } =
     useHeaderTheme()
   const pathname = usePathname()
+
+  const isWiki = pathname?.startsWith('/wiki')
 
   useEffect(() => {
     setHeaderThemeMode(null)
@@ -40,17 +43,20 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data }) =>
 
   return (
     <header
-      className={`w-full px-6 rounded-none sticky top-0 z-20 bg-background shadow-md`}
+      className={`w-full h-(--header-height) flex flex-row flex-nowrap px-6 rounded-none sticky top-0 z-20 bg-background shadow-md`}
       data-theme={themeColor}
       data-mode={themeMode}
     >
-      <div className="container py-6 flex justify-between">
-        <Link href="/">
-          <Logo text={appTitle} loading="eager" priority="auto" />
-        </Link>
-        <HeaderNav data={data} />
-        <div className="flex gap-2">
-          <ColorThemeToggle />
+      <div className="py-2 flex items-center">{isWiki && <SidebarTrigger />}</div>
+      <div className="container py-6 flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <Link href="/">
+            <Logo text={appTitle} loading="eager" priority="auto" />
+          </Link>
+          <HeaderNav data={data} />
+          <div className="flex gap-2">
+            <ColorThemeToggle />
+          </div>
         </div>
       </div>
     </header>
