@@ -202,7 +202,7 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | PostContentBlock)[];
   meta?: {
     title?: string | null;
     /**
@@ -854,6 +854,28 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostContentBlock".
+ */
+export interface PostContentBlock {
+  populateBy?: ('selection' | 'collection') | null;
+  categories?: (string | Category)[] | null;
+  limit?: number | null;
+  selectedDocs?:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }[]
+    | null;
+  showTitle?: boolean | null;
+  showAuthor?: boolean | null;
+  showDate?: boolean | null;
+  showCategories?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'postContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1168,6 +1190,7 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        postContent?: T | PostContentBlockSelect<T>;
       };
   meta?:
     | T
@@ -1264,6 +1287,22 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PostContentBlock_select".
+ */
+export interface PostContentBlockSelect<T extends boolean = true> {
+  populateBy?: T;
+  categories?: T;
+  limit?: T;
+  selectedDocs?: T;
+  showTitle?: T;
+  showAuthor?: T;
+  showDate?: T;
+  showCategories?: T;
   id?: T;
   blockName?: T;
 }
