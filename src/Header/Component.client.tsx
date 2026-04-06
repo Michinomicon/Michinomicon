@@ -7,13 +7,18 @@ import { ColorThemeToggle } from '@/providers/Theme/color-theme-toggle'
 import type { Header } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
+import { usePageAnchors } from '@/providers/PageAnchors'
+import NavMenu from '@/components/NavMenu'
+import { NavTreeItem } from '@/utilities/buildNavTree'
+import { PageBreadcrumbNav } from '@/components/PageBreadcrumbNav'
 
 interface HeaderClientProps {
   data: Header
   appTitle?: string | undefined
+  navTree: NavTreeItem[]
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data, navTree }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [themeMode, setThemeMode] = useState<string | null>(null)
   const [themeColor, setThemeColor] = useState<string | null>(null)
@@ -21,6 +26,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data }) =>
   const { headerThemeMode, setHeaderThemeMode, headerThemeColor, setHeaderThemeColor } =
     useHeaderTheme()
   const pathname = usePathname()
+  const { anchors } = usePageAnchors()
 
   useEffect(() => {
     setHeaderThemeMode(null)
@@ -51,6 +57,16 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data }) =>
         <HeaderNav data={data} />
         <div className="flex gap-2">
           <ColorThemeToggle />
+        </div>
+      </div>
+      <div className="w-full rounded-none border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <NavMenu navTree={navTree} postAnchors={anchors} />
+      </div>
+      <div className="absolute left-auto right-0 top-[calc(var(--header-height)+1px)] z-30 ml-auto mr-0 w-(--sidebar-width) overflow-hidden overscroll-none">
+        <div className="h-(--top-spacing) shrink-0">
+          <div className="no-scrollbar flex flex-col gap-8 overflow-y-auto px-8">
+            <PageBreadcrumbNav anchors={anchors} navTree={navTree}></PageBreadcrumbNav>
+          </div>
         </div>
       </div>
     </header>

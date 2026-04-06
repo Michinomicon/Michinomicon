@@ -22,8 +22,26 @@ export const Categories: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'isNav',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Include in Site Navigation',
+    },
     slugField({
       position: undefined,
     }),
+    {
+      name: 'parent',
+      type: 'relationship',
+      relationTo: 'categories',
+      admin: {
+        position: 'sidebar',
+        description: 'Select Parent Category.',
+      },
+      filterOptions: ({ id }) => ({
+        id: { not_in: [id] },
+      }),
+    },
   ],
 }

@@ -12,6 +12,11 @@ import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
+import { PageAnchorEmitter } from '@/components/PageAnchorEmitter'
+import { PageAnchor } from '@/providers/PageAnchors'
+import { Post } from '@/payload-types'
+import { getNavTree } from '@/utilities/buildNavTree'
+import { PageBreadcrumbNav } from '@/components/PageBreadcrumbNav'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -45,6 +50,7 @@ type Args = {
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
+  const navTree = await getNavTree()
   const { slug = 'home' } = await paramsPromise
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
@@ -66,17 +72,46 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const { hero, layout } = page
 
+  const postContentBlock = layout.find((block) => block.blockType === 'postContent')
+  let pagePostAnchors: PageAnchor[] = []
+
+  if (postContentBlock?.populateBy === 'selection' && postContentBlock.selectedDocs) {
+    pagePostAnchors = postContentBlock.selectedDocs
+      .map((doc) => (typeof doc.value === 'object' ? doc.value : null))
+      .filter((value) => value !== null)
+      .map((post) => {
+        return {
+          title: post.title,
+          id: post.slug || `post-${post.id}`,
+        }
+      })
+  } else if (postContentBlock?.populateBy === 'collection' && postContentBlock?.categories) {
+    const posts = await queryPostByCategories({
+      categories: postContentBlock?.categories,
+    })
+    pagePostAnchors = posts.map((post) => {
+      return {
+        title: post.title,
+        id: post.slug || `post-${post.id}`,
+      }
+    })
+  }
+
   return (
-    <article className="article-page relative mx-auto px-6 py-12 border border-primary/30 bg-background">
-      <PageClient />
-      {/* Allows redirects for valid pages too */}
-      <PayloadRedirects disableNotFound url={url} />
+    <React.Fragment>
+      <PageAnchorEmitter anchors={pagePostAnchors} />
 
-      {draft && <LivePreviewListener />}
+      <article className="article-page relative mx-auto px-6 py-12 border border-primary/30 bg-background">
+        <PageClient />
+        {/* Allows redirects for valid pages too */}
+        <PayloadRedirects disableNotFound url={url} />
 
-      <RenderHero {...hero} />
-      <RenderBlocks blocks={layout} />
-    </article>
+        {draft && <LivePreviewListener />}
+
+        <RenderHero {...hero} />
+        <RenderBlocks blocks={layout} />
+      </article>
+    </React.Fragment>
   )
 }
 
@@ -110,4 +145,32 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
   })
 
   return result.docs?.[0] || null
+})
+
+const queryPostByCategories = cache(async ({ categories }: { categories: Post['categories'] }) => {
+  const { isEnabled: draft } = await draftMode()
+
+  const queryCategories = categories
+    ? categories.filter((category) => typeof category === 'object').map((cat) => cat.id)
+    : []
+
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'posts',
+    limit: 2000,
+    draft,
+    pagination: false,
+    overrideAccess: draft,
+    where: {
+      'categories.isNav': {
+        equals: true,
+      },
+      'categories.id': {
+        in: queryCategories,
+      },
+    },
+  })
+
+  return result.docs || []
 })

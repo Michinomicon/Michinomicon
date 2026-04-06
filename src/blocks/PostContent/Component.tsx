@@ -82,11 +82,10 @@ export const PostContentBlock: React.FC<
           return (
             <div key={post.id || index} className="mb-24 last:mb-0 border-b pb-16 last:border-b-0">
               <div className="mb-8">
-                {/* Conditionally render Title */}
                 {showTitle && (
                   <h2
                     id={anchorId}
-                    className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground scroll-mt-24"
+                    className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground scroll-mt-48"
                   >
                     {post.title}
                   </h2>
