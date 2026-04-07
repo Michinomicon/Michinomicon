@@ -15,8 +15,6 @@ import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { PageAnchorEmitter } from '@/components/PageAnchorEmitter'
 import { PageAnchor } from '@/providers/PageAnchors'
 import { Post } from '@/payload-types'
-import { getNavTree } from '@/utilities/buildNavTree'
-import { PageBreadcrumbNav } from '@/components/PageBreadcrumbNav'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -50,7 +48,6 @@ type Args = {
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
-  const navTree = await getNavTree()
   const { slug = 'home' } = await paramsPromise
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)

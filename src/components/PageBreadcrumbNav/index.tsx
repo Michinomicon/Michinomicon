@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { usePathname, useSelectedLayoutSegment } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,7 +13,6 @@ import {
 import { NavTreeItem } from '@/utilities/buildNavTree'
 import { cn } from '@/lib/utils'
 import { PageAnchor } from '@/providers/PageAnchors'
-import { Slash, SlashIcon } from 'lucide-react'
 
 type BreadcrumbNavProps = {
   navTree: NavTreeItem[]
@@ -55,7 +54,7 @@ function useActiveItem(itemIds: string[]) {
   return activeId
 }
 
-// Helper to recursively find the current active path based on the URL
+// recursively find the current active path based on the URL
 function findPathToUrl(
   tree: NavTreeItem[],
   targetUrl: string,
@@ -63,7 +62,6 @@ function findPathToUrl(
 ): NavTreeItem[] {
   for (const node of tree) {
     const path = [...currentPath, node]
-    // Assuming URLs for pages are formatted as '/slug'
     if (node.type === 'page' && `/${node.url}` === targetUrl) {
       return path
     }
@@ -77,23 +75,10 @@ function findPathToUrl(
 }
 
 export function PageBreadcrumbNav({ navTree, anchors }: BreadcrumbNavProps) {
-  console.debug(`PageBreadcrumbNav`)
-  console.debug(`   => navTree:`, navTree)
-  console.debug(`   => anchors:`, anchors)
   const pathname = usePathname()
-  console.debug(`   => pathname:`, pathname)
-  const segment = useSelectedLayoutSegment()
-  console.debug(`   => segment:`, segment)
-
   const activePath = React.useMemo(() => findPathToUrl(navTree, pathname), [navTree, pathname])
-  console.debug(`   => activePath:`, activePath)
-
   const itemIds = React.useMemo(() => anchors.map((a) => a.id), [anchors])
-
-  console.debug(`   => itemIds:`, itemIds)
-
   const activeHeading = useActiveItem(itemIds ?? [])
-  console.debug(`   => activeHeading:`, activeHeading)
 
   const anchorNavItems = anchors.map(
     (a) =>
@@ -131,7 +116,6 @@ export function PageBreadcrumbNav({ navTree, anchors }: BreadcrumbNavProps) {
           </Breadcrumb>
         </div>
         <div className="flex flex-col gap-2 p-4 pt-0 text-sm ml-1">
-          {/* <p className="sticky top-0 h-6 font-medium">Contents:</p> */}
           {anchorNavItems.map((item) => (
             <a
               key={item.id}
@@ -158,7 +142,9 @@ export function PageBreadcrumbNav({ navTree, anchors }: BreadcrumbNavProps) {
               <BreadcrumbItem key={index}>
                 <BreadcrumbLink asChild>
                   <Link href={`#${item.id}`} className="text-primary hover:underline font-medium">
-                    <div className={cn(`${isActive ? 'font-semibold ' : ''}`)}>{item.title}</div>
+                    <div className={cn(`${isActive ? 'font-semibold text-lg' : ''}`)}>
+                      {item.title}
+                    </div>
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>

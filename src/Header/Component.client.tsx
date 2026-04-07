@@ -50,17 +50,18 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ appTitle, data, navT
       data-theme={themeColor}
       data-mode={themeMode}
     >
-      <div className="container py-6 flex justify-between">
+      <div className="container py-2 flex justify-between">
+        <div className="grow"></div>
         <Link href="/">
           <Logo text={appTitle} loading="eager" priority="auto" />
         </Link>
-        <HeaderNav data={data} />
-        <div className="flex gap-2">
-          <ColorThemeToggle />
-        </div>
+        <div className="grow"></div>
       </div>
-      <div className="w-full rounded-none border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="flex justify-around w-full max-w-7xl mx-auto rounded-none border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <NavMenu navTree={navTree} postAnchors={anchors} />
+        {/* <HeaderNav data={data} /> */}
+        <div className="grow"></div>
+        <ColorThemeToggle />
       </div>
       <div className="absolute left-auto right-0 top-[calc(var(--header-height)+1px)] z-30 ml-auto mr-0 w-(--sidebar-width) overflow-hidden overscroll-none">
         <div className="h-(--top-spacing) shrink-0">
