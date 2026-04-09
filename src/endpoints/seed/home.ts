@@ -11,6 +11,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
   metaImage,
 }) => {
   return {
+    parentCategory: '',
     slug: 'home',
     _status: 'published',
     hero: {

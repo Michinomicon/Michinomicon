@@ -42,12 +42,6 @@ export async function getNavTree(): Promise<NavTreeItem[]> {
     sort: 'title',
   })
 
-  // console.debug(`getNavTree() => `, {
-  //   categories: categories,
-  //   pages: pages,
-  //   posts: posts,
-  // })
-
   function buildTree(parentId: string | null = null): NavTreeItem[] {
     // Find categories that belong to this parent
     const childCategories = categories.filter((cat) => {
@@ -117,10 +111,6 @@ export async function getNavTree(): Promise<NavTreeItem[]> {
               children: [],
             }))
 
-          if (pagePosts.length > 0) {
-            console.debug(`Page ${page.title} posts:`, pagePosts)
-          }
-
           return {
             id: page.id,
             title: page.title,
@@ -150,6 +140,5 @@ export async function getNavTree(): Promise<NavTreeItem[]> {
 
   // Start building from the root (categories with no parent)
   const tree = buildTree(null)
-  console.debug(`buildTree => `, tree)
   return tree
 }

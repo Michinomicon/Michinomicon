@@ -25,6 +25,9 @@
 /* @import './themes/minimal-yellow.css'; */
 
 @theme inline {
+  --header-height: 100px;
+  --footer-height: 100px;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -180,7 +183,6 @@
   margin: 0 !important;
   padding: 0 !important;
 }
-
 
 /** TEMPLATE FOR THEME VARIABLE FOR INTERACTIVE WALLPAPER */
 

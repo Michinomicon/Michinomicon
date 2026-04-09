@@ -13,7 +13,7 @@ export async function Footer() {
   const navItems = footerData?.navItems || []
 
   return (
-    <footer className="relative mt-auto border-t border-border bg-background z-1 rounded-none">
+    <footer className="relative w-screen mt-auto z-20 border-t border-border bg-background rounded-none">
       <div className="container py-8 gap-8 flex flex-col md:flex-row md:justify-between">
         <Link className="flex items-center" href="/">
           <Logo text={appTitle} loading="eager" priority="high" />

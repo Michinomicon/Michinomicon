@@ -67,13 +67,19 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
-  const { hero, layout } = page
+  const { hero, layout, id, title } = page
+
+  const pageHeading = {
+    id: slug || `page-${id}`,
+    title: title,
+  }
 
   const postContentBlock = layout.find((block) => block.blockType === 'postContent')
-  let pagePostAnchors: PageAnchor[] = []
+  const pageAnchors: PageAnchor[] = []
+  pageAnchors.push(pageHeading)
 
   if (postContentBlock?.populateBy === 'selection' && postContentBlock.selectedDocs) {
-    pagePostAnchors = postContentBlock.selectedDocs
+    const selectionPostHeadings = postContentBlock.selectedDocs
       .map((doc) => (typeof doc.value === 'object' ? doc.value : null))
       .filter((value) => value !== null)
       .map((post) => {
@@ -82,21 +88,23 @@ export default async function Page({ params: paramsPromise }: Args) {
           id: post.slug || `post-${post.id}`,
         }
       })
+    pageAnchors.push(...selectionPostHeadings)
   } else if (postContentBlock?.populateBy === 'collection' && postContentBlock?.categories) {
     const posts = await queryPostByCategories({
       categories: postContentBlock?.categories,
     })
-    pagePostAnchors = posts.map((post) => {
+    const collectionPostHeadings = posts.map((post) => {
       return {
         title: post.title,
         id: post.slug || `post-${post.id}`,
       }
     })
+    pageAnchors.push(...collectionPostHeadings)
   }
 
   return (
     <React.Fragment>
-      <PageAnchorEmitter anchors={pagePostAnchors} />
+      <PageAnchorEmitter anchors={pageAnchors} />
 
       <article className="article-page relative mx-auto px-6 py-12 border border-primary/30 bg-background">
         <PageClient />
@@ -106,6 +114,16 @@ export default async function Page({ params: paramsPromise }: Args) {
         {draft && <LivePreviewListener />}
 
         <RenderHero {...hero} />
+
+        {/* <span className="prose ">
+          <h1
+            className="font-bold tracking-tight mb-4 text-foreground scroll-mt-48"
+            id={pageHeading.id}
+          >
+            {pageHeading.title}
+          </h1>
+        </span> */}
+
         <RenderBlocks blocks={layout} />
       </article>
     </React.Fragment>

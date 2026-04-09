@@ -17,9 +17,13 @@ import './globals.css'
 
 import { getServerSideURL } from '@/utilities/getURL'
 import InteractiveBackground from '@/components/InteractiveBackground'
+import { PageTableOfContents } from '@/components/PageTableOfContents'
+import { getNavTree } from '@/utilities/buildNavTree'
+import { SidebarInset } from '@/components/ui/sidebar'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
+  const navTree = await getNavTree()
 
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
@@ -46,36 +50,48 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="theme-color" content="#5a168c" />
       </head>
       <body>
-        <Providers>
-          <InteractiveBackground enableSpotlight={true} enableReactiveTile={true} />
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-              className: '"bg-card text-foreground"',
-              classNames: {
-                controls: 'bg-card text-foreground',
-                create: '',
-                edit: '',
-                logo: '',
-                logout: '',
-                preview: '',
-                user: '',
-              },
-              style: {
-                color: 'inherit',
-              },
-            }}
-          />
+        <div className="flex flex-col min-h-screen w-screen">
+          <Providers>
+            <InteractiveBackground enableSpotlight={true} enableReactiveTile={true} />
+            <AdminBar
+              adminBarProps={{
+                preview: isEnabled,
+                className: '"bg-card text-foreground"',
+                classNames: {
+                  controls: 'bg-card text-foreground',
+                  create: '',
+                  edit: '',
+                  logo: '',
+                  logout: '',
+                  preview: '',
+                  user: '',
+                },
+                style: {
+                  color: 'inherit',
+                },
+              }}
+            />
 
-          <Header />
-          <div
-            id="mainContent"
-            className="bg-background/40 text-foreground relative min-h-screen p-6 md:p-12 max-w-7xl mx-auto pointer-events-none *:pointer-events-auto"
-          >
-            {children}
-          </div>
-          <Footer />
-        </Providers>
+            <Header />
+
+            <PageTableOfContents navTree={navTree}></PageTableOfContents>
+            <SidebarInset
+              className={cn(
+                'min-w-0 max-w-screen bg-none',
+                'peer-data-[state=expanded]:pl-[calc(calc(var(--sidebar-width))+--spacing(3))]',
+                'peer-data-[state=expanded]:max-w-[calc(calc(100vw-var(--sidebar-width)))] peer-data-[state=collapsed]:max-w-[calc(100vw)] peer-data-[state=collapsed]:w-[calc(100vw)]',
+              )}
+            >
+              <div
+                id="mainContent"
+                className="relative min-h-screen p-6 md:p-12 max-w-7xl ml-auto mr-auto pointer-events-none *:pointer-events-auto"
+              >
+                {children}
+              </div>
+            </SidebarInset>
+            <Footer />
+          </Providers>
+        </div>
       </body>
     </html>
   )
