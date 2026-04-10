@@ -137,7 +137,8 @@ const SidebarProvider = React.forwardRef<
               } as React.CSSProperties
             }
             className={cn(
-              'group/sidebar-wrapper t-[calc(var(--header-height)+0px)] flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar overflow-hidden',
+              'flex-col',
+              'group/sidebar-wrapper  flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar overflow-hidden',
               className,
             )}
             ref={ref}
@@ -298,7 +299,8 @@ const SidebarRail = React.forwardRef<HTMLButtonElement, React.ComponentProps<'bu
         onClick={toggleSidebar}
         title="Toggle Sidebar"
         className={cn(
-          'absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
+          'absolute inset-y-0 z-20 hidden w-[0.1em] -translate-x-1/2 transition-all ease-linear bg-sidebar-border/80',
+          'after:absolute after:inset-y-0 after:left-1/2 after:w-0.5 hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex',
           'in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize',
           '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
           'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full group-data-[collapsible=offcanvas]:hover:bg-sidebar',
@@ -319,8 +321,10 @@ const SidebarInset = React.forwardRef<HTMLDivElement, React.ComponentProps<'main
       <main
         ref={ref}
         className={cn(
-          'relative flex w-full flex-1 flex-col bg-none',
-          'md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:ml-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow',
+          'relative flex grow shrink basis-full flex-col bg-none',
+          'md:peer-data-[variant=inset]:m-0',
+          'md:peer-data-[state=collapsed]:peer-data-[variant=inset]:mr-0 md:peer-data-[variant=inset]:mr-0',
+          'md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow',
           className,
         )}
         {...props}

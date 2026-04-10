@@ -16,14 +16,8 @@ import { NavTreeItem, NavTreePageItem } from '@/utilities/buildNavTree'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-// type PostAnchor = {
-//   id: string
-//   title: string
-// }
-
 type NavMenuProps = {
   navTree: NavTreeItem[]
-  // postAnchors?: PostAnchor[]
 }
 
 function LevelZeroNode({ item }: { item: NavTreeItem }) {
@@ -95,11 +89,11 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
   return (
     <Tabs
       defaultValue={defaultTab}
-      onValueChange={setActiveTab}
+      onValueChange={(value) => setActiveTab(value)}
       value={activeTab}
       className="flex flex-row w-full h-full min-h-60 rounded-none gap-0"
     >
-      <TabsList className="flex flex-col max-w-62.5 min-w-26 w-auto h-auto justify-start items-start p-0 rounded-none border-r m-0">
+      <TabsList className="bg-card/10 flex flex-col max-w-62.5 min-w-26 w-auto h-auto justify-start items-start p-0 rounded-none border-r m-0">
         {items.map((item) => {
           const isDisabled =
             item.type === 'category' && (!item.children || item.children.length === 0)
@@ -112,15 +106,17 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
               disabled={isDisabled}
               className={cn(
                 'rounded-none max-h-10 min-w-26 max-w-70 w-full justify-start text-left px-3 py-2 m-0 ',
-                'hover:bg-primary/40',
-                `data-[state=active]:bg-primary/40`,
-                `data-[state=active]:hover:bg-primary/30`,
-                'data-[state=active]:text-primary-foreground ',
-                'data-[state=active]:hover:text-primary-foreground ',
-                'data-[state=active]:font-medium',
-                'whitespace-nowrap text-sm transition-colors',
-                ' disabled:pointer-events-none disabled:opacity-50',
-                'bg-card/10 text-primary',
+                'hover:bg-accent/80',
+                'data-[state=active]:text-accent-foreground ',
+                `data-[state=active]:bg-accent/70`,
+                `data-[state=active]:hover:bg-accent`,
+                'font-medium',
+                'whitespace-nowrap text-sm transition-color',
+                'disabled:pointer-events-none disabled:opacity-50 disabled:bg-none',
+                'text-accent-foreground',
+                'data-[state=active]:hover:text-accent-foreground',
+                'data-[state=active]:hover:font-semibold',
+                'data-[state=active]:font-semibold',
               )}
             >
               {item.title}

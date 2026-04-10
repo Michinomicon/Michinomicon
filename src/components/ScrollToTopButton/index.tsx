@@ -1,33 +1,50 @@
+'use client'
+
 import { useState } from 'react'
-import { Button } from '../ui/button'
-import { ArrowUpToLine } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ChevronsUp } from 'lucide-react'
 import React from 'react'
 
 const ScrollToTopButton = () => {
   const [visible, setVisible] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [_document, setDocumentObject] = React.useState<Document>()
+  const [_window, setWindowObject] = React.useState<Window>()
 
   React.useEffect(() => {
     setMounted(true)
+    setDocumentObject(document)
+    setWindowObject(window)
   }, [])
 
-  const toggleVisible = () => {
-    const scrolled = document.documentElement.scrollTop
-    if (scrolled > 300) {
-      setVisible(true)
-    } else if (scrolled <= 300) {
-      setVisible(false)
+  React.useEffect(() => {
+    if (!mounted) return
+    if (!_document) return
+
+    const toggleVisible = () => {
+      const scrolled = _document.documentElement.scrollTop
+      if (scrolled > 300) {
+        setVisible(true)
+      } else if (scrolled <= 300) {
+        setVisible(false)
+      }
     }
-  }
+
+    setDocumentObject(document)
+    setWindowObject(window)
+    window.addEventListener('scroll', toggleVisible)
+    return () => {
+      window.removeEventListener('scroll', toggleVisible)
+    }
+  }, [_document, mounted])
 
   const scrollToTop = () => {
-    window.scrollTo({
+    if (!_window) return
+    _window.scrollTo({
       top: 0,
-      behavior: 'smooth', // "auto"
+      behavior: 'smooth',
     })
   }
-
-  window.addEventListener('scroll', toggleVisible)
 
   if (!mounted) {
     return <></>
@@ -36,14 +53,12 @@ const ScrollToTopButton = () => {
   return (
     <>
       {visible && (
-        <Button
-          className="sticky bottom-0"
-          size={'default'}
-          variant={'ghost'}
-          onClick={scrollToTop}
-        >
-          <div className="flex flex-nowrap gap-6">
-            <ArrowUpToLine /> Scroll to Top
+        <Button size={'lg'} variant={'outline'} onClick={scrollToTop} className="group">
+          <div className="flex flex-col flex-nowrap items-center gap-0.5">
+            <ChevronsUp className="absolute -translate-y-3 size-6 group-hover:stroke-2 ease-in group-hover:size-8 group-hover:-translate-y-6 transition-all" />
+            <span className="group-hover:translate-y-2 ease-in transition-all group-hover:font-semibold">
+              Scroll to Top
+            </span>
           </div>
         </Button>
       )}

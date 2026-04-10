@@ -9,8 +9,15 @@ import {
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
 import { NavTreeItem } from '@/utilities/buildNavTree'
-import { CircleSmall, ListTree, PanelRightClose, PanelRightOpen } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import {
+  ArrowLeftFromLine,
+  ArrowRightToLine,
+  CircleSmall,
+  ListTree,
+  PanelRightClose,
+  PanelRightOpen,
+} from 'lucide-react'
+import { Button, ButtonProps } from '@/components/ui/button'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import {
@@ -22,7 +29,7 @@ import {
   useSidebar,
   SidebarRail,
 } from '../ui/sidebar'
-import ScrollToTopButton from '../ScrollToTopButton'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 
 type PageTableOfContentsProps = {
   navTree: NavTreeItem[]
@@ -190,16 +197,70 @@ function PageContentsHeadingList({
   )
 }
 
-export function PageTableOfContentsTrigger({ hideWhenOpen = true }: { hideWhenOpen?: boolean }) {
+type PageTOCProps = Omit<ButtonProps & React.RefAttributes<HTMLButtonElement>, 'onClick'>
+export function PageTableOfContentsTrigger(props: PageTOCProps) {
+  const { variant: variantFromProps, onMouseLeave, ...restProps } = props
   const { toggleSidebar, open } = useSidebar()
-  if (hideWhenOpen && open) {
-    return <></>
+  const buttonVariant = variantFromProps || 'outline'
+
+  const [isClicked, setIsClicked] = React.useState(false)
+
+  const handlePointerLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+    setIsClicked(false) // Reset the hover
+    onMouseLeave?.(e) // Fire original onMouseLeave
   }
+
+  const handleClick = () => {
+    setIsClicked(true) // skip hover
+    toggleSidebar()
+  }
+
+  const buttonStyles = cn(
+    'group relative flex h-10 w-20 items-center justify-center overflow-hidden rounded-lg transition-colors ',
+  )
+
+  const listTreeIconStyles = cn(
+    'absolute size-5 transition-transform duration-150 ease-in',
+    // translate on hover if the button been clicked
+    !isClicked && (open ? 'group-hover:-translate-x-3' : 'group-hover:translate-x-3'),
+  )
+
+  const arrowIconStyles = cn(
+    'absolute size-5 opacity-0 transition-all duration-100 delay-0 ease-in',
+    // translate,opacity on hover if the button been clicked
+    !isClicked && 'group-hover:opacity-100',
+    !isClicked && (open ? 'group-hover:translate-x-3 ' : 'group-hover:-translate-x-3'),
+  )
+
   return (
-    <Button variant="ghost" className={cn('')} onClick={toggleSidebar}>
-      <ListTree className="ml-0" />
-      <span className="">Page Contents</span>
-    </Button>
+    <Tooltip delayDuration={800}>
+      <TooltipTrigger asChild>
+        <Button
+          variant={buttonVariant}
+          size="sm"
+          {...restProps}
+          onClick={handleClick}
+          onMouseLeave={handlePointerLeave}
+          className={buttonStyles}
+          aria-label={`${open ? 'Collapse Table of Contents' : 'Show Table of Contents'}`}
+        >
+          {open ? (
+            <React.Fragment>
+              <ListTree className={listTreeIconStyles} />
+              <ArrowRightToLine className={arrowIconStyles} />
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <ListTree className={listTreeIconStyles} />
+              <ArrowLeftFromLine className={arrowIconStyles} />
+            </React.Fragment>
+          )}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}</p>
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -237,6 +298,8 @@ export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
       variant="inset"
       collapsible="offcanvas"
       className={cn(
+        '',
+        'pl-0 pr-6',
         'pt-[calc(var(--header-height)+0px)]',
         'pb-[calc(var(--footer-height)+0px)]',
         'max-h-[calc(100svh-calc(var(--header-height)+0px))-calc(var(--footer-height)+0px)] z-10 border-sidebar border bg-sidebar',
@@ -259,10 +322,8 @@ export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
           ></PageContentsHeadingList>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <ScrollToTopButton />
-      </SidebarFooter>
-      <SidebarRail className="border-sidebar" />
+      <SidebarFooter></SidebarFooter>
+      <SidebarRail className="border-sidebar-foreground/70 hover:border-sidebar-border" />
     </Sidebar>
   )
 }

@@ -23,7 +23,7 @@ export const Providers: React.FC<{
           <TooltipProvider delayDuration={800} skipDelayDuration={500}>
             <AudioTrackProvider>
               <PageAnchorsProvider>
-                <SidebarProvider>{children}</SidebarProvider>
+                <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
               </PageAnchorsProvider>
             </AudioTrackProvider>
           </TooltipProvider>

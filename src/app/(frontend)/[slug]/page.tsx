@@ -15,6 +15,9 @@ import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { PageAnchorEmitter } from '@/components/PageAnchorEmitter'
 import { PageAnchor } from '@/providers/PageAnchors'
 import { Post } from '@/payload-types'
+import { ButtonGroup } from '@/components/ui/button-group'
+import { Button } from '@/components/ui/button'
+import { PageTableOfContentsTrigger } from '@/components/PageTableOfContents'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -106,23 +109,20 @@ export default async function Page({ params: paramsPromise }: Args) {
     <React.Fragment>
       <PageAnchorEmitter anchors={pageAnchors} />
 
-      <article className="article-page relative mx-auto px-6 py-12 border border-primary/30 bg-background">
+      <article className="article-page relative mx-auto px-6 pt-6 pb-12 border border-primary/30 bg-background">
         <PageClient />
         {/* Allows redirects for valid pages too */}
         <PayloadRedirects disableNotFound url={url} />
 
         {draft && <LivePreviewListener />}
 
-        <RenderHero {...hero} />
+        <div className="article-toolbar w-full flex flex-nowrap justify-end">
+          <ButtonGroup aria-label="Article Controls">
+            <PageTableOfContentsTrigger size="icon" aria-label="Show Table of Contents" />
+          </ButtonGroup>
+        </div>
 
-        {/* <span className="prose ">
-          <h1
-            className="font-bold tracking-tight mb-4 text-foreground scroll-mt-48"
-            id={pageHeading.id}
-          >
-            {pageHeading.title}
-          </h1>
-        </span> */}
+        <RenderHero {...hero} />
 
         <RenderBlocks blocks={layout} />
       </article>
