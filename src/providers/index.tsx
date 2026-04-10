@@ -4,6 +4,8 @@ import { ThemeProvider } from './Theme'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { AudioTrackProvider } from './Audio'
 import { WallpaperProvider } from './Wallpaper'
+import { PageAnchorsProvider } from './PageAnchors'
+import { SidebarProvider } from '@/components/ui/sidebar'
 
 export const Providers: React.FC<{
   children: React.ReactNode
@@ -19,7 +21,11 @@ export const Providers: React.FC<{
       >
         <HeaderThemeProvider>
           <TooltipProvider delayDuration={800} skipDelayDuration={500}>
-            <AudioTrackProvider>{children}</AudioTrackProvider>
+            <AudioTrackProvider>
+              <PageAnchorsProvider>
+                <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
+              </PageAnchorsProvider>
+            </AudioTrackProvider>
           </TooltipProvider>
         </HeaderThemeProvider>
       </ThemeProvider>

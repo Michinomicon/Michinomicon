@@ -26,18 +26,19 @@ export function ModeToggle() {
       defaultValue="system"
       aria-label="Toggle theme dark mode"
       value={theme}
+      spacing={0}
       onValueChange={(value) => {
         if (value) setTheme(value)
       }}
     >
       <ToggleGroupItem value="light" aria-label="Light mode">
-        <Sun className="h-[1.2rem] w-[1.2rem] transition-all" />
+        <Sun className="transition-all" />
       </ToggleGroupItem>
       <ToggleGroupItem value="dark" aria-label="Dark mode">
-        <Moon className="h-[1.2rem] w-[1.2rem] transition-all" />
+        <Moon className="transition-all" />
       </ToggleGroupItem>
       <ToggleGroupItem value="system" aria-label="Follow system">
-        <SunMoon className="h-[1.2rem] w-[1.2rem] transition-all" />
+        <SunMoon className="transition-all" />
       </ToggleGroupItem>
     </ToggleGroup>
   )

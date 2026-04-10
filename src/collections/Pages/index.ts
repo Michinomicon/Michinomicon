@@ -10,6 +10,7 @@ import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
+import { PostContent } from '../../blocks/PostContent/config'
 
 import {
   MetaDescriptionField,
@@ -60,6 +61,15 @@ export const Pages: CollectionConfig<'pages'> = {
       required: true,
     },
     {
+      name: 'parentCategory',
+      type: 'relationship',
+      relationTo: 'categories',
+      required: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
       type: 'tabs',
       tabs: [
         {
@@ -71,7 +81,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, PostContent],
               required: true,
               admin: {
                 initCollapsed: true,
