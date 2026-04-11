@@ -42,7 +42,7 @@ function LevelZeroNode({ item }: { item: NavTreeItem }) {
     return (
       <NavigationMenuItem>
         <Link href={item.url} legacyBehavior passHref>
-          <NavigationMenuLink className={cn(navigationMenuTriggerStyle(), 'text-primary')}>
+          <NavigationMenuLink className={cn(navigationMenuTriggerStyle())}>
             {item.title}
           </NavigationMenuLink>
         </Link>
@@ -54,7 +54,7 @@ function LevelZeroNode({ item }: { item: NavTreeItem }) {
   if (item.type === 'page') {
     return (
       <NavigationMenuItem>
-        <NavigationMenuTrigger className="text-primary">{item.title}</NavigationMenuTrigger>
+        <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
           <div className="w-full md:w-100 lg:w-150">
             <PageContentLayout item={item} />
@@ -68,7 +68,7 @@ function LevelZeroNode({ item }: { item: NavTreeItem }) {
   if (item.type === 'category') {
     return (
       <NavigationMenuItem>
-        <NavigationMenuTrigger className="text-primary">{item.title}</NavigationMenuTrigger>
+        <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
           <div className="w-full md:w-100 lg:w-180">
             <RecursiveTabs items={item.children} />
@@ -94,35 +94,24 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
       className="flex flex-row w-full h-full min-h-60 rounded-none gap-0"
     >
       <TabsList className="bg-card/10 flex flex-col max-w-62.5 min-w-26 w-auto h-auto justify-start items-start p-0 rounded-none border-r m-0">
-        {items.map((item) => {
-          const isDisabled =
-            item.type === 'category' && (!item.children || item.children.length === 0)
-
-          return (
-            <TabsTrigger
-              onMouseEnter={() => setActiveTab(item.id)}
-              key={item.id}
-              value={item.id}
-              disabled={isDisabled}
-              className={cn(
-                'rounded-none max-h-10 min-w-26 max-w-70 w-full justify-start text-left px-3 py-2 m-0 ',
-                'hover:bg-accent/80',
-                'data-[state=active]:text-accent-foreground ',
-                `data-[state=active]:bg-accent/70`,
-                `data-[state=active]:hover:bg-accent`,
-                'font-medium',
-                'whitespace-nowrap text-sm transition-color',
-                'disabled:pointer-events-none disabled:opacity-50 disabled:bg-none',
-                'text-accent-foreground',
-                'data-[state=active]:hover:text-accent-foreground',
-                'data-[state=active]:hover:font-semibold',
-                'data-[state=active]:font-semibold',
-              )}
-            >
-              {item.title}
-            </TabsTrigger>
-          )
-        })}
+        {items
+          .filter((item) => item.type === 'category' || item.type === 'page')
+          .map((categoryOrPage) => {
+            const isDisabled =
+              categoryOrPage.type === 'category' &&
+              (!categoryOrPage.children || categoryOrPage.children.length === 0)
+            return (
+              <TabsTrigger
+                onMouseEnter={() => setActiveTab(categoryOrPage.id)}
+                key={categoryOrPage.id}
+                value={categoryOrPage.id}
+                disabled={isDisabled}
+                className={cn(NavMenuPageOrCategoryItemTriggerStyle)}
+              >
+                {categoryOrPage.title}
+              </TabsTrigger>
+            )
+          })}
       </TabsList>
 
       <div className="flex-1 rounded-none overflow-y-auto p-0 m-0">
@@ -139,6 +128,21 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
     </Tabs>
   )
 }
+
+const NavMenuPageOrCategoryItemTriggerStyle = cn(
+  'rounded-none max-h-10 min-w-26 max-w-70 w-full justify-start text-left px-3 py-2 m-0 ',
+  'hover:bg-accent/80',
+  'data-[state=active]:text-accent-foreground ',
+  `data-[state=active]:bg-accent/70`,
+  `data-[state=active]:hover:bg-accent`,
+  'font-medium',
+  'whitespace-nowrap text-sm transition-color',
+  'disabled:pointer-events-none disabled:opacity-50 disabled:bg-none',
+  'text-accent-foreground',
+  'data-[state=active]:hover:text-accent-foreground',
+  'data-[state=active]:hover:font-semibold',
+  'data-[state=active]:font-semibold',
+)
 
 function TabContentNode({ item }: { item: NavTreeItem }) {
   if (item.type === 'page') {

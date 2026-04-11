@@ -16,7 +16,6 @@ import { PageAnchorEmitter } from '@/components/PageAnchorEmitter'
 import { PageAnchor } from '@/providers/PageAnchors'
 import { Post } from '@/payload-types'
 import { ButtonGroup } from '@/components/ui/button-group'
-import { Button } from '@/components/ui/button'
 import { PageTableOfContentsTrigger } from '@/components/PageTableOfContents'
 
 export async function generateStaticParams() {
