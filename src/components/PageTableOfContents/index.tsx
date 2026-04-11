@@ -51,8 +51,77 @@ export type TableOfContentsItem = {
   url: string
 }
 
-function useActiveItem(itemIds: string[]) {
+function generateHeadingTagSlug(textContent: string): string {
+  return textContent
+    .toLowerCase()
+    .trim()
+    .replace(/[\s\W-]+/g, '-') // Replace spaces and non-word chars with a hyphen
+    .replace(/^-+|-+$/g, '') // Remove leading and trailing hyphens
+}
+
+function collectHeadingTagReferences(
+  node?: Element,
+  headings: Array<TableOfContentsItem> = [],
+  encounteredIds: Map<string, number> = new Map(),
+): TableOfContentsItem[] {
+  // Skip non-element nodes
+  if (!node || node.nodeType !== Node.ELEMENT_NODE) return headings
+  // if is heading tag, collect it
+  const lowerCaseTagName = node.tagName.toLowerCase()
+  if (
+    ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(lowerCaseTagName) &&
+    node.textContent &&
+    node.textContent.trim().length > 0
+  ) {
+    let { id } = node
+    const textContent = node.textContent
+
+    // if tag has no ID, create and assign unique ID
+    if (!id) {
+      const baseId = generateHeadingTagSlug(textContent) || 'heading'
+      let uniqueId = baseId
+      // If ID already exists, append a number
+      if (encounteredIds.has(uniqueId)) {
+        let count = encounteredIds.get(uniqueId)!
+        do {
+          count++
+          uniqueId = `${baseId}-${count}`
+        } while (encounteredIds.has(uniqueId))
+        encounteredIds.set(baseId, count)
+      }
+      id = uniqueId
+      node.setAttribute('id', id)
+      node.classList.add('scroll-mt-[120px]')
+    }
+    // update encountered IDs
+    encounteredIds.set(id, 1)
+
+    headings.push({
+      depth: HeadingTagDepth[lowerCaseTagName as keyof typeof HeadingTagDepth],
+      id: id,
+      title: textContent,
+      url: `#${id}`,
+    })
+  }
+  // recursive for child nodes
+  for (const child of node.children) {
+    collectHeadingTagReferences(child, headings)
+  }
+  return headings
+}
+
+function useActiveTocItem(tocContent: TableOfContentsItem[]) {
+  const [tableOfContents, setTableOfContents] =
+    React.useState<Array<TableOfContentsItem>>(tocContent)
+  const [itemIds, setItemIds] = React.useState<string[]>([])
   const [activeId, setActiveId] = React.useState<string | null>(null)
+
+  React.useEffect(() => {
+    const itemIds: string[] = tableOfContents
+      .filter(({ id }) => id && id.trim().length > 0)
+      .map<string>(({ id }) => id)
+    setItemIds(itemIds)
+  }, [tableOfContents])
 
   React.useEffect(() => {
     const observer = new IntersectionObserver(
@@ -83,7 +152,11 @@ function useActiveItem(itemIds: string[]) {
     }
   }, [itemIds])
 
-  return activeId
+  return {
+    activeId,
+    tocContent,
+    setTocContent: setTableOfContents,
+  }
 }
 
 function findPagePathByUrl(
@@ -103,27 +176,6 @@ function findPagePathByUrl(
     }
   }
   return false
-}
-
-function collectHeadings(node?: Element, headings: Array<TableOfContentsItem> = []) {
-  // Skip non-element nodes
-  if (!node || node.nodeType !== Node.ELEMENT_NODE) return headings
-  // if heading tag, collect it
-  const tagName = node.tagName.toLowerCase()
-  if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName) && node.textContent.length > 0) {
-    headings.push({
-      depth: HeadingTagDepth[tagName as keyof typeof HeadingTagDepth],
-      id: node.id,
-      title: node.textContent,
-      url: `#${node.id}`,
-    })
-  }
-  // recursively for child nodes
-  for (const child of node.children) {
-    collectHeadings(child, headings)
-  }
-
-  return headings
 }
 
 function PathPathBreadcrumbs({ pathToPage }: { pathToPage: NavTreeItem[] | false }) {
@@ -150,18 +202,13 @@ function PathPathBreadcrumbs({ pathToPage }: { pathToPage: NavTreeItem[] | false
   )
 }
 
-function PageContentsHeadingList({
-  tableOfContents,
-  activeHeading,
-}: {
-  tableOfContents: TableOfContentsItem[]
-  activeHeading: string | null
-}) {
+function PageContentsHeadingList({ tableOfContents }: { tableOfContents: TableOfContentsItem[] }) {
+  const { activeId, tocContent } = useActiveTocItem(tableOfContents)
   return (
     <div className="flex flex-col w-full h-auto rounded-none">
-      {tableOfContents.map((item, index) => {
+      {tocContent.map((item, index) => {
         const isH1 = item.depth === 1
-        const isActive = item.url === `#${activeHeading}`
+        const isActive = item.url === `#${activeId}`
         return (
           <div
             className={cn('rounded-none', isH1 ? `text-primary text-xl` : 'text-xs')}
@@ -268,25 +315,21 @@ export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
   const { toggleSidebar, open: sidebarOpen } = useSidebar()
 
   const pathname = usePathname()
-
-  const [_document, setDocumentObject] = React.useState<Document>()
   const [mounted, setMounted] = React.useState(false)
   const [pathToPage, setPathToPage] = React.useState<NavTreeItem[] | false>(false)
   const [tableOfContents, setTableOfContents] = React.useState<Array<TableOfContentsItem>>([])
 
-  const activeHeading = useActiveItem(tableOfContents.map((i) => i.id))
-
   React.useEffect(() => {
     setMounted(true)
-    setDocumentObject(document)
   }, [])
 
   React.useEffect(() => {
     setPathToPage(findPagePathByUrl(navTree, pathname))
-    if (_document) {
-      setTableOfContents(collectHeadings(_document.body))
+    if (document?.body) {
+      const headingTags = collectHeadingTagReferences(document.body)
+      setTableOfContents(headingTags)
     }
-  }, [_document, navTree, pathname])
+  }, [navTree, pathname])
 
   if (!mounted) {
     return <></>
@@ -316,10 +359,7 @@ export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
           <PathPathBreadcrumbs pathToPage={pathToPage} />
         </SidebarGroup>
         <SidebarGroup className="flex flex-col bg-blend-darken">
-          <PageContentsHeadingList
-            tableOfContents={tableOfContents}
-            activeHeading={activeHeading}
-          ></PageContentsHeadingList>
+          <PageContentsHeadingList tableOfContents={tableOfContents} />
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter></SidebarFooter>
