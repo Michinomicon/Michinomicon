@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "strict": true,
-    "baseUrl": ".",
     "esModuleInterop": true,
     "target": "ES2022",
     "lib": [
@@ -35,7 +34,7 @@
         "./src/*"
       ],
       "flipbook-js": [
-        "node_modules/flipbook-js"
+        "./node_modules/flipbook-js"
       ]
     }
   },

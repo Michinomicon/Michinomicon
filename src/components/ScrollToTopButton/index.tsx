@@ -21,20 +21,20 @@ const ScrollToTopButton = () => {
     if (!mounted) return
     if (!_document) return
 
-    const toggleVisible = () => {
-      const scrolled = _document.documentElement.scrollTop
-      if (scrolled > 300) {
-        setVisible(true)
-      } else if (scrolled <= 300) {
-        setVisible(false)
-      }
-    }
+    // const toggleVisible = () => {
+    //   const scrolled = _document.documentElement.scrollTop
+    //   if (scrolled > 200) {
+    //     setVisible(true)
+    //   } else if (scrolled <= 200) {
+    //     setVisible(false)
+    //   }
+    // }
 
     setDocumentObject(document)
     setWindowObject(window)
-    window.addEventListener('scroll', toggleVisible)
+    // window.addEventListener('scroll', toggleVisible)
     return () => {
-      window.removeEventListener('scroll', toggleVisible)
+      // window.removeEventListener('scroll', toggleVisible)
     }
   }, [_document, mounted])
 

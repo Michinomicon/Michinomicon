@@ -1,4 +1,4 @@
-import LogoImage from 'public/icons/favicon-512x512.png'
+import LogoImage from '../../../public/icons/favicon-512x512.png'
 
 export interface LogoProps {
   text?: string | undefined
