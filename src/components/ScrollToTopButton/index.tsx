@@ -22,10 +22,11 @@ const ScrollToTopButton = () => {
     if (!_document) return
 
     const toggleVisible = () => {
-      const scrolled = _document.documentElement.scrollTop
-      if (scrolled > 300) {
+      const mainContent: HTMLElement | null = _document.getElementById('#mainContent')
+      const scrolled = mainContent?.scrollTop ?? 300
+      if (scrolled >= 300) {
         setVisible(true)
-      } else if (scrolled <= 300) {
+      } else if (scrolled < 300) {
         setVisible(false)
       }
     }
@@ -39,7 +40,9 @@ const ScrollToTopButton = () => {
   }, [_document, mounted])
 
   const scrollToTop = () => {
-    if (!_window) return
+    if (!_window) {
+      return
+    }
     _window.scrollTo({
       top: 0,
       behavior: 'smooth',
@@ -53,8 +56,14 @@ const ScrollToTopButton = () => {
   return (
     <>
       {visible && (
-        <Button size={'lg'} variant={'outline'} onClick={scrollToTop} className="group">
-          <div className="flex flex-col flex-nowrap items-center gap-0.5">
+        <Button
+          style={{ opacity: visible ? 100 : 0 }}
+          size={'lg'}
+          variant={'outline'}
+          onClick={scrollToTop}
+          className="group transition-all"
+        >
+          <div className="flex flex-col flex-nowrap items-center gap-0.5 pointer-events-none">
             <ChevronsUp className="absolute -translate-y-3 size-6 group-hover:stroke-2 ease-in group-hover:size-8 group-hover:-translate-y-6 transition-all" />
             <span className="group-hover:translate-y-2 ease-in transition-all group-hover:font-semibold">
               Scroll to Top
