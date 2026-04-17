@@ -77,7 +77,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <PageTableOfContents navTree={navTree}></PageTableOfContents>
             <SidebarInset
               className={cn(
-                'min-w-0 max-w-screen bg-none rounded-none',
+                'min-w-0 max-w-screen bg-none rounded-none pointer-events-none',
                 'peer-data-[state=expanded]:top-[calc(calc(var(--header-height))+0)]',
                 'peer-data-[state=expanded]:pl-[calc(calc(var(--sidebar-width)))]',
                 'peer-data-[state=expanded]:max-w-[calc(calc(100vw-var(--sidebar-width)))] peer-data-[state=collapsed]:max-w-[calc(100vw)] peer-data-[state=collapsed]:w-[calc(100vw)]',

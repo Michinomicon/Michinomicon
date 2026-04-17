@@ -66,18 +66,22 @@ function useActiveItem(itemIds: string[]) {
       { rootMargin: '0% 0% -80% 0%' },
     )
 
-    for (const id of itemIds ?? []) {
-      const element = document.getElementById(id)
-      if (element) {
-        observer.observe(element)
+    for (const id of itemIds) {
+      if (id.trim().length > 0) {
+        const element = document.getElementById(id)
+        if (element) {
+          observer.observe(element)
+        }
       }
     }
 
     return () => {
-      for (const id of itemIds ?? []) {
-        const element = document.getElementById(id)
-        if (element) {
-          observer.unobserve(element)
+      for (const id of itemIds) {
+        if (id.trim().length > 0) {
+          const element = document.getElementById(id)
+          if (element) {
+            observer.unobserve(element)
+          }
         }
       }
     }
