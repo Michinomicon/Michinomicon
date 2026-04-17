@@ -4,10 +4,11 @@ import React from 'react'
 
 import type { Header } from '@/payload-types'
 import { getAppName } from '@/utilities/getAppName'
+import { getNavTree } from '@/utilities/buildNavTree'
 
 export async function Header() {
   const headerData: Header = await getCachedGlobal('header', 1)()
   const appTitle: string = getAppName()
-
-  return <HeaderClient appTitle={appTitle} data={headerData} />
+  const navTree = await getNavTree()
+  return <HeaderClient appTitle={appTitle} data={headerData} navTree={navTree} />
 }

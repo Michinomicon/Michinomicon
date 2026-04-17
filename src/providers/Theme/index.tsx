@@ -4,11 +4,14 @@ import * as React from 'react'
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from 'next-themes'
 
 interface ColorThemeContextType {
-  colorTheme: string | null
-  setColorTheme: (theme: string | null) => void
+  colorTheme: string
+  setColorTheme: (theme: string) => void
 }
 
-const ColorThemeContext = React.createContext<ColorThemeContextType | undefined>(undefined)
+const ColorThemeContext = React.createContext<ColorThemeContextType>({
+  colorTheme: 'default',
+  setColorTheme: (_theme: string) => {},
+})
 
 const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME ?? 'default'
 const ColorThemeStorageKey = 'michnomicon-theme'
@@ -22,15 +25,15 @@ export function ColorThemeProvider({
   defaultColorTheme?: string
   storageKey?: string
 }) {
-  const [colorTheme, setColorThemeState] = React.useState<string | null>(DefaultColorTheme)
+  const [colorTheme, setColorThemeState] = React.useState<string>(DefaultColorTheme)
   const [isClient, setIsClient] = React.useState(false)
 
   // Handle client-side mounting to avoid hydration mismatch
   React.useEffect(() => {
     setIsClient(true)
-    const storedColorTheme = localStorage.getItem(storageKey)
+    const storedColorTheme: string = localStorage.getItem(storageKey) ?? defaultColorTheme
 
-    setColorThemeState(storedColorTheme ?? defaultColorTheme)
+    setColorThemeState(storedColorTheme)
   }, [defaultColorTheme, storageKey])
 
   // Apply color theme to document
@@ -58,7 +61,7 @@ export function ColorThemeProvider({
     }
   }, [colorTheme, storageKey, isClient])
 
-  const setColorTheme = React.useCallback((theme: string | null) => {
+  const setColorTheme = React.useCallback((theme: string) => {
     setColorThemeState(theme)
   }, [])
 

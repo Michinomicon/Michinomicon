@@ -101,7 +101,7 @@
   --accent-foreground: oklch(0.9851 0 0);
   --destructive: oklch(0.6399 0.2353 25.1288);
   --destructive-foreground: oklch(0.9815 0.0075 17.2846);
-  --border: oklch(0.2138 0.0019 286.2347);
+  --border: oklch(84.15% 0.10091 306.769 / 0.663);
   --input: oklch(0.7288 0.1798 306.2861);
   --ring: oklch(72.153% 0.11319 306.353);
   --chart-1: oklch(0.9815 0.0075 17.2846);
@@ -115,7 +115,7 @@
   --sidebar-primary-foreground: oklch(0.9851 0 0);
   --sidebar-accent: oklch(0.2686 0 0);
   --sidebar-accent-foreground: oklch(0.9851 0 0);
-  --sidebar-border: oklch(0.2768 0 0);
+  --sidebar-border: oklch(84.15% 0.10091 306.769 / 0.663);
   --sidebar-ring: oklch(0.4386 0 0);
   --font-sans: Merriweather Sans, ui-sans-serif, sans-serif, system-ui;
   --font-serif: Merriweather, ui-serif, serif;
