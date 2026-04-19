@@ -1,22 +1,21 @@
-import LogoImage from 'public/icons/favicon-512x512.png'
+import LogoImage from '@/public/icons/favicon-512x512.png'
 
-export interface LogoProps {
+export type LogoProps = {
   text?: string | undefined
-  className?: string
+  className?: string | undefined
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
   variant?: 'textonly' | 'icononly' | 'default'
 }
 
-export const Logo = (props: LogoProps) => {
-  const {
-    variant: variantFromProps,
-    text,
-    loading: loadingFromProps,
-    priority: priorityFromProps,
-    className,
-  } = props
-
+export function Logo({
+  variant: variantFromProps,
+  text,
+  loading: loadingFromProps,
+  priority: priorityFromProps,
+  className,
+  ...props
+}: LogoProps & React.ComponentProps<'div'>) {
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
   const variant = variantFromProps || 'default'
@@ -26,7 +25,7 @@ export const Logo = (props: LogoProps) => {
 
   return (
     /* eslint-disable @next/next/no-img-element */
-    <div className={`flex flex-nowrap justify-center items-center ${className}`}>
+    <div className={`flex flex-row flex-nowrap ${className}`} {...props}>
       {showIcon && (
         <img
           alt="Logo"
@@ -43,7 +42,7 @@ export const Logo = (props: LogoProps) => {
           <text
             x="10"
             y="32"
-            className="ml-2 text-4xl no-underline"
+            className={'ml-2 text-4xl no-underline'}
             fill={'var(--muted-foreground)'}
           >
             {text}

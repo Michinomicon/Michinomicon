@@ -50,7 +50,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="theme-color" content="#5a168c" />
       </head>
       <body>
-        <div className="flex flex-col min-h-screen w-screen">
+        <div className="flex min-h-screen w-screen flex-col">
           <Providers>
             <InteractiveBackground enableSpotlight={true} enableReactiveTile={true} />
             <AdminBar
@@ -77,10 +77,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <PageTableOfContents navTree={navTree}></PageTableOfContents>
             <SidebarInset
               className={cn(
-                'min-w-0 max-w-screen bg-none rounded-none pointer-events-none',
+                'pointer-events-none max-w-screen min-w-0 rounded-none bg-none',
                 'peer-data-[state=expanded]:top-[calc(calc(var(--header-height))+0)]',
-                'peer-data-[state=expanded]:pl-[calc(calc(var(--sidebar-width)))]',
-                'peer-data-[state=expanded]:max-w-[calc(calc(100vw-var(--sidebar-width)))] peer-data-[state=collapsed]:max-w-[calc(100vw)] peer-data-[state=collapsed]:w-[calc(100vw)]',
+                'xl:peer-data-[state=expanded]:pl-[calc(calc(var(--sidebar-width)))]',
+                'peer-data-[state=collapsed]:w-[calc(100vw)] peer-data-[state=collapsed]:max-w-[calc(100vw)] peer-data-[state=expanded]:max-w-[calc(calc(100vw-var(--sidebar-width)))]',
               )}
             >
               <div
@@ -88,7 +88,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 className={cn(
                   'mt-[calc(var(--header-height)+0px)]',
                   'mb-[calc(var(--footer-height)+0px)]',
-                  'relative min-h-screen p-6 md:p-12 max-w-7xl ml-auto mr-auto pointer-events-none *:pointer-events-auto',
+                  'pointer-events-none relative mr-auto ml-auto min-h-screen max-w-7xl p-6 *:pointer-events-auto md:p-12',
                 )}
               >
                 {children}

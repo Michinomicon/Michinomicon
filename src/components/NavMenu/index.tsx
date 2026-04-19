@@ -15,6 +15,7 @@ import {
 import { NavTreeItem, NavTreePageItem } from '@/utilities/buildNavTree'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 type NavMenuProps = {
   navTree: NavTreeItem[]
@@ -28,7 +29,7 @@ function LevelZeroNode({ item }: { item: NavTreeItem }) {
     return (
       <NavigationMenuItem>
         <NavigationMenuLink
-          className={cn(navigationMenuTriggerStyle(), 'opacity-50 pointer-events-none')}
+          className={cn(navigationMenuTriggerStyle(), 'pointer-events-none opacity-50')}
           aria-disabled="true"
         >
           {item.title}
@@ -91,9 +92,9 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
       defaultValue={defaultTab}
       onValueChange={(value) => setActiveTab(value)}
       value={activeTab}
-      className="flex flex-row w-full h-full min-h-60 rounded-none gap-0"
+      className="flex h-full min-h-60 w-full flex-row gap-0 rounded-none"
     >
-      <TabsList className="bg-card/10 flex flex-col max-w-62.5 min-w-26 w-auto h-auto justify-start items-start p-0 rounded-none border-r m-0">
+      <TabsList className="m-0 flex h-auto w-auto max-w-62.5 min-w-26 flex-col items-start justify-start rounded-none border-r bg-card/10 p-0">
         {items
           .filter((item) => item.type === 'category' || item.type === 'page')
           .map((categoryOrPage) => {
@@ -114,12 +115,12 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
           })}
       </TabsList>
 
-      <div className="flex-1 rounded-none overflow-y-auto p-0 m-0">
+      <div className="m-0 flex-1 overflow-y-auto rounded-none p-0">
         {items.map((item) => (
           <TabsContent
             key={item.id}
             value={item.id}
-            className="rounded-none m-0 w-full h-full focus-visible:outline-none focus-visible:ring-0"
+            className="m-0 h-full w-full rounded-none focus-visible:ring-0 focus-visible:outline-none"
           >
             <TabContentNode item={item} />
           </TabsContent>
@@ -155,7 +156,7 @@ function TabContentNode({ item }: { item: NavTreeItem }) {
       return <RecursiveTabs items={item.children} />
     }
     return (
-      <div className="text-sm text-muted-foreground flex items-center justify-center h-full">
+      <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
         No further content available.
       </div>
     )
@@ -164,7 +165,7 @@ function TabContentNode({ item }: { item: NavTreeItem }) {
   // Fallback for Posts
   if (item.type === 'post') {
     return (
-      <Link href={item.url} className="text-sm hover:underline text-primary">
+      <Link href={item.url} className="text-sm text-primary hover:underline">
         {item.title}
       </Link>
     )
@@ -175,10 +176,10 @@ function TabContentNode({ item }: { item: NavTreeItem }) {
 
 function PageContentLayout({ item }: { item: NavTreePageItem }) {
   return (
-    <div className="flex flex-col h-full p-3">
+    <div className="flex h-full flex-col p-3">
       <Link
         href={item.url}
-        className="text-2xl font-bold tracking-tight hover:underline mb-6 pb-2 border-b rounded-none block text-foreground hover:text-primary"
+        className="mb-6 block rounded-none border-b pb-2 text-2xl font-bold tracking-tight text-foreground hover:text-primary hover:underline"
       >
         {item.title}
       </Link>
@@ -188,9 +189,9 @@ function PageContentLayout({ item }: { item: NavTreePageItem }) {
             <Link
               key={child.id}
               href={`${item.url}#${child.url}`}
-              className="block p-2 border rounded-md hover:bg-muted transition-colors text-foreground"
+              className="block rounded-md border p-2 text-foreground transition-colors hover:bg-muted"
             >
-              <div className="font-medium text-sm">{child.title}</div>
+              <div className="text-sm font-medium">{child.title}</div>
             </Link>
           ))}
         </div>
@@ -202,18 +203,44 @@ function PageContentLayout({ item }: { item: NavTreePageItem }) {
 }
 
 export default function NavMenu({ navTree }: NavMenuProps) {
-  return (
-    <NavigationMenu>
-      <NavigationMenuList>
-        <HomeNavigationMenuItem />
-        {navTree.map((item) => (
-          <LevelZeroNode key={item.id} item={item} />
-        ))}
-        <SearchNavigationMenuItem />
-        <NavigationMenuIndicator />
-      </NavigationMenuList>
-    </NavigationMenu>
-  )
+  const isMobile = useIsMobile()
+
+  if (isMobile) {
+    return (
+      <NavigationMenu orientation={'vertical'}>
+        <NavigationMenuList>
+          <NavigationMenuItem>
+            <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <NavigationMenu orientation={'vertical'}>
+                <NavigationMenuList className="flex flex-col">
+                  <HomeNavigationMenuItem />
+                  {navTree.map((item) => (
+                    <LevelZeroNode key={item.id} item={item} />
+                  ))}
+                  <SearchNavigationMenuItem />
+                </NavigationMenuList>
+              </NavigationMenu>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+          <NavigationMenuIndicator />
+        </NavigationMenuList>
+      </NavigationMenu>
+    )
+  } else {
+    return (
+      <NavigationMenu>
+        <NavigationMenuList>
+          <HomeNavigationMenuItem />
+          {navTree.map((item) => (
+            <LevelZeroNode key={item.id} item={item} />
+          ))}
+          <SearchNavigationMenuItem />
+          <NavigationMenuIndicator />
+        </NavigationMenuList>
+      </NavigationMenu>
+    )
+  }
 }
 
 function HomeNavigationMenuItem({
