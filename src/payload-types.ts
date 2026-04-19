@@ -203,7 +203,15 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | PostContentBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | MediaGalleryBlock
+    | ArchiveBlock
+    | FormBlock
+    | PostContentBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -307,6 +315,10 @@ export interface Post {
 export interface Media {
   id: string;
   title: string;
+  /**
+   * Select Category.
+   */
+  category?: (string | null) | Category;
   alt?: string | null;
   caption?: {
     root: {
@@ -622,6 +634,23 @@ export interface MediaBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaGalleryBlock".
+ */
+export interface MediaGalleryBlock {
+  selectionMethod: 'individual' | 'category';
+  individualMedia?:
+    | {
+        media: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  mediaCategory?: (string | null) | Category;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaGalleryBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1194,6 +1223,7 @@ export interface PagesSelect<T extends boolean = true> {
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
+        mediaGalleryBlock?: T | MediaGalleryBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         postContent?: T | PostContentBlockSelect<T>;
@@ -1268,6 +1298,22 @@ export interface ContentBlockSelect<T extends boolean = true> {
  */
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaGalleryBlock_select".
+ */
+export interface MediaGalleryBlockSelect<T extends boolean = true> {
+  selectionMethod?: T;
+  individualMedia?:
+    | T
+    | {
+        media?: T;
+        id?: T;
+      };
+  mediaCategory?: T;
   id?: T;
   blockName?: T;
 }
@@ -1349,6 +1395,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   title?: T;
+  category?: T;
   alt?: T;
   caption?: T;
   width?: T;
