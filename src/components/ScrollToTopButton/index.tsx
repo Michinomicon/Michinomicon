@@ -4,8 +4,9 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ChevronsUp } from 'lucide-react'
 import React from 'react'
+import { cn } from '@/lib/utils'
 
-const ScrollToTopButton = () => {
+const ScrollToTopButton = (props: React.ComponentPropsWithoutRef<typeof Button>) => {
   const [visible, setVisible] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [_document, setDocumentObject] = React.useState<Document>()
@@ -61,11 +62,12 @@ const ScrollToTopButton = () => {
           size={'lg'}
           variant={'outline'}
           onClick={scrollToTop}
-          className="group transition-all"
+          className={cn('group transition-all', props.className)}
+          {...props}
         >
-          <div className="flex flex-col flex-nowrap items-center gap-0.5 pointer-events-none">
-            <ChevronsUp className="absolute -translate-y-3 size-6 group-hover:stroke-2 ease-in group-hover:size-8 group-hover:-translate-y-6 transition-all" />
-            <span className="group-hover:translate-y-2 ease-in transition-all group-hover:font-semibold">
+          <div className="pointer-events-none flex flex-col flex-nowrap items-center gap-0.5">
+            <ChevronsUp className="absolute size-6 -translate-y-3 transition-all ease-in group-hover:size-8 group-hover:-translate-y-6 group-hover:stroke-2" />
+            <span className="transition-all ease-in group-hover:translate-y-2 group-hover:font-semibold">
               Scroll to Top
             </span>
           </div>

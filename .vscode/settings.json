@@ -1,6 +1,19 @@
 {
   "npm.packageManager": "pnpm",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSaveMode": "file",
+  "editor.colorDecorators": true,
+  "tailwindCSS.hovers": true,
+  "tailwindCSS.suggestions": true,
+  "tailwindCSS.colorDecorators": true,
+  "tailwindCSS.codeActions": true,
+  "tailwindCSS.validate": true,
+  "tailwindCSS.lint.cssConflict": "error",
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+  "js/ts.preferences.jsxAttributeCompletionStyle": "braces",
+  "js/ts.tsdk.path": "node_modules/typescript/lib",
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
@@ -30,11 +43,20 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true
   },
-  "editor.formatOnSaveMode": "file",
-  "typescript.tsdk": "node_modules/typescript/lib",
   "[javascript][typescript][typescriptreact]": {
     "editor.codeActionsOnSave": {
       "source.fixAll.eslint": "explicit"
     }
-  }
+  },
+  "cSpell.words": [
+    "cmdk",
+    "flipbook",
+    "icononly",
+    "importmap",
+    "pageflip",
+    "payloadcms",
+    "Stylesheet",
+    "textonly",
+    "unrs"
+  ]
 }

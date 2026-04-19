@@ -7,7 +7,6 @@ import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
 import NavMenu from '@/components/NavMenu'
 import { NavTreeItem } from '@/utilities/buildNavTree'
-import { PageTableOfContentsTrigger } from '@/components/PageTableOfContents'
 import { cn } from '@/lib/utils'
 import { AppMainLogo } from '@/components/AppMainLogo'
 
