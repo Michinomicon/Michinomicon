@@ -44,6 +44,18 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
     const cacheTag = resource.updatedAt
 
     src = getMediaUrl(url, cacheTag)
+
+    if (typeof src === 'string' && src.startsWith('http')) {
+      try {
+        const urlObj = new URL(src)
+        // If the URL matches localhost, strip it down to just the relative path
+        if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+          src = urlObj.pathname + urlObj.search
+        }
+      } catch (_err) {
+        // Silently ignore invalid URLs
+      }
+    }
   }
 
   if (src && src.toString().length < 0) {

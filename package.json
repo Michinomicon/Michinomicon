@@ -65,6 +65,7 @@
     "flipbook-js": "^1.1.1",
     "geist": "^1.7.0",
     "graphql": "^16.12.0",
+    "lightgallery": "^2.9.0",
     "lucide-react": "^1.7.0",
     "music-metadata": "^11.12.3",
     "next": "16.2.0",
@@ -124,7 +125,10 @@
     ],
     "overrides": {
       "pdfjs-dist": "4.4.168"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "ffmpeg-static"
+    ]
   },
   "resolutions": {
     "pdfjs-dist": "4.4.168"

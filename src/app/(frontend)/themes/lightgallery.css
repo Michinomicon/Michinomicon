@@ -1,0 +1,25 @@
+/* LIGHT GALLERY GLOBAL STYLES */
+.lg-outer .lg-thumb-item.active,
+.lg-outer .lg-thumb-item:hover {
+  border-color: var(--secondary) !important;
+}
+.lg-thumb.lg-group {
+  justify-content: center !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+.lg-outer .lg-thumb-item {
+  border-radius: inherit !important;
+}
+.lg-outer .lg-thumb-item img{
+  border-radius: inherit !important;
+  border-color: var(--border) !important;
+}
+
+
+@layer base {
+  .lg-container * {
+    @apply rounded-none;
+    border-radius: 0;
+  }
+}
