@@ -112,7 +112,7 @@ const imageBeforeChangeTasks = async ({
 }): Promise<Partial<Media>> => {
   if (!req.file?.mimetype.startsWith('image/')) {
     console.error(
-      `applicationPdfBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "application/pdf"`,
+      `imageBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "image/"`,
       JSON.stringify(req),
     )
     return data
@@ -144,7 +144,7 @@ const audioBeforeChangeTasks = async ({
 }): Promise<Partial<Media>> => {
   if (!req.file?.mimetype.startsWith('audio/')) {
     console.error(
-      `applicationPdfBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "application/pdf"`,
+      `audioBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "audio/"`,
       JSON.stringify(req),
     )
     return data
@@ -166,6 +166,124 @@ const audioBeforeChangeTasks = async ({
     data.live = false
   } catch (error) {
     console.error('Failed to parse audio metadata:', error)
+  }
+
+  return data
+}
+
+const videoBeforeChangeTasks = async ({
+  data,
+  req,
+}: {
+  data: Partial<Media>
+  req: PayloadRequest
+}): Promise<Partial<Media>> => {
+  if (!req.file?.mimetype.startsWith('video/')) {
+    console.error(
+      `videoBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected "video/"`,
+      JSON.stringify(req),
+    )
+    return data
+  }
+
+  const os = await import('os')
+  const fs = await import('fs/promises')
+  const path = await import('path')
+  const util = await import('util')
+  const { execFile } = await import('child_process')
+  const execFileAsync = util.promisify(execFile)
+  const ffmpegCommand = 'ffmpeg'
+  const ffprobeCommand = 'ffprobe'
+
+  const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}-${req.file.name}`)
+
+  try {
+    await fs.writeFile(tempFilePath, req.file.data)
+
+    // Extract Metadata
+    const { stdout: probeOutput } = await execFileAsync(ffprobeCommand, [
+      '-v',
+      'error',
+      '-select_streams',
+      'v:0',
+      '-show_entries',
+      'stream=width,height,codec_name:format=duration',
+      '-of',
+      'json',
+      tempFilePath,
+    ])
+
+    const videoMetadata = JSON.parse(probeOutput)
+    const stream = videoMetadata.streams?.[0]
+    const format = videoMetadata.format
+
+    if (stream) {
+      data.width = stream.width || data.width
+      data.height = stream.height || data.height
+      data.codec = stream.codec_name || data.codec
+    }
+
+    let durationSec = 0
+    if (format && format.duration) {
+      durationSec = parseFloat(format.duration)
+      data.duration = Math.round(durationSec)
+    } else {
+      data.duration = data.duration || 0
+    }
+
+    // Generate Thumbnails
+    data.sizes = data.sizes || {}
+    const uploadConfig = req.payload.collections['media'].config.upload as {
+      staticDir: string
+    }
+    const resolvedStaticDir = uploadConfig.staticDir
+    const baseName = (data.filename || req.file.name).replace(/\.[^/.]+$/, '')
+
+    const sharp = (await import('sharp')).default
+    const midpointSec = Math.max(0, durationSec / 2).toFixed(2)
+
+    for (const { name, width, height } of configuredUploadImageSizes) {
+      const sizeFilename = `${baseName}-${name}.png`
+      const uploadPath = path.join(resolvedStaticDir, sizeFilename)
+
+      const scaleWidth = width ? width : -1
+      const scaleHeight = height ? height : -1
+      const scaleFilter = `scale=${scaleWidth}:${scaleHeight}`
+
+      await execFileAsync(ffmpegCommand, [
+        '-y',
+        '-ss',
+        String(midpointSec),
+        '-i',
+        tempFilePath,
+        '-vframes',
+        '1',
+        '-vf',
+        scaleFilter,
+        uploadPath,
+      ])
+
+      const generatedImageBuffer = await fs.readFile(uploadPath)
+      const sharpMetadata = await sharp(generatedImageBuffer).metadata()
+
+      data.sizes[name as keyof typeof data.sizes] = {
+        filename: sizeFilename,
+        filesize: generatedImageBuffer.length,
+        mimeType: 'image/png',
+        width: sharpMetadata.width || width,
+        height: sharpMetadata.height || height,
+      }
+    }
+
+    console.log('Video metadata and thumbnails generated successfully.')
+  } catch (error) {
+    console.error('Failed to parse video metadata or generate thumbnails:', error)
+  } finally {
+    try {
+      await fs.unlink(tempFilePath)
+    } catch (cleanupError) {
+      console.error(`Failed to clean up temp file ${tempFilePath}:`, cleanupError)
+    }
   }
 
   return data
@@ -193,6 +311,10 @@ export const mediaCollectionBeforeChange: CollectionBeforeChangeHook<Media> = as
 
     if (req.file.mimetype.startsWith('audio/')) {
       return audioBeforeChangeTasks({ data, req })
+    }
+
+    if (req.file.mimetype.startsWith('video/')) {
+      return videoBeforeChangeTasks({ data, req })
     }
   }
 

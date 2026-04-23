@@ -60,6 +60,14 @@ export const Media: CollectionConfig = {
       },
     },
     {
+      name: 'sortPriority',
+      type: 'number',
+      admin: {
+        position: 'sidebar',
+      },
+      defaultValue:0
+    },
+    {
       name: 'alt',
       type: 'text',
       admin: {

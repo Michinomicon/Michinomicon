@@ -7,6 +7,9 @@
 /* Styles for the .pdf flipbopok */
 @import './themes/pdf-flipbook.css';
 
+/* Styles for lightgallery.js*/
+@import './themes/lightgallery.css';
+
 /* Eyes wallpaper */
 @import './themes/eyes-wallpaper.css';
 
@@ -14,15 +17,6 @@
 @import './themes/fii-one.css';
 @import './themes/simple.css';
 @import './themes/purple.css';
-
-/* @import './themes/blue.css'; */
-/* @import './themes/minimal-red.css'; */
-/* @import './themes/minimal-blue.css'; */
-/* @import './themes/minimal-green.css'; */
-/* @import './themes/minimal-orange.css'; */
-/* @import './themes/minimal-rose.css'; */
-/* @import './themes/minimal-violet.css'; */
-/* @import './themes/minimal-yellow.css'; */
 
 @theme inline {
   --header-height: 100px;

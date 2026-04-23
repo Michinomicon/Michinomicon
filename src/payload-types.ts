@@ -319,6 +319,7 @@ export interface Media {
    * Select Category.
    */
   category?: (string | null) | Category;
+  sortPriority?: number | null;
   alt?: string | null;
   caption?: {
     root: {
@@ -1396,6 +1397,7 @@ export interface PostsSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   title?: T;
   category?: T;
+  sortPriority?: T;
   alt?: T;
   caption?: T;
   width?: T;

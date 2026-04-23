@@ -125,7 +125,10 @@
     ],
     "overrides": {
       "pdfjs-dist": "4.4.168"
-    }
+    },
+    "ignoredBuiltDependencies": [
+      "ffmpeg-static"
+    ]
   },
   "resolutions": {
     "pdfjs-dist": "4.4.168"
