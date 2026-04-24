@@ -192,8 +192,8 @@ const videoBeforeChangeTasks = async ({
   const util = await import('util')
   const { execFile } = await import('child_process')
   const execFileAsync = util.promisify(execFile)
-  const ffmpegCommand = 'ffmpeg'
-  const ffprobeCommand = 'ffprobe'
+  const ffmpegCommand = '/usr/bin/ffmpeg'
+  const ffprobeCommand = '/usr/bin/ffprobe'
 
   const tempFilePath = path.join(os.tmpdir(), `temp-${Date.now()}-${req.file.name}`)
 

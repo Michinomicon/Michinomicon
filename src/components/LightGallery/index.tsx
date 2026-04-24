@@ -140,7 +140,12 @@ const mapMediaItemsToLightGalleryItems = (item: Media, index: number, _array: Me
           className={ImageStyles}
           src={videoItem.thumb}
           fill={true}
+          style={{
+            objectFit: 'cover',
+            objectPosition: '50% 50%',
+          }}
           loading="lazy"
+          sizes={ImageSizes}
         />
       </a>
     )
@@ -187,7 +192,6 @@ export const LightGalleryComponent: React.FC<Props> = ({ items, className }: Pro
     <div className={cn('w-full rounded-none', className)}>
       <LightGallery
         onInit={onInit}
-        speed={50}
         mode={'lg-lollipop'}
         width={'100%'}
         plugins={[lgThumbnail, lgZoom, lgVideo]}
@@ -195,14 +199,9 @@ export const LightGalleryComponent: React.FC<Props> = ({ items, className }: Pro
         allowMediaOverlap={true}
         currentPagerPosition={'middle'}
         alignThumbnails={'middle'}
-        startAnimationDuration={50}
-        slideDelay={50}
         loop={true}
         escKey={true}
         controls={true}
-        easing={'linear'}
-        preload={3}
-        numberOfSlideItemsInDom={3}
         isMobile={() => isMobile}
         showMaximizeIcon={false}
         elementClassNames={LightGalleryGridStyles}
