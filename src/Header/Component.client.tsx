@@ -14,14 +14,15 @@ interface HeaderClientProps {
   data: Header
   appTitle?: string | undefined
   navTree: NavTreeItem[]
+  twitchStatusSlot?: React.ReactNode
 }
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
   appTitle,
   navTree,
+  twitchStatusSlot,
   // data,
 }) => {
-  /* Storing the value in a useState to avoid hydration errors */
   const [themeMode, setThemeMode] = useState<string | null>(null)
   const [themeColor, setThemeColor] = useState<string | null>(null)
 
@@ -45,19 +46,18 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headerThemeColor])
 
-  const HeaderRowStyles =
-    'px-2 py-2 mx-auto container grid grid-cols-12 grid-rows-1 gap-3 rounded-none'
+  const HeaderRowStyles = 'px-2 py-2 mx-auto grid grid-cols-12 grid-rows-1 gap-3 rounded-none'
 
   return (
     <header
-      className={`fixed w-screen rounded-none top-0 z-20 bg-background shadow-md`}
+      className={`fixed top-0 z-20 w-screen rounded-none bg-background shadow-md`}
       data-theme={themeColor}
       data-mode={themeMode}
     >
       {/* TOP ROW OF HEADER */}
       <div className={cn(HeaderRowStyles, 'border-b')}>
-        <div className="col-span-2 flex justify-start"></div>
-        <div className="col-span-8 flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="col-span-2 flex justify-start align-middle">{twitchStatusSlot}</div>
+        <div className="col-span-8 flex flex-row flex-nowrap justify-center rounded-none">
           <AppMainLogo text={appTitle} />
         </div>
         <div className="col-span-2 flex justify-end">
@@ -66,13 +66,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
       </div>
 
       {/* BOTTOM ROW OF HEADER */}
-      <div className={cn(HeaderRowStyles)}>
+      <div className={cn(HeaderRowStyles, 'container')}>
         <div className="col-span-2 flex justify-start"></div>
         <div className="col-span-8 flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
           <NavMenu navTree={navTree} />
           {/* <HeaderNav data={data} /> */}
         </div>
-        <div className="col-span-2 flex justify-end">{/* <PageTableOfContentsTrigger /> */}</div>
       </div>
     </header>
   )

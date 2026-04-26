@@ -80,6 +80,9 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+  --color-twitch-purple: #bf94ff;
+  --color-twitch-viewer-count-red:#ff8280;
 }
 
 @layer base {
@@ -101,6 +104,15 @@
   h6 {
     font-size: unset;
     font-weight: unset;
+  }
+  .twitch-text{
+    font-family: "Roobert","Tajawal","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+    color: #efeff1 !important;
+    line-height: 1.1 !important;
+    font-size: 1.8rem !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.18px !important;
+    text-decoration:none !important;
   }
 }
 
