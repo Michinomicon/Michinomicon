@@ -55,7 +55,7 @@ jobs:
           echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
           echo "TWITCH_CLIENT_ID=${{ secrets.TWITCH_CLIENT_ID }}" >> .env
           echo "TWITCH_CLIENT_SECRET=${{ secrets.TWITCH_CLIENT_SECRET }}" >> .env
-          echo "TWITCH_STATUS_USERNAME=${{ secrets.TWITCH_STATUS_USERNAME }}" >> .env
+          echo "TWITCH_STATUS_USERNAME=${{ vars.TWITCH_STATUS_USERNAME }}" >> .env
 
       - name: Install pnpm (v10.27)
         uses: pnpm/action-setup@v4
