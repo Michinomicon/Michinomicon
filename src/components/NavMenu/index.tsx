@@ -11,6 +11,7 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
+  NavigationMenuViewport,
 } from '@/components/ui/navigation-menu'
 import { NavTreeItem, NavTreePageItem } from '@/utilities/buildNavTree'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
@@ -57,7 +58,7 @@ function LevelZeroNode({ item }: { item: NavTreeItem }) {
       <NavigationMenuItem>
         <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <div className="w-full md:w-100 lg:w-150">
+          <div className={cn('w-full md:w-100 lg:w-150')}>
             <PageContentLayout item={item} />
           </div>
         </NavigationMenuContent>
@@ -71,7 +72,7 @@ function LevelZeroNode({ item }: { item: NavTreeItem }) {
       <NavigationMenuItem>
         <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
         <NavigationMenuContent>
-          <div className="w-full md:w-100 lg:w-180">
+          <div className={cn('w-full md:w-100 lg:w-180')}>
             <RecursiveTabs items={item.children} />
           </div>
         </NavigationMenuContent>
@@ -85,16 +86,28 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
   const [activeTab, setActiveTab] = React.useState<string>()
   if (!items || items.length === 0) return null
 
+  const isVertical = true
+
+  // const TabStyles = isVertical
+  //   ? cn('flex w-full flex-col gap-0 rounded-none')
+  //   : cn('flex w-full flex-row gap-0 rounded-none')
+
   // Auto-select the first tab
   const defaultTab = items[0]?.id
   return (
     <Tabs
       defaultValue={defaultTab}
       onValueChange={(value) => setActiveTab(value)}
+      orientation={isVertical ? 'vertical' : 'horizontal'}
       value={activeTab}
-      className="flex h-full min-h-60 w-full flex-row gap-0 rounded-none"
+      className={cn('flex w-full flex-col gap-0 rounded-none')}
     >
-      <TabsList className="m-0 flex h-auto w-auto max-w-62.5 min-w-26 flex-col items-start justify-start rounded-none border-r bg-card/10 p-0">
+      <TabsList
+        className={cn(
+          'flex items-start justify-center border-b',
+          'm-0 w-full min-w-26 rounded-none bg-card/10 p-0',
+        )}
+      >
         {items
           .filter((item) => item.type === 'category' || item.type === 'page')
           .map((categoryOrPage) => {
@@ -107,7 +120,7 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
                 key={categoryOrPage.id}
                 value={categoryOrPage.id}
                 disabled={isDisabled}
-                className={cn(NavMenuPageOrCategoryItemTriggerStyle)}
+                className={cn(NavMenuPageOrCategoryItemTriggerStyle, 'group')}
               >
                 {categoryOrPage.title}
               </TabsTrigger>
@@ -115,12 +128,14 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
           })}
       </TabsList>
 
-      <div className="m-0 flex-1 overflow-y-auto rounded-none p-0">
+      <div className="m-0 w-full flex-1 overflow-y-auto rounded-none p-0 group-active:border-t-2">
         {items.map((item) => (
           <TabsContent
             key={item.id}
             value={item.id}
-            className="m-0 h-full w-full rounded-none focus-visible:ring-0 focus-visible:outline-none"
+            className={cn(
+              'm-0 flex w-full flex-col rounded-none focus-visible:ring-0 focus-visible:outline-none',
+            )}
           >
             <TabContentNode item={item} />
           </TabsContent>
@@ -131,7 +146,7 @@ function RecursiveTabs({ items }: { items: NavTreeItem[] }) {
 }
 
 const NavMenuPageOrCategoryItemTriggerStyle = cn(
-  'rounded-none max-h-10 min-w-26 max-w-70 w-full justify-start text-left px-3 py-2 m-0 ',
+  'rounded-none max-h-10 min-w-26 w-full text-center px-3 py-2 m-0 ',
   'hover:bg-accent/80',
   'data-[state=active]:text-accent-foreground ',
   `data-[state=active]:bg-accent/70`,
@@ -176,7 +191,7 @@ function TabContentNode({ item }: { item: NavTreeItem }) {
 
 function PageContentLayout({ item }: { item: NavTreePageItem }) {
   return (
-    <div className="flex h-full flex-col p-3">
+    <div className="flex h-full w-full flex-col p-3">
       <Link
         href={item.url}
         className="mb-6 block rounded-none border-b pb-2 text-2xl font-bold tracking-tight text-foreground hover:text-primary hover:underline"
@@ -204,16 +219,17 @@ function PageContentLayout({ item }: { item: NavTreePageItem }) {
 
 export default function NavMenu({ navTree }: NavMenuProps) {
   const isMobile = useIsMobile()
+  const orientation = 'vertical'
 
   if (isMobile) {
     return (
-      <NavigationMenu orientation={'vertical'}>
-        <NavigationMenuList>
+      <NavigationMenu orientation={orientation}>
+        <NavigationMenuList orientation={orientation}>
           <NavigationMenuItem>
             <NavigationMenuTrigger>Menu</NavigationMenuTrigger>
             <NavigationMenuContent>
-              <NavigationMenu orientation={'vertical'}>
-                <NavigationMenuList className="flex flex-col">
+              <NavigationMenu orientation={orientation}>
+                <NavigationMenuList orientation={orientation}>
                   <HomeNavigationMenuItem />
                   {navTree.map((item) => (
                     <LevelZeroNode key={item.id} item={item} />
@@ -229,8 +245,8 @@ export default function NavMenu({ navTree }: NavMenuProps) {
     )
   } else {
     return (
-      <NavigationMenu>
-        <NavigationMenuList>
+      <NavigationMenu orientation={orientation}>
+        <NavigationMenuList orientation={orientation}>
           <HomeNavigationMenuItem />
           {navTree.map((item) => (
             <LevelZeroNode key={item.id} item={item} />
@@ -238,6 +254,7 @@ export default function NavMenu({ navTree }: NavMenuProps) {
           <SearchNavigationMenuItem />
           <NavigationMenuIndicator />
         </NavigationMenuList>
+        <NavigationMenuViewport orientation={'vertical'}></NavigationMenuViewport>
       </NavigationMenu>
     )
   }
