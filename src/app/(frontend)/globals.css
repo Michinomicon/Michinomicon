@@ -20,6 +20,7 @@
 
 @theme inline {
   --header-height: 100px;
+  --inset-shadow-header: inset 0px 5px 0px rgba(0, 0, 0, 0.10); 
   --footer-height: 50px;
 
   --color-background: var(--background);

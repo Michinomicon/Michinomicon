@@ -7,29 +7,48 @@ import { cn } from '@/lib/utils'
 
 const NavigationMenu = React.forwardRef<
   React.ComponentRef<typeof NavigationMenuPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root>
->(({ className, children, ...props }, ref) => (
-  <NavigationMenuPrimitive.Root
-    ref={ref}
-    className={cn('relative z-10 flex max-w-max flex-1 items-center justify-center', className)}
-    {...props}
-  >
-    {children}
-    <NavigationMenuViewport />
-  </NavigationMenuPrimitive.Root>
-))
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Root> & {
+    orientation: 'vertical' | 'horizontal'
+  }
+>(({ orientation = 'vertical', className, children, ...props }, ref) => {
+  const orientationStyles = orientation === 'vertical' ? 'flex' : 'flex-col'
+  return (
+    <NavigationMenuPrimitive.Root
+      ref={ref}
+      className={cn(
+        'relative z-10 max-w-max flex-1 items-center justify-center',
+        orientationStyles,
+        className,
+      )}
+      {...props}
+    >
+      {children}
+      <NavigationMenuViewport orientation={orientation} />
+    </NavigationMenuPrimitive.Root>
+  )
+})
 NavigationMenu.displayName = NavigationMenuPrimitive.Root.displayName
 
 const NavigationMenuList = React.forwardRef<
   React.ComponentRef<typeof NavigationMenuPrimitive.List>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List>
->(({ className, ...props }, ref) => (
-  <NavigationMenuPrimitive.List
-    ref={ref}
-    className={cn('group flex flex-1 list-none items-center justify-center space-x-1', className)}
-    {...props}
-  />
-))
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.List> & {
+    orientation: 'vertical' | 'horizontal'
+  }
+>(({ orientation = 'vertical', className, ...props }, ref) => {
+  const orientationStyles = orientation === 'vertical' ? 'flex' : 'flex-col'
+
+  return (
+    <NavigationMenuPrimitive.List
+      ref={ref}
+      className={cn(
+        'group flex-1 list-none items-center justify-center space-x-1',
+        orientationStyles,
+        className,
+      )}
+      {...props}
+    />
+  )
+})
 NavigationMenuList.displayName = NavigationMenuPrimitive.List.displayName
 
 const NavigationMenuItem = NavigationMenuPrimitive.Item
@@ -63,7 +82,7 @@ const NavigationMenuContent = React.forwardRef<
   <NavigationMenuPrimitive.Content
     ref={ref}
     className={cn(
-      'left-0 top-0 w-full data-[motion^=from-]:animate-in data-[motion^=to-]:animate-out data-[motion^=from-]:fade-in data-[motion^=to-]:fade-out data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 md:absolute md:w-auto ',
+      'top-0 left-0 w-screen data-[motion=from-end]:slide-in-from-right-52 data-[motion=from-start]:slide-in-from-left-52 data-[motion=to-end]:slide-out-to-right-52 data-[motion=to-start]:slide-out-to-left-52 data-[motion^=from-]:animate-in data-[motion^=from-]:fade-in data-[motion^=to-]:animate-out data-[motion^=to-]:fade-out md:absolute md:w-auto',
       className,
     )}
     {...props}
@@ -75,19 +94,30 @@ const NavigationMenuLink = NavigationMenuPrimitive.Link
 
 const NavigationMenuViewport = React.forwardRef<
   React.ComponentRef<typeof NavigationMenuPrimitive.Viewport>,
-  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport>
->(({ className, ...props }, ref) => (
-  <div className={cn('absolute top-full isolate z-50 flex justify-center')}>
-    <NavigationMenuPrimitive.Viewport
-      className={cn(
-        'origin-top-center relative mt-1.5 h-(--radix-navigation-menu-viewport-height) w-full overflow-hidden rounded-md border bg-popover text-popover-foreground shadow data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-90 md:w-(--radix-navigation-menu-viewport-width)',
-        className,
-      )}
-      ref={ref}
-      {...props}
-    />
-  </div>
-))
+  React.ComponentPropsWithoutRef<typeof NavigationMenuPrimitive.Viewport> & {
+    orientation: 'vertical' | 'horizontal'
+  }
+>(({ orientation = 'vertical', className, ...props }, ref) => {
+  const containerStyles = orientation === 'vertical' ? 'flex-col' : 'flex'
+  return (
+    <div className={cn('absolute top-full isolate z-50 justify-center', containerStyles)}>
+      <NavigationMenuPrimitive.Viewport
+        className={cn(
+          'h-(--radix-navigation-menu-viewport-height)',
+          'md:w-screen md:min-w-(--radix-navigation-menu-viewport-width)',
+          'items-center justify-center',
+          'bg-background text-background',
+          'rounded-t-none rounded-b-md',
+          'border-0 border-t',
+          'origin-top-center relative mt-1.5 overflow-hidden shadow data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:zoom-in-90',
+          className,
+        )}
+        ref={ref}
+        {...props}
+      />
+    </div>
+  )
+})
 NavigationMenuViewport.displayName = NavigationMenuPrimitive.Viewport.displayName
 
 const NavigationMenuIndicator = React.forwardRef<
@@ -97,7 +127,7 @@ const NavigationMenuIndicator = React.forwardRef<
   <NavigationMenuPrimitive.Indicator
     ref={ref}
     className={cn(
-      'top-full z-1 flex h-1.5 items-end justify-center overflow-hidden data-[state=visible]:animate-in data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:fade-in',
+      'top-full z-1 flex h-1.5 items-end justify-center overflow-hidden data-[state=hidden]:animate-out data-[state=hidden]:fade-out data-[state=visible]:animate-in data-[state=visible]:fade-in',
       className,
     )}
     {...props}

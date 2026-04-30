@@ -17,11 +17,12 @@ interface HeaderClientProps {
   twitchStatusSlot?: React.ReactNode
 }
 
+export const HeaderRowStyles = 'px-2 py-2 mx-auto grid grid-cols-12 grid-rows-1 gap-3 rounded-none'
+
 export const HeaderClient: React.FC<HeaderClientProps> = ({
   appTitle,
   navTree,
   twitchStatusSlot,
-  // data,
 }) => {
   const [themeMode, setThemeMode] = useState<string | null>(null)
   const [themeColor, setThemeColor] = useState<string | null>(null)
@@ -45,8 +46,6 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     if (headerThemeColor && headerThemeColor !== themeColor) setThemeColor(headerThemeColor)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [headerThemeColor])
-
-  const HeaderRowStyles = 'px-2 py-2 mx-auto grid grid-cols-12 grid-rows-1 gap-3 rounded-none'
 
   return (
     <header
