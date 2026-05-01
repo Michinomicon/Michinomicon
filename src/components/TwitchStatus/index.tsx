@@ -1,87 +1,74 @@
+'use client'
+
 import { Badge } from '@/components/ui/badge'
 import TwitchGlitchIcon from '@/public/TwitchGlitchPurple.png'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
+import React from 'react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { StreamTimer } from './StreamTimer'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-export function msToTime(duration: number): string {
-  const seconds = parseInt(String((duration / 1000) % 60)),
-    minutes = parseInt(String((duration / (1000 * 60)) % 60)),
-    hours = parseInt(String((duration / (1000 * 60 * 60)) % 24))
-
-  const hoursString = String(hours < 10 ? '0' + hours : hours)
-  const minutesString = String(minutes < 10 ? '0' + minutes : minutes)
-  const secondsString = String(seconds < 10 ? '0' + seconds : seconds)
-
-  return hoursString + ':' + minutesString + ':' + secondsString
+type TwitchStatusData = {
+  live: boolean
+  username: string
+  gameName?: string
+  startedAt?: string
+  title?: string
+  error?: string
 }
 
-async function getTwitchToken() {
-  const res = await fetch(
-    `https://id.twitch.tv/oauth2/token?client_id=${process.env.TWITCH_CLIENT_ID}&client_secret=${process.env.TWITCH_CLIENT_SECRET}&grant_type=client_credentials`,
-    {
-      method: 'POST',
-      next: { revalidate: 3600 },
-    },
-  )
+export default function TwitchStatus() {
+  const [status, setStatus] = useState<TwitchStatusData | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  if (!res.ok) throw new Error('Failed to fetch Twitch token')
-  const data = await res.json()
-  return data.access_token
-}
+  React.useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch('/api/twitch-status')
+        const data = await res.json()
 
-async function checkIsLive() {
-  const username = process.env.TWITCH_STATUS_USERNAME
+        if (!res.ok || data.error) {
+          console.log('Failed to fetch status', { res: res, data: data })
+          setError(data.error || 'Failed to fetch status')
+          return
+        }
 
-  if (!username) {
-    console.error('TWITCH_STATUS_USERNAME environment variable is missing.')
-    return false
-  }
-
-  try {
-    const token = await getTwitchToken()
-    const res = await fetch(`https://api.twitch.tv/helix/streams?user_login=${username}`, {
-      headers: {
-        'Client-ID': process.env.TWITCH_CLIENT_ID as string,
-        Authorization: `Bearer ${token}`,
-      },
-      next: { revalidate: 60 },
-    })
-
-    if (!res.ok) throw new Error('Failed to fetch stream status')
-    const data = await res.json()
-    if (data.data && data.data.length > 0) {
-      const { game_name: gameName, started_at: startedAt, title, type } = data.data[0]
-      const liveData = {
-        gameName: String(gameName),
-        startedAt: String(startedAt),
-        title: String(title),
-        live: type === 'live',
+        setStatus(data)
+      } catch (err) {
+        console.error('Error fetching Twitch status:', err)
       }
-      // console.debug(`Twitch API Data: `, liveData)
-      return liveData
-    } else {
-      return false
     }
-  } catch (error) {
-    console.error('Error fetching Twitch status:', error)
-    return false
-  }
-}
 
-export default async function TwitchStatus() {
-  const username = process.env.TWITCH_STATUS_USERNAME
+    // Fetch on mount
+    fetchStatus()
+    // background polling 60 seconds (60000ms)
+    const intervalId = setInterval(fetchStatus, 60000)
+    // Cleanup on unmount
+    return () => clearInterval(intervalId)
+  }, [])
 
-  if (!username) {
+  // handle errors
+  if (error) {
     return (
-      <div className="w-fit rounded-xl border border-destructive p-4 text-sm text-destructive">
-        Error: Streamer username not configured.
+      <div className="flex w-fit items-center justify-center rounded-xl border border-destructive px-4 text-sm whitespace-nowrap text-destructive">
+        Error: {error}
       </div>
     )
   }
 
-  const isLiveStatus = await checkIsLive()
+  // blank/loading while initializing
+  if (!status) {
+    return (
+      <div className="flex h-8 w-30 animate-pulse items-center justify-center rounded-xl bg-muted" />
+    )
+  }
+
+  const { username, live, gameName, startedAt, title } = status
+
+  const showTitle = false
+  const showGameName = true
+  const showLiveDuration = true
 
   return (
     <div className="flex flex-col items-center rounded-none">
@@ -104,38 +91,43 @@ export default async function TwitchStatus() {
             {username}
           </div>
         </Link>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            {isLiveStatus ? (
+        {live ? (
+          <Tooltip delayDuration={800} disableHoverableContent={true}>
+            <TooltipTrigger className="py-0" asChild>
               <Badge
                 variant="destructive"
-                className="flex gap-1 rounded-[0.4rem] text-lg font-medium"
+                className="flex h-fit gap-0 rounded-[0.4rem] px-1 py-0 text-lg font-medium"
               >
                 LIVE
               </Badge>
-            ) : (
-              <Badge variant="outline" className="capitalize">
-                OFFLINE
-              </Badge>
-            )}
-          </TooltipTrigger>
-          <TooltipContent className="rounded-[0.4rem] border border-primary/40 bg-card p-0">
-            {isLiveStatus && (
-              <div className="grid w-full grid-cols-2 items-start">
-                <div className="px-1 text-right text-xs font-medium text-card-foreground">
-                  <StreamTimer startedAt={isLiveStatus.startedAt} />
-                </div>
-                <div className="px-1 text-left text-xs font-medium text-card-foreground">
-                  {isLiveStatus.gameName}
-                </div>
-                <div className="col-span-2 px-1 text-xs font-medium text-card-foreground">
-                  {isLiveStatus.title}
-                </div>
-              </div>
-            )}
-          </TooltipContent>
-        </Tooltip>
+            </TooltipTrigger>
+            <TooltipContent>
+              <span className="font-semibold">
+                {showLiveDuration && (
+                  <span>
+                    <StreamTimer startedAt={startedAt} />
+                  </span>
+                )}
+                {showGameName && (
+                  <span>
+                    {' | '}
+                    {gameName}
+                  </span>
+                )}
+                {showTitle && (
+                  <span>
+                    {' | '}
+                    {title}
+                  </span>
+                )}
+              </span>
+            </TooltipContent>
+          </Tooltip>
+        ) : (
+          <Badge variant="outline" className="capitalize">
+            OFFLINE
+          </Badge>
+        )}
       </div>
     </div>
   )

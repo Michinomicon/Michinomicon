@@ -286,7 +286,7 @@ function HomeNavigationMenuItem({
   ...props
 }: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>) {
   return (
-    <Tooltip>
+    <Tooltip delayDuration={800} disableHoverableContent={true}>
       <TooltipTrigger asChild>
         <NavigationMenuItem {...props}>
           <Link href="/home" passHref>
@@ -308,7 +308,7 @@ function SearchNavigationMenuItem({
   ...props
 }: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>) {
   return (
-    <Tooltip>
+    <Tooltip delayDuration={800} disableHoverableContent={true}>
       <TooltipTrigger asChild>
         <NavigationMenuItem {...props}>
           <Link href="/search" passHref>
