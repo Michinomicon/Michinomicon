@@ -30,8 +30,10 @@ import {
   SidebarRail,
 } from '../ui/sidebar'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { TOCItem } from '@/providers/PageTOC'
 
 type PageTableOfContentsProps = {
+  // pageTOC:TOCItem[],
   navTree: NavTreeItem[]
 }
 
@@ -44,13 +46,6 @@ export enum HeadingTagDepth {
   'h6',
 }
 
-export type TableOfContentsItem = {
-  depth: number
-  id: string
-  title: string
-  url: string
-}
-
 function generateHeadingTagSlug(textContent: string): string {
   return textContent
     .toLowerCase()
@@ -60,14 +55,21 @@ function generateHeadingTagSlug(textContent: string): string {
 }
 
 function collectHeadingTagReferences(
-  node?: Element,
-  headings: Array<TableOfContentsItem> = [],
+  pageSlug: string,
+  node?: Element | null,
+  parentSlug?: string | null,
+  headings: Array<TOCItem> = [],
   encounteredIds: Map<string, number> = new Map(),
-): TableOfContentsItem[] {
+): TOCItem[] {
   // Skip non-element nodes
   if (!node || node.nodeType !== Node.ELEMENT_NODE) return headings
-  // if is heading tag, collect it
+
   const lowerCaseTagName = node.tagName.toLowerCase()
+  const isPost = node.getAttribute('data-post') === 'true'
+  const postSlug = isPost ? node.getAttribute('data-post-slug') : parentSlug ? parentSlug : ''
+  parentSlug = postSlug
+
+  // if is heading tag, collect it
   if (
     ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(lowerCaseTagName) &&
     node.textContent &&
@@ -75,44 +77,53 @@ function collectHeadingTagReferences(
   ) {
     let { id } = node
     const textContent = node.textContent
+    const isPostHeading = node.getAttribute('data-post-title') === 'true'
+    const baseId = generateHeadingTagSlug(
+      !isPostHeading && lowerCaseTagName !== 'h1'
+        ? `${parentSlug}-${textContent}`
+        : `${textContent}`,
+    )
 
-    // if tag has no ID, create and assign unique ID
-    if (!id) {
-      const baseId = generateHeadingTagSlug(textContent) || 'heading'
-      let uniqueId = baseId
-      // If ID already exists, append a number
-      if (encounteredIds.has(uniqueId)) {
-        let count = encounteredIds.get(uniqueId)!
-        do {
-          count++
-          uniqueId = `${baseId}-${count}`
-        } while (encounteredIds.has(uniqueId))
-        encounteredIds.set(baseId, count)
-      }
-      id = uniqueId
-      node.setAttribute('id', id)
-      node.classList.add('scroll-mt-[120px]')
+    let uniqueId = baseId
+    // If ID already exists, append a number
+    if (encounteredIds.has(uniqueId)) {
+      let count = encounteredIds.get(uniqueId)!
+      do {
+        count++
+        uniqueId = `${baseId}-${count}`
+      } while (encounteredIds.has(uniqueId))
+      encounteredIds.set(baseId, count)
     }
+
+    id = uniqueId
+    node.setAttribute('id', id)
+    node.classList.add('scroll-mt-[120px]')
+
     // update encountered IDs
     encounteredIds.set(id, 1)
 
+    const treeDepth =
+      HeadingTagDepth[lowerCaseTagName as keyof typeof HeadingTagDepth] +
+      (parentSlug && parentSlug?.trim().length >= 0 && !isPostHeading ? 2 : 0)
+
     headings.push({
-      depth: HeadingTagDepth[lowerCaseTagName as keyof typeof HeadingTagDepth],
+      depth: treeDepth,
       id: id,
       title: textContent,
-      url: `#${id}`,
+      url: `${pageSlug}#${id}`,
     })
   }
+
   // recursive for child nodes
   for (const child of node.children) {
-    collectHeadingTagReferences(child, headings)
+    collectHeadingTagReferences(pageSlug, child, parentSlug, headings)
   }
+
   return headings
 }
 
-function useActiveTocItem(tocContent: TableOfContentsItem[]) {
-  const [tableOfContents, setTableOfContents] =
-    React.useState<Array<TableOfContentsItem>>(tocContent)
+function useActiveTocItem(tocContent: TOCItem[]) {
+  const [tableOfContents, setTableOfContents] = React.useState<Array<TOCItem>>(tocContent)
   const [itemIds, setItemIds] = React.useState<string[]>([])
   const [activeId, setActiveId] = React.useState<string | null>(null)
 
@@ -132,7 +143,8 @@ function useActiveTocItem(tocContent: TableOfContentsItem[]) {
           }
         }
       },
-      { rootMargin: '0% 0% -80% 0%' },
+      // TODO - Improve accuracy or reduce window of activation
+      { rootMargin: '0% 0% -90% 0%' },
     )
 
     for (const id of itemIds) {
@@ -158,6 +170,7 @@ function useActiveTocItem(tocContent: TableOfContentsItem[]) {
 
   return {
     activeId,
+    setActiveId,
     tocContent,
     setTocContent: setTableOfContents,
   }
@@ -188,13 +201,13 @@ function PathPathBreadcrumbs({ pathToPage }: { pathToPage: NavTreeItem[] | false
   }
   return (
     <Breadcrumb>
-      <BreadcrumbList className="flex-wrap">
+      <BreadcrumbList className="gap-y-0 md:gap-y-0">
         {pathToPage.map((item, index) => {
           const notLast = index < pathToPage.length - 1
           return (
             <React.Fragment key={index}>
               <BreadcrumbItem>
-                <div className="gap-2 min-h-6 text-primary font-medium">{item.title}</div>
+                <div className="min-h-6 gap-2 font-medium text-primary">{item.title}</div>
               </BreadcrumbItem>
 
               {notLast && <BreadcrumbSeparator>/</BreadcrumbSeparator>}
@@ -206,28 +219,39 @@ function PathPathBreadcrumbs({ pathToPage }: { pathToPage: NavTreeItem[] | false
   )
 }
 
-function PageContentsHeadingList({ tableOfContents }: { tableOfContents: TableOfContentsItem[] }) {
-  const { activeId, tocContent } = useActiveTocItem(tableOfContents)
+function PageContentsHeadingList({ tableOfContents }: { tableOfContents: TOCItem[] }) {
+  const { activeId, setActiveId, tocContent } = useActiveTocItem(tableOfContents)
   return (
-    <div className="flex flex-col w-full h-auto rounded-none">
+    <div className="flex h-auto w-full flex-col rounded-none">
       {tocContent.map((item, index) => {
         const isH1 = item.depth === 1
-        const isActive = item.url === `#${activeId}`
+        const isActive = item.id === activeId
+        // console.debug(`isActive: ${item.id} === ${activeId}`, isActive)
         return (
           <div
-            className={cn('rounded-none', isH1 ? `text-primary text-xl` : 'text-xs')}
+            className={cn('rounded-none', isH1 ? `text-xl text-primary` : 'text-xs')}
             key={index}
+            title={item.id}
           >
             <Link
               key={item.id}
               href={item.url}
               className={cn(
-                'text-xs align-middle',
-                'overflow-hidden whitespace-nowrap text-muted-foreground no-underline flex flex-row flex-flex-nowrap transition-colors hover:text-foreground data-[active=true]:text-primary',
-                'data-[depth=1]:pl-0 data-[depth=2]:pl-0 data-[depth=3]:pl-3 data-[depth=4]:pl-6 data-[depth=5]:pl-9 data-[depth=6]:pl-12',
+                'align-middle text-xs',
+                'flex-flex-nowrap flex flex-row overflow-hidden whitespace-nowrap text-muted-foreground no-underline transition-colors hover:text-foreground data-[active=true]:text-primary',
+                'data-[depth=1]:pl-0',
+                'data-[depth=2]:pl-2',
+                'data-[depth=3]:pl-4',
+                'data-[depth=4]:pl-6',
+                'data-[depth=5]:pl-9',
+                'data-[depth=6]:pl-12',
               )}
               data-active={isActive}
               data-depth={item.depth}
+              onNavigate={() => {
+                console.debug(`onNavigate link "${item.url}"`)
+                setActiveId(item.id)
+              }}
             >
               <CircleSmall strokeWidth={isActive ? 1.5 : 0} className="my-auto">
                 <circle
@@ -239,7 +263,7 @@ function PageContentsHeadingList({ tableOfContents }: { tableOfContents: TableOf
                   className={'text-foreground'}
                 />
               </CircleSmall>
-              <div className="self-center">{item.title}</div>
+              <div className="self-center whitespace-normal">{item.title}</div>
             </Link>
           </div>
         )
@@ -319,18 +343,22 @@ export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
   const { toggleSidebar, open: sidebarOpen } = useSidebar()
 
   const pathname = usePathname()
+
   const [mounted, setMounted] = React.useState(false)
   const [pathToPage, setPathToPage] = React.useState<NavTreeItem[] | false>(false)
-  const [tableOfContents, setTableOfContents] = React.useState<Array<TableOfContentsItem>>([])
+  const [tableOfContents, setTableOfContents] = React.useState<Array<TOCItem>>([])
 
   React.useEffect(() => {
     setMounted(true)
   }, [])
 
   React.useEffect(() => {
-    setPathToPage(findPagePathByUrl(navTree, pathname))
+    const pagePath = findPagePathByUrl(navTree, pathname)
+    setPathToPage(pagePath)
+
     if (document?.body) {
-      const headingTags = collectHeadingTagReferences(document.body)
+      const currentPageSlug = pagePath ? pagePath[pagePath.length - 1].url : ''
+      const headingTags = collectHeadingTagReferences(currentPageSlug, document.body)
       setTableOfContents(headingTags)
     }
   }, [navTree, pathname])
@@ -346,23 +374,23 @@ export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
       collapsible="offcanvas"
       className={cn(
         '',
-        'pl-0 pr-6',
+        'pr-0 pl-0',
         'pt-[calc(var(--header-height)+0px)]',
         'pb-[calc(var(--footer-height)+0px)]',
-        'max-h-[calc(100svh-calc(var(--header-height)+0px))-calc(var(--footer-height)+0px)] z-10 border-sidebar border bg-sidebar',
+        'z-10 max-h-[calc(100svh-calc(var(--header-height)+0px))-calc(var(--footer-height)+0px)] border border-sidebar bg-sidebar',
       )}
     >
-      <SidebarHeader className="flex flex-row align-middle items-center flex-nowrap border-b rounded-none">
+      <SidebarHeader className="flex flex-row flex-nowrap items-center rounded-none border-b align-middle">
         <Button variant="ghost" size="icon" className={cn('mr-auto')} onClick={toggleSidebar}>
           {sidebarOpen ? <PanelRightClose /> : <PanelRightOpen />}
         </Button>
         <div className="grow">Page Contents</div>
       </SidebarHeader>
-      <SidebarContent className="flex flex-col justify-start bg-blend-darken h-auto max-h-full">
-        <SidebarGroup>
+      <SidebarContent className="flex h-auto max-h-full flex-col justify-start bg-blend-darken">
+        <SidebarGroup className="max-w-(--sidebar-width)">
           <PathPathBreadcrumbs pathToPage={pathToPage} />
         </SidebarGroup>
-        <SidebarGroup className="flex flex-col bg-blend-darken">
+        <SidebarGroup className="flex max-w-(--sidebar-width) flex-col bg-blend-darken">
           <PageContentsHeadingList tableOfContents={tableOfContents} />
         </SidebarGroup>
       </SidebarContent>
