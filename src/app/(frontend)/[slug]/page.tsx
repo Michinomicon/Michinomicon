@@ -12,9 +12,6 @@ import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
-import { PageAnchorEmitter } from '@/components/PageAnchorEmitter'
-import { PageAnchor } from '@/providers/PageAnchors'
-import { Post } from '@/payload-types'
 import { ButtonGroup } from '@/components/ui/button-group'
 import { PageTableOfContentsTrigger } from '@/components/PageTableOfContents'
 
@@ -69,53 +66,23 @@ export default async function Page({ params: paramsPromise }: Args) {
     return <PayloadRedirects url={url} />
   }
 
-  const { hero, layout, id, title } = page
-
-  const pageHeading = {
-    id: slug || `page-${id}`,
-    title: title,
-  }
-
-  const postContentBlock = layout.find((block) => block.blockType === 'postContent')
-  const pageAnchors: PageAnchor[] = []
-  pageAnchors.push(pageHeading)
-
-  if (postContentBlock?.populateBy === 'selection' && postContentBlock.selectedDocs) {
-    const selectionPostHeadings = postContentBlock.selectedDocs
-      .map((doc) => (typeof doc.value === 'object' ? doc.value : null))
-      .filter((value) => value !== null)
-      .map((post) => {
-        return {
-          title: post.title,
-          id: post.slug || `post-${post.id}`,
-        }
-      })
-    pageAnchors.push(...selectionPostHeadings)
-  } else if (postContentBlock?.populateBy === 'collection' && postContentBlock?.categories) {
-    const posts = await queryPostByCategories({
-      categories: postContentBlock?.categories,
-    })
-    const collectionPostHeadings = posts.map((post) => {
-      return {
-        title: post.title,
-        id: post.slug || `post-${post.id}`,
-      }
-    })
-    pageAnchors.push(...collectionPostHeadings)
-  }
+  const { hero, layout, id } = page
 
   return (
     <React.Fragment>
-      <PageAnchorEmitter anchors={pageAnchors} />
+      {/* <PageTOCEmitter toc={pageToc} /> */}
 
-      <article className="article-page relative mx-auto px-6 pt-6 pb-12 border border-primary/30 bg-background">
+      <article
+        id={id}
+        className="article-page relative mx-auto border border-primary/30 bg-background px-6 pt-6 pb-12"
+      >
         <PageClient />
         {/* Allows redirects for valid pages too */}
         <PayloadRedirects disableNotFound url={url} />
 
         {draft && <LivePreviewListener />}
 
-        <div className="article-toolbar w-full flex flex-nowrap justify-end">
+        <div className="article-toolbar flex w-full flex-nowrap justify-end">
           <ButtonGroup aria-label="Article Controls">
             <PageTableOfContentsTrigger size="icon" aria-label="Show Table of Contents" />
           </ButtonGroup>
@@ -159,32 +126,4 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
   })
 
   return result.docs?.[0] || null
-})
-
-const queryPostByCategories = cache(async ({ categories }: { categories: Post['categories'] }) => {
-  const { isEnabled: draft } = await draftMode()
-
-  const queryCategories = categories
-    ? categories.filter((category) => typeof category === 'object').map((cat) => cat.id)
-    : []
-
-  const payload = await getPayload({ config: configPromise })
-
-  const result = await payload.find({
-    collection: 'posts',
-    limit: 2000,
-    draft,
-    pagination: false,
-    overrideAccess: draft,
-    where: {
-      'categories.isNav': {
-        equals: true,
-      },
-      'categories.id': {
-        in: queryCategories,
-      },
-    },
-  })
-
-  return result.docs || []
 })

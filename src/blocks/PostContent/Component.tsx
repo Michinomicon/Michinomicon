@@ -60,7 +60,7 @@ export const PostContentBlock: React.FC<
   }
 
   return (
-    <div className="my-16 post-content-block" id={`block-${id}`}>
+    <div className="post-content-block my-16" id={`block-${id}`}>
       <div className="container">
         {posts.map((post, index) => {
           const authors = post.populatedAuthors || []
@@ -77,15 +77,20 @@ export const PostContentBlock: React.FC<
             .map((cat) => (typeof cat === 'object' && cat !== null ? cat.title : null))
             .filter(Boolean)
 
-          const anchorId = post.slug || `post-${post.id}`
-
           return (
-            <div key={post.id || index} className="mb-24 last:mb-0 border-b pb-16 last:border-b-0">
+            <div
+              id={post.id}
+              key={post.id || index}
+              data-post="true"
+              data-post-slug={post.slug}
+              className="mb-24 border-b pb-16 last:mb-0 last:border-b-0"
+            >
               <div className="mb-8">
                 {showTitle && (
                   <h2
-                    id={anchorId}
-                    className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-foreground scroll-mt-48"
+                    id={post.slug}
+                    data-post-title="true"
+                    className="mb-4 scroll-mt-48 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                   >
                     {post.title}
                   </h2>
@@ -119,7 +124,7 @@ export const PostContentBlock: React.FC<
               </div>
 
               {post.content && (
-                <div className="prose dark:prose-invert max-w-none">
+                <div className="prose max-w-none dark:prose-invert">
                   <RichText data={post.content} enableGutter={false} />
                 </div>
               )}
