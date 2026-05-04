@@ -28,7 +28,7 @@ export async function Footer() {
   const appTitle: string = getAppName()
 
   const FooterStyles =
-    'relative lg:h-(--footer-height) h-[calc(var(--footer-height)*2)] w-screen mt-auto z-20 border-t border-border bg-background rounded-none shadow-md pt-1'
+    'hidden md:block relative lg:h-(--footer-height) h-[calc(var(--footer-height)*2)] w-screen mt-auto z-20 border-t border-border bg-background rounded-none shadow-md pt-1'
 
   const FooterRowStyles =
     'mx-6 grid grid-cols-6 grid-rows-2 justify-center lg:grid-cols-12 lg:grid-rows-1 gap-3 rounded-none'

@@ -1,8 +1,11 @@
+import { cn } from '@/lib/utils'
 import LogoImage from '@/public/icons/favicon-512x512.png'
 
 export type LogoProps = {
   text?: string | undefined
+  textClassName?: string | undefined
   className?: string | undefined
+
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
   variant?: 'textonly' | 'icononly' | 'default'
@@ -10,22 +13,23 @@ export type LogoProps = {
 
 export function Logo({
   variant: variantFromProps,
-  text,
+  text: logoTextFromProps,
   loading: loadingFromProps,
   priority: priorityFromProps,
   className,
+  textClassName,
   ...props
 }: LogoProps & React.ComponentProps<'div'>) {
+  const logoText = logoTextFromProps || ''
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
   const variant = variantFromProps || 'default'
 
   const showIcon = variant !== 'textonly'
   const showText = variant !== 'icononly'
-
   return (
     /* eslint-disable @next/next/no-img-element */
-    <div className={`flex flex-row flex-nowrap ${className}`} {...props}>
+    <div className={cn('flex flex-row flex-nowrap', className)} {...props}>
       {showIcon && (
         <img
           alt="Logo"
@@ -42,10 +46,10 @@ export function Logo({
           <text
             x="10"
             y="32"
-            className={'ml-2 text-4xl no-underline'}
-            fill={'var(--muted-foreground)'}
+            className={cn('ml-2 text-4xl no-underline', textClassName)}
+            fill={'var(--color-foreground)'}
           >
-            {text}
+            {logoText}
           </text>
         </svg>
       )}

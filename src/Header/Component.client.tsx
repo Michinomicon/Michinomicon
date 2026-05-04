@@ -55,21 +55,21 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     >
       {/* TOP ROW OF HEADER */}
       <div className={cn(HeaderRowStyles, 'border-b')}>
-        <div className="col-span-2 flex justify-start align-middle">{twitchStatusSlot}</div>
-        <div className="col-span-8 flex flex-row flex-nowrap justify-center rounded-none">
+        <div className="col-span-6 flex justify-start align-middle md:col-span-4">
+          {twitchStatusSlot}
+        </div>
+        <div className="col-span-6 flex flex-row flex-nowrap justify-center rounded-none md:col-span-4">
           <AppMainLogo text={appTitle} />
         </div>
-        <div className="col-span-2 flex justify-end">
+        <div className="hidden justify-end md:col-span-4 md:flex">
           <ColorThemeToggle />
         </div>
       </div>
 
       {/* BOTTOM ROW OF HEADER */}
       <div className={cn(HeaderRowStyles, 'container')}>
-        <div className="col-span-2 flex justify-start"></div>
-        <div className="col-span-8 flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-          <NavMenu navTree={navTree} />
-          {/* <HeaderNav data={data} /> */}
+        <div className="col-span-full flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 xl:col-span-10 xl:col-start-3">
+          <NavMenu navTree={navTree} appTitle={appTitle} />
         </div>
       </div>
     </header>

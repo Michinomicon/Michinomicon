@@ -13,10 +13,13 @@
 /* Eyes wallpaper */
 @import './themes/eyes-wallpaper.css';
 
-/* IMPORT CUSTOM THEMES HERE */
+/* IMPORT COMPLETE CUSTOM THEMES HERE */
 @import './themes/fii-one.css';
 @import './themes/simple.css';
 @import './themes/purple.css';
+
+/* IMPORT PARTIAL THEMES HERE*/
+@import './themes/twitch.css';
 
 @theme inline {
   --header-height: 100px;
@@ -82,8 +85,7 @@
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
 
-  --color-twitch-purple: #bf94ff;
-  --color-twitch-viewer-count-red:#ff8280;
+
 }
 
 @layer base {
@@ -106,16 +108,10 @@
     font-size: unset;
     font-weight: unset;
   }
-  .twitch-text{
-    font-family: "Roobert","Tajawal","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
-    color: #efeff1 !important;
-    line-height: 1.1 !important;
-    font-size: 1.8rem !important;
-    font-weight: 500 !important;
-    letter-spacing: -0.18px !important;
-    text-decoration:none !important;
-  }
 }
+
+
+
 
 /** 
   EYES WALLPAPER
