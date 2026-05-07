@@ -339,6 +339,33 @@ export function PageTableOfContentsTrigger(props: PageTOCProps) {
   )
 }
 
+export function PageTOCTriggerButton(props: PageTOCProps) {
+  const { toggleSidebar, open } = useSidebar()
+
+  const handleClick = () => {
+    toggleSidebar()
+  }
+
+  return (
+    <Tooltip delayDuration={800}>
+      <TooltipTrigger asChild>
+        <Button
+          size="icon"
+          variant={'ghost'}
+          {...props}
+          onClick={handleClick}
+          aria-label={`${open ? 'Collapse Table of Contents' : 'Show Table of Contents'}`}
+        >
+          <ListTree />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}</p>
+      </TooltipContent>
+    </Tooltip>
+  )
+}
+
 export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
   const { toggleSidebar, open: sidebarOpen } = useSidebar()
 

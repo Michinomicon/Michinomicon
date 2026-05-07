@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
-import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
+import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
-import { homeStatic } from '@/endpoints/seed/home-static'
+// import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
@@ -51,16 +51,16 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
-  let page: RequiredDataFromCollectionSlug<'pages'> | null
+  // const page: RequiredDataFromCollectionSlug<'pages'> | null
 
-  page = await queryPageBySlug({
+  const page = await queryPageBySlug({
     slug: decodedSlug,
   })
 
   // Remove this code once your website is seeded
-  if (!page && slug === 'home') {
-    page = homeStatic
-  }
+  // if (!page && slug === 'home') {
+  //   page = homeStatic
+  // }
 
   if (!page) {
     return <PayloadRedirects url={url} />
@@ -70,11 +70,9 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   return (
     <React.Fragment>
-      {/* <PageTOCEmitter toc={pageToc} /> */}
-
       <article
         id={id}
-        className="article-page relative mx-auto border border-primary/30 bg-background px-6 pt-6 pb-12"
+        className="article-page relative min-h-screen w-full border-primary/30 bg-card px-6 pt-16 pb-12 md:mx-auto md:min-h-max md:w-auto md:border md:bg-background md:pt-6"
       >
         <PageClient />
         {/* Allows redirects for valid pages too */}
@@ -82,10 +80,16 @@ export default async function Page({ params: paramsPromise }: Args) {
 
         {draft && <LivePreviewListener />}
 
-        <div className="article-toolbar flex w-full flex-nowrap justify-end">
+        <div className="article-toolbar hidden w-full flex-nowrap justify-end md:flex">
           <ButtonGroup aria-label="Article Controls">
             <PageTableOfContentsTrigger size="icon" aria-label="Show Table of Contents" />
           </ButtonGroup>
+        </div>
+
+        <div className="mobile-article-title flex w-full flex-nowrap justify-center md:hidden">
+          <span className="text-5xl text-card-foreground underline decoration-card-foreground/40 decoration-1">
+            {page.title}
+          </span>
         </div>
 
         <RenderHero {...hero} />

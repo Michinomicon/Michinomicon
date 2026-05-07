@@ -29,7 +29,10 @@ export function Logo({
   const showText = variant !== 'icononly'
   return (
     /* eslint-disable @next/next/no-img-element */
-    <div className={cn('flex flex-row flex-nowrap', className)} {...props}>
+    <div
+      className={cn('flex flex-row flex-nowrap items-center justify-center', className)}
+      {...props}
+    >
       {showIcon && (
         <img
           alt="Logo"
@@ -42,11 +45,11 @@ export function Logo({
         />
       )}
       {showText && (
-        <svg width="280" height="34" xmlns="http://www.w3.org/2000/svg">
+        <svg width="200" height="34" xmlns="http://www.w3.org/2000/svg">
           <text
             x="10"
             y="32"
-            className={cn('ml-2 text-4xl no-underline', textClassName)}
+            className={cn('ml-2 text-3xl no-underline', textClassName)}
             fill={'var(--color-foreground)'}
           >
             {logoText}
