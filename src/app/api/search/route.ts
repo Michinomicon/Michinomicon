@@ -1,5 +1,6 @@
 'use server'
 
+import { type NextRequest } from 'next/server'
 import { Category, Page, Post } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -10,7 +11,7 @@ export type GlobalSearchResults = {
   pages: Page[]
 }
 
-export async function globalSearch(query: string): Promise<GlobalSearchResults> {
+export async function globalSearch(query: string | null): Promise<GlobalSearchResults> {
   if (!query) return { posts: [], categories: [], pages: [] }
 
   const payload = await getPayload({ config: configPromise })
@@ -49,4 +50,12 @@ export async function globalSearch(query: string): Promise<GlobalSearchResults> 
     categories: categoriesRes.docs,
     pages: pagesRes.docs,
   }
+}
+
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams
+  const query = searchParams.get('q')
+  const results = await globalSearch(query)
+
+  return Response.json({ results: results })
 }

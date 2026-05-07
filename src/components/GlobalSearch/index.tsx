@@ -18,10 +18,12 @@ import { Button, ButtonProps } from '../ui/button'
 import { SearchIcon } from 'lucide-react'
 import { Page } from '@/payload-types'
 
-export const GlobalSearch: React.FC<{
+type GlobalSearchProps = {
   onSelectionCallback?: () => void
   buttonProps?: ButtonProps
-}> = ({ onSelectionCallback, buttonProps }) => {
+}
+
+export default function GlobalSearch({ onSelectionCallback, buttonProps }: GlobalSearchProps) {
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [query, setQuery] = React.useState('')

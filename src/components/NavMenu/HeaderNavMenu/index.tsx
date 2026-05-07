@@ -17,7 +17,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { HeaderRowStyles } from '@/Header/Component.client'
-import { GlobalSearch } from '@/components/GlobalSearch'
+import GlobalSearch from '@/components/GlobalSearch'
 
 export type NavMenuProps = {
   navTree: NavTreeItem[]

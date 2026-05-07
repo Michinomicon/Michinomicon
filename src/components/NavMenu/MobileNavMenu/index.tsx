@@ -22,7 +22,7 @@ import {
   MobileThemeModeFieldGroup,
   MobileWallpaperSettingsFieldGroup,
 } from '@/providers/Theme/color-theme-toggle'
-import { GlobalSearch } from '@/components/GlobalSearch'
+import GlobalSearch from '@/components/GlobalSearch'
 
 export type MobileMenuProps = {
   appTitle?: string
