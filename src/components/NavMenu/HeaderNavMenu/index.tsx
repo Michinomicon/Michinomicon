@@ -1,4 +1,4 @@
-import { ChevronDown, House, SearchIcon } from 'lucide-react'
+import { ChevronDown, House } from 'lucide-react'
 import Link from 'next/link'
 import * as React from 'react'
 import { cn } from '@/lib/utils'
@@ -17,6 +17,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { HeaderRowStyles } from '@/Header/Component.client'
+import { GlobalSearch } from '@/components/GlobalSearch'
 
 export type NavMenuProps = {
   navTree: NavTreeItem[]
@@ -253,7 +254,7 @@ function HomeNavigationMenuItem({
           <Link href="/home" passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
               <span>
-                <House className="w-5 text-primary" />
+                <House className="w-5" />
                 <span className="md:sr-only">Home</span>
               </span>
             </NavigationMenuLink>
@@ -272,18 +273,34 @@ function SearchNavigationMenuItem({
     <Tooltip delayDuration={800} disableHoverableContent={true}>
       <TooltipTrigger asChild>
         <NavigationMenuItem {...props}>
-          <Link href="/search" passHref>
+          <GlobalSearch buttonProps={{ variant: 'ghost', size: 'default' }} />
+          {/* <Link href="/search" passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
               <span>
                 <SearchIcon className="w-5 text-primary" />
                 <span className="md:sr-only">Search</span>
               </span>
             </NavigationMenuLink>
-          </Link>
+          </Link> */}
         </NavigationMenuItem>
       </TooltipTrigger>
       <TooltipContent>Search</TooltipContent>
     </Tooltip>
+    // <Tooltip delayDuration={800} disableHoverableContent={true}>
+    //   <TooltipTrigger asChild>
+    //     <NavigationMenuItem {...props}>
+    //       <Link href="/search" passHref>
+    //         <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+    //           <span>
+    //             <SearchIcon className="w-5 text-primary" />
+    //             <span className="md:sr-only">Search</span>
+    //           </span>
+    //         </NavigationMenuLink>
+    //       </Link>
+    //     </NavigationMenuItem>
+    //   </TooltipTrigger>
+    //   <TooltipContent>Search</TooltipContent>
+    // </Tooltip>
   )
 }
 

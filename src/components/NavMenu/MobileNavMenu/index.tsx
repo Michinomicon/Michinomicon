@@ -13,10 +13,16 @@ import {
 import { cn } from '@/lib/utils'
 import { NavTreeItem } from '@/utilities/buildNavTree'
 import { Button } from '@/components/ui/button'
-import { ChevronRightIcon, House, Icon, Menu, SearchIcon } from 'lucide-react'
+import { ArrowLeft, ChevronRightIcon, House, Icon, Menu, PaletteIcon, Settings } from 'lucide-react'
 import Link from 'next/link'
 import { ComponentPropsWithoutRef, useState } from 'react'
 import React from 'react'
+import {
+  MobileColorThemeFieldGroup,
+  MobileThemeModeFieldGroup,
+  MobileWallpaperSettingsFieldGroup,
+} from '@/providers/Theme/color-theme-toggle'
+import { GlobalSearch } from '@/components/GlobalSearch'
 
 export type MobileMenuProps = {
   appTitle?: string
@@ -162,7 +168,7 @@ export default function MobileNavMenu({
       <DrawerContent
         className={cn(
           'rounded-none bg-background',
-          'data-[vaul-drawer-direction=bottom]:max-h-screen data-[vaul-drawer-direction=bottom]:min-h-screen',
+          'data-[vaul-drawer-direction=bottom]:h-full data-[vaul-drawer-direction=bottom]:max-h-screen',
           'data-[vaul-drawer-direction=bottom]:rounded-t-none',
         )}
       >
@@ -178,27 +184,115 @@ export default function MobileNavMenu({
           </DrawerTitle>
           <DrawerDescription></DrawerDescription>
         </DrawerHeader>
+
         <MobileMenuContent navTree={navTree} onNavigateHandler={handleOnNavigate} />
         <DrawerFooter>
-          <div className="flex flex-col items-center justify-stretch gap-x-1 rounded-none px-8">
-            <div className="mb-2 flex w-full flex-row items-center justify-around gap-x-1 rounded-none border-t border-b border-t-primary border-b-primary">
+          <div className="flex flex-col items-center justify-around gap-x-1 rounded-none">
+            <div className="mb-2 flex w-full flex-row items-center justify-center gap-x-1 rounded-none border-t border-b border-t-primary border-b-primary">
               <Button variant={'link'} size={'lg'} className={'text-primary'} asChild>
-                <Link href="/home" passHref onNavigate={handleOnNavigate}>
+                <Link
+                  href="/home"
+                  passHref
+                  onNavigate={handleOnNavigate}
+                  className="no-underline decoration-0"
+                >
                   <House className="w-5" />
-                  <span>Home</span>
+                  <span className="no-underline">Home</span>
                 </Link>
               </Button>
-              <Button variant={'link'} size={'lg'} className={'text-primary'} asChild>
-                <Link href="/search" passHref onNavigate={handleOnNavigate}>
+              <GlobalSearch
+                onSelectionCallback={handleOnNavigate}
+                buttonProps={{ className: 'text-primary' }}
+              />
+              <SettingsDrawer />
+              {/* <Button variant={'link'} size={'lg'} className={'text-primary'} asChild>
+                <Link href="/searchresults" passHref onNavigate={handleOnNavigate}>
                   <SearchIcon className="w-5" />
                   <span>Search</span>
                 </Link>
-              </Button>
+              </Button> */}
             </div>
             <DrawerClose asChild>
-              <Button variant="ghost">Close</Button>
+              <Button variant="default">Close Menu</Button>
             </DrawerClose>
           </div>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+function SettingsDrawer() {
+  return (
+    <Drawer direction={'bottom'}>
+      <DrawerTrigger asChild>
+        <Button variant={'link'} size={'lg'} className={'text-primary'}>
+          <Settings />
+          Settings
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent
+        className={cn(
+          'rounded-none bg-background',
+          'data-[vaul-drawer-direction=bottom]:max-h-screen data-[vaul-drawer-direction=bottom]:min-h-1/2',
+        )}
+      >
+        <DrawerHeader>
+          <DrawerTitle>Settings</DrawerTitle>
+          <DrawerDescription></DrawerDescription>
+        </DrawerHeader>
+        <div className="flex h-full flex-col items-center justify-center gap-y-4">
+          <AppearanceSettingsDrawer />
+        </div>
+
+        <DrawerFooter>
+          <DrawerClose asChild>
+            <Button variant="default">
+              <ArrowLeft className={'mr-6'} />
+              Back to Main Menu
+            </Button>
+          </DrawerClose>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+function AppearanceSettingsDrawer() {
+  return (
+    <Drawer direction={'bottom'}>
+      <DrawerTrigger asChild>
+        <Button variant="ghost">
+          <PaletteIcon className={'mr-1'} />
+          Appearance
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent
+        className={cn(
+          'rounded-none bg-background',
+          'data-[vaul-drawer-direction=bottom]:h-full data-[vaul-drawer-direction=bottom]:max-h-screen',
+          'data-[vaul-drawer-direction=bottom]:rounded-t-none',
+        )}
+      >
+        <DrawerHeader>
+          <DrawerTitle>Appearance</DrawerTitle>
+          <DrawerDescription>Change the look and feel of the website.</DrawerDescription>
+        </DrawerHeader>
+        <div className="flex flex-col items-center justify-center gap-y-4">
+          <MobileWallpaperSettingsFieldGroup />
+          <div className="flex w-full items-center justify-center gap-y-4">
+            <MobileColorThemeFieldGroup />
+          </div>
+          <MobileThemeModeFieldGroup />
+        </div>
+
+        <DrawerFooter>
+          <DrawerClose asChild>
+            <Button variant="default">
+              <ArrowLeft className={'mr-6'} />
+              Back to Settings
+            </Button>
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

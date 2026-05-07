@@ -27,7 +27,7 @@ export async function getNavTree(): Promise<NavTreeItem[]> {
   const { docs: categories } = await payload.find({
     collection: 'categories',
     limit: 1000,
-    sort: 'order', // Respect the custom ordering
+    sort: 'order',
   })
 
   const { docs: pages } = await payload.find({
@@ -106,7 +106,7 @@ export async function getNavTree(): Promise<NavTreeItem[]> {
             .map((post) => ({
               id: post.id,
               title: post.title,
-              url: `${post.slug}`,
+              url: `posts/${post.slug}`,
               type: 'post',
               children: [],
             }))
