@@ -101,9 +101,6 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
         <Command
           shouldFilter={false}
           label=""
-          // filter=""
-          defaultValue=""
-          value=""
           // onValueChange=""
           // loop=""
           disablePointerSelection={true}
@@ -144,7 +141,6 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                     <CommandItem
                       key={page.id}
                       value={`page-${page.id}`}
-                      data-selected={false}
                       onSelect={() => {
                         console.debug(`selected page item "${page.slug}"`, page)
                         handleSelect(`/${page.slug}`)
