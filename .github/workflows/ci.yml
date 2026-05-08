@@ -42,8 +42,8 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        # run: pnpm install --frozen-lockfile
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
+        # run: pnpm install
 
       - name: Lint
         run: pnpm lint
@@ -57,8 +57,18 @@ jobs:
           # Use a dummy URI for build only, or the service URI if testing
           DATABASE_URI: 'mongodb://127.0.0.1:27017/payload-ci'
 
-      - name: Run Tests
-        run: pnpm exec playwright install --with-deps && pnpm test
+      - name: Install Playwright
+        run: pnpm exec playwright install --with-deps
+
+      - name: Run Integration Tests
+        run: pnpm test:int
+        env:
+          APP_NAME: ${{vars.APP_NAME || 'APP_NAME'}}
+          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
+          DATABASE_URI: 'mongodb://127.0.0.1:27017/payload-ci'
+
+      - name: Run End to End Tests
+        run: pnpm test:e2e
         env:
           APP_NAME: ${{vars.APP_NAME || 'APP_NAME'}}
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
