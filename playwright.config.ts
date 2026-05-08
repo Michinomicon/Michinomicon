@@ -42,7 +42,7 @@ export default defineConfig({
     command: 'pnpm dev',
     reuseExistingServer: true,
     url: 'http://127.0.0.1:3000',
-    /* timeout 120 seconds (120000ms) */
-    timeout: 120 * 1000,
+    /* timeout: 3 minutes / 300 seconds / 300000ms */
+    timeout: 300 * 1000,
   },
 })
