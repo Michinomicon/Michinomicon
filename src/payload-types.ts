@@ -970,10 +970,6 @@ export interface Search {
     | {
         relationTo: 'pages';
         value: string | Page;
-      }
-    | {
-        relationTo: 'categories';
-        value: string | Category;
       };
   slug?: string | null;
   meta?: {
