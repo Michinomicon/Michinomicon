@@ -1,6 +1,6 @@
 'use client'
 
-import { globalSearch, GlobalSearchResults } from '@/app/api/search/route'
+import { globalSearch, GlobalSearchResults } from '@/app/(frontend)/search/actions'
 import React from 'react'
 import { useDebounce } from '@/utilities/useDebounce'
 import { useRouter } from 'next/navigation'
@@ -98,14 +98,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
         <span className="">Search</span>
       </Button>
       <CommandDialog title={'Search'} open={open} onOpenChange={setOpen}>
-        <Command
-          shouldFilter={false}
-          label=""
-          // onValueChange=""
-          // loop=""
-          disablePointerSelection={true}
-          vimBindings={false}
-        >
+        <Command shouldFilter={false} label="" disablePointerSelection={true} vimBindings={false}>
           {/* shouldFilter={false} required to bypass cmdk default text filtering */}
           <CommandInput placeholder="Search..." value={query} onValueChange={setQuery} />
           <CommandList className={'p-1'}>
