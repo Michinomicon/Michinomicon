@@ -115,7 +115,7 @@ export const plugins: Plugin[] = [
     },
   }),
   searchPlugin({
-    collections: ['posts'],
+    collections: ['posts', 'pages', 'categories'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       admin: {
