@@ -86,9 +86,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <div
                 id="mainContent"
                 className={cn(
-                  'mt-[calc(var(--header-height)+0px)]',
-                  'mb-[calc(var(--footer-height)+0px)]',
-                  'pointer-events-none relative mr-auto ml-auto min-h-screen max-w-7xl p-6 *:pointer-events-auto md:p-12',
+                  'md:mt-[calc(var(--header-height)+0px)]',
+                  'md:mb-[calc(var(--footer-height)+0px)]',
+                  'pointer-events-none relative min-h-screen w-screen *:pointer-events-auto md:mr-auto md:ml-auto md:max-w-7xl md:p-12',
                 )}
               >
                 {children}

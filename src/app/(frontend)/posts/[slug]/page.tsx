@@ -51,10 +51,12 @@ export default async function Post({ params: paramsPromise }: Args) {
   const url = '/posts/' + decodedSlug
   const post = await queryPostBySlug({ slug: decodedSlug })
 
+  console.debug('posts/[slug].page => ', { url: url, decodedSlug: decodedSlug, post: post })
+
   if (!post) return <PayloadRedirects url={url} />
 
   return (
-    <article className="article-post pt-16 pb-16 text-card-foreground pointer-events-auto border border-primary/30 bg-background">
+    <article className="article-post pointer-events-auto border border-primary/30 bg-background pt-16 pb-16 text-card-foreground">
       <PageClient />
 
       {/* Allows redirects for valid pages too */}
@@ -66,10 +68,10 @@ export default async function Post({ params: paramsPromise }: Args) {
 
       <div className="flex flex-col items-center gap-4 pt-8">
         <div className="container">
-          <RichText className="max-w-3xl mx-auto" data={post.content} enableGutter={false} />
+          <RichText className="mx-auto max-w-3xl" data={post.content} enableGutter={false} />
           {post.relatedPosts && post.relatedPosts.length > 0 && (
             <RelatedPosts
-              className="mt-12 max-w-208 lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
+              className="col-span-3 col-start-1 mt-12 max-w-208 grid-rows-[2fr] lg:grid lg:grid-cols-subgrid"
               docs={post.relatedPosts.filter((post) => typeof post === 'object')}
             />
           )}
