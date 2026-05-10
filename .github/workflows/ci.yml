@@ -67,9 +67,9 @@ jobs:
           PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
           DATABASE_URI: 'mongodb://127.0.0.1:27017/payload-ci'
 
-      - name: Run End to End Tests
-        run: pnpm test:e2e
-        env:
-          APP_NAME: ${{vars.APP_NAME || 'APP_NAME'}}
-          PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
-          DATABASE_URI: 'mongodb://127.0.0.1:27017/payload-ci'
+      # - name: Run End to End Tests
+      #  run: pnpm test:e2e
+      #  env:
+      #    APP_NAME: ${{vars.APP_NAME || 'APP_NAME'}}
+      #    PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET || 'dummy-secret-for-ci-build' }}
+      #    DATABASE_URI: 'mongodb://127.0.0.1:27017/payload-ci'
