@@ -58,7 +58,7 @@ const nextConfig = {
   },
   serverExternalPackages: ['pdf-img-convert', 'pdfjs-dist', 'canvas'],
   transpilePackages: ['react-pdf', 'flipbook-js'],
-  allowedDevOrigins: ['192.168.50.7'],
+  allowedDevOrigins: ['192.168.50.207'],
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

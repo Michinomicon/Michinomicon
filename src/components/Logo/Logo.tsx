@@ -14,43 +14,36 @@ export type LogoProps = {
 export function Logo({
   variant: variantFromProps,
   text: logoTextFromProps,
-  loading: loadingFromProps,
-  priority: priorityFromProps,
   className,
   textClassName,
   ...props
 }: LogoProps & React.ComponentProps<'div'>) {
   const logoText = logoTextFromProps || ''
-  const loading = loadingFromProps || 'lazy'
-  const priority = priorityFromProps || 'low'
   const variant = variantFromProps || 'default'
 
   const showIcon = variant !== 'textonly'
   const showText = variant !== 'icononly'
   return (
-    /* eslint-disable @next/next/no-img-element */
     <div
-      className={cn('flex flex-row flex-nowrap items-center justify-center', className)}
+      className={cn(
+        '@container h-full min-h-8.5 w-auto max-w-60 min-w-10 rounded-none md:max-h-8 md:max-w-80',
+        className,
+      )}
       {...props}
     >
-      {showIcon && (
-        <img
-          alt="Logo"
-          width={34}
-          height={34}
-          loading={loading}
-          fetchPriority={priority}
-          decoding="async"
-          src={LogoImage.src}
-        />
-      )}
       {showText && (
-        <svg width="200" height="34" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          viewBox="0 0 240 34"
+          preserveAspectRatio="xMinYMid meet"
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-full w-full"
+        >
+          {showIcon && <image width={28} height={28} y="2" href={LogoImage.src} />}
           <text
-            x="10"
-            y="32"
-            className={cn('ml-2 text-3xl no-underline', textClassName)}
-            fill={'var(--color-foreground)'}
+            x={showIcon ? '38' : '0'}
+            y="28"
+            className={cn('text-[30px] no-underline', textClassName)}
+            fill="var(--color-foreground)"
           >
             {logoText}
           </text>

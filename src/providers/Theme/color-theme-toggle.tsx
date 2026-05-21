@@ -217,7 +217,9 @@ export function MobileThemeModeFieldGroup() {
   return (
     <FieldGroup className="w-full px-8">
       <FieldSet>
-        <FieldLegend variant="label">Dark or Light Appearance</FieldLegend>
+        <FieldLegend variant="label" className="text-center">
+          Dark or Light Appearance
+        </FieldLegend>
         <RadioGroup value={theme} onValueChange={setTheme} className="pl-5">
           <FieldLabel
             htmlFor={'lightModeRadioItem'}
@@ -227,7 +229,7 @@ export function MobileThemeModeFieldGroup() {
               'data-[active="true"]:border data-[active="true"]:border-primary',
             )}
           >
-            <Field orientation="horizontal">
+            <Field orientation="horizontal" className={`group-data-[active="true"]:bg-primary/10`}>
               <FieldContent>
                 <FieldTitle>
                   <SunIcon className="transition-all" />
@@ -247,7 +249,7 @@ export function MobileThemeModeFieldGroup() {
               'data-[active="true"]:border data-[active="true"]:border-primary',
             )}
           >
-            <Field orientation="horizontal">
+            <Field orientation="horizontal" className={`group-data-[active="true"]:bg-primary/10`}>
               <FieldContent>
                 <FieldTitle>
                   <MoonIcon className="transition-all" />
@@ -267,7 +269,7 @@ export function MobileThemeModeFieldGroup() {
             )}
             data-active={theme === 'system'}
           >
-            <Field orientation="horizontal">
+            <Field orientation="horizontal" className={`group-data-[active="true"]:bg-primary/10`}>
               <FieldContent>
                 <FieldTitle>
                   <SunMoonIcon className="transition-all" />
@@ -310,62 +312,66 @@ export function MobileColorThemeFieldGroup() {
   }
 
   return (
-    <FieldGroup className="w-full px-8">
-      <FieldSet>
-        <FieldLegend variant="label">Color Pallette</FieldLegend>
-        <RadioGroup
-          value={activeColorTheme}
-          onValueChange={onChangeActiveColorTheme}
-          className="pl-5"
-        >
-          {colorThemes.map((theme, index) => {
-            const isActiveTheme = activeColorTheme === theme.id
-            return (
-              <FieldLabel
-                htmlFor={theme.id}
-                data-active={isActiveTheme}
-                key={index}
-                onMouseEnter={() => {
-                  handleThemeItemMouseEnter(theme.id)
-                }}
-                onMouseLeave={() => {
-                  handleThemeItemMouseLeave(theme.id)
-                }}
-                className={cn(
-                  'group',
-                  'data-[active="true"]:border data-[active="true"]:border-primary',
+    <div className="flex w-full items-center justify-center gap-y-4">
+      <FieldGroup className="w-full px-8">
+        <FieldSet>
+          <FieldLegend variant="label" className="text-center">
+            Color Pallette
+          </FieldLegend>
+          <RadioGroup
+            value={activeColorTheme}
+            onValueChange={onChangeActiveColorTheme}
+            className="pl-5"
+          >
+            {colorThemes.map((theme, index) => {
+              const isActiveTheme = activeColorTheme === theme.id
+              return (
+                <FieldLabel
+                  htmlFor={theme.id}
+                  data-active={isActiveTheme}
+                  key={index}
+                  onMouseEnter={() => {
+                    handleThemeItemMouseEnter(theme.id)
+                  }}
+                  onMouseLeave={() => {
+                    handleThemeItemMouseLeave(theme.id)
+                  }}
+                  className={cn(
+                    'group',
+                    'data-[active="true"]:border data-[active="true"]:border-primary',
 
-                  isActiveTheme ? `` : ``,
-                )}
-              >
-                <Field
-                  orientation="horizontal"
-                  className={`group-data-[active="true"]:bg-primary/10`}
+                    isActiveTheme ? `` : ``,
+                  )}
                 >
-                  <FieldContent data-theme={theme.id} data-mode={currentThemeMode}>
-                    <FieldTitle>
-                      <div className="p-x-2 flex items-center gap-x-2">
-                        <div className="flex items-center justify-center space-x-0 rounded-full border-2 border-accent outline-0">
-                          <div className="rounded-r-0 h-6 w-3 rounded-l-full bg-primary outline-0"></div>
-                          <div className="rounded-l-0 h-6 w-3 rounded-r-full bg-secondary outline-0"></div>
+                  <Field
+                    orientation="horizontal"
+                    className={`group-data-[active="true"]:bg-primary/10`}
+                  >
+                    <FieldContent data-theme={theme.id} data-mode={currentThemeMode}>
+                      <FieldTitle>
+                        <div className="p-x-2 flex items-center gap-x-2">
+                          <div className="flex items-center justify-center space-x-0 rounded-full border-2 border-accent outline-0">
+                            <div className="rounded-r-0 h-6 w-3 rounded-l-full bg-primary outline-0"></div>
+                            <div className="rounded-l-0 h-6 w-3 rounded-r-full bg-secondary outline-0"></div>
+                          </div>
+                          <span className={cn('group-data-[active="true"]:font-semibold')}>
+                            {theme.label}
+                          </span>
                         </div>
-                        <span className={cn('group-data-[active="true"]:font-semibold')}>
-                          {theme.label}
-                        </span>
-                      </div>
-                    </FieldTitle>
-                  </FieldContent>
-                  <div className="flex h-full flex-col items-center justify-center">
-                    <RadioGroupItem value={theme.id} id={theme.id}></RadioGroupItem>
-                  </div>
-                </Field>
-              </FieldLabel>
-            )
-          })}
-        </RadioGroup>
-      </FieldSet>
-      <FieldSeparator />
-    </FieldGroup>
+                      </FieldTitle>
+                    </FieldContent>
+                    <div className="flex h-full flex-col items-center justify-center">
+                      <RadioGroupItem value={theme.id} id={theme.id}></RadioGroupItem>
+                    </div>
+                  </Field>
+                </FieldLabel>
+              )
+            })}
+          </RadioGroup>
+          <FieldSeparator className="opacity-50" />
+        </FieldSet>
+      </FieldGroup>
+    </div>
   )
 }
 
@@ -374,7 +380,6 @@ export function MobileWallpaperSettingsFieldGroup() {
 
   return (
     <FieldGroup className="w-full px-8">
-      <FieldSeparator />
       <FieldSet>
         <FieldLabel>Wallpaper Features</FieldLabel>
         <FieldGroup data-slot="checkbox-group" className="pl-5">
@@ -413,7 +418,6 @@ export function MobileWallpaperSettingsFieldGroup() {
           </Field>
         </FieldGroup>
       </FieldSet>
-      <FieldSeparator />
     </FieldGroup>
   )
 }
