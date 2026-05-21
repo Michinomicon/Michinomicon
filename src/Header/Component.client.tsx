@@ -21,6 +21,8 @@ interface HeaderClientProps {
 }
 
 export const HeaderRowStyles = 'grid grid-cols-12 grid-rows-1 gap-3 rounded-none px-3 '
+export const AltHeaderRowStyles =
+  'flex max-h-12 w-screen flex-row items-center rounded-none border-b px-3'
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
   appTitle,
@@ -54,19 +56,38 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   if (isMobile) {
     return (
       <header
-        className={`fixed top-0 z-20 w-screen rounded-none bg-background shadow-md`}
+        className={`fixed top-0 z-20 w-screen max-w-screen rounded-none bg-background shadow-md`}
         data-theme={themeColor}
         data-mode={themeMode}
       >
-        <div className={cn(HeaderRowStyles, 'border-b py-2')}>
-          <div className="col-span-2 flex flex-nowrap items-center justify-start">
-            <MobileNavMenu appTitle={appTitle} navTree={navTree} />
+        <div
+          className={cn('flex max-h-12 w-screen flex-row items-center rounded-none border-b px-3')}
+        >
+          {/* Left group */}
+          <div className="flex h-full flex-1 items-center justify-start gap-2">
+            <div className="py-auto h-full min-w-fit flex-0">
+              <MobileNavMenu
+                appTitle={appTitle}
+                navTree={navTree}
+                twitchStatusSlot={twitchStatusSlot}
+              />
+            </div>
+            <div className="py-auto h-full min-w-fit flex-0 max-sm:hidden">{twitchStatusSlot}</div>
           </div>
-          <div className="col-span-8 flex flex-nowrap items-center justify-center">
+
+          {/* center group */}
+          <div
+            className={cn(
+              'min-w-60 shrink-0 content-center',
+              'mx-auto h-full items-center justify-center text-center',
+            )}
+          >
             <AppMainLogo text={appTitle} variant={'default'} />
           </div>
-          <div className="col-span-2 flex flex-nowrap items-center justify-end">
-            <PageTOCTriggerButton size={'lg'} />
+
+          {/* right group */}
+          <div className="flex h-full min-w-fit flex-1 items-center justify-end gap-2">
+            <PageTOCTriggerButton size={'icon'} />
           </div>
         </div>
       </header>
@@ -79,12 +100,12 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         data-mode={themeMode}
       >
         {/* TOP ROW OF HEADER */}
-        <div className={cn(HeaderRowStyles, 'border-b py-1')}>
-          <div className="col-span-4 flex items-center justify-start">{twitchStatusSlot}</div>
-          <div className="col-span-4 flex flex-nowrap items-center justify-center rounded-none">
-            <AppMainLogo text={appTitle} />
+        <div className={cn(AltHeaderRowStyles, 'border-b py-1')}>
+          <div className={cn('py-auto h-full min-w-fit flex-0')}>{twitchStatusSlot}</div>
+          <div className={cn('grow content-center', 'mx-auto max-h-10 max-w-[60vw]')}>
+            <AppMainLogo text={appTitle} className={'mx-auto'} />
           </div>
-          <div className="col-span-4 flex items-center justify-end">
+          <div className={cn('ml-auto min-w-fit')}>
             <ColorThemeToggle />
           </div>
         </div>

@@ -9,6 +9,7 @@ import React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { StreamTimer } from './StreamTimer'
 import { cn } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 type TwitchStatusData = {
   live: boolean
@@ -29,15 +30,26 @@ type StreamStatusBadgeProps = { data: TwitchStatusData; options: TwitchStatusLiv
 function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
   const { live, gameName, startedAt, title } = data
   const { showTitle, showGameName, showLiveDuration } = options
+  const isMobile = useIsMobile()
   if (live) {
     return (
       <Tooltip delayDuration={800} disableHoverableContent={true}>
         <TooltipTrigger className="py-0" asChild>
           <Badge
             variant="destructive"
-            className="flex h-fit gap-0 rounded-[0.4rem] px-1 py-0 text-xs font-medium xl:text-base"
+            className="flex h-fit w-fit gap-0 rounded-[0.4rem] px-1 py-0 text-xs font-medium xl:text-base"
           >
-            LIVE
+            {isMobile && (
+              <Image
+                src={TwitchGlitchIcon.src}
+                alt="twitch logo"
+                className="rounded-none"
+                width="12"
+                height="12"
+                loading="eager"
+              />
+            )}
+            <span className="ml-1">LIVE</span>
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
@@ -69,7 +81,17 @@ function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
         variant="outline"
         className="border-text-muted-foreground rounded-[0.4rem] text-xs font-medium text-muted-foreground capitalize no-underline! xl:text-base"
       >
-        OFFLINE
+        {isMobile && (
+          <Image
+            src={TwitchGlitchIcon.src}
+            alt="twitch logo"
+            className="rounded-none"
+            width="12"
+            height="12"
+            loading="eager"
+          />
+        )}
+        <span className="ml-1">OFFLINE</span>
       </Badge>
     )
   }
@@ -130,12 +152,12 @@ export default function TwitchStatus() {
   const { username } = status
 
   return (
-    <div className="flex shrink-0 grow-0 flex-col items-center justify-center rounded-none">
-      <div className="flex flex-row items-center justify-center gap-1">
+    <div className="py-auto flex min-w-fit shrink-0 grow-0 flex-col items-center justify-center rounded-none">
+      <div className="flex w-fit flex-row items-center justify-center">
         <Image
           src={TwitchGlitchIcon.src}
           alt="twitch logo"
-          className="h-auto w-auto rounded-none"
+          className="h-auto w-auto rounded-none max-md:hidden"
           width="20"
           height="20"
           loading="eager"
