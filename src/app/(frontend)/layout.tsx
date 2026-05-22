@@ -28,6 +28,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
+        {/* Favicon and theme related */}
         <link rel="apple-touch-icon" sizes="57x57" href="/icons/favicon-57x57.png" />
         <link rel="apple-touch-icon" sizes="60x60" href="/icons/favicon-60x60.png" />
         <link rel="apple-touch-icon" sizes="72x72" href="/icons/favicon-72x72.png" />
@@ -48,6 +49,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="msapplication-config" content="/browserconfig.xml" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#5a168c" />
+
+        {/* Cache Management */}
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate"></meta>
+        <meta httpEquiv="Pragma" content="no-cache"></meta>
       </head>
       <body>
         <div className="flex min-h-screen w-screen flex-col">
