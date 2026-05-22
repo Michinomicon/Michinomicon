@@ -53,5 +53,6 @@ export const contact: (args: ContactArgs) => RequiredDataFromCollectionSlug<'pag
       },
     ],
     title: 'Contact',
+    siteMenuShowContentPanel: false,
   }
 }
