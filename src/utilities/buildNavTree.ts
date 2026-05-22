@@ -14,6 +14,7 @@ export interface NavTreeCategoryItem extends BaseNavTreeItem {
 }
 export interface NavTreePageItem extends BaseNavTreeItem {
   type: 'page'
+  siteMenuShowContentPanel: boolean
 }
 export interface NavTreePostItem extends BaseNavTreeItem {
   type: 'post'
@@ -114,6 +115,7 @@ export async function getNavTree(): Promise<NavTreeItem[]> {
           return {
             id: page.id,
             title: page.title,
+            siteMenuShowContentPanel: page.siteMenuShowContentPanel === true,
             url: `${pageSlug}`,
             type: 'page',
             children: pagePosts,

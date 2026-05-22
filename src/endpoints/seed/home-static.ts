@@ -86,4 +86,5 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
   },
   title: 'Home',
   layout: [],
+  siteMenuShowContentPanel: false,
 }

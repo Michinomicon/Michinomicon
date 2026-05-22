@@ -226,6 +226,7 @@ export interface Page {
    */
   generateSlug?: boolean | null;
   slug: string;
+  siteMenuShowContentPanel: boolean;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -903,8 +904,12 @@ export interface PostContentBlock {
     | null;
   showTitle?: boolean | null;
   showAuthor?: boolean | null;
-  showDate?: boolean | null;
   showCategories?: boolean | null;
+  showPublishedDate?: boolean | null;
+  showCreatedDate?: boolean | null;
+  showUpdatedDate?: boolean | null;
+  sortPostsBy?: ('title' | 'publishedAt' | 'createdAt' | 'updatedAt') | null;
+  sortDir?: ('asc' | 'desc') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'postContent';
@@ -1244,6 +1249,7 @@ export interface PagesSelect<T extends boolean = true> {
   publishedAt?: T;
   generateSlug?: T;
   slug?: T;
+  siteMenuShowContentPanel?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1359,8 +1365,12 @@ export interface PostContentBlockSelect<T extends boolean = true> {
   selectedDocs?: T;
   showTitle?: T;
   showAuthor?: T;
-  showDate?: T;
   showCategories?: T;
+  showPublishedDate?: T;
+  showCreatedDate?: T;
+  showUpdatedDate?: T;
+  sortPostsBy?: T;
+  sortDir?: T;
   id?: T;
   blockName?: T;
 }

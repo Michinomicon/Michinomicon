@@ -672,5 +672,6 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
       title: 'Michinomicon',
     },
     title: 'Home',
+    siteMenuShowContentPanel: false,
   }
 }

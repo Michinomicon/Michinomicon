@@ -22,8 +22,6 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { hasAccess } from '@/utilities/accessFunctions'
 
-
-
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
@@ -84,7 +82,15 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock,MediaGalleryBlock, Archive, FormBlock, PostContent],
+              blocks: [
+                CallToAction,
+                Content,
+                MediaBlock,
+                MediaGalleryBlock,
+                Archive,
+                FormBlock,
+                PostContent,
+              ],
               required: true,
               admin: {
                 initCollapsed: true,
@@ -130,6 +136,28 @@ export const Pages: CollectionConfig<'pages'> = {
       },
     },
     slugField(),
+    {
+      type: 'collapsible',
+      label: 'Navigation Menu Options',
+      admin: {
+        position: 'sidebar',
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'siteMenuShowContentPanel',
+              type: 'checkbox',
+              defaultValue: false,
+              required: true,
+              label: 'Expand to Show Page Content in Site Menu',
+            },
+          ],
+        },
+      ],
+    },
   ],
   hooks: {
     afterChange: [revalidatePage],
