@@ -77,7 +77,6 @@ export default buildConfig({
   email: nodemailerAdapter({
     defaultFromAddress: 'system@michinomicon.com',
     defaultFromName: 'Michinomicon',
-    Nodemailer transportOptions
     transportOptions: {
       host: process.env.SMTP_HOST,
       port: 587,
