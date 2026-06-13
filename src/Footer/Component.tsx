@@ -7,14 +7,14 @@ import ScrollToTopButton from '@/components/ScrollToTopButton'
 import { AppMainLogo } from '@/components/AppMainLogo'
 import { cn } from '@/lib/utils'
 
-function FooterCMSLinks({ navItems }: { navItems: FooterType['navItems'] }) {
-  if (!navItems) {
+function FooterCMSLinks({ menuItems }: { menuItems: FooterType['menuItems'] }) {
+  if (!menuItems) {
     return <></>
   }
   return (
     <div className="flex flex-col">
       <nav className="flex flex-row justify-center gap-4 lg:justify-end">
-        {navItems.map(({ link }, i) => {
+        {menuItems.map(({ link }, i) => {
           return <CMSLink key={i} {...link} />
         })}
       </nav>
@@ -24,7 +24,7 @@ function FooterCMSLinks({ navItems }: { navItems: FooterType['navItems'] }) {
 
 export async function Footer() {
   const footerData: FooterType = await getCachedGlobal('footer', 1)()
-  const navItems = footerData?.navItems || []
+  const menuItems = footerData?.menuItems || []
   const appTitle: string = getAppName()
 
   const FooterStyles =
@@ -51,7 +51,7 @@ export async function Footer() {
         </div>
 
         <div className={FooterRightSectionStyles}>
-          <FooterCMSLinks navItems={navItems} />
+          <FooterCMSLinks menuItems={menuItems} />
         </div>
       </div>
     </footer>

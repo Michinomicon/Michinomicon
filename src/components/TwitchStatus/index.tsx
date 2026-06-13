@@ -151,9 +151,14 @@ export default function TwitchStatus() {
 
   const { username } = status
 
+  const outerContainerClassName = cn(
+    'py-auto flex shrink-0 grow-0 flex-col items-start justify-center rounded-none',
+  )
+  const innerContainerClassName = cn('flex  flex-row items-center justify-center gap-x-1')
+
   return (
-    <div className="py-auto flex min-w-fit shrink-0 grow-0 flex-col items-center justify-center rounded-none">
-      <div className="flex w-fit flex-row items-center justify-center">
+    <div className={outerContainerClassName}>
+      <div className={innerContainerClassName}>
         <Image
           src={TwitchGlitchIcon.src}
           alt="twitch logo"

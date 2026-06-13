@@ -159,30 +159,34 @@ export const PostContentBlock: React.FC<
             >
               <div className="mb-8">
                 {showTitle && (
-                  <div className={'group mb-4 flex items-center justify-items-start gap-1'}>
+                  <div
+                    className={
+                      'group mb-4 flex w-full items-center justify-items-start gap-1 hover:bg-black/5'
+                    }
+                  >
                     <h2
                       id={post.slug}
                       data-post-title="true"
-                      className="mb-0 w-fit scroll-mt-48 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
+                      className="mb-0 scroll-mt-48 text-3xl font-bold tracking-tight text-foreground md:text-4xl"
                     >
-                      {post.title}
+                      <span>{post.title}</span>{' '}
                     </h2>
 
-                    <Button
-                      variant={'ghost'}
-                      size={'icon'}
-                      className="opacity-0 group-hover:opacity-100"
-                      asChild
-                    >
-                      <Tooltip delayDuration={800} disableHoverableContent={true}>
-                        <TooltipTrigger asChild>
+                    <Tooltip delayDuration={800} disableHoverableContent={true}>
+                      <TooltipTrigger>
+                        <Button
+                          variant={'ghost'}
+                          size={'icon'}
+                          className="opacity-0 transition-opacity group-hover:opacity-100"
+                          asChild
+                        >
                           <Link href={`posts/${post.slug}`} target={'_blank'}>
                             <ExternalLink size={38} />
                           </Link>
-                        </TooltipTrigger>
-                        <TooltipContent>Open {post.title} in new tab.</TooltipContent>
-                      </Tooltip>
-                    </Button>
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Open {post.title} in new tab.</TooltipContent>
+                    </Tooltip>
                   </div>
                 )}
 

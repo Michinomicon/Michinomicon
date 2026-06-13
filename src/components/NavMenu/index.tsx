@@ -2,11 +2,11 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import HeaderNavMenu, { NavMenuProps } from './HeaderNavMenu'
 import MobileNavMenu, { MobileMenuProps } from './MobileNavMenu'
 
-export default function NavMenu({ appTitle, navTree }: NavMenuProps & MobileMenuProps) {
+export default function NavMenu({ appTitle, menuTree }: NavMenuProps & MobileMenuProps) {
   const isMobile = useIsMobile()
   return isMobile ? (
-    <MobileNavMenu appTitle={appTitle} navTree={navTree} />
+    <MobileNavMenu appTitle={appTitle} menuTree={menuTree} />
   ) : (
-    <HeaderNavMenu navTree={navTree} />
+    <HeaderNavMenu menuTree={menuTree} />
   )
 }

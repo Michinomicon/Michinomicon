@@ -1,4 +1,5 @@
-import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import type { CollectionSlug, Payload, PayloadRequest, File } from 'payload'
+import type { Config } from '@/payload-types'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
@@ -20,9 +21,9 @@ const collections: CollectionSlug[] = [
   'search',
 ]
 
-const globals: GlobalSlug[] = ['header', 'footer']
-
 const categories = ['Technology', 'News', 'Finance', 'Design', 'Software', 'Engineering']
+
+const Globals = Object.keys({} as Config['globals']) as (keyof Config['globals'])[]
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -45,18 +46,18 @@ export const seed = async ({
 
   // clear the database
   await Promise.all(
-    globals.map((global) =>
-      payload.updateGlobal({
+    Globals.map((global) => {
+      return payload.updateGlobal({
         slug: global,
         data: {
-          navItems: [],
+          menuItems: [],
         },
         depth: 0,
         context: {
           disableRevalidate: true,
         },
-      }),
-    ),
+      })
+    }),
   )
 
   await Promise.all(
@@ -221,7 +222,7 @@ export const seed = async ({
     payload.updateGlobal({
       slug: 'header',
       data: {
-        navItems: [
+        menuItems: [
           {
             link: {
               type: 'custom',
@@ -245,7 +246,7 @@ export const seed = async ({
     payload.updateGlobal({
       slug: 'footer',
       data: {
-        navItems: [
+        menuItems: [
           {
             link: {
               type: 'custom',

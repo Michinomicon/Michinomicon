@@ -12,7 +12,7 @@ export const Footer: GlobalConfig = {
   },
   fields: [
     {
-      name: 'navItems',
+      name: 'menuItems',
       type: 'array',
       fields: [
         link({

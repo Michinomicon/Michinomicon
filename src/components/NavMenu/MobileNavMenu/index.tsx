@@ -11,7 +11,7 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
-import { NavTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeItem } from '@/utilities/buildNavTree'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, ChevronRightIcon, House, Icon, Menu, PaletteIcon, Settings } from 'lucide-react'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ import GlobalSearch from '@/components/GlobalSearch'
 
 export type MobileMenuProps = {
   appTitle?: string
-  navTree: NavTreeItem[]
+  menuTree: MenuTreeItem[]
   twitchStatusSlot?: React.ReactNode
   triggerButtonProps?: ComponentPropsWithoutRef<typeof Button>
   triggerButtonIconProps?: ComponentPropsWithoutRef<typeof Icon>
@@ -36,7 +36,7 @@ function MobileMenuItem({
   item,
   onNavigateHandler,
 }: {
-  item: NavTreeItem
+  item: MenuTreeItem
   onNavigateHandler: OnNavigateHandler
 }): React.JSX.Element {
   const hasChildren = item.children && item.children.length > 0
@@ -97,7 +97,7 @@ function MobileMenuItem({
         </CollapsibleTrigger>
         <CollapsibleContent className="rounded-none">
           <div className={cn('flex flex-col gap-x-1 bg-card/40')}>
-            {item.children.map((child) => (
+            {item.children?.map((child) => (
               <MobileMenuItem key={child.id} item={child} onNavigateHandler={onNavigateHandler} />
             ))}
           </div>
@@ -112,7 +112,7 @@ function MobileMenuItem({
 type OnNavigateHandler = (event?: { preventDefault: () => void }) => void
 
 export default function MobileNavMenu({
-  navTree,
+  menuTree: navTree,
   appTitle,
   twitchStatusSlot,
   triggerButtonProps = {},
