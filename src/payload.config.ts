@@ -78,14 +78,14 @@ export default buildConfig({
     defaultFromAddress: 'system@michinomicon.com',
     defaultFromName: 'Michinomicon',
     // Nodemailer transportOptions
-    transportOptions: {
-      host: process.env.SMTP_HOST,
-      port: 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    },
+    // transportOptions: {
+    //   host: process.env.SMTP_HOST,
+    //   port: 587,
+    //   auth: {
+    //     user: process.env.SMTP_USER,
+    //     pass: process.env.SMTP_PASS,
+    //   },
+    // },
   }),
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
