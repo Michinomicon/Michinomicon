@@ -18,12 +18,12 @@ import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 import InteractiveBackground from '@/components/InteractiveBackground'
 import { PageTableOfContents } from '@/components/PageTableOfContents'
-import { getNavTree } from '@/utilities/buildNavTree'
+import { getMainMenu } from '@/utilities/buildNavTree'
 import { SidebarInset } from '@/components/ui/sidebar'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
-  const navTree = await getNavTree()
+  const navTree = await getMainMenu()
 
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>

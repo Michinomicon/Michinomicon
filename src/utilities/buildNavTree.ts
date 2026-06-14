@@ -1,34 +1,284 @@
-import { Post } from '@/payload-types'
+import { CMSLinkProps } from '@/components/Link'
+import { Category, Header, Page, Post, PostContentBlock } from '@/payload-types'
 import config from '@payload-config'
-import { getPayload } from 'payload'
+import { BasePayload, getPayload } from 'payload'
+import { getCachedGlobal } from './getGlobals'
 
-type BaseNavTreeItem = {
+/**
+ * (output) Menu Tree Item Types
+ */
+
+export type BaseMenuTreeItem = {
   id: string
   title: string
   url: string
-  type: 'category' | 'page' | 'post'
-  children: NavTreeItem[]
+  type: string & ('category' | 'page' | 'post' | 'link')
+  link: CMSLinkProps | { type: 'reference' }
+  children?: MenuTree
 }
-export interface NavTreeCategoryItem extends BaseNavTreeItem {
+export interface MenuTreeCategoryItem extends BaseMenuTreeItem {
+  id: string
+  title: string
+  url: string
   type: 'category'
+  children?: MenuTree
+  link: { type: 'reference' }
 }
-export interface NavTreePageItem extends BaseNavTreeItem {
-  type: 'page'
+export interface MenuTreePageItem extends BaseMenuTreeItem {
+  id: string
+  title: string
   siteMenuShowContentPanel: boolean
+  url: string
+  type: 'page'
+  link: { type: 'reference' }
+  children?: MenuTreePostItem[]
 }
-export interface NavTreePostItem extends BaseNavTreeItem {
+export interface MenuTreePostItem extends BaseMenuTreeItem {
+  id: string
+  title: string
+  url: string
   type: 'post'
+  link: { type: 'reference' }
+  children?: never
 }
-export type NavTreeItem = NavTreeCategoryItem | NavTreePageItem | NavTreePostItem | never
+export interface MenuTreeLinkItem extends BaseMenuTreeItem {
+  id: string
+  title: string
+  type: 'link'
+  url: string
+  link: CMSLinkProps
+  children?: never
+}
 
-export async function getNavTree(): Promise<NavTreeItem[]> {
-  const payload = await getPayload({ config })
+export type MenuTreeItem =
+  | MenuTreeCategoryItem
+  | MenuTreePageItem
+  | MenuTreePostItem
+  | MenuTreeLinkItem
+export type MenuTree = MenuTreeItem[]
 
-  // Fetch all categories and pages
+type MenuConfigItem = {
+  id?: string | null
+  type?: 'pages' | 'categories' | 'link' | null | undefined
+  pageReference?: string | Page | null | undefined
+  categoryReference?: (string | null) | Category
+  referenceLabel?: string | null
+  link?: CMSLinkProps
+  children?: MenuConfigItem[] | null
+}
+
+type DocumentCollections = {
+  categories: Category[]
+  pages: Page[]
+  posts: Post[]
+}
+
+function createMenuTreeLinkItemFromLink(
+  { posts, pages }: DocumentCollections,
+  linkConfig: MenuConfigItem,
+): MenuTreeLinkItem | undefined {
+  const { link } = linkConfig
+
+  if (!link) {
+    const errorMsg = `Error creating Menu Link Item. Missing CMSLinkProps`
+    console.error(errorMsg, JSON.stringify(linkConfig))
+    throw new Error(errorMsg, { cause: JSON.stringify(linkConfig) })
+  }
+
+  if (link.type === 'custom') {
+    return {
+      id: linkConfig.id || link.label || '',
+      title: linkConfig.referenceLabel || link.label || '',
+      type: 'link',
+      url: link.url || '',
+      link: link,
+    }
+  }
+
+  if (link.type === 'reference' && link.reference?.relationTo === 'pages') {
+    const { value } = link.reference
+    const pageRef = typeof value === 'object' ? <Page>value : pages.find((doc) => doc.id === value)
+    if (pageRef) {
+      return {
+        id: pageRef.id,
+        title: pageRef.title,
+        type: 'link',
+        link: {
+          ...linkConfig.link,
+          reference: { relationTo: link.reference.relationTo, value: pageRef },
+          url: `/${pageRef.slug}`,
+        },
+        url: `/${pageRef.slug}`,
+      }
+    }
+  }
+
+  if (link.type === 'reference' && link.reference?.relationTo === 'posts') {
+    const { relationTo, value } = link.reference
+    const postRef = typeof value === 'object' ? <Post>value : posts.find(({ id }) => id === value)
+    if (postRef) {
+      return {
+        id: postRef.id,
+        title: postRef.title,
+        type: 'link',
+        link: {
+          ...linkConfig.link,
+          reference: { relationTo: relationTo, value: postRef },
+          url: `/${postRef.slug}`,
+        },
+        url: `/${postRef.slug}`,
+      }
+    }
+  }
+}
+
+function getPostsForPostContentBlock(
+  allPosts: Post[],
+  contentBlock: PostContentBlock,
+): Post[] | undefined {
+  if (contentBlock.populateBy === 'collection' && contentBlock.categories) {
+    const selectedContentCategories: string[] = contentBlock.categories.flatMap((category) =>
+      typeof category === 'object' ? category.id : category,
+    )
+    return allPosts.filter(
+      (post) =>
+        post.categories &&
+        post.categories.find((postCategory) => {
+          const postCategoryId = typeof postCategory === 'object' ? postCategory.id : postCategory
+          return selectedContentCategories.includes(postCategoryId)
+        }),
+    )
+  }
+
+  if (contentBlock.populateBy === 'selection' && contentBlock.selectedDocs) {
+    const selectedDocIds = contentBlock.selectedDocs.map(({ value }) =>
+      typeof value === 'object' ? value.id : value,
+    )
+    return allPosts.filter(
+      (post) =>
+        post.categories &&
+        post.categories.find((postCategory) => {
+          const postCategoryId = typeof postCategory === 'object' ? postCategory.id : postCategory
+          return selectedDocIds.includes(postCategoryId)
+        }),
+    )
+  }
+}
+
+function mapPostContentBlockContentToMenuTreePostItems(
+  { posts }: DocumentCollections,
+  page: Page,
+): MenuTreePostItem[] {
+  return page.layout
+    ?.filter<PostContentBlock>((block) => block.blockType === 'postContent')
+    .flatMap((contentBlock) => getPostsForPostContentBlock(posts, contentBlock))
+    .filter((p) => !!p)
+    .map((post: Post) => ({
+      id: post.id,
+      title: post.title,
+      url: `${post.slug}`,
+      type: 'post',
+      link: { type: 'reference' },
+    }))
+}
+
+function createMenuTreePageItemFromPage(
+  collections: DocumentCollections,
+  item: MenuConfigItem,
+): MenuTreePageItem | undefined {
+  if (!item.pageReference) {
+    return
+  }
+
+  const { pages } = collections
+
+  const pageRef: Page | undefined =
+    typeof item.pageReference === 'object'
+      ? item.pageReference
+      : pages.find(({ id }) => id === item.pageReference)
+
+  if (pageRef) {
+    return {
+      id: pageRef.id,
+      title: pageRef.title,
+      siteMenuShowContentPanel: pageRef.siteMenuShowContentPanel === true,
+      url: `/${pageRef.slug}`,
+      type: 'page',
+      link: { type: 'reference' },
+      children: mapPostContentBlockContentToMenuTreePostItems(collections, pageRef),
+    }
+  }
+}
+
+function createMenuTreeCategoryItemFromCategory(
+  { categories }: DocumentCollections,
+  item: MenuConfigItem,
+): MenuTreeCategoryItem | undefined {
+  if (!item.categoryReference) {
+    return
+  }
+
+  const catRef: Category | undefined =
+    typeof item.categoryReference === 'object'
+      ? item.categoryReference
+      : categories.find(({ id }) => id === item.categoryReference)
+
+  if (catRef) {
+    return {
+      id: catRef.id,
+      title: catRef.title,
+      url: catRef.slug,
+      type: 'category',
+      children: [],
+      link: { type: 'reference' },
+    }
+  }
+}
+
+export function buildMenuTree(
+  documentCollections: DocumentCollections,
+  items: MenuConfigItem[] | null | undefined,
+): MenuTree {
+  if (!items || !Array.isArray(items)) return []
+
+  return items.reduce((acc: MenuTreeItem[], item: MenuConfigItem) => {
+    if (item.type === 'link') {
+      const linkItem = createMenuTreeLinkItemFromLink(documentCollections, item)
+      if (linkItem) {
+        acc.push(linkItem)
+      }
+    }
+
+    if (item.type === 'categories') {
+      const categoryItem: MenuTreeCategoryItem | undefined = createMenuTreeCategoryItemFromCategory(
+        documentCollections,
+        item,
+      )
+      if (categoryItem) {
+        if (item.children) {
+          // Recursively get Category sub-items
+          categoryItem.children = buildMenuTree(documentCollections, item.children)
+        }
+        acc.push(categoryItem)
+      }
+    }
+
+    if (item.type === 'pages') {
+      const pageItem = createMenuTreePageItemFromPage(documentCollections, item)
+      if (pageItem) {
+        acc.push(pageItem)
+      }
+    }
+
+    return acc
+  }, [] as MenuTree)
+}
+
+async function getDocumentCollections(payload: BasePayload): Promise<DocumentCollections> {
   const { docs: categories } = await payload.find({
     collection: 'categories',
-    limit: 1000,
-    sort: 'order',
+    limit: 2000,
+    sort: 'title',
   })
 
   const { docs: pages } = await payload.find({
@@ -43,104 +293,34 @@ export async function getNavTree(): Promise<NavTreeItem[]> {
     sort: 'title',
   })
 
-  function buildTree(parentId: string | null = null): NavTreeItem[] {
-    // Find categories that belong to this parent
-    const childCategories = categories.filter((cat) => {
-      const catParentId = cat.parent
-        ? typeof cat.parent === 'object'
-          ? cat.parent.id
-          : cat.parent
-        : null
-      return cat.isNav && catParentId === parentId
-    })
-
-    return childCategories.map((cat) => {
-      // Find pages that belong directly to this category
-      const categoryPages: NavTreeItem[] = pages
-        .filter((page) => {
-          const pageCatId =
-            page.parentCategory && typeof page.parentCategory === 'object'
-              ? page.parentCategory.id
-              : page.parentCategory
-          return pageCatId === cat.id
-        })
-        .map((page) => {
-          const pageSlug = page.slug
-          const pagePosts: NavTreeItem[] = page.layout
-            .filter((block) => block.blockType === 'postContent')
-            .flatMap((contentBlock) => {
-              if (contentBlock.populateBy === 'collection' && contentBlock.categories) {
-                const selectedContentCategories: string[] = contentBlock.categories.flatMap(
-                  (category) => (typeof category === 'object' ? category.id : category),
-                )
-                const postsInSelectedCategories: Post[] = posts.filter(
-                  (post) =>
-                    post.categories &&
-                    post.categories.find((postCategory) => {
-                      const postCategoryId =
-                        typeof postCategory === 'object' ? postCategory.id : postCategory
-                      return selectedContentCategories.includes(postCategoryId)
-                    }),
-                )
-
-                return postsInSelectedCategories
-              } else if (contentBlock.populateBy === 'selection' && contentBlock.selectedDocs) {
-                const selectedDocIds = contentBlock.selectedDocs.map(({ value }) =>
-                  typeof value === 'object' ? value.id : value,
-                )
-                const selectedPosts: Post[] = posts.filter(
-                  (post) =>
-                    post.categories &&
-                    post.categories.find((postCategory) => {
-                      const postCategoryId =
-                        typeof postCategory === 'object' ? postCategory.id : postCategory
-                      return selectedDocIds.includes(postCategoryId)
-                    }),
-                )
-
-                return selectedPosts
-              } else {
-                return
-              }
-            })
-            .filter((p) => !!p)
-            .map((post) => ({
-              id: post.id,
-              title: post.title,
-              url: `posts/${post.slug}`,
-              type: 'post',
-              children: [],
-            }))
-
-          return {
-            id: page.id,
-            title: page.title,
-            siteMenuShowContentPanel: page.siteMenuShowContentPanel === true,
-            url: `${pageSlug}`,
-            type: 'page',
-            children: pagePosts,
-          }
-        })
-
-      // Recursively sub-categories
-      const subCategories: NavTreeItem[] = buildTree(cat.id)
-
-      const categoryHasPageWithSameSlug = categoryPages.find((p) => p.url === cat.slug)
-
-      if (categoryHasPageWithSameSlug && subCategories.length < 0) {
-      }
-      return {
-        id: cat.id,
-        title: cat.title,
-        url: `${cat.slug}`,
-        type: 'category',
-        // Combine pages and sub-categories
-        children: [...subCategories, ...categoryPages],
-      }
-    })
+  return {
+    categories,
+    pages,
+    posts,
   }
+}
 
-  // Start building from the root (categories with no parent)
-  const tree = buildTree(null)
-  return tree
+export async function getMainMenu(): Promise<MenuTree> {
+  const payload = await getPayload({ config })
+
+  try {
+    const { menuItems }: Header = await getCachedGlobal('header')()
+
+    if (!menuItems || !Array.isArray(menuItems) || menuItems.length === 0) {
+      const errorMsg = `Invalid main menu config: ${JSON.stringify(menuItems)}`
+      console.error(errorMsg, JSON.stringify(menuItems))
+      throw new Error(errorMsg, { cause: JSON.stringify(menuItems) })
+    }
+
+    // console.log(`Building Menu Tree from config:`, menuItems)
+
+    const documentCollections: DocumentCollections = await getDocumentCollections(payload)
+    const menuTree: MenuTree = buildMenuTree(documentCollections, menuItems)
+
+    // console.log(`Built Menu Tree:`, menuTree)
+    return menuTree
+  } catch (error) {
+    payload.logger.error(`Failed to build Menu Tree from config: ${error}`)
+    return []
+  }
 }

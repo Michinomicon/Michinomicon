@@ -11,7 +11,7 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
-import { NavTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeItem } from '@/utilities/buildNavTree'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, ChevronRightIcon, House, Icon, Menu, PaletteIcon, Settings } from 'lucide-react'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ import GlobalSearch from '@/components/GlobalSearch'
 
 export type MobileMenuProps = {
   appTitle?: string
-  navTree: NavTreeItem[]
+  menuTree: MenuTreeItem[]
   twitchStatusSlot?: React.ReactNode
   triggerButtonProps?: ComponentPropsWithoutRef<typeof Button>
   triggerButtonIconProps?: ComponentPropsWithoutRef<typeof Icon>
@@ -34,9 +34,11 @@ export type MobileMenuProps = {
 
 function MobileMenuItem({
   item,
+  menuDepth = 0,
   onNavigateHandler,
 }: {
-  item: NavTreeItem
+  item: MenuTreeItem
+  menuDepth?: number
   onNavigateHandler: OnNavigateHandler
 }): React.JSX.Element {
   const hasChildren = item.children && item.children.length > 0
@@ -68,7 +70,7 @@ function MobileMenuItem({
           variant="ghost"
           size="lg"
           className={cn(
-            'group ml-6 w-full justify-start rounded-none rounded-tl-none border-l border-l-primary/20 bg-card/40 pl-6 text-lg text-foreground transition-none hover:border-l-2 hover:border-l-primary-foreground',
+            'group ml-3 w-full justify-start rounded-none rounded-tl-none pl-4 text-lg text-foreground transition-none',
           )}
         >
           <Link href={item.url} passHref onNavigate={onNavigateHandler}>
@@ -82,23 +84,40 @@ function MobileMenuItem({
   // CATEGORY with children
   if (item.type === 'category') {
     return (
-      <Collapsible className={'w-full'}>
+      <Collapsible className={cn('w-full rounded-none')}>
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
             size="lg"
             className={cn(
-              'group w-full justify-start rounded-none border-l border-l-primary/20 text-lg text-foreground transition-none data-[state=open]:border-l-2 data-[state=open]:border-l-primary',
+              'group w-full justify-start rounded-none px-0 pl-1 text-lg text-foreground transition-none',
+              'data-[state=open]:font-bold',
+              'data-[state=open]:pl-0',
+              'data-[state=open]:ml-0',
+              'data-[state=open]:border-l-4 data-[state=open]:border-l-primary/50',
             )}
           >
-            {item.title}
             <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
+            {item.title}
           </Button>
         </CollapsibleTrigger>
-        <CollapsibleContent className="rounded-none">
-          <div className={cn('flex flex-col gap-x-1 bg-card/40')}>
-            {item.children.map((child) => (
-              <MobileMenuItem key={child.id} item={child} onNavigateHandler={onNavigateHandler} />
+        <CollapsibleContent className={cn('group rounded-none')}>
+          <div
+            className={cn(
+              'bg-card/40',
+              'flex flex-col gap-x-1',
+              'ml-0 rounded-none',
+              'pl-2',
+              'group-data-[state=open]:border-l-4 group-data-[state=open]:border-l-primary/50',
+            )}
+          >
+            {item.children?.map((child) => (
+              <MobileMenuItem
+                key={child.id}
+                item={child}
+                menuDepth={menuDepth + 1}
+                onNavigateHandler={onNavigateHandler}
+              />
             ))}
           </div>
         </CollapsibleContent>
@@ -112,7 +131,7 @@ function MobileMenuItem({
 type OnNavigateHandler = (event?: { preventDefault: () => void }) => void
 
 export default function MobileNavMenu({
-  navTree,
+  menuTree: navTree,
   appTitle,
   twitchStatusSlot,
   triggerButtonProps = {},
@@ -168,7 +187,8 @@ export default function MobileNavMenu({
           <div
             className={cn(
               MobileDrawerContentListCLassName,
-              'flex h-full flex-col items-center justify-stretch gap-y-0 overflow-x-hidden overflow-y-auto',
+              // 'items-center ',
+              'flex h-full flex-col justify-stretch gap-y-0 overflow-x-hidden overflow-y-auto',
             )}
           >
             {navTree.map((item) => (
@@ -290,5 +310,5 @@ const MobileDrawerSubMenuContentClassName = cn(
   'data-[vaul-drawer-direction=bottom]:rounded-t-none',
 )
 const MobileDrawerContentListCLassName =
-  'mx-2 flex flex-col items-center justify-center gap-y-4 overflow-auto border border-primary/30 bg-background pb-2'
+  'mx-2 flex flex-col justify-center gap-y-4 overflow-auto border border-primary/30 bg-background pb-2' //items-center
 const MobileDrawerFooterClassName = 'flex flex-col items-center justify-center rounded-none'

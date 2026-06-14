@@ -5,7 +5,7 @@ import { ColorThemeToggle } from '@/providers/Theme/color-theme-toggle'
 import type { Header } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
-import { NavTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeItem } from '@/utilities/buildNavTree'
 import { cn } from '@/lib/utils'
 import { AppMainLogo } from '@/components/AppMainLogo'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -16,7 +16,7 @@ import { PageTOCTriggerButton } from '@/components/PageTableOfContents'
 interface HeaderClientProps {
   data: Header
   appTitle?: string | undefined
-  navTree: NavTreeItem[]
+  menuTree: MenuTreeItem[]
   twitchStatusSlot?: React.ReactNode
 }
 
@@ -26,7 +26,7 @@ export const AltHeaderRowStyles =
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
   appTitle,
-  navTree,
+  menuTree,
   twitchStatusSlot,
 }) => {
   const [themeMode, setThemeMode] = useState<string | null>(null)
@@ -68,7 +68,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
             <div className="py-auto h-full min-w-fit flex-0">
               <MobileNavMenu
                 appTitle={appTitle}
-                navTree={navTree}
+                menuTree={menuTree}
                 twitchStatusSlot={twitchStatusSlot}
               />
             </div>
@@ -101,11 +101,11 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
       >
         {/* TOP ROW OF HEADER */}
         <div className={cn(AltHeaderRowStyles, 'border-b py-1')}>
-          <div className={cn('py-auto h-full min-w-fit flex-0')}>{twitchStatusSlot}</div>
-          <div className={cn('grow content-center', 'mx-auto max-h-10 max-w-[60vw]')}>
+          <div className={cn('py-auto h-full min-w-[20vw] flex-0')}>{twitchStatusSlot}</div>
+          <div className={cn('max-h-10 max-w-[60vw] grow content-center')}>
             <AppMainLogo text={appTitle} className={'mx-auto'} />
           </div>
-          <div className={cn('ml-auto min-w-fit')}>
+          <div className={cn('ml-auto flex min-w-[20vw] justify-end')}>
             <ColorThemeToggle />
           </div>
         </div>
@@ -113,7 +113,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         {/* BOTTOM ROW OF HEADER */}
         <div className={cn(HeaderRowStyles, 'container py-1')}>
           <div className="col-span-full flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 xl:col-span-10 xl:col-start-2">
-            <HeaderNavMenu navTree={navTree} />
+            <HeaderNavMenu menuTree={menuTree} />
           </div>
         </div>
       </header>

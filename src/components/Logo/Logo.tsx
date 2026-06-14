@@ -26,7 +26,7 @@ export function Logo({
   return (
     <div
       className={cn(
-        '@container h-full min-h-8.5 w-auto max-w-60 min-w-10 rounded-none md:max-h-8 md:max-w-80',
+        '@container h-full min-h-8.5 w-auto max-w-60 min-w-10 rounded-none md:max-h-8.5 md:max-w-80',
         className,
       )}
       {...props}
@@ -38,10 +38,10 @@ export function Logo({
           xmlns="http://www.w3.org/2000/svg"
           className="h-full w-full"
         >
-          {showIcon && <image width={28} height={28} y="2" href={LogoImage.src} />}
+          {showIcon && <image width={28} height={28} y="0" href={LogoImage.src} />}
           <text
             x={showIcon ? '38' : '0'}
-            y="28"
+            y="26"
             className={cn('text-[30px] no-underline', textClassName)}
             fill="var(--color-foreground)"
           >

@@ -8,7 +8,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { NavTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeItem } from '@/utilities/buildNavTree'
 import {
   ArrowLeftFromLine,
   ArrowRightToLine,
@@ -34,7 +34,7 @@ import { TOCItem } from '@/providers/PageTOC'
 
 type PageTableOfContentsProps = {
   // pageTOC:TOCItem[],
-  navTree: NavTreeItem[]
+  navTree: MenuTreeItem[]
 }
 
 export enum HeadingTagDepth {
@@ -177,15 +177,15 @@ function useActiveTocItem(tocContent: TOCItem[]) {
 }
 
 function findPagePathByUrl(
-  tree: NavTreeItem[],
+  tree: MenuTreeItem[],
   targetUrl: string,
-  progress: NavTreeItem[] = [],
-): NavTreeItem[] | false {
+  progress: MenuTreeItem[] = [],
+): MenuTreeItem[] | false {
   for (const treeItem of tree) {
     if (treeItem.type === 'page' && `/${treeItem.url}` === targetUrl) {
       return [...progress, treeItem]
     }
-    if (treeItem.type === 'category') {
+    if (treeItem.type === 'category' && treeItem.children) {
       const result = findPagePathByUrl(treeItem.children, targetUrl, [...progress, treeItem])
       if (result) {
         return result
@@ -195,7 +195,7 @@ function findPagePathByUrl(
   return false
 }
 
-function PathPathBreadcrumbs({ pathToPage }: { pathToPage: NavTreeItem[] | false }) {
+function PathPathBreadcrumbs({ pathToPage }: { pathToPage: MenuTreeItem[] | false }) {
   if (!pathToPage) {
     return <></>
   }
@@ -372,7 +372,7 @@ export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
   const pathname = usePathname()
 
   const [mounted, setMounted] = React.useState(false)
-  const [pathToPage, setPathToPage] = React.useState<NavTreeItem[] | false>(false)
+  const [pathToPage, setPathToPage] = React.useState<MenuTreeItem[] | false>(false)
   const [tableOfContents, setTableOfContents] = React.useState<Array<TOCItem>>([])
 
   React.useEffect(() => {

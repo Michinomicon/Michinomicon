@@ -238,15 +238,11 @@ export interface Page {
 export interface Category {
   id: string;
   title: string;
-  isNav?: boolean | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
   slug: string;
-  /**
-   * Select Parent Category.
-   */
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -1523,7 +1519,6 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
-  isNav?: T;
   generateSlug?: T;
   slug?: T;
   parent?: T;
@@ -1886,14 +1881,20 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Drag and drop items to set their display order in the main website menu
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
  */
 export interface Header {
   id: string;
-  navItems?:
+  menuItems?:
     | {
-        link: {
+        type?: ('link' | 'categories' | 'pages') | null;
+        pageReference?: (string | null) | Page;
+        categoryReference?: (string | null) | Category;
+        referenceLabel?: string | null;
+        link?: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
@@ -1908,6 +1909,126 @@ export interface Header {
           url?: string | null;
           label: string;
         };
+        children?:
+          | {
+              type?: ('link' | 'categories' | 'pages') | null;
+              pageReference?: (string | null) | Page;
+              categoryReference?: (string | null) | Category;
+              referenceLabel?: string | null;
+              link?: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              children?:
+                | {
+                    type?: ('link' | 'categories' | 'pages') | null;
+                    pageReference?: (string | null) | Page;
+                    categoryReference?: (string | null) | Category;
+                    referenceLabel?: string | null;
+                    link?: {
+                      type?: ('reference' | 'custom') | null;
+                      newTab?: boolean | null;
+                      reference?:
+                        | ({
+                            relationTo: 'pages';
+                            value: string | Page;
+                          } | null)
+                        | ({
+                            relationTo: 'posts';
+                            value: string | Post;
+                          } | null);
+                      url?: string | null;
+                      label: string;
+                    };
+                    children?:
+                      | {
+                          type?: ('link' | 'categories' | 'pages') | null;
+                          pageReference?: (string | null) | Page;
+                          categoryReference?: (string | null) | Category;
+                          referenceLabel?: string | null;
+                          link?: {
+                            type?: ('reference' | 'custom') | null;
+                            newTab?: boolean | null;
+                            reference?:
+                              | ({
+                                  relationTo: 'pages';
+                                  value: string | Page;
+                                } | null)
+                              | ({
+                                  relationTo: 'posts';
+                                  value: string | Post;
+                                } | null);
+                            url?: string | null;
+                            label: string;
+                          };
+                          children?:
+                            | {
+                                type?: ('link' | 'categories' | 'pages') | null;
+                                pageReference?: (string | null) | Page;
+                                categoryReference?: (string | null) | Category;
+                                referenceLabel?: string | null;
+                                link?: {
+                                  type?: ('reference' | 'custom') | null;
+                                  newTab?: boolean | null;
+                                  reference?:
+                                    | ({
+                                        relationTo: 'pages';
+                                        value: string | Page;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'posts';
+                                        value: string | Post;
+                                      } | null);
+                                  url?: string | null;
+                                  label: string;
+                                };
+                                children?:
+                                  | {
+                                      type?: ('link' | 'categories' | 'pages') | null;
+                                      pageReference?: (string | null) | Page;
+                                      categoryReference?: (string | null) | Category;
+                                      referenceLabel?: string | null;
+                                      link?: {
+                                        type?: ('reference' | 'custom') | null;
+                                        newTab?: boolean | null;
+                                        reference?:
+                                          | ({
+                                              relationTo: 'pages';
+                                              value: string | Page;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'posts';
+                                              value: string | Post;
+                                            } | null);
+                                        url?: string | null;
+                                        label: string;
+                                      };
+                                      id?: string | null;
+                                    }[]
+                                  | null;
+                                id?: string | null;
+                              }[]
+                            | null;
+                          id?: string | null;
+                        }[]
+                      | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1920,7 +2041,7 @@ export interface Header {
  */
 export interface Footer {
   id: string;
-  navItems?:
+  menuItems?:
     | {
         link: {
           type?: ('reference' | 'custom') | null;
@@ -1948,9 +2069,13 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
-  navItems?:
+  menuItems?:
     | T
     | {
+        type?: T;
+        pageReference?: T;
+        categoryReference?: T;
+        referenceLabel?: T;
         link?:
           | T
           | {
@@ -1959,6 +2084,96 @@ export interface HeaderSelect<T extends boolean = true> {
               reference?: T;
               url?: T;
               label?: T;
+            };
+        children?:
+          | T
+          | {
+              type?: T;
+              pageReference?: T;
+              categoryReference?: T;
+              referenceLabel?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              children?:
+                | T
+                | {
+                    type?: T;
+                    pageReference?: T;
+                    categoryReference?: T;
+                    referenceLabel?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                        };
+                    children?:
+                      | T
+                      | {
+                          type?: T;
+                          pageReference?: T;
+                          categoryReference?: T;
+                          referenceLabel?: T;
+                          link?:
+                            | T
+                            | {
+                                type?: T;
+                                newTab?: T;
+                                reference?: T;
+                                url?: T;
+                                label?: T;
+                              };
+                          children?:
+                            | T
+                            | {
+                                type?: T;
+                                pageReference?: T;
+                                categoryReference?: T;
+                                referenceLabel?: T;
+                                link?:
+                                  | T
+                                  | {
+                                      type?: T;
+                                      newTab?: T;
+                                      reference?: T;
+                                      url?: T;
+                                      label?: T;
+                                    };
+                                children?:
+                                  | T
+                                  | {
+                                      type?: T;
+                                      pageReference?: T;
+                                      categoryReference?: T;
+                                      referenceLabel?: T;
+                                      link?:
+                                        | T
+                                        | {
+                                            type?: T;
+                                            newTab?: T;
+                                            reference?: T;
+                                            url?: T;
+                                            label?: T;
+                                          };
+                                      id?: T;
+                                    };
+                                id?: T;
+                              };
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
             };
         id?: T;
       };
@@ -1971,7 +2186,7 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  navItems?:
+  menuItems?:
     | T
     | {
         link?:
