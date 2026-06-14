@@ -77,6 +77,10 @@ export default buildConfig({
   email: nodemailerAdapter({
     defaultFromAddress: 'system@michinomicon.com',
     defaultFromName: 'Michinomicon',
+    // streamTransport skips all network requests entirely
+    transportOptions: {
+      streamTransport: true,
+    },
     // Nodemailer transportOptions
     // transportOptions: {
     //   host: process.env.SMTP_HOST,
