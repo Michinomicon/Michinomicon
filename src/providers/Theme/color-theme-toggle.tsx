@@ -1,10 +1,6 @@
 'use client'
 
 import { MoonIcon, PaletteIcon, SunIcon, SunMoonIcon, TriangleAlertIcon } from 'lucide-react'
-import { MoonIcon, PaletteIcon, SunIcon, SunMoonIcon, TriangleAlertIcon } from 'lucide-react'
-
-import { useTheme } from '.'
-import { useWallpaper } from '../Wallpaper'
 import { useTheme } from '.'
 import { useWallpaper } from '../Wallpaper'
 import {
@@ -13,8 +9,6 @@ import {
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
@@ -47,7 +41,6 @@ import {
 } from '@/components/ui/popover'
 
 const colorThemes: Array<{ id: string; label: string }> = [
-const colorThemes: Array<{ id: string; label: string }> = [
   { id: 'default', label: 'Default' },
   { id: 'simple', label: 'Simple' },
   { id: 'purple', label: 'Purple' },
@@ -67,38 +60,7 @@ export function ColorThemeToggle() {
   const { setTheme, theme, colorTheme, setColorTheme } = useTheme()
 
   const [activeColorTheme, setActiveColorTheme] = React.useState<string>(colorTheme)
-  const [mounted, setMounted] = React.useState(false)
-  const [dropdownOpen, setDropdownOpen] = React.useState(false)
-  const { setTheme, theme, colorTheme, setColorTheme } = useTheme()
-
-  const [activeColorTheme, setActiveColorTheme] = React.useState<string>(colorTheme)
   const { globalSpotlight, globalReactiveTile, setSpotlight, setReactiveTile } = useWallpaper()
-
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
-
-  const onChangeActiveColorTheme = (nextActiveTheme: string) => {
-    console.debug(`setting active color theme to "${nextActiveTheme}"`)
-    setActiveColorTheme(nextActiveTheme)
-    setColorTheme(nextActiveTheme)
-  }
-
-  const handleThemeItemMouseEnter = (itemTheme: string) => {
-    if (itemTheme !== activeColorTheme) {
-      setColorTheme(itemTheme)
-    }
-  }
-
-  const handleThemeItemMouseLeave = (itemTheme: string) => {
-    if (itemTheme !== activeColorTheme) {
-      setColorTheme(activeColorTheme)
-    }
-  }
 
   React.useEffect(() => {
     setMounted(true)
