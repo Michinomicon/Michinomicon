@@ -60,7 +60,6 @@ jobs:
       - name: Install pnpm (11.8.0)
         uses: pnpm/action-setup@v4
         with:
-          version: 11.8.0
           run_install: false
 
       - name: Setup Node.js LTS (v24.13.0)
