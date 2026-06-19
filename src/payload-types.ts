@@ -160,6 +160,7 @@ export interface Page {
   id: string;
   title: string;
   parentCategory: string | Category;
+  parentCategory: string | Category;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {
@@ -1202,6 +1203,7 @@ export interface PayloadMigration {
 export interface PagesSelect<T extends boolean = true> {
   title?: T;
   parentCategory?: T;
+  parentCategory?: T;
   hero?:
     | T
     | {
@@ -1233,6 +1235,7 @@ export interface PagesSelect<T extends boolean = true> {
         mediaGalleryBlock?: T | MediaGalleryBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        postContent?: T | PostContentBlockSelect<T>;
         postContent?: T | PostContentBlockSelect<T>;
       };
   meta?:
@@ -1519,6 +1522,7 @@ export interface MediaSelect<T extends boolean = true> {
  */
 export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
+  isNav?: T;
   generateSlug?: T;
   slug?: T;
   parent?: T;

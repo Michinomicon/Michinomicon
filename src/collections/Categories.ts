@@ -22,6 +22,12 @@ export const Categories: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'isNav',
+      type: 'checkbox',
+      defaultValue: false,
+      label: 'Include in Site Navigation',
+    },
     slugField({
       position: undefined,
     }),

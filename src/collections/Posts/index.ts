@@ -103,7 +103,7 @@ export const Posts: CollectionConfig<'posts'> = {
                     // UploadFeature(),
                     // TreeViewFeature(),
                     // TextStateFeature(),
-                    BlocksFeature({ blocks: [Banner, Code, MediaBlock, MediaGalleryBlock,] }),
+                    BlocksFeature({ blocks: [Banner, Code, MediaBlock, MediaGalleryBlock] }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),

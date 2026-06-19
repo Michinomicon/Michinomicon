@@ -97,6 +97,11 @@ export default async function Page({ params: paramsPromise }: Args) {
         <RenderBlocks blocks={layout} />
       </article>
     </React.Fragment>
+        <RenderHero {...hero} />
+
+        <RenderBlocks blocks={layout} />
+      </article>
+    </React.Fragment>
   )
 }
 
@@ -130,4 +135,32 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
   })
 
   return result.docs?.[0] || null
+})
+
+const queryPostByCategories = cache(async ({ categories }: { categories: Post['categories'] }) => {
+  const { isEnabled: draft } = await draftMode()
+
+  const queryCategories = categories
+    ? categories.filter((category) => typeof category === 'object').map((cat) => cat.id)
+    : []
+
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'posts',
+    limit: 2000,
+    draft,
+    pagination: false,
+    overrideAccess: draft,
+    where: {
+      'categories.isNav': {
+        equals: true,
+      },
+      'categories.id': {
+        in: queryCategories,
+      },
+    },
+  })
+
+  return result.docs || []
 })

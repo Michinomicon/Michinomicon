@@ -12,6 +12,7 @@ import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { revalidateDelete, revalidatePage } from './hooks/revalidatePage'
 import { PostContent } from '../../blocks/PostContent/config'
+import { PostContent } from '../../blocks/PostContent/config'
 
 import {
   MetaDescriptionField,
@@ -60,6 +61,15 @@ export const Pages: CollectionConfig<'pages'> = {
       name: 'title',
       type: 'text',
       required: true,
+    },
+    {
+      name: 'parentCategory',
+      type: 'relationship',
+      relationTo: 'categories',
+      required: true,
+      admin: {
+        position: 'sidebar',
+      },
     },
     {
       name: 'parentCategory',

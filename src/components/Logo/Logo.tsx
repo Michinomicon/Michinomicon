@@ -9,6 +9,7 @@ export type LogoProps = {
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
   variant?: 'textonly' | 'icononly' | 'default'
+  variant?: 'textonly' | 'icononly' | 'default'
 }
 
 export function Logo({

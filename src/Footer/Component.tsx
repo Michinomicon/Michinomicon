@@ -1,6 +1,7 @@
 import { getCachedGlobal } from '@/utilities/getGlobals'
 
 import type { Footer as FooterType } from '@/payload-types'
+import type { Footer as FooterType } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { getAppName } from '@/utilities/getAppName'
 import ScrollToTopButton from '@/components/ScrollToTopButton'
