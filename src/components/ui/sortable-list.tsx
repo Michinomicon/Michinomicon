@@ -47,11 +47,12 @@ const SortableList = <TItem extends SortableBaseItem>({
   className,
 }: SortableListProps<TItem>) => {
   const [active, setActive] = React.useState<Active | null>(null)
-  const [mounted, setMounted] = React.useState(false)
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
 
   const [activeItem, activeIndex] = React.useMemo(() => {
     if (active === null) {
@@ -129,7 +130,7 @@ const dropAnimationConfig: DropAnimation = {
 
 const Overlay = ({ children }: React.PropsWithChildren) => (
   <DragOverlay
-    className="z-100 overflow-hidden rounded-md shadow-elevation-card-hover [&>li]:border-b-0"
+    className="shadow-elevation-card-hover z-100 overflow-hidden rounded-md [&>li]:border-b-0"
     dropAnimation={dropAnimationConfig}
     style={{
       cursor: 'grabbing',

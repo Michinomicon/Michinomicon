@@ -8,22 +8,20 @@ import { cn } from '@/lib/utils'
 
 const ScrollToTopButton = (props: React.ComponentPropsWithoutRef<typeof Button>) => {
   const [visible, setVisible] = useState(false)
-  const [mounted, setMounted] = useState(false)
-  const [_document, setDocumentObject] = React.useState<Document>()
-  const [_window, setWindowObject] = React.useState<Window>()
 
-  React.useEffect(() => {
-    setMounted(true)
-    setDocumentObject(document)
-    setWindowObject(window)
-  }, [])
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
 
   React.useEffect(() => {
     if (!mounted) return
-    if (!_document) return
+    if (!document) return
+    if (!window) return
 
     const toggleVisible = () => {
-      const mainContent: HTMLElement | null = _document.getElementById('#mainContent')
+      const mainContent: HTMLElement | null = document.getElementById('#mainContent')
       const scrolled = mainContent?.scrollTop ?? 300
       if (scrolled >= 300) {
         setVisible(true)
@@ -32,19 +30,17 @@ const ScrollToTopButton = (props: React.ComponentPropsWithoutRef<typeof Button>)
       }
     }
 
-    setDocumentObject(document)
-    setWindowObject(window)
     window.addEventListener('scroll', toggleVisible)
     return () => {
       window.removeEventListener('scroll', toggleVisible)
     }
-  }, [_document, mounted])
+  }, [mounted])
 
   const scrollToTop = () => {
-    if (!_window) {
+    if (!window) {
       return
     }
-    _window.scrollTo({
+    window.scrollTo({
       top: 0,
       behavior: 'smooth',
     })

@@ -5,10 +5,8 @@ export type LogoProps = {
   text?: string | undefined
   textClassName?: string | undefined
   className?: string | undefined
-
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
-  variant?: 'textonly' | 'icononly' | 'default'
   variant?: 'textonly' | 'icononly' | 'default'
 }
 
@@ -21,7 +19,6 @@ export function Logo({
 }: LogoProps & React.ComponentProps<'div'>) {
   const logoText = logoTextFromProps || ''
   const variant = variantFromProps || 'default'
-
   const showIcon = variant !== 'textonly'
   const showText = variant !== 'icononly'
   return (

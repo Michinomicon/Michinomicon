@@ -124,15 +124,22 @@ function collectHeadingTagReferences(
 
 function useActiveTocItem(tocContent: TOCItem[]) {
   const [tableOfContents, setTableOfContents] = React.useState<Array<TOCItem>>(tocContent)
-  const [itemIds, setItemIds] = React.useState<string[]>([])
+
   const [activeId, setActiveId] = React.useState<string | null>(null)
 
-  React.useEffect(() => {
-    const itemIds: string[] = tableOfContents
+  const itemIds = React.useMemo(() => {
+    return tableOfContents
       .filter(({ id }) => id && id.trim().length > 0)
       .map<string>(({ id }) => id)
-    setItemIds(itemIds)
   }, [tableOfContents])
+
+  // const [itemIds, setItemIds] = React.useState<string[]>([])
+  // React.useEffect(() => {
+  //   const itemIds: string[] = tableOfContents
+  //     .filter(({ id }) => id && id.trim().length > 0)
+  //     .map<string>(({ id }) => id)
+  //   setItemIds(itemIds)
+  // }, [tableOfContents])
 
   React.useEffect(() => {
     const observer = new IntersectionObserver(
@@ -368,27 +375,29 @@ export function PageTOCTriggerButton(props: PageTOCProps) {
 
 export function PageTableOfContents({ navTree }: PageTableOfContentsProps) {
   const { toggleSidebar, open: sidebarOpen } = useSidebar()
-
   const pathname = usePathname()
-
-  const [mounted, setMounted] = React.useState(false)
-  const [pathToPage, setPathToPage] = React.useState<MenuTreeItem[] | false>(false)
   const [tableOfContents, setTableOfContents] = React.useState<Array<TOCItem>>([])
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
 
-  React.useEffect(() => {
-    const pagePath = findPagePathByUrl(navTree, pathname)
-    setPathToPage(pagePath)
-
-    if (document?.body) {
-      const currentPageSlug = pagePath ? pagePath[pagePath.length - 1].url : ''
-      const headingTags = collectHeadingTagReferences(currentPageSlug, document.body)
-      setTableOfContents(headingTags)
-    }
+  const pathToPage = React.useMemo(() => {
+    return findPagePathByUrl(navTree, pathname)
   }, [navTree, pathname])
+
+  // intentional cause a second render after the DOM has painted
+  React.useEffect(() => {
+    if (document?.body) {
+      const currentPageSlug = pathToPage ? pathToPage[pathToPage.length - 1].url : ''
+      const headingTags = collectHeadingTagReferences(currentPageSlug, document.body)
+
+      const updateToc = () => setTableOfContents(headingTags)
+      updateToc()
+    }
+  }, [pathToPage, pathname])
 
   if (!mounted) {
     return <></>

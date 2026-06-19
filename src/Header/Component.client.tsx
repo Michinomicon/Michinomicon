@@ -29,29 +29,36 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
   menuTree,
   twitchStatusSlot,
 }) => {
-  const [themeMode, setThemeMode] = useState<string | null>(null)
-  const [themeColor, setThemeColor] = useState<string | null>(null)
-
-  const { headerThemeMode, setHeaderThemeMode, headerThemeColor, setHeaderThemeColor } =
-    useHeaderTheme()
   const pathname = usePathname()
   const isMobile = useIsMobile()
+
+  const [themeMode, setThemeMode] = useState<string | null>(null)
+  const { headerThemeMode, setHeaderThemeMode, headerThemeColor, setHeaderThemeColor } =
+    useHeaderTheme()
+  const [prevHeaderThemeMode, setPrevHeaderThemeMode] = useState(headerThemeMode)
+
+  if (headerThemeMode !== prevHeaderThemeMode) {
+    setPrevHeaderThemeMode(headerThemeMode)
+    if (headerThemeMode) {
+      setThemeMode(headerThemeMode)
+    }
+  }
+
+  const [themeColor, setThemeColor] = useState<string | null>(null)
+  const [prevHeaderThemeColor, setPrevHeaderThemeColor] = useState(headerThemeColor)
+
+  if (headerThemeColor !== prevHeaderThemeColor) {
+    setPrevHeaderThemeColor(headerThemeColor)
+    if (headerThemeColor) {
+      setThemeColor(headerThemeColor)
+    }
+  }
 
   useEffect(() => {
     setHeaderThemeMode(null)
     setHeaderThemeColor(null)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
-
-  useEffect(() => {
-    if (headerThemeMode && headerThemeMode !== themeMode) setThemeMode(headerThemeMode)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerThemeMode])
-
-  useEffect(() => {
-    if (headerThemeColor && headerThemeColor !== themeColor) setThemeColor(headerThemeColor)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerThemeColor])
 
   if (isMobile) {
     return (

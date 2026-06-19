@@ -30,6 +30,7 @@ export const FieldSelector: FieldClientComponent = (props) => {
   const { value, setValue } = useField({ path })
   const [fieldOptions, setFieldOptions] = useState<Array<Option>>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [prevSlugDocId, setPrevSlugDocId] = useState<unknown | undefined>()
 
   const slugDocId = useFormFields(([fields]) => {
     const pathParts = path.split('.')
@@ -42,15 +43,20 @@ export const FieldSelector: FieldClientComponent = (props) => {
     return undefined
   })
 
+  if (slugDocId !== prevSlugDocId) {
+    setPrevSlugDocId(slugDocId)
+    setFieldOptions([])
+  }
+
   useEffect(() => {
     if (!slugDocId || !config) {
-      setFieldOptions([])
       return
     }
 
-    setIsLoading(true)
+    let isCurrent = true
 
     const fetchFields = async () => {
+      setIsLoading(true)
       try {
         const slugResponse = await fetch(`/api/slugs/${slugDocId}`)
         if (!slugResponse.ok) {
@@ -119,16 +125,23 @@ export const FieldSelector: FieldClientComponent = (props) => {
         }
 
         const options = extractFields(collection.fields || [])
-        setFieldOptions(options)
+
+        if (isCurrent) {
+          setFieldOptions(options)
+        }
       } catch (error) {
         console.error('Error loading collection fields:', error)
-        setFieldOptions([])
+        if (isCurrent) setFieldOptions([])
       } finally {
-        setIsLoading(false)
+        if (isCurrent) setIsLoading(false)
       }
     }
 
     fetchFields()
+
+    return () => {
+      isCurrent = false
+    }
   }, [slugDocId, config])
 
   return (

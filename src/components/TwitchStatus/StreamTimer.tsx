@@ -5,11 +5,14 @@ import React from 'react'
 
 export function StreamTimer({ startedAt }: { startedAt?: string | undefined }) {
   const [uptime, setUptime] = useState<string>('00:00:00')
-  const [mounted, setMounted] = useState(false)
+
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
 
   React.useEffect(() => {
-    setMounted(true)
-
     const startTimestamp = startedAt ? new Date(startedAt).getTime() : null
 
     const updateTimer = () => {

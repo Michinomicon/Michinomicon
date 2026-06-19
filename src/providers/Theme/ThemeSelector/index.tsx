@@ -16,7 +16,18 @@ import { themeLocalStorageKey } from './types'
 
 export const ThemeSelector: React.FC = () => {
   const { setTheme } = useTheme()
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem(themeLocalStorageKey) ?? 'auto'
+    }
+    return 'auto'
+  })
+
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
 
   const onThemeChange = (themeToSet: Theme & 'auto') => {
     if (themeToSet === 'auto') {
@@ -28,16 +39,17 @@ export const ThemeSelector: React.FC = () => {
     }
   }
 
-  React.useEffect(() => {
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
-    setValue(preference ?? 'auto')
-  }, [])
+  if (!mounted) {
+    return (
+      <div className="h-10 w-25 opacity-0" /> // Invisible placeholder matching Select size
+    )
+  }
 
   return (
     <Select onValueChange={onThemeChange} value={value}>
       <SelectTrigger
         aria-label="Select a theme"
-        className="w-auto bg-transparent gap-2 pl-0 md:pl-3 border-none"
+        className="w-auto gap-2 border-none bg-transparent pl-0 md:pl-3"
       >
         <SelectValue placeholder="Theme" />
       </SelectTrigger>

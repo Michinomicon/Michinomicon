@@ -14,7 +14,7 @@ const ColorThemeContext = React.createContext<ColorThemeContextType>({
 })
 
 const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME ?? 'default'
-const ColorThemeStorageKey = 'michnomicon-theme'
+const ColorThemeStorageKey = 'michinomicon-theme'
 
 export function ColorThemeProvider({
   children,
@@ -25,16 +25,17 @@ export function ColorThemeProvider({
   defaultColorTheme?: string
   storageKey?: string
 }) {
-  const [colorTheme, setColorThemeState] = React.useState<string>(DefaultColorTheme)
-  const [isClient, setIsClient] = React.useState(false)
-
-  // Handle client-side mounting to avoid hydration mismatch
-  React.useEffect(() => {
-    setIsClient(true)
-    const storedColorTheme: string = localStorage.getItem(storageKey) ?? defaultColorTheme
-
-    setColorThemeState(storedColorTheme)
-  }, [defaultColorTheme, storageKey])
+  const [colorTheme, setColorThemeState] = React.useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem(storageKey) ?? defaultColorTheme
+    }
+    return defaultColorTheme
+  })
+  const isClient = React.useSyncExternalStore(
+    () => () => {}, // no-op subscribe
+    () => true, // client snapshot
+    () => false, // server snapshot
+  )
 
   // Apply color theme to document
   React.useEffect(() => {

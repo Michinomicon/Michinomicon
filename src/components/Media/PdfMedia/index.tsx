@@ -78,6 +78,8 @@ const FlipbookPopoverContent: React.FC<{
 }> = ({ media, onClose, isOpen, disableHoverAnim = false }) => {
   const [documentLoaded, setDocumentLoaded] = useState<boolean>(false)
   const [flipbookRenderCount, setFlipbookRenderCount] = useState<number>(0)
+  const [prevIsFullyRendered, setPrevIsFullyRendered] = useState<boolean>(false)
+
   const [fileloadingProgress, setFileLoadingProgress] = useState<OnLoadProgressArgs>({
     loaded: 0,
     total: 0,
@@ -88,6 +90,8 @@ const FlipbookPopoverContent: React.FC<{
   const [numPages, setNumPages] = useState<number | null>(null)
 
   const [pageWidth, setPageWidth] = useState<number | null>(null)
+  const [prevPageWidth, setPrevPageWidth] = useState<number | null>(null)
+
   const pageHeight = Math.max(Number(pageWidth), 0) * 1.4142
   const bookWidth = Math.max(Number(pageWidth), 0) * 2
 
@@ -428,21 +432,33 @@ const FlipbookPopoverContent: React.FC<{
     return false
   }
 
-  React.useEffect(() => {
+  // React.useEffect(() => {
+  //   setSliderValue([0])
+  //   setActivePages([0])
+  //   setRenderedPagesCount(0)
+  // }, [pageWidth])
+
+  if (pageWidth !== prevPageWidth) {
+    setPrevPageWidth(pageWidth)
     setSliderValue([0])
     setActivePages([0])
     setRenderedPagesCount(0)
-  }, [pageWidth])
+  }
+
+  if (isFullyRendered !== prevIsFullyRendered) {
+    setPrevIsFullyRendered(isFullyRendered)
+    if (isFullyRendered === true) {
+      setFlipbookRenderCount((prev) => prev + 1)
+    }
+  }
 
   React.useEffect(() => {
     if (isFullyRendered === true) {
-      setFlipbookRenderCount((prev) => {
-        return prev + 1
-      })
       const previousNumPages = totalPagesAcrossRendersRef.current ?? 0
       const restoredActivePage = Math.max(...(activePageRangeRef.current ?? [0]), 0)
+
       if (previousNumPages > 0 && restoredActivePage >= previousNumPages) {
-        // overriding default behaviour to reach back page
+        // overriding default behavior to reach back page
         goToSpecificPage(previousNumPages - 1, true)
         goToSpecificPage(previousNumPages, true)
       } else {
@@ -450,6 +466,23 @@ const FlipbookPopoverContent: React.FC<{
       }
     }
   }, [isFullyRendered])
+
+  // React.useEffect(() => {
+  //   if (isFullyRendered === true) {
+  //     setFlipbookRenderCount((prev) => {
+  //       return prev + 1
+  //     })
+  //     const previousNumPages = totalPagesAcrossRendersRef.current ?? 0
+  //     const restoredActivePage = Math.max(...(activePageRangeRef.current ?? [0]), 0)
+  //     if (previousNumPages > 0 && restoredActivePage >= previousNumPages) {
+  //       // overriding default behavior to reach back page
+  //       goToSpecificPage(previousNumPages - 1, true)
+  //       goToSpecificPage(previousNumPages, true)
+  //     } else {
+  //       goToSpecificPage(restoredActivePage, true)
+  //     }
+  //   }
+  // }, [isFullyRendered])
 
   useEffect(() => {
     if (!sliderTimeoutRef || !sliderTimeoutRef.current) {
@@ -680,10 +713,10 @@ const FlipbookPopoverContent: React.FC<{
     const cardTitle = isFirstRender ? 'Creating Flipbook' : 'Updating Flipbook'
 
     return (
-      <div className="z-50 flex w-full h-full flex-col items-center gap-4 pointer-events-none">
-        <Card className="w-full max-w-3xl my-auto pointer-events-auto">
+      <div className="pointer-events-none z-50 flex h-full w-full flex-col items-center gap-4">
+        <Card className="pointer-events-auto my-auto w-full max-w-3xl">
           <CardHeader>
-            <CardTitle className=" text-3xl font-semibold text-center">{cardTitle}</CardTitle>
+            <CardTitle className="text-center text-3xl font-semibold">{cardTitle}</CardTitle>
           </CardHeader>
           <CardContent>
             <ItemGroup className="gap-4">
@@ -721,7 +754,7 @@ const FlipbookPopoverContent: React.FC<{
               size="lg"
               onClick={onClose}
               aria-label="Close flipbook"
-              className="w-fit mx-auto"
+              className="mx-auto w-fit"
             >
               <X /> Cancel
             </Button>
@@ -764,7 +797,7 @@ const FlipbookPopoverContent: React.FC<{
   return (
     <div
       ref={containerRef}
-      className="relative w-screen h-screen flex flex-col items-center bg-background overflow-hidden"
+      className="relative flex h-screen w-screen flex-col items-center overflow-hidden bg-background"
     >
       <InteractiveBackground enableSpotlight={isFullyRendered} />
       {isFullyRendered && (
@@ -772,9 +805,9 @@ const FlipbookPopoverContent: React.FC<{
           <div
             id="pdfDocumentControls"
             style={{ maxWidth: flipbookOverflowContainerStyles.width }}
-            className={`absolute bg-card border border-primary/20 bottom-0 z-10 w-full flex flex-col justify-center items-center gap-0 px-2 py-0 pb-2 `}
+            className={`absolute bottom-0 z-10 flex w-full flex-col items-center justify-center gap-0 border border-primary/20 bg-card px-2 py-0 pb-2`}
           >
-            <div className="flex justify-center w-full gap-0 p-0">
+            <div className="flex w-full justify-center gap-0 p-0">
               <Field style={pageSliderWidthStyles}>
                 <FloatingLabelSlider
                   value={sliderValue}
@@ -784,7 +817,7 @@ const FlipbookPopoverContent: React.FC<{
                   max={pageSliderMaxValue}
                   step={1}
                   orientation={'horizontal'}
-                  className="mt-4 mb-2 w-full min-h-1.5 cursor-grab active:cursor-grabbing border-2 border-solid border-input"
+                  className="mt-4 mb-2 min-h-1.5 w-full cursor-grab border-2 border-solid border-input active:cursor-grabbing"
                   aria-label="Page Navigation"
                   badgeVariant="default"
                   valueLabelFormatter={getPageSliderValueFormatter}
@@ -813,8 +846,8 @@ const FlipbookPopoverContent: React.FC<{
                 >
                   <ChevronLeft />
                 </Button>
-                <Button variant="default" className="w-32 sm:w-40 [anchor-name:--slider-btn]">
-                  <span className="whitespace-nowrap text-center">
+                <Button variant="default" className="w-32 [anchor-name:--slider-btn] sm:w-40">
+                  <span className="text-center whitespace-nowrap">
                     {getPreviewPageStateDescription(sliderValue[0], numPages)}
                   </span>
                 </Button>
@@ -863,7 +896,7 @@ const FlipbookPopoverContent: React.FC<{
           {/* Floating Left "Previous" Button*/}
           <button
             className={cn([
-              `absolute  top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-primary/20 hover:bg-primary/40 text-foreground/50 hover:text-foreground transition-all duration-300 disabled:opacity-0 disabled:pointer-events-none`,
+              `absolute top-1/2 z-50 -translate-y-1/2 rounded-full bg-primary/20 p-4 text-foreground/50 transition-all duration-300 hover:bg-primary/40 hover:text-foreground disabled:pointer-events-none disabled:opacity-0`,
             ])}
             style={floatingPreviousButtonnStyles}
             onClick={previousPage}
@@ -872,13 +905,13 @@ const FlipbookPopoverContent: React.FC<{
             disabled={isBackNavigationDisabled() || isZoomMode}
             aria-label="Previous Page"
           >
-            <ChevronLeft className="w-12 h-12" />
+            <ChevronLeft className="h-12 w-12" />
           </button>
 
           {/* Floating Right "Next" Button*/}
           <button
             className={cn([
-              `absolute  top-1/2 -translate-y-1/2 z-50 p-4 rounded-full bg-primary/20 hover:bg-primary/40 text-foreground/50 hover:text-foreground transition-all duration-300 disabled:opacity-0 disabled:pointer-events-none`,
+              `absolute top-1/2 z-50 -translate-y-1/2 rounded-full bg-primary/20 p-4 text-foreground/50 transition-all duration-300 hover:bg-primary/40 hover:text-foreground disabled:pointer-events-none disabled:opacity-0`,
             ])}
             style={floatingNextButtonStyles}
             onClick={nextPage}
@@ -887,7 +920,7 @@ const FlipbookPopoverContent: React.FC<{
             disabled={isForwardNavigationDisabled() || isZoomMode}
             aria-label="Next Page"
           >
-            <ChevronRight className="w-12 h-12" />
+            <ChevronRight className="h-12 w-12" />
           </button>
         </React.Fragment>
       )}
@@ -898,10 +931,10 @@ const FlipbookPopoverContent: React.FC<{
         id="pdfDocumentContainer"
         style={{ marginTop: 30 }}
         className={cn(
-          'relative flex items-center justify-center max-h-screen border-2 border-background',
+          'relative flex max-h-screen items-center justify-center border-2 border-background',
           isFullyRendered
             ? 'opacity-100 transition-opacity duration-500'
-            : 'opacity-0 pointer-events-none absolute',
+            : 'pointer-events-none absolute opacity-0',
         )}
       >
         <Document
@@ -911,7 +944,7 @@ const FlipbookPopoverContent: React.FC<{
           loading={<></>}
           onItemClick={onClickDocumentItem}
           externalLinkTarget="_blank"
-          className={cn('flex items-center justify-center w-full')}
+          className={cn('flex w-full items-center justify-center')}
         >
           <div
             id="flipbookOverflowContainer"
@@ -924,12 +957,12 @@ const FlipbookPopoverContent: React.FC<{
             <div
               id="zoomAndPanLayer"
               className={cn(
-                'w-full h-full ease-out transition-transform duration-100 will-change-transform bg-card',
+                'h-full w-full bg-card transition-transform duration-100 ease-out will-change-transform',
               )}
               style={zoomAndPanLayerStyles}
             >
               <div
-                className={cn('c-flipbook-custom c-flipbook absolute pointer-events-none')}
+                className={cn('c-flipbook-custom c-flipbook pointer-events-none absolute')}
                 id={FLIPBOOK_ELEMENT_ID}
                 style={flipbookElementStyles}
               >
@@ -1028,7 +1061,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
       <React.Fragment>
         <Item
           variant="outline"
-          className="relative flex flex-row bg-card text-card-foreground border border-card shadow-none w-full"
+          className="relative flex w-full flex-row border border-card bg-card text-card-foreground shadow-none"
         >
           <div className="absolute top-2 right-2">
             <Tooltip>
@@ -1038,12 +1071,12 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
                   <span className="sr-only">Media Information</span>
                 </Button>
               </TooltipTrigger>
-              <TooltipContent className="max-w-80 bg-popover text-popover-foreground border border-popover grid grid-cols-[auto_1fr] gap-0 p-1">
+              <TooltipContent className="grid max-w-80 grid-cols-[auto_1fr] gap-0 border border-popover bg-popover p-1 text-popover-foreground">
                 {Object.entries(metadata ?? {}).map(([label, value]) => {
                   return (
                     <React.Fragment key={label}>
                       <div className="text-xs font-semibold whitespace-nowrap">{label}:</div>
-                      <div className="text-xs whitespace-normal wrap-break-word">{value}</div>
+                      <div className="text-xs wrap-break-word whitespace-normal">{value}</div>
                     </React.Fragment>
                   )
                 })}
@@ -1052,7 +1085,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
           </div>
           <ItemMedia
             variant="image"
-            className="relative w-32 shrink-0 overflow-hidden rounded-md shadow-md border flex items-center justify-center min-h-40"
+            className="relative flex min-h-40 w-32 shrink-0 items-center justify-center overflow-hidden rounded-md border shadow-md"
           >
             {thumbnailURL ? (
               <Image
@@ -1061,13 +1094,13 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
                 loading="eager"
                 fill
                 sizes="128px"
-                className="aspect-square w-full mt-0 mb-0 object-cover rounded-none"
+                className="mt-0 mb-0 aspect-square w-full rounded-none object-cover"
               />
             ) : (
               <FileTextIcon />
             )}
           </ItemMedia>
-          <ItemContent className="flex flex-col grow-2">
+          <ItemContent className="flex grow-2 flex-col">
             <ItemTitle className="line-clamp-1 font-medium whitespace-nowrap">
               {title}
               <span className="text-muted-foreground"></span>
@@ -1084,7 +1117,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
         <div
           popover="auto"
           ref={popoverRef}
-          className="fixed inset-0 w-screen h-screen m-0 p-0 bg-neutral-900/95 backdrop:bg-black/80 border-none outline-none transition-opacity duration-300"
+          className="fixed inset-0 m-0 h-screen w-screen border-none bg-neutral-900/95 p-0 transition-opacity duration-300 outline-none backdrop:bg-black/80"
         >
           {hasOpened && (
             <FlipbookPopoverContent media={resource} onClose={handleClose} isOpen={isPopoverOpen} />

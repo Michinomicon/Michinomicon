@@ -55,16 +55,17 @@ const colorThemes: Array<{ id: string; label: string }> = [
 ]
 
 export function ColorThemeToggle() {
-  const [mounted, setMounted] = React.useState(false)
   const [dropdownOpen, setDropdownOpen] = React.useState(false)
   const { setTheme, theme, colorTheme, setColorTheme } = useTheme()
 
   const [activeColorTheme, setActiveColorTheme] = React.useState<string>(colorTheme)
   const { globalSpotlight, globalReactiveTile, setSpotlight, setReactiveTile } = useWallpaper()
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
 
   if (!mounted) {
     return null

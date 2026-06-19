@@ -6,12 +6,13 @@ import { useTheme } from '.'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 export function ModeToggle() {
-  const [mounted, setMounted] = React.useState(false)
   const { setTheme, theme } = useTheme()
 
-  React.useEffect(() => {
-    setMounted(true)
-  }, [])
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
 
   if (!mounted) {
     return null

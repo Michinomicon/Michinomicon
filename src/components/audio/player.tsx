@@ -30,11 +30,12 @@ import { AudioSlider } from '@/components/ui/slider'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 function useIsMounted() {
-  const [isMounted, setIsMounted] = React.useState(false)
-  React.useEffect(() => {
-    setIsMounted(true)
-  }, [])
-  return isMounted
+  const mounted = React.useSyncExternalStore(
+    () => () => {}, // Subscribe (noop)
+    () => true, // Client snapshot
+    () => false, // Server snapshot
+  )
+  return mounted
 }
 
 interface AudioPlayerButtonProps extends React.ComponentProps<typeof Button> {
@@ -158,7 +159,7 @@ const AudioPlayerTimeDisplay = ({
       className={cn(
         'min-w-12 shrink-0 px-1.5 text-left font-mono text-sm tabular-nums',
         remaining && 'text-right',
-        showLiveIcon && 'flex items-center gap-1 text-red-500 text-xs',
+        showLiveIcon && 'flex items-center gap-1 text-xs text-red-500',
         className,
       )}
       data-live={isLiveStream ? 'true' : undefined}
