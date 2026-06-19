@@ -158,6 +158,9 @@ importers:
       pdf-img-convert:
         specifier: ^2.0.0
         version: 2.0.0
+      pdfjs-dist:
+        specifier: 4.4.168
+        version: 4.4.168
       prism-react-renderer:
         specifier: ^2.4.1
         version: 2.4.1(react@19.2.4)
