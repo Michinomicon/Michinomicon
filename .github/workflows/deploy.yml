@@ -57,10 +57,10 @@ jobs:
           echo "TWITCH_CLIENT_SECRET=${{ secrets.TWITCH_CLIENT_SECRET }}" >> .env
           echo "TWITCH_STATUS_USERNAME=${{ vars.TWITCH_STATUS_USERNAME }}" >> .env
 
-      - name: Install pnpm (v10.27)
+      - name: Install pnpm (11.8.0)
         uses: pnpm/action-setup@v4
         with:
-          version: 10.27
+          version: 11.8.0
           run_install: false
 
       - name: Setup Node.js LTS (v24.13.0)
