@@ -18,16 +18,17 @@ import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 import InteractiveBackground from '@/components/InteractiveBackground'
 import { PageTableOfContents } from '@/components/PageTableOfContents'
-import { getNavTree } from '@/utilities/buildNavTree'
+import { getMainMenu } from '@/utilities/buildNavTree'
 import { SidebarInset } from '@/components/ui/sidebar'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
-  const navTree = await getNavTree()
+  const navTree = await getMainMenu()
 
   return (
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
+        {/* Favicon and theme related */}
         <link rel="apple-touch-icon" sizes="57x57" href="/icons/favicon-57x57.png" />
         <link rel="apple-touch-icon" sizes="60x60" href="/icons/favicon-60x60.png" />
         <link rel="apple-touch-icon" sizes="72x72" href="/icons/favicon-72x72.png" />
@@ -48,9 +49,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <meta name="msapplication-config" content="/browserconfig.xml" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#5a168c" />
+
+        {/* Cache Management */}
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate"></meta>
+        <meta httpEquiv="Pragma" content="no-cache"></meta>
       </head>
       <body>
-        <div className="flex flex-col min-h-screen w-screen">
+        <div className="flex min-h-screen w-screen flex-col">
           <Providers>
             <InteractiveBackground enableSpotlight={true} enableReactiveTile={true} />
             <AdminBar
@@ -77,18 +82,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <PageTableOfContents navTree={navTree}></PageTableOfContents>
             <SidebarInset
               className={cn(
-                'min-w-0 max-w-screen bg-none rounded-none pointer-events-none',
+                'pointer-events-none max-w-screen min-w-0 rounded-none bg-none',
                 'peer-data-[state=expanded]:top-[calc(calc(var(--header-height))+0)]',
-                'peer-data-[state=expanded]:pl-[calc(calc(var(--sidebar-width)))]',
-                'peer-data-[state=expanded]:max-w-[calc(calc(100vw-var(--sidebar-width)))] peer-data-[state=collapsed]:max-w-[calc(100vw)] peer-data-[state=collapsed]:w-[calc(100vw)]',
+                'xl:peer-data-[state=expanded]:pl-[calc(calc(var(--sidebar-width)))]',
+                'peer-data-[state=collapsed]:w-[calc(100vw)] peer-data-[state=collapsed]:max-w-[calc(100vw)] peer-data-[state=expanded]:max-w-[calc(calc(100vw-var(--sidebar-width)))]',
               )}
             >
               <div
                 id="mainContent"
                 className={cn(
-                  'mt-[calc(var(--header-height)+0px)]',
-                  'mb-[calc(var(--footer-height)+0px)]',
-                  'relative min-h-screen p-6 md:p-12 max-w-7xl ml-auto mr-auto pointer-events-none *:pointer-events-auto',
+                  'md:mt-[calc(var(--header-height)+0px)]',
+                  'md:mb-[calc(var(--footer-height)+0px)]',
+                  'pointer-events-none relative min-h-screen w-screen *:pointer-events-auto md:mr-auto md:ml-auto md:max-w-7xl md:p-12',
                 )}
               >
                 {children}

@@ -1,0 +1,8 @@
+overrides:
+  pdfjs-dist: "4.4.168"
+
+allowBuilds:
+  canvas: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

@@ -8,6 +8,7 @@ import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { PostContentBlock } from '@/blocks/PostContent/Component'
+import { MediaGalleryBlock } from './MediaGalleryBlock/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -15,6 +16,7 @@ const blockComponents = {
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
+  mediaGalleryBlock: MediaGalleryBlock,
   postContent: PostContentBlock,
 }
 
@@ -36,7 +38,7 @@ export const RenderBlocks: React.FC<{
 
             if (Block) {
               return (
-                <div className="block-wrapper mt-16 container border-none" key={index}>
+                <div className="block-wrapper container mt-16 border-none" key={index}>
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...block} disableInnerContainer />
                 </div>

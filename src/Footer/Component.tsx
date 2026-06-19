@@ -1,5 +1,4 @@
 import { getCachedGlobal } from '@/utilities/getGlobals'
-
 import type { Footer as FooterType } from '@/payload-types'
 import { CMSLink } from '@/components/Link'
 import { getAppName } from '@/utilities/getAppName'
@@ -7,14 +6,14 @@ import ScrollToTopButton from '@/components/ScrollToTopButton'
 import { AppMainLogo } from '@/components/AppMainLogo'
 import { cn } from '@/lib/utils'
 
-function FooterCMSLinks({ navItems }: { navItems: FooterType['navItems'] }) {
-  if (!navItems) {
+function FooterCMSLinks({ menuItems }: { menuItems: FooterType['menuItems'] }) {
+  if (!menuItems) {
     return <></>
   }
   return (
-    <div className="flex flex-col-reverse items-start md:flex-row gap-4 md:items-center">
-      <nav className="flex flex-col md:flex-row gap-4">
-        {navItems.map(({ link }, i) => {
+    <div className="flex flex-col">
+      <nav className="flex flex-row justify-center gap-4 lg:justify-end">
+        {menuItems.map(({ link }, i) => {
           return <CMSLink key={i} {...link} />
         })}
       </nav>
@@ -24,36 +23,34 @@ function FooterCMSLinks({ navItems }: { navItems: FooterType['navItems'] }) {
 
 export async function Footer() {
   const footerData: FooterType = await getCachedGlobal('footer', 1)()
-  const navItems = footerData?.navItems || []
+  const menuItems = footerData?.menuItems || []
   const appTitle: string = getAppName()
 
   const FooterStyles =
-    'relative h-(--footer-height) w-screen mt-auto z-20 border-t border-border bg-background rounded-none shadow-md'
+    'hidden md:block relative lg:h-(--footer-height) h-[calc(var(--footer-height)*2)] w-screen mt-auto z-20 border-t border-border bg-background rounded-none shadow-md pt-1'
 
-  const FooterRowStyles = 'p-1 mx-6 grid grid-cols-12 grid-rows-1 gap-3 rounded-none'
+  const FooterRowStyles =
+    'mx-6 grid grid-cols-6 grid-rows-2 justify-center lg:grid-cols-12 lg:grid-rows-1 gap-3 rounded-none'
 
   const FooterSectionStyles =
-    'px-2 gap-2 flex flex-col md:flex-row justify-center md:justify-center flex-nowrap rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60'
+    'col-span-6 rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 justify-center flex flex-col align-middle'
 
-  const FooterCenterSectionStyles = cn(FooterSectionStyles, 'container col-span-8')
-  const FooterLeftSectionStyles = cn(FooterSectionStyles, 'col-span-2 ') //justify-start
-  const FooterRightSectionStyles = cn(FooterSectionStyles, 'col-span-2 ') //justify-end
+  const FooterLeftSectionStyles = cn(FooterSectionStyles, 'lg:justify-start ')
+  const FooterRightSectionStyles = cn(FooterSectionStyles, 'lg:justify-end')
 
   return (
-    <footer className={FooterStyles}>
+    <footer className={cn(FooterStyles)}>
+      <div className="absolute bottom-[calc(var(--footer-height)*2)] flex w-full flex-row flex-nowrap justify-center lg:bottom-(--footer-height)">
+        <ScrollToTopButton className={'rounded-b-none border-b-0 border-border'} />
+      </div>
+
       <div className={FooterRowStyles}>
         <div className={FooterLeftSectionStyles}>
-          <AppMainLogo text={appTitle} />
-        </div>
-
-        <div className={FooterCenterSectionStyles}>
-          <div className="absolute -top-[calc(calc(50%)+0.1em)]">
-            <ScrollToTopButton />
-          </div>
+          <AppMainLogo text={appTitle} className={'justify-center lg:justify-start'} />
         </div>
 
         <div className={FooterRightSectionStyles}>
-          <FooterCMSLinks navItems={navItems} />
+          <FooterCMSLinks menuItems={menuItems} />
         </div>
       </div>
     </footer>

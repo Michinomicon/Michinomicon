@@ -15,6 +15,7 @@ export interface BaseMediaProps {
   onLoad?: () => void
   resource?: MediaType | string | number | null
   metadata?: MediaMetaData
+  sortPriority?:number
 }
 
 export interface ImageMediaProps extends BaseMediaProps {

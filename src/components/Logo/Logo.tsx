@@ -1,52 +1,49 @@
-import LogoImage from 'public/icons/favicon-512x512.png'
+import { cn } from '@/lib/utils'
+import LogoImage from '@/public/icons/favicon-512x512.png'
 
-export interface LogoProps {
+export type LogoProps = {
   text?: string | undefined
-  className?: string
+  textClassName?: string | undefined
+  className?: string | undefined
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
   variant?: 'textonly' | 'icononly' | 'default'
 }
 
-export const Logo = (props: LogoProps) => {
-  const {
-    variant: variantFromProps,
-    text,
-    loading: loadingFromProps,
-    priority: priorityFromProps,
-    className,
-  } = props
-
-  const loading = loadingFromProps || 'lazy'
-  const priority = priorityFromProps || 'low'
+export function Logo({
+  variant: variantFromProps,
+  text: logoTextFromProps,
+  className,
+  textClassName,
+  ...props
+}: LogoProps & React.ComponentProps<'div'>) {
+  const logoText = logoTextFromProps || ''
   const variant = variantFromProps || 'default'
-
   const showIcon = variant !== 'textonly'
   const showText = variant !== 'icononly'
-
   return (
-    /* eslint-disable @next/next/no-img-element */
-    <div className={`flex flex-nowrap justify-center items-center ${className}`}>
-      {showIcon && (
-        <img
-          alt="Logo"
-          width={34}
-          height={34}
-          loading={loading}
-          fetchPriority={priority}
-          decoding="async"
-          src={LogoImage.src}
-        />
+    <div
+      className={cn(
+        '@container h-full min-h-8.5 w-auto max-w-60 min-w-10 rounded-none md:max-h-8.5 md:max-w-80',
+        className,
       )}
+      {...props}
+    >
       {showText && (
-        <svg width="280" height="34" xmlns="http://www.w3.org/2000/svg">
+        <svg
+          viewBox="0 0 240 34"
+          preserveAspectRatio="xMinYMid meet"
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-full w-full"
+        >
+          {showIcon && <image width={28} height={28} y="0" href={LogoImage.src} />}
           <text
-            x="10"
-            y="32"
-            className="ml-2 text-4xl no-underline"
-            fill={'var(--muted-foreground)'}
+            x={showIcon ? '38' : '0'}
+            y="26"
+            className={cn('text-[30px] no-underline', textClassName)}
+            fill="var(--color-foreground)"
           >
-            {text}
+            {logoText}
           </text>
         </svg>
       )}

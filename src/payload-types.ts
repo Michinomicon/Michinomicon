@@ -203,7 +203,15 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock | PostContentBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | MediaGalleryBlock
+    | ArchiveBlock
+    | FormBlock
+    | PostContentBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -218,6 +226,7 @@ export interface Page {
    */
   generateSlug?: boolean | null;
   slug: string;
+  siteMenuShowContentPanel: boolean;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -235,9 +244,6 @@ export interface Category {
    */
   generateSlug?: boolean | null;
   slug: string;
-  /**
-   * Select Parent Category.
-   */
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -307,6 +313,11 @@ export interface Post {
 export interface Media {
   id: string;
   title: string;
+  /**
+   * Select Category.
+   */
+  category?: (string | null) | Category;
+  sortPriority?: number | null;
   alt?: string | null;
   caption?: {
     root: {
@@ -625,6 +636,23 @@ export interface MediaBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaGalleryBlock".
+ */
+export interface MediaGalleryBlock {
+  selectionMethod: 'individual' | 'category';
+  individualMedia?:
+    | {
+        media: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  mediaCategory?: (string | null) | Category;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaGalleryBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
@@ -873,8 +901,12 @@ export interface PostContentBlock {
     | null;
   showTitle?: boolean | null;
   showAuthor?: boolean | null;
-  showDate?: boolean | null;
   showCategories?: boolean | null;
+  showPublishedDate?: boolean | null;
+  showCreatedDate?: boolean | null;
+  showUpdatedDate?: boolean | null;
+  sortPostsBy?: ('title' | 'publishedAt' | 'createdAt' | 'updatedAt') | null;
+  sortDir?: ('asc' | 'desc') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'postContent';
@@ -932,10 +964,15 @@ export interface Search {
   id: string;
   title?: string | null;
   priority?: number | null;
-  doc: {
-    relationTo: 'posts';
-    value: string | Post;
-  };
+  doc:
+    | {
+        relationTo: 'posts';
+        value: string | Post;
+      }
+    | {
+        relationTo: 'pages';
+        value: string | Page;
+      };
   slug?: string | null;
   meta?: {
     title?: string | null;
@@ -1194,6 +1231,7 @@ export interface PagesSelect<T extends boolean = true> {
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
+        mediaGalleryBlock?: T | MediaGalleryBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         postContent?: T | PostContentBlockSelect<T>;
@@ -1208,6 +1246,7 @@ export interface PagesSelect<T extends boolean = true> {
   publishedAt?: T;
   generateSlug?: T;
   slug?: T;
+  siteMenuShowContentPanel?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1273,6 +1312,22 @@ export interface MediaBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaGalleryBlock_select".
+ */
+export interface MediaGalleryBlockSelect<T extends boolean = true> {
+  selectionMethod?: T;
+  individualMedia?:
+    | T
+    | {
+        media?: T;
+        id?: T;
+      };
+  mediaCategory?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ArchiveBlock_select".
  */
 export interface ArchiveBlockSelect<T extends boolean = true> {
@@ -1307,8 +1362,12 @@ export interface PostContentBlockSelect<T extends boolean = true> {
   selectedDocs?: T;
   showTitle?: T;
   showAuthor?: T;
-  showDate?: T;
   showCategories?: T;
+  showPublishedDate?: T;
+  showCreatedDate?: T;
+  showUpdatedDate?: T;
+  sortPostsBy?: T;
+  sortDir?: T;
   id?: T;
   blockName?: T;
 }
@@ -1349,6 +1408,8 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   title?: T;
+  category?: T;
+  sortPriority?: T;
   alt?: T;
   caption?: T;
   width?: T;
@@ -1822,14 +1883,20 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   createdAt?: T;
 }
 /**
+ * Drag and drop items to set their display order in the main website menu
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header".
  */
 export interface Header {
   id: string;
-  navItems?:
+  menuItems?:
     | {
-        link: {
+        type?: ('link' | 'categories' | 'pages') | null;
+        pageReference?: (string | null) | Page;
+        categoryReference?: (string | null) | Category;
+        referenceLabel?: string | null;
+        link?: {
           type?: ('reference' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
@@ -1844,6 +1911,126 @@ export interface Header {
           url?: string | null;
           label: string;
         };
+        children?:
+          | {
+              type?: ('link' | 'categories' | 'pages') | null;
+              pageReference?: (string | null) | Page;
+              categoryReference?: (string | null) | Category;
+              referenceLabel?: string | null;
+              link?: {
+                type?: ('reference' | 'custom') | null;
+                newTab?: boolean | null;
+                reference?:
+                  | ({
+                      relationTo: 'pages';
+                      value: string | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'posts';
+                      value: string | Post;
+                    } | null);
+                url?: string | null;
+                label: string;
+              };
+              children?:
+                | {
+                    type?: ('link' | 'categories' | 'pages') | null;
+                    pageReference?: (string | null) | Page;
+                    categoryReference?: (string | null) | Category;
+                    referenceLabel?: string | null;
+                    link?: {
+                      type?: ('reference' | 'custom') | null;
+                      newTab?: boolean | null;
+                      reference?:
+                        | ({
+                            relationTo: 'pages';
+                            value: string | Page;
+                          } | null)
+                        | ({
+                            relationTo: 'posts';
+                            value: string | Post;
+                          } | null);
+                      url?: string | null;
+                      label: string;
+                    };
+                    children?:
+                      | {
+                          type?: ('link' | 'categories' | 'pages') | null;
+                          pageReference?: (string | null) | Page;
+                          categoryReference?: (string | null) | Category;
+                          referenceLabel?: string | null;
+                          link?: {
+                            type?: ('reference' | 'custom') | null;
+                            newTab?: boolean | null;
+                            reference?:
+                              | ({
+                                  relationTo: 'pages';
+                                  value: string | Page;
+                                } | null)
+                              | ({
+                                  relationTo: 'posts';
+                                  value: string | Post;
+                                } | null);
+                            url?: string | null;
+                            label: string;
+                          };
+                          children?:
+                            | {
+                                type?: ('link' | 'categories' | 'pages') | null;
+                                pageReference?: (string | null) | Page;
+                                categoryReference?: (string | null) | Category;
+                                referenceLabel?: string | null;
+                                link?: {
+                                  type?: ('reference' | 'custom') | null;
+                                  newTab?: boolean | null;
+                                  reference?:
+                                    | ({
+                                        relationTo: 'pages';
+                                        value: string | Page;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'posts';
+                                        value: string | Post;
+                                      } | null);
+                                  url?: string | null;
+                                  label: string;
+                                };
+                                children?:
+                                  | {
+                                      type?: ('link' | 'categories' | 'pages') | null;
+                                      pageReference?: (string | null) | Page;
+                                      categoryReference?: (string | null) | Category;
+                                      referenceLabel?: string | null;
+                                      link?: {
+                                        type?: ('reference' | 'custom') | null;
+                                        newTab?: boolean | null;
+                                        reference?:
+                                          | ({
+                                              relationTo: 'pages';
+                                              value: string | Page;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'posts';
+                                              value: string | Post;
+                                            } | null);
+                                        url?: string | null;
+                                        label: string;
+                                      };
+                                      id?: string | null;
+                                    }[]
+                                  | null;
+                                id?: string | null;
+                              }[]
+                            | null;
+                          id?: string | null;
+                        }[]
+                      | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
         id?: string | null;
       }[]
     | null;
@@ -1856,7 +2043,7 @@ export interface Header {
  */
 export interface Footer {
   id: string;
-  navItems?:
+  menuItems?:
     | {
         link: {
           type?: ('reference' | 'custom') | null;
@@ -1884,9 +2071,13 @@ export interface Footer {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
-  navItems?:
+  menuItems?:
     | T
     | {
+        type?: T;
+        pageReference?: T;
+        categoryReference?: T;
+        referenceLabel?: T;
         link?:
           | T
           | {
@@ -1895,6 +2086,96 @@ export interface HeaderSelect<T extends boolean = true> {
               reference?: T;
               url?: T;
               label?: T;
+            };
+        children?:
+          | T
+          | {
+              type?: T;
+              pageReference?: T;
+              categoryReference?: T;
+              referenceLabel?: T;
+              link?:
+                | T
+                | {
+                    type?: T;
+                    newTab?: T;
+                    reference?: T;
+                    url?: T;
+                    label?: T;
+                  };
+              children?:
+                | T
+                | {
+                    type?: T;
+                    pageReference?: T;
+                    categoryReference?: T;
+                    referenceLabel?: T;
+                    link?:
+                      | T
+                      | {
+                          type?: T;
+                          newTab?: T;
+                          reference?: T;
+                          url?: T;
+                          label?: T;
+                        };
+                    children?:
+                      | T
+                      | {
+                          type?: T;
+                          pageReference?: T;
+                          categoryReference?: T;
+                          referenceLabel?: T;
+                          link?:
+                            | T
+                            | {
+                                type?: T;
+                                newTab?: T;
+                                reference?: T;
+                                url?: T;
+                                label?: T;
+                              };
+                          children?:
+                            | T
+                            | {
+                                type?: T;
+                                pageReference?: T;
+                                categoryReference?: T;
+                                referenceLabel?: T;
+                                link?:
+                                  | T
+                                  | {
+                                      type?: T;
+                                      newTab?: T;
+                                      reference?: T;
+                                      url?: T;
+                                      label?: T;
+                                    };
+                                children?:
+                                  | T
+                                  | {
+                                      type?: T;
+                                      pageReference?: T;
+                                      categoryReference?: T;
+                                      referenceLabel?: T;
+                                      link?:
+                                        | T
+                                        | {
+                                            type?: T;
+                                            newTab?: T;
+                                            reference?: T;
+                                            url?: T;
+                                            label?: T;
+                                          };
+                                      id?: T;
+                                    };
+                                id?: T;
+                              };
+                          id?: T;
+                        };
+                    id?: T;
+                  };
+              id?: T;
             };
         id?: T;
       };
@@ -1907,7 +2188,7 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  navItems?:
+  menuItems?:
     | T
     | {
         link?:

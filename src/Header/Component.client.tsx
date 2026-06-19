@@ -5,30 +5,54 @@ import { ColorThemeToggle } from '@/providers/Theme/color-theme-toggle'
 import type { Header } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
-import NavMenu from '@/components/NavMenu'
-import { NavTreeItem } from '@/utilities/buildNavTree'
-import { PageTableOfContentsTrigger } from '@/components/PageTableOfContents'
+import { MenuTreeItem } from '@/utilities/buildNavTree'
 import { cn } from '@/lib/utils'
 import { AppMainLogo } from '@/components/AppMainLogo'
+import { useIsMobile } from '@/hooks/use-mobile'
+import MobileNavMenu from '@/components/NavMenu/MobileNavMenu'
+import HeaderNavMenu from '@/components/NavMenu/HeaderNavMenu'
+import { PageTOCTriggerButton } from '@/components/PageTableOfContents'
 
 interface HeaderClientProps {
   data: Header
   appTitle?: string | undefined
-  navTree: NavTreeItem[]
+  menuTree: MenuTreeItem[]
+  twitchStatusSlot?: React.ReactNode
 }
+
+export const HeaderRowStyles = 'grid grid-cols-12 grid-rows-1 gap-3 rounded-none px-3 '
+export const AltHeaderRowStyles =
+  'flex max-h-12 w-screen flex-row items-center rounded-none border-b px-3'
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
   appTitle,
-  navTree,
-  // data,
+  menuTree,
+  twitchStatusSlot,
 }) => {
-  /* Storing the value in a useState to avoid hydration errors */
-  const [themeMode, setThemeMode] = useState<string | null>(null)
-  const [themeColor, setThemeColor] = useState<string | null>(null)
+  const pathname = usePathname()
+  const isMobile = useIsMobile()
 
+  const [themeMode, setThemeMode] = useState<string | null>(null)
   const { headerThemeMode, setHeaderThemeMode, headerThemeColor, setHeaderThemeColor } =
     useHeaderTheme()
-  const pathname = usePathname()
+  const [prevHeaderThemeMode, setPrevHeaderThemeMode] = useState(headerThemeMode)
+
+  if (headerThemeMode !== prevHeaderThemeMode) {
+    setPrevHeaderThemeMode(headerThemeMode)
+    if (headerThemeMode) {
+      setThemeMode(headerThemeMode)
+    }
+  }
+
+  const [themeColor, setThemeColor] = useState<string | null>(null)
+  const [prevHeaderThemeColor, setPrevHeaderThemeColor] = useState(headerThemeColor)
+
+  if (headerThemeColor !== prevHeaderThemeColor) {
+    setPrevHeaderThemeColor(headerThemeColor)
+    if (headerThemeColor) {
+      setThemeColor(headerThemeColor)
+    }
+  }
 
   useEffect(() => {
     setHeaderThemeMode(null)
@@ -36,45 +60,70 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
-  useEffect(() => {
-    if (headerThemeMode && headerThemeMode !== themeMode) setThemeMode(headerThemeMode)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerThemeMode])
+  if (isMobile) {
+    return (
+      <header
+        className={`fixed top-0 z-20 w-screen max-w-screen rounded-none bg-background shadow-md`}
+        data-theme={themeColor}
+        data-mode={themeMode}
+      >
+        <div
+          className={cn('flex max-h-12 w-screen flex-row items-center rounded-none border-b px-3')}
+        >
+          {/* Left group */}
+          <div className="flex h-full flex-1 items-center justify-start gap-2">
+            <div className="py-auto h-full min-w-fit flex-0">
+              <MobileNavMenu
+                appTitle={appTitle}
+                menuTree={menuTree}
+                twitchStatusSlot={twitchStatusSlot}
+              />
+            </div>
+            <div className="py-auto h-full min-w-fit flex-0 max-sm:hidden">{twitchStatusSlot}</div>
+          </div>
 
-  useEffect(() => {
-    if (headerThemeColor && headerThemeColor !== themeColor) setThemeColor(headerThemeColor)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerThemeColor])
+          {/* center group */}
+          <div
+            className={cn(
+              'min-w-60 shrink-0 content-center',
+              'mx-auto h-full items-center justify-center text-center',
+            )}
+          >
+            <AppMainLogo text={appTitle} variant={'default'} />
+          </div>
 
-  const HeaderRowStyles =
-    'px-2 py-2 mx-auto container grid grid-cols-12 grid-rows-1 gap-3 rounded-none'
-
-  return (
-    <header
-      className={`fixed w-screen rounded-none top-0 z-20 bg-background shadow-md`}
-      data-theme={themeColor}
-      data-mode={themeMode}
-    >
-      {/* TOP ROW OF HEADER */}
-      <div className={cn(HeaderRowStyles, 'border-b')}>
-        <div className="col-span-2 flex justify-start"></div>
-        <div className="col-span-8 flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-          <AppMainLogo text={appTitle} />
+          {/* right group */}
+          <div className="flex h-full min-w-fit flex-1 items-center justify-end gap-2">
+            <PageTOCTriggerButton size={'icon'} />
+          </div>
         </div>
-        <div className="col-span-2 flex justify-end">
-          <ColorThemeToggle />
+      </header>
+    )
+  } else {
+    return (
+      <header
+        className={`fixed top-0 z-20 w-screen rounded-none bg-background shadow-md`}
+        data-theme={themeColor}
+        data-mode={themeMode}
+      >
+        {/* TOP ROW OF HEADER */}
+        <div className={cn(AltHeaderRowStyles, 'border-b py-1')}>
+          <div className={cn('py-auto h-full min-w-[20vw] flex-0')}>{twitchStatusSlot}</div>
+          <div className={cn('max-h-10 max-w-[60vw] grow content-center')}>
+            <AppMainLogo text={appTitle} className={'mx-auto'} />
+          </div>
+          <div className={cn('ml-auto flex min-w-[20vw] justify-end')}>
+            <ColorThemeToggle />
+          </div>
         </div>
-      </div>
 
-      {/* BOTTOM ROW OF HEADER */}
-      <div className={cn(HeaderRowStyles)}>
-        <div className="col-span-2 flex justify-start"></div>
-        <div className="col-span-8 flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-          <NavMenu navTree={navTree} />
-          {/* <HeaderNav data={data} /> */}
+        {/* BOTTOM ROW OF HEADER */}
+        <div className={cn(HeaderRowStyles, 'container py-1')}>
+          <div className="col-span-full flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 xl:col-span-10 xl:col-start-2">
+            <HeaderNavMenu menuTree={menuTree} />
+          </div>
         </div>
-        <div className="col-span-2 flex justify-end">{/* <PageTableOfContentsTrigger /> */}</div>
-      </div>
-    </header>
-  )
+      </header>
+    )
+  }
 }

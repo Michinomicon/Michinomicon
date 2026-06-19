@@ -5,6 +5,7 @@ import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
 import { hero } from '@/heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -81,7 +82,15 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, PostContent],
+              blocks: [
+                CallToAction,
+                Content,
+                MediaBlock,
+                MediaGalleryBlock,
+                Archive,
+                FormBlock,
+                PostContent,
+              ],
               required: true,
               admin: {
                 initCollapsed: true,
@@ -127,6 +136,28 @@ export const Pages: CollectionConfig<'pages'> = {
       },
     },
     slugField(),
+    {
+      type: 'collapsible',
+      label: 'Navigation Menu Options',
+      admin: {
+        position: 'sidebar',
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'siteMenuShowContentPanel',
+              type: 'checkbox',
+              defaultValue: false,
+              required: true,
+              label: 'Expand to Show Page Content in Site Menu',
+            },
+          ],
+        },
+      ],
+    },
   ],
   hooks: {
     afterChange: [revalidatePage],

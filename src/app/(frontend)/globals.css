@@ -7,25 +7,23 @@
 /* Styles for the .pdf flipbopok */
 @import './themes/pdf-flipbook.css';
 
+/* Styles for lightgallery.js*/
+@import './themes/lightgallery.css';
+
 /* Eyes wallpaper */
 @import './themes/eyes-wallpaper.css';
 
-/* IMPORT CUSTOM THEMES HERE */
+/* IMPORT COMPLETE CUSTOM THEMES HERE */
 @import './themes/fii-one.css';
 @import './themes/simple.css';
 @import './themes/purple.css';
 
-/* @import './themes/blue.css'; */
-/* @import './themes/minimal-red.css'; */
-/* @import './themes/minimal-blue.css'; */
-/* @import './themes/minimal-green.css'; */
-/* @import './themes/minimal-orange.css'; */
-/* @import './themes/minimal-rose.css'; */
-/* @import './themes/minimal-violet.css'; */
-/* @import './themes/minimal-yellow.css'; */
+/* IMPORT PARTIAL THEMES HERE*/
+@import './themes/twitch.css';
 
 @theme inline {
   --header-height: 100px;
+  --inset-shadow-header: inset 0px 5px 0px rgba(0, 0, 0, 0.10); 
   --footer-height: 50px;
 
   --color-background: var(--background);
@@ -86,6 +84,8 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+
 }
 
 @layer base {
@@ -109,6 +109,9 @@
     font-weight: unset;
   }
 }
+
+
+
 
 /** 
   EYES WALLPAPER

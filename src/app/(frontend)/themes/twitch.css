@@ -1,0 +1,36 @@
+
+/**
+  ------TWITCH.TV------
+
+   Accurately replicates default styling and sizing of streamer name in the twitch.tv live stream UI (browser/100%)
+*/
+@theme inline {
+    --color-accent-twitch: #bf94ff;
+    --color-twitch-viewer-count-red:#ff8280;
+    --font-twitch--font-family:"Roobert","Tajawal","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+    /* --font-twitch--font-size: 1.8rem; */
+    --font-twitch--font-weight: 500;
+    --font-twitch--text-transform: capitalize;
+    --tracking-twitch: -0.18px;
+    --text-decoration-line-twitch: none;
+    --text-twitch: 1.8rem;
+    --text-twitch--line-height: 1.8;
+}
+
+
+@layer base {
+  .font-twitch {
+    color: #0e0e10;
+    line-height: var(--text-twitch--line-height);
+    font-family: var(--font-twitch--font-family);
+    font-size: var(--font-twitch--font-size);
+    font-weight: var(--font-twitch--font-weight);
+    text-transform: var(--font-twitch--text-transform);
+    letter-spacing: var(--tracking-twitch);
+    text-decoration-line: var(--text-decoration-line-twitch);
+  }
+
+  .dark .font-twitch{
+    color: #efeff1;
+  }
+}

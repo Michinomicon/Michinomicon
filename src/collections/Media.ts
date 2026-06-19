@@ -50,6 +50,23 @@ export const Media: CollectionConfig = {
         ],
       },
     },
+    { 
+      name: 'category',
+      type: 'relationship',
+      relationTo: 'categories',
+      admin: {
+        position: 'sidebar',
+        description: 'Select Category.',
+      },
+    },
+    {
+      name: 'sortPriority',
+      type: 'number',
+      admin: {
+        position: 'sidebar',
+      },
+      defaultValue:0
+    },
     {
       name: 'alt',
       type: 'text',
