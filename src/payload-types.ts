@@ -69,6 +69,8 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    projects: Project;
+    creators: Creator;
     media: Media;
     categories: Category;
     users: User;
@@ -93,6 +95,8 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    creators: CreatorsSelect<false> | CreatorsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -314,6 +318,24 @@ export interface Media {
   id: string;
   title: string;
   /**
+   * Check this box if this asset belongs to a specific community project to assign attribution.
+   */
+  isForProject?: boolean | null;
+  /**
+   * The project this asset belongs to.
+   */
+  project?: (string | null) | Project;
+  /**
+   * Assign community members and their specific roles for this asset.
+   */
+  credits?:
+    | {
+        creator: string | Creator;
+        role: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Select Category.
    */
   category?: (string | null) | Category;
@@ -422,6 +444,86 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * Community initiatives, games, mods, or collaborative efforts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: string;
+  title: string;
+  /**
+   * Detailed overview of the project and its goals.
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  status: 'active' | 'completed' | 'archived';
+  startDate?: string | null;
+  /**
+   * Leave blank if the project is ongoing.
+   */
+  endDate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Community members, artists, and contributors.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "creators".
+ */
+export interface Creator {
+  id: string;
+  name: string;
+  /**
+   * Optional profile picture or avatar
+   */
+  profileImage?: (string | null) | Media;
+  /**
+   * Short biography or introduction
+   */
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Links to portfolios, social media, or personal websites.
+   */
+  socialLinks?:
+    | {
+        platform: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1115,6 +1217,14 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'projects';
+        value: string | Project;
+      } | null)
+    | ({
+        relationTo: 'creators';
+        value: string | Creator;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -1404,10 +1514,50 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  status?: T;
+  startDate?: T;
+  endDate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "creators_select".
+ */
+export interface CreatorsSelect<T extends boolean = true> {
+  name?: T;
+  profileImage?: T;
+  bio?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   title?: T;
+  isForProject?: T;
+  project?: T;
+  credits?:
+    | T
+    | {
+        creator?: T;
+        role?: T;
+        id?: T;
+      };
   category?: T;
   sortPriority?: T;
   alt?: T;

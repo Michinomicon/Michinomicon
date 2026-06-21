@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils'
 import TrackLoader from './AudioTrackLoader'
 import { Track } from '@/lib/html-audio'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
-import { getMIMEType } from '@/utilities/getMIMEType'
-import { MIMEType } from 'util'
+// import { getMIMEType } from '@/utilities/getMIMEType'
+// import { MIMEType } from 'util'
 import {
   getImageMediaMetaData,
   getPDFMediaMetaData,
@@ -27,8 +27,6 @@ const MESSAGE_MIME_UNSUPPORTED = 'Unsupported MIME Type.'
 
 export const Media: React.FC<MediaProps> = (props) => {
   const {
-    className,
-    htmlElement = 'div',
     resource,
     description,
     fill,
@@ -42,8 +40,6 @@ export const Media: React.FC<MediaProps> = (props) => {
     title,
     ...baseProps
   } = props
-
-  const wrapperProps = htmlElement !== null ? { className } : {}
 
   const getMediaPlaceholder = (message: string, details?: string) => {
     return (
@@ -63,14 +59,12 @@ export const Media: React.FC<MediaProps> = (props) => {
 
   const mimeType: string | null | undefined = resource.mimeType
 
-  const mime: MIMEType | null = getMIMEType(mimeType)
-
-  if (!mime) {
+  if (!mimeType) {
     return getMediaPlaceholder(MESSAGE_MIME_MISSING, `( ${resource.mimeType} ) [${resource.id}]`)
   }
 
-  switch (mime.type) {
-    case 'image':
+  switch (true) {
+    case mimeType.includes('image'):
       const imageProps: ImageMediaProps = {
         ...baseProps,
         fill,
@@ -85,11 +79,11 @@ export const Media: React.FC<MediaProps> = (props) => {
       }
 
       return (
-        <React.Fragment {...wrapperProps}>
+        <React.Fragment>
           <ImageMedia {...imageProps} />
         </React.Fragment>
       )
-    case 'video':
+    case mimeType.includes('video'):
       const videoProps: VideoMediaProps = {
         ...baseProps,
         resource,
@@ -98,7 +92,7 @@ export const Media: React.FC<MediaProps> = (props) => {
         metadata: getVideoMediaMetaData(resource),
       }
       return (
-        <React.Fragment {...wrapperProps}>
+        <React.Fragment>
           <VideoMedia {...videoProps} />
           {resource.caption && (
             <div className={cn('')}>
@@ -107,7 +101,7 @@ export const Media: React.FC<MediaProps> = (props) => {
           )}
         </React.Fragment>
       )
-    case 'audio':
+    case mimeType.includes('audio'):
       const audioTrack: Track = {
         id: resource.id,
         url: resource.url ?? '',
@@ -121,15 +115,15 @@ export const Media: React.FC<MediaProps> = (props) => {
         live: resource.live ?? false,
       }
       return (
-        <React.Fragment {...wrapperProps}>
+        <React.Fragment>
           <TrackLoader {...audioTrack} />
         </React.Fragment>
       )
 
-    case 'application':
-      if (mime.subtype === 'pdf') {
+    case mimeType.includes('application'):
+      if (mimeType.includes('pdf')) {
         return (
-          <React.Fragment {...wrapperProps}>
+          <React.Fragment>
             <PdfMediaWrapper
               resource={resource}
               title={title}
@@ -140,6 +134,6 @@ export const Media: React.FC<MediaProps> = (props) => {
         )
       }
     default:
-      return getMediaPlaceholder(MESSAGE_MIME_UNSUPPORTED, `( ${mime.essence} ) [${resource.id}]`)
+      return getMediaPlaceholder(MESSAGE_MIME_UNSUPPORTED, `( ${mimeType} ) [${resource.id}]`)
   }
 }

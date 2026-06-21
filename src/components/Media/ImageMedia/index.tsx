@@ -6,12 +6,29 @@ import { cn } from '@/utilities/ui'
 import NextImage from 'next/image'
 import React from 'react'
 
-import type { ImageMediaProps } from '../types'
+import type { ImageMediaProps, MediaMetaData } from '../types'
 
 import { cssVariables } from '@/cssVariables'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { Creator, Project } from '@/payload-types'
+import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import { getPDFMediaMetaData } from '@/utilities/getMediaMetaData'
 
 const { breakpoints } = cssVariables
+
+type CreditType = {
+  creator: string | Creator
+  role: string
+  id?: string | null
+}
+
+type ImageDetails = {
+  title?: string
+  credits?: CreditType[]
+  project?: Project
+  caption?: DefaultTypedEditorState
+  metadata?: MediaMetaData
+}
 
 // A base64 encoded image to use as a placeholder while the image is loading
 const placeholderBlur =
@@ -34,13 +51,36 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
   let height: number | undefined
   let alt = altFromProps
   let src: StaticImageData | string | null = srcFromProps || null
+  let imageDetails: ImageDetails = {
+    title: undefined,
+    credits: undefined,
+    project: undefined,
+    caption: undefined,
+    metadata: undefined,
+  }
 
   if (src === null && resource && typeof resource === 'object') {
-    const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
+    const {
+      alt: altFromResource,
+      height: fullHeight,
+      url,
+      width: fullWidth,
+      title,
+      credits,
+      project,
+      caption,
+    } = resource
     width = fullWidth!
     height = fullHeight!
     alt = altFromResource || ''
-
+    imageDetails = {
+      title: title,
+      credits: credits ?? [],
+      project: project && typeof project === 'object' ? project : undefined,
+      caption: caption ?? undefined,
+      metadata: getPDFMediaMetaData(resource),
+    }
+    console.log(imageDetails)
     const cacheTag = resource.updatedAt
 
     src = getMediaUrl(url, cacheTag)
@@ -75,7 +115,7 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
     return <></>
   } else {
     return (
-      <picture className={cn(pictureClassName)}>
+      <picture id={`ImageMedia${imageDetails.title}`} className={cn(pictureClassName)}>
         <NextImage
           alt={alt || ''}
           className={cn(imgClassName)}

@@ -50,7 +50,72 @@ export const Media: CollectionConfig = {
         ],
       },
     },
-    { 
+    {
+      name: 'isForProject',
+      type: 'checkbox',
+      label: 'Is for Project',
+      defaultValue: false,
+      admin: {
+        description:
+          'Check this box if this asset belongs to a specific community project to assign attribution.',
+      },
+    },
+    // --- PROJECT RELATIONSHIP ---
+    {
+      name: 'project',
+      type: 'relationship',
+      relationTo: 'projects',
+      hasMany: false,
+      admin: {
+        condition: (data) => Boolean(data?.isForProject),
+        description: 'The project this asset belongs to.',
+      },
+      validate: (value, { siblingData }: { siblingData: { isForProject?: boolean } }) => {
+        if (siblingData?.isForProject && !value) {
+          return 'A project must be selected if "Is for Project" is checked.'
+        }
+        return true
+      },
+    },
+    {
+      name: 'credits',
+      type: 'array',
+      labels: {
+        singular: 'Credit',
+        plural: 'Credits',
+      },
+      admin: {
+        condition: (data) => Boolean(data?.isForProject),
+        description: 'Assign community members and their specific roles for this asset.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'creator',
+              type: 'relationship',
+              relationTo: 'creators',
+              hasMany: false,
+              required: true,
+              admin: {
+                width: '50%',
+              },
+            },
+            {
+              name: 'role',
+              type: 'text',
+              required: true,
+              admin: {
+                width: '50%',
+                placeholder: 'e.g., Lead Artist, 3D Modeler, Videographer',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
@@ -65,7 +130,7 @@ export const Media: CollectionConfig = {
       admin: {
         position: 'sidebar',
       },
-      defaultValue:0
+      defaultValue: 0,
     },
     {
       name: 'alt',

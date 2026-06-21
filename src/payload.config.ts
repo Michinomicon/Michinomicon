@@ -19,6 +19,8 @@ import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { Slugs } from './collections/Slugs'
 import { Rights } from './collections/Rights'
+import { Projects } from './collections/Projects'
+import { Creators } from './collections/Creators'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -93,7 +95,7 @@ export default buildConfig({
   }),
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  collections: [Pages, Posts, Media, Categories, Users, Slugs, Rights],
+  collections: [Pages, Posts, Projects, Creators, Media, Categories, Users, Slugs, Rights],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
