@@ -25,8 +25,8 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   if (!Number.isInteger(sanitizedPageNumber)) notFound()
 
-  const posts = await payload.find({
-    collection: 'posts',
+  const creators = await payload.find({
+    collection: 'creators',
     depth: 1,
     limit: 12,
     page: sanitizedPageNumber,
@@ -38,24 +38,24 @@ export default async function Page({ params: paramsPromise }: Args) {
       <PageClient />
       <div className="container mb-16">
         <div className="prose max-w-none dark:prose-invert">
-          <h1>Posts</h1>
+          <h1>Creators</h1>
         </div>
       </div>
 
       <div className="container mb-8">
         <PageRange
-          collection="posts"
-          currentPage={posts.page}
+          collection="creators"
+          currentPage={creators.page}
           limit={12}
-          totalDocs={posts.totalDocs}
+          totalDocs={creators.totalDocs}
         />
       </div>
 
-      <CollectionArchive items={posts.docs} relationTo={'posts'} />
+      <CollectionArchive items={creators.docs} relationTo={'creators'} />
 
       <div className="container">
-        {posts?.page && posts?.totalPages > 1 && (
-          <Pagination page={posts.page} totalPages={posts.totalPages} />
+        {creators?.page && creators?.totalPages > 1 && (
+          <Pagination page={creators.page} totalPages={creators.totalPages} />
         )}
       </div>
     </div>
@@ -65,14 +65,14 @@ export default async function Page({ params: paramsPromise }: Args) {
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { pageNumber } = await paramsPromise
   return {
-    title: `Michinomicon Posts Page ${pageNumber || ''}`,
+    title: `Michinomicon Creators Page ${pageNumber || ''}`,
   }
 }
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const { totalDocs } = await payload.count({
-    collection: 'posts',
+    collection: 'creators',
     overrideAccess: false,
   })
 

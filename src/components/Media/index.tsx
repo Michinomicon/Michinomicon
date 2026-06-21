@@ -78,6 +78,8 @@ export const Media: React.FC<MediaProps> = (props) => {
         metadata: getImageMediaMetaData(resource),
       }
 
+      console.log(`imageProps:`, imageProps)
+
       return (
         <React.Fragment>
           <ImageMedia {...imageProps} />

@@ -13,16 +13,14 @@ export const revalidate = 600
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })
 
-  const posts = await payload.find({
-    collection: 'posts',
+  const creators = await payload.find({
+    collection: 'creators',
     depth: 1,
     limit: 12,
     overrideAccess: false,
     select: {
-      title: true,
+      id: true,
       slug: true,
-      categories: true,
-      meta: true,
     },
   })
 
@@ -31,24 +29,24 @@ export default async function Page() {
       <PageClient />
       <div className="container mb-16">
         <div className="prose max-w-none dark:prose-invert">
-          <h1>Posts</h1>
+          <h1>Creators</h1>
         </div>
       </div>
 
       <div className="container mb-8">
         <PageRange
-          collection="posts"
-          currentPage={posts.page}
+          collection="creators"
+          currentPage={creators.page}
           limit={12}
-          totalDocs={posts.totalDocs}
+          totalDocs={creators.totalDocs}
         />
       </div>
 
-      <CollectionArchive items={posts.docs} relationTo={'posts'} />
+      <CollectionArchive items={creators.docs} relationTo={'creators'} />
 
       <div className="container">
-        {posts.totalPages > 1 && posts.page && (
-          <Pagination page={posts.page} totalPages={posts.totalPages} />
+        {creators.totalPages > 1 && creators.page && (
+          <Pagination page={creators.page} totalPages={creators.totalPages} />
         )}
       </div>
     </div>
@@ -57,6 +55,6 @@ export default async function Page() {
 
 export function generateMetadata(): Metadata {
   return {
-    title: `Michinomicon Posts`,
+    title: `Michinomicon Creators`,
   }
 }

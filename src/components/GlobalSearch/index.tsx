@@ -34,6 +34,8 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
     posts: [],
     categories: [],
     pages: [],
+    creators: [],
+    projects: [],
   })
 
   React.useEffect(() => {
@@ -51,7 +53,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
   React.useEffect(() => {
     async function fetchResults() {
       if (debouncedValue.length < 2) {
-        setResults({ posts: [], categories: [], pages: [] })
+        setResults({ posts: [], categories: [], pages: [], projects: [], creators: [] })
         return
       }
 
@@ -125,6 +127,39 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                 <CommandSeparator className="mx-0 my-1" alwaysRender={true} />
               </>
             )} */}
+
+            {/* --- Projects GROUP --- */}
+            {results.creators.length > 0 && (
+              <>
+                <CommandGroup heading="Creators" className={'group p-0'}>
+                  {results.creators.map((creator) => (
+                    <CommandItem
+                      key={creator.id}
+                      value={`creator-${creator.id}`}
+                      onSelect={() => {
+                        console.debug(`selected creator item "${creator.slug}"`, creator)
+                        handleSelect(`creators/${creator.slug}`)
+                      }}
+                      className={'mb-1 flex flex-col'}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <span className="font-medium">{creator.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          Updated: {new Date(creator.updatedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <div className="w-full text-right">
+                        <span className="text-xs text-muted-foreground">
+                          {/* {getPageCategoryString(creator)} */}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                <CommandSeparator className="mx-0 my-1" alwaysRender={true} />
+              </>
+            )}
 
             {/* --- Pages GROUP --- */}
             {results.pages.length > 0 && (

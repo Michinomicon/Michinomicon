@@ -1,10 +1,12 @@
 import { hasAccess } from '@/utilities/accessFunctions'
-import type { CollectionConfig } from 'payload'
+import { slugField, type CollectionConfig } from 'payload'
+import { revalidateCreator, revalidateCreatorDelete } from './hooks/revalidateCreator'
 
 export const Creators: CollectionConfig = {
   slug: 'creators',
   admin: {
-    useAsTitle: 'name',
+    defaultColumns: ['title', 'slug', 'updatedAt'],
+    useAsTitle: 'title',
     description: 'Community members, artists, and contributors.',
   },
   access: {
@@ -13,13 +15,19 @@ export const Creators: CollectionConfig = {
     update: hasAccess('categories', 'upd'),
     read: () => true,
   },
+  defaultPopulate: {
+    title: true,
+    slug: true,
+  },
   fields: [
     {
-      name: 'name',
+      name: 'title',
+      label: 'name',
       type: 'text',
       required: true,
       admin: {
-        placeholder: 'e.g., Jane Doe or @PixelArtist99',
+        description: 'Artists name or username',
+        placeholder: 'Example: Jane Doe or @PixelArtist99',
       },
     },
     {
@@ -31,7 +39,7 @@ export const Creators: CollectionConfig = {
       },
     },
     {
-      name: 'bio',
+      name: 'description',
       type: 'richText',
       admin: {
         description: 'Short biography or introduction',
@@ -73,5 +81,50 @@ export const Creators: CollectionConfig = {
         },
       ],
     },
+    slugField(),
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'active',
+      options: [
+        { label: 'Active', value: 'active' },
+        { label: 'Inactive', value: 'inactive' },
+        { label: 'Archived', value: 'archived' },
+      ],
+    },
+    {
+      name: 'publishedAt',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+        position: 'sidebar',
+      },
+      hooks: {
+        beforeChange: [
+          ({ siblingData, value }) => {
+            if (siblingData._status === 'published' && !value) {
+              return new Date()
+            }
+            return value
+          },
+        ],
+      },
+    },
   ],
+  hooks: {
+    afterChange: [revalidateCreator],
+    afterDelete: [revalidateCreatorDelete],
+  },
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 100, // We set this interval for optimal live preview
+      },
+      // schedulePublish: true,
+    },
+    maxPerDoc: 50,
+  },
 }

@@ -489,7 +489,10 @@ export interface Project {
  */
 export interface Creator {
   id: string;
-  name: string;
+  /**
+   * Artists name or username
+   */
+  title: string;
   /**
    * Optional profile picture or avatar
    */
@@ -497,7 +500,7 @@ export interface Creator {
   /**
    * Short biography or introduction
    */
-  bio?: {
+  description?: {
     root: {
       type: string;
       children: {
@@ -522,8 +525,16 @@ export interface Creator {
         id?: string | null;
       }[]
     | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  status: 'active' | 'inactive' | 'archived';
+  publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1530,9 +1541,9 @@ export interface ProjectsSelect<T extends boolean = true> {
  * via the `definition` "creators_select".
  */
 export interface CreatorsSelect<T extends boolean = true> {
-  name?: T;
+  title?: T;
   profileImage?: T;
-  bio?: T;
+  description?: T;
   socialLinks?:
     | T
     | {
@@ -1540,8 +1551,13 @@ export interface CreatorsSelect<T extends boolean = true> {
         url?: T;
         id?: T;
       };
+  generateSlug?: T;
+  slug?: T;
+  status?: T;
+  publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

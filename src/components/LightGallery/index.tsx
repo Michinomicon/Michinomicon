@@ -59,7 +59,8 @@ const ThumbnailStyles = cn(
 const ImageStyles = cn('relative block h-full w-full')
 
 const LightGalleryGridStyles = cn(
-  'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 rounded-none',
+  'grid gap-0 rounded-none',
+  // 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
 )
 
 const DUMMY_POSTER =
