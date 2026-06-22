@@ -472,7 +472,7 @@ export interface Project {
     };
     [k: string]: unknown;
   } | null;
-  status: 'active' | 'completed' | 'archived';
+  status: 'planned' | 'active' | 'completed' | 'archived';
   startDate?: string | null;
   /**
    * Leave blank if the project is ongoing.

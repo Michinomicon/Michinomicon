@@ -5,6 +5,8 @@ import * as TooltipPrimitive from '@radix-ui/react-tooltip'
 
 import { cn } from '@/lib/utils'
 
+const DEFAULT_TOOLTIP_DELAY = 1600
+
 const TooltipProvider = TooltipPrimitive.Provider
 
 const Tooltip = TooltipPrimitive.Root
@@ -29,4 +31,11 @@ const TooltipContent = React.forwardRef<
 ))
 TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+export interface TooltipProps extends Omit<
+  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Root>,
+  'delayDuration'
+> {
+  delayDuration?: number
+}
+
+export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, DEFAULT_TOOLTIP_DELAY }

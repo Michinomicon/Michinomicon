@@ -3,7 +3,7 @@
 import type { StaticImageData } from 'next/image'
 
 import { cn } from '@/utilities/ui'
-import NextImage from 'next/image'
+import Image from 'next/image'
 import React from 'react'
 
 import type { ImageMediaProps, MediaMetaData } from '../types'
@@ -12,7 +12,7 @@ import { cssVariables } from '@/cssVariables'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { Creator, Project } from '@/payload-types'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
-import { getPDFMediaMetaData } from '@/utilities/getMediaMetaData'
+import { getImageMediaMetaData } from '@/utilities/getMediaMetaData'
 
 const { breakpoints } = cssVariables
 
@@ -37,7 +37,7 @@ const placeholderBlur =
 export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
   const {
     alt: altFromProps,
-    fill,
+    fill = false,
     pictureClassName,
     imgClassName,
     priority,
@@ -47,6 +47,7 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
     loading: loadingFromProps,
   } = props
 
+  let resourceId: string | undefined
   let width: number | undefined
   let height: number | undefined
   let alt = altFromProps
@@ -69,7 +70,9 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
       credits,
       project,
       caption,
+      id,
     } = resource
+    resourceId = id
     width = fullWidth!
     height = fullHeight!
     alt = altFromResource || ''
@@ -78,7 +81,7 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
       credits: credits ?? [],
       project: project && typeof project === 'object' ? project : undefined,
       caption: caption ?? undefined,
-      metadata: getPDFMediaMetaData(resource),
+      metadata: getImageMediaMetaData(resource),
     }
     console.log(imageDetails)
     const cacheTag = resource.updatedAt
@@ -115,12 +118,10 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
     return <></>
   } else {
     return (
-      <picture id={`ImageMedia${imageDetails.title}`} className={cn(pictureClassName)}>
-        <NextImage
+      <div id={`${resourceId}`} className={cn('relative h-full w-full', pictureClassName)}>
+        <Image
           alt={alt || ''}
           className={cn(imgClassName)}
-          fill={fill ?? false}
-          height={!fill ? height : undefined}
           placeholder="blur"
           blurDataURL={placeholderBlur}
           priority={priority}
@@ -128,9 +129,15 @@ export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
           loading={loading}
           sizes={sizes}
           src={src}
-          width={!fill ? width : undefined}
+          {...(fill || !height || !width
+            ? { fill: true }
+            : {
+                fill: false,
+                width: width,
+                height: height,
+              })}
         />
-      </picture>
+      </div>
     )
   }
 }

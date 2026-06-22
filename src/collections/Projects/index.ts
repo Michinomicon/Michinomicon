@@ -7,7 +7,6 @@ export const Projects: CollectionConfig = {
     description: 'Community initiatives, games, mods, or collaborative efforts.',
   },
   access: {
-    // Allows the frontend wiki to fetch project data publicly
     read: () => true,
   },
   fields: [
@@ -35,6 +34,7 @@ export const Projects: CollectionConfig = {
             width: '33%',
           },
           options: [
+            { label: 'Planned', value: 'planned' },
             { label: 'Active', value: 'active' },
             { label: 'Completed', value: 'completed' },
             { label: 'Archived', value: 'archived' },

@@ -21,13 +21,16 @@ import {
   MenuTree,
 } from '@/utilities/buildNavTree'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  DEFAULT_TOOLTIP_DELAY,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { HeaderRowStyles } from '@/Header/Component.client'
 import GlobalSearch from '@/components/GlobalSearch'
 import { CMSLink } from '@/components/Link'
-
-const MENU_LINK_TOOLTIP_DELAY = 1600
 
 const navigationMenuTabTriggerStyle = cn(
   'h-9 items-center justify-center rounded-md bg-background text-sm font-medium transition-colors text-accent-foreground',
@@ -131,7 +134,7 @@ function MenuItemTabsTrigger({
 }): React.JSX.Element {
   if (isPostItem(item) || isLinkItem(item) || isPageWithContentPanelDisabled(item)) {
     return (
-      <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+      <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
           <TabsTrigger
             onMouseEnter={onMouseEnterTriggerHandler}
@@ -234,7 +237,7 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.JSX.Element {
       return <PageContentPanel item={item} />
     } else {
       return (
-        <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+        <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
             <Link href={item.url} className={cn(RecursiveTabsTabsTriggerAsLinkClassName)}>
               {item.title}
@@ -259,7 +262,7 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.JSX.Element {
   } else {
     // Fallback for Posts
     return (
-      <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+      <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
           <Link href={item.url} className={cn(RecursiveTabsTabsTriggerAsLinkClassName)}>
             {item.title}
@@ -278,7 +281,7 @@ function PageContentPanel({ item }: { item: MenuTreePageItem }): React.JSX.Eleme
   return (
     <div className="flex h-full w-full flex-col justify-center p-1">
       <div className={cn('w-full', isMobile ? 'text-left' : 'text-center')}>
-        <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+        <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
             <Link
               href={item.url}
@@ -303,7 +306,7 @@ function PageContentPanel({ item }: { item: MenuTreePageItem }): React.JSX.Eleme
           {item.children?.map((child) => (
             <Tooltip
               key={child.id}
-              delayDuration={MENU_LINK_TOOLTIP_DELAY}
+              delayDuration={DEFAULT_TOOLTIP_DELAY}
               disableHoverableContent={true}
             >
               <TooltipTrigger asChild>
@@ -352,7 +355,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
     } else {
       // CATEGORY without children
       return (
-        <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+        <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
             <NavigationMenuItem>
               <NavigationMenuLink
@@ -388,7 +391,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
       )
     } else {
       return (
-        <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+        <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
             <NavigationMenuItem>
               <NavigationMenuLink href={item.url} className={cn(navigationMenuTriggerStyle())}>
@@ -405,7 +408,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
   }
   if (isLinkItem(item)) {
     return (
-      <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+      <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
           <NavigationMenuItem>
             <NavigationMenuLink className={cn(navigationMenuTriggerStyle())} asChild>
@@ -423,7 +426,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
   if (isPostItem(item)) {
     // Any Item without children (Post)
     return (
-      <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+      <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
           <NavigationMenuItem>
             <Link href={item.url} passHref>
@@ -446,7 +449,7 @@ function HomeNavigationMenuItem({
   ...props
 }: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>) {
   return (
-    <Tooltip delayDuration={MENU_LINK_TOOLTIP_DELAY} disableHoverableContent={true}>
+    <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
       <TooltipTrigger asChild>
         <NavigationMenuItem {...props}>
           <Link href="/home" passHref>
@@ -487,7 +490,7 @@ function SearchNavigationMenuItem({
     <Tooltip
       open={tooltipOpen}
       onOpenChange={setTooltipOpen}
-      delayDuration={MENU_LINK_TOOLTIP_DELAY}
+      delayDuration={DEFAULT_TOOLTIP_DELAY}
       disableHoverableContent={true}
     >
       <TooltipTrigger asChild>

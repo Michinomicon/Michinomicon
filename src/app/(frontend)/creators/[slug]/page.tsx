@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
-import type { Creator } from '@/payload-types'
+import type { Creator, Media } from '@/payload-types'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { getPayload, PaginatedDocs } from 'payload'
 import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import RichText from '@/components/RichText'
@@ -23,8 +23,11 @@ import { CMSLink } from '@/components/Link'
 import { ExternalLinkIcon } from 'lucide-react'
 import { LightGalleryComponent } from '@/components/LightGallery'
 import { Separator } from '@/components/ui/separator'
-// import { cn } from '@/lib/utils'
-// import { Media } from '@/components/Media'
+import {
+  extractMediaCreditsByCreatorId,
+  ProjectMediaCredit,
+} from '@/utilities/extractMediaCreditsByCreatorId'
+import { CreatorProjectsCreditsTable } from '@/components/CreatorProjectsCreditsTable'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -62,20 +65,18 @@ export default async function Creator({ params: paramsPromise }: Args) {
   const url = '/creators/' + decodedSlug
   const creator = await queryCreatorBySlug({ slug: decodedSlug })
 
-  console.debug('creators/[slug].page => ', {
-    url: url,
-    decodedSlug: decodedSlug,
-    creator: creator,
-  })
+  const creatorId = creator.id
+
+  const creditedProjectMedia = await queryCreditedProjectMedia({ id: creator.id })
+
+  const projectCredits: ProjectMediaCredit[] = extractMediaCreditsByCreatorId(
+    creditedProjectMedia,
+    creatorId,
+  )
 
   if (!creator) return <PayloadRedirects url={url} />
 
-  const {
-    title,
-    profileImage,
-    socialLinks,
-    //  status,publishedAt,
-  } = creator
+  const { title, profileImage, socialLinks } = creator
 
   return (
     <article className="article pointer-events-auto border border-primary/30 bg-background p-16 text-card-foreground">
@@ -99,13 +100,10 @@ export default async function Creator({ params: paramsPromise }: Args) {
         </div>
       </div>
 
-      <Separator></Separator>
-
       <div className="mb-6 flex w-full flex-col gap-4">
-        <div className="w-full">
-          <span className="prose">
-            <h2>Links</h2>
-          </span>
+        <Separator></Separator>
+        <div className="prose w-full">
+          <h2>Links</h2>
         </div>
         {Array.isArray(socialLinks) && socialLinks.length > 0 && (
           <ItemGroup className="flex w-full flex-row flex-wrap gap-6">
@@ -130,38 +128,23 @@ export default async function Creator({ params: paramsPromise }: Args) {
         )}
       </div>
 
-      <Separator></Separator>
-
       <div className="mb-6 flex w-full flex-col gap-4">
-        <div className="w-full">
-          <span className="prose">
-            <h2>About</h2>
-          </span>
+        <Separator></Separator>
+        <div className="prose w-full">
+          <h2>About</h2>
         </div>
 
         {creator.description && (
-          <RichText className="mx-auto max-w-3xl" data={creator.description} enableGutter={false} />
+          <RichText className="mx-auto" data={creator.description} enableGutter={false} />
         )}
       </div>
 
-      <Separator></Separator>
-
-      <div className="flex w-full flex-col gap-4">
-        {/* 
-            - TODO:
-            Create "Related Projects" component to display list of projects the creator has a credit for 
-          */}
-        <div className="w-full">
-          <span className="prose">
-            <h2>Projects</h2>
-          </span>
+      <div className="mb-6 flex w-full flex-col gap-4">
+        <Separator></Separator>
+        <div className="prose w-full">
+          <h2>Projects</h2>
         </div>
-        {/* {creator.relatedPosts && creator.relatedPosts.length > 0 && (
-            <RelatedPosts
-              className="col-span-3 col-start-1 mt-12 max-w-208 grid-rows-[2fr] lg:grid lg:grid-cols-subgrid"
-              docs={creator.relatedPosts.filter((post) => typeof post === 'object')}
-            />
-          )} */}
+        <CreatorProjectsCreditsTable data={projectCredits} />
       </div>
     </article>
   )
@@ -196,3 +179,57 @@ const queryCreatorBySlug = cache(async ({ slug }: { slug: string }) => {
 
   return result.docs?.[0] || null
 })
+
+const queryCreditedProjectMedia = cache(async ({ id }: { id: string }): Promise<Media[]> => {
+  const { isEnabled: draft } = await draftMode()
+
+  const payload = await getPayload({ config: configPromise })
+
+  const creatorMedia: PaginatedDocs<Media> = await payload.find({
+    collection: 'media',
+    draft,
+    limit: 1,
+    overrideAccess: draft,
+    pagination: false,
+    where: {
+      and: [
+        {
+          'credits.creator': {
+            equals: id,
+          },
+        },
+        {
+          isForProject: {
+            equals: true,
+          },
+        },
+      ],
+    },
+  })
+
+  return creatorMedia.docs
+})
+
+// const queryProjectsById = cache(async ({ id }: { id: string }) => {
+//   const { isEnabled: draft } = await draftMode()
+
+//   const payload = await getPayload({ config: configPromise })
+
+//   const found = await payload.find({
+//     collection: 'projects',
+//     draft,
+//     limit: 1000,
+//     overrideAccess: draft,
+//     pagination: false,
+//     select: {
+//       title: true,
+//       id:true
+//     },
+//   })
+
+//   if(found.docs.length > 0){
+//     return found.docs[0]
+//   }
+
+//   return null
+// })
