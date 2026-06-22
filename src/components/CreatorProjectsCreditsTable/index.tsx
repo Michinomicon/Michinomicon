@@ -37,6 +37,7 @@ export function CreatorProjectsCreditsTableBody({
   const [isOpen, setOpen] = useState(false)
   if (!data || data.length <= 0) return
   const { project } = data[0]
+
   return (
     <Collapsible open={isOpen} onOpenChange={setOpen} asChild>
       <TableBody className={cn(isOpen ? 'bg-primary/10' : '', 'rounded-none')}>
@@ -81,11 +82,11 @@ export function CreatorProjectsCreditsTableBody({
           </TableCell>
           <TableCell className="text-center">
             <CMSLink
-              url={''}
               appearance="ghost"
               size="icon"
               className="rounded-full"
               tooltipContent={'Go to this projects homepage'}
+              {...project.homepage}
             >
               <SquareArrowRightEnter className="size-4" />
             </CMSLink>

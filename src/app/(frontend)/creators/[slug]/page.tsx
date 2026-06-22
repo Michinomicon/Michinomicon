@@ -210,26 +210,21 @@ const queryCreditedProjectMedia = cache(async ({ id }: { id: string }): Promise<
   return creatorMedia.docs
 })
 
-// const queryProjectsById = cache(async ({ id }: { id: string }) => {
-//   const { isEnabled: draft } = await draftMode()
+export const queryProjectsById = cache(async ({ projectIds }: { projectIds: string[] }) => {
+  const { isEnabled: draft } = await draftMode()
+  const payload = await getPayload({ config: configPromise })
 
-//   const payload = await getPayload({ config: configPromise })
-
-//   const found = await payload.find({
-//     collection: 'projects',
-//     draft,
-//     limit: 1000,
-//     overrideAccess: draft,
-//     pagination: false,
-//     select: {
-//       title: true,
-//       id:true
-//     },
-//   })
-
-//   if(found.docs.length > 0){
-//     return found.docs[0]
-//   }
-
-//   return null
-// })
+  const found = await payload.find({
+    collection: 'projects',
+    draft,
+    limit: 1000,
+    overrideAccess: draft,
+    pagination: false,
+    where: {
+      id: {
+        in: projectIds,
+      },
+    },
+  })
+  return found.docs
+})

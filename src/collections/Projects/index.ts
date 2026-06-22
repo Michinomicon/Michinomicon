@@ -1,4 +1,6 @@
-import type { CollectionConfig } from 'payload'
+import { link } from '@/fields/link'
+import { hasAccess } from '@/utilities/accessFunctions'
+import { slugField, type CollectionConfig } from 'payload'
 
 export const Projects: CollectionConfig = {
   slug: 'projects',
@@ -7,7 +9,18 @@ export const Projects: CollectionConfig = {
     description: 'Community initiatives, games, mods, or collaborative efforts.',
   },
   access: {
+    create: hasAccess('projects', 'create'),
+    delete: hasAccess('projects', 'del'),
+    update: hasAccess('projects', 'upd'),
     read: () => true,
+  },
+  defaultPopulate: {
+    title: true,
+    slug: true,
+    status: true,
+    startDate: true,
+    endDate: true,
+    homepage: true,
   },
   fields: [
     {
@@ -22,6 +35,7 @@ export const Projects: CollectionConfig = {
         description: 'Detailed overview of the project and its goals.',
       },
     },
+    slugField(),
     {
       type: 'row', // Groups the status and date fields horizontally in the admin UI
       fields: [
@@ -65,5 +79,12 @@ export const Projects: CollectionConfig = {
         },
       ],
     },
+    link({
+      appearances: false,
+      overrides: {
+        required: false,
+        name: 'homepage',
+      },
+    }),
   ],
 }

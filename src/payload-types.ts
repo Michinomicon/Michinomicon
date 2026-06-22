@@ -194,6 +194,14 @@ export interface Page {
               | ({
                   relationTo: 'posts';
                   value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'creators';
+                  value: string | Creator;
+                } | null)
+              | ({
+                  relationTo: 'projects';
+                  value: string | Project;
                 } | null);
             url?: string | null;
             label: string;
@@ -472,12 +480,40 @@ export interface Project {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
   status: 'planned' | 'active' | 'completed' | 'archived';
   startDate?: string | null;
   /**
    * Leave blank if the project is ongoing.
    */
   endDate?: string | null;
+  homepage: {
+    type?: ('reference' | 'custom') | null;
+    newTab?: boolean | null;
+    reference?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'creators';
+          value: string | Creator;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null);
+    url?: string | null;
+    label: string;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -672,6 +708,14 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -722,6 +766,14 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -1530,9 +1582,20 @@ export interface PostsSelect<T extends boolean = true> {
 export interface ProjectsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
+  generateSlug?: T;
+  slug?: T;
   status?: T;
   startDate?: T;
   endDate?: T;
+  homepage?:
+    | T
+    | {
+        type?: T;
+        newTab?: T;
+        reference?: T;
+        url?: T;
+        label?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2073,6 +2136,14 @@ export interface Header {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -2094,6 +2165,14 @@ export interface Header {
                   | ({
                       relationTo: 'posts';
                       value: string | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'creators';
+                      value: string | Creator;
+                    } | null)
+                  | ({
+                      relationTo: 'projects';
+                      value: string | Project;
                     } | null);
                 url?: string | null;
                 label: string;
@@ -2115,6 +2194,14 @@ export interface Header {
                         | ({
                             relationTo: 'posts';
                             value: string | Post;
+                          } | null)
+                        | ({
+                            relationTo: 'creators';
+                            value: string | Creator;
+                          } | null)
+                        | ({
+                            relationTo: 'projects';
+                            value: string | Project;
                           } | null);
                       url?: string | null;
                       label: string;
@@ -2136,6 +2223,14 @@ export interface Header {
                               | ({
                                   relationTo: 'posts';
                                   value: string | Post;
+                                } | null)
+                              | ({
+                                  relationTo: 'creators';
+                                  value: string | Creator;
+                                } | null)
+                              | ({
+                                  relationTo: 'projects';
+                                  value: string | Project;
                                 } | null);
                             url?: string | null;
                             label: string;
@@ -2157,6 +2252,14 @@ export interface Header {
                                     | ({
                                         relationTo: 'posts';
                                         value: string | Post;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'creators';
+                                        value: string | Creator;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'projects';
+                                        value: string | Project;
                                       } | null);
                                   url?: string | null;
                                   label: string;
@@ -2178,6 +2281,14 @@ export interface Header {
                                           | ({
                                               relationTo: 'posts';
                                               value: string | Post;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'creators';
+                                              value: string | Creator;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'projects';
+                                              value: string | Project;
                                             } | null);
                                         url?: string | null;
                                         label: string;
@@ -2222,6 +2333,14 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;

@@ -10,9 +10,9 @@ export const Creators: CollectionConfig = {
     description: 'Community members, artists, and contributors.',
   },
   access: {
-    create: hasAccess('categories', 'create'),
-    delete: hasAccess('categories', 'del'),
-    update: hasAccess('categories', 'upd'),
+    create: hasAccess('creators', 'create'),
+    delete: hasAccess('creators', 'del'),
+    update: hasAccess('creators', 'upd'),
     read: () => true,
   },
   defaultPopulate: {

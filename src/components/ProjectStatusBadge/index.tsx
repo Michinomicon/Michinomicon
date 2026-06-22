@@ -1,5 +1,5 @@
 import { Project } from '@/payload-types'
-import { Badge } from '../ui/badge'
+import { Badge } from '@/components/ui/badge'
 import React from 'react'
 import { cn } from '@/lib/utils'
 
@@ -41,6 +41,8 @@ export const ProjectStatusBadge: React.FC<ProjectStatusBadgeProps> = ({
       )
       break
   }
+
+  console.log(`Project Status:`, status, project)
 
   return <Badge {...badgeProps}>{StatusLabel[status]}</Badge>
 }
