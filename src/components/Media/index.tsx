@@ -1,40 +1,27 @@
 import React from 'react'
-import { ImageMedia } from './ImageMedia'
+import { ImageMediaProps } from './ImageMedia'
 import { VideoMedia } from './VideoMedia'
-import {
-  isPayloadMedia,
-  type MediaProps,
-  type ImageMediaProps,
-  type VideoMediaProps,
-} from './types'
+import { isPayloadMedia, type MediaProps, type VideoMediaProps } from './types'
 import RichText from '@/components/RichText'
 import { cn } from '@/lib/utils'
 import TrackLoader from './AudioTrackLoader'
 import { Track } from '@/lib/html-audio'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
-// import { getMIMEType } from '@/utilities/getMIMEType'
-// import { MIMEType } from 'util'
-import {
-  getImageMediaMetaData,
-  getPDFMediaMetaData,
-  getVideoMediaMetaData,
-} from '@/utilities/getMediaMetaData'
+import { getPDFMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
+import { ImageGallery } from '../ImageGallery'
 
 const MESSAGE_FAILED_TO_RENDER = 'Failed to render media.'
 const MESSAGE_RESOURCE_MISSING = 'Resource was missing or invalid.'
 const MESSAGE_MIME_MISSING = 'Missing MIME Type.'
 const MESSAGE_MIME_UNSUPPORTED = 'Unsupported MIME Type.'
 
-export const Media: React.FC<MediaProps> = (props) => {
+export const Media = (props: MediaProps) => {
   const {
+    alt = '',
     resource,
     description,
     fill,
-    imgClassName,
     loading,
-    pictureClassName,
-    priority,
-    size,
     src,
     videoClassName,
     title,
@@ -67,22 +54,18 @@ export const Media: React.FC<MediaProps> = (props) => {
     case mimeType.includes('image'):
       const imageProps: ImageMediaProps = {
         ...baseProps,
+        alt,
         fill,
-        imgClassName,
         loading,
-        pictureClassName,
-        priority,
-        size,
-        src,
-        ref: baseProps.ref as React.Ref<HTMLImageElement>,
-        metadata: getImageMediaMetaData(resource),
+        src: resource,
       }
 
       console.log(`imageProps:`, imageProps)
 
       return (
         <React.Fragment>
-          <ImageMedia {...imageProps} />
+          <ImageGallery items={[resource]} />
+          {/* <ImageMedia {...imageProps} /> */}
         </React.Fragment>
       )
     case mimeType.includes('video'):

@@ -41,8 +41,5 @@ export const ProjectStatusBadge: React.FC<ProjectStatusBadgeProps> = ({
       )
       break
   }
-
-  console.log(`Project Status:`, status, project)
-
   return <Badge {...badgeProps}>{StatusLabel[status]}</Badge>
 }

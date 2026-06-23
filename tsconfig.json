@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noImplicitAny":true,
+    "allowUnreachableCode": false,
     "esModuleInterop": true,
     "target": "ES2024",
     "lib": [

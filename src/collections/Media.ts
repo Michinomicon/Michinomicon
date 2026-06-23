@@ -135,9 +135,7 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      admin: {
-        condition: (data) => data?.mimeType?.startsWith('image/'),
-      },
+      required: true,
       hooks: {
         beforeChange: [
           ({ value, siblingData }) => {
@@ -297,6 +295,7 @@ export const Media: CollectionConfig = {
     mimeTypes: ['image/*', 'video/*', 'audio/*', 'application/pdf'],
     adminThumbnail: 'thumbnail',
     focalPoint: true,
+    displayPreview: true,
     imageSizes: [
       {
         name: 'thumbnail',

@@ -121,7 +121,7 @@ export function CollectionCard(props: CollectionCardProps): React.JSX.Element {
     >
       <div className="relative w-full">
         {/* {!metaImage && <div className="">No image</div>} */}
-        {metaImage && <Media resource={metaImage} size="33vw" />}
+        {metaImage && <Media resource={metaImage} className="w-[33vw]" />}
       </div>
       <div className="p-4">
         {showRelated && hasRelatedItems && (

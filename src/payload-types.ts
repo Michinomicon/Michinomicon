@@ -348,7 +348,7 @@ export interface Media {
    */
   category?: (string | null) | Category;
   sortPriority?: number | null;
-  alt?: string | null;
+  alt: string;
   caption?: {
     root: {
       type: string;

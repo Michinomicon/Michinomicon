@@ -1,7 +1,7 @@
 'use client'
 import { ProjectMediaCredit } from '@/utilities/extractMediaCreditsByCreatorId'
 import {
-  ExternalLinkIcon,
+  FileImage,
   ListChevronsDownUp,
   ListChevronsUpDown,
   SquareArrowRightEnter,
@@ -17,9 +17,7 @@ import {
 } from '@/components/ui/table'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { CMSLink } from '@/components/Link'
-import { HoverCard, HoverCardTrigger, HoverCardContent } from '@/components/ui/hover-card'
 import { Button } from '@/components/ui/button'
-import { Media } from '@/components/Media'
 import { ProjectStatusBadge } from '@/components/ProjectStatusBadge'
 import {
   DEFAULT_TOOLTIP_DELAY,
@@ -27,9 +25,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { Item, ItemMedia } from '../ui/item'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import { cn } from '@/lib/utils'
+import { ImageGallery } from '../ImageGallery'
 
 export function CreatorProjectsCreditsTableBody({
   data,
@@ -114,27 +112,8 @@ export function CreatorProjectsCreditsTableBody({
                     {data.map((credit, index) => {
                       return (
                         <TableRow key={index}>
-                          <TableCell>
-                            <HoverCard openDelay={10} closeDelay={100}>
-                              <HoverCardTrigger asChild>
-                                <Item size={'sm'} className="flex-nowrap p-0">
-                                  <ItemMedia variant="image">
-                                    <Media
-                                      imgClassName={'w-[32px] h-[32px]'}
-                                      resource={credit.media}
-                                      src={credit.media.thumbnailURL || ''}
-                                    />
-                                  </ItemMedia>
-                                </Item>
-                              </HoverCardTrigger>
-                              <HoverCardContent className="flex h-64 w-64 flex-col gap-0.5">
-                                <Media
-                                  imgClassName={''}
-                                  resource={credit.media}
-                                  src={credit.media.thumbnailURL || ''}
-                                />
-                              </HoverCardContent>
-                            </HoverCard>
+                          <TableCell className={'p-0'}>
+                            <ImageGallery items={[credit.media]} inlineGallery={false} />
                           </TableCell>
                           <TableCell>{credit.media.title}</TableCell>
                           <TableCell>{credit.roles.join(', ')}</TableCell>
@@ -147,7 +126,7 @@ export function CreatorProjectsCreditsTableBody({
                               className="rounded-full"
                               tooltipContent={'Open this item in a new tab.'}
                             >
-                              <ExternalLinkIcon className="size-4" />
+                              <FileImage className="size-4" />
                             </CMSLink>
                           </TableCell>
                         </TableRow>
