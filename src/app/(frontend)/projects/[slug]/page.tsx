@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import type { Creator, Media } from '@/payload-types'
+import type { Media } from '@/payload-types'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
@@ -10,21 +10,12 @@ import RichText from '@/components/RichText'
 import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
-import {
-  extractMediaCreditsByCreatorId,
-  ProjectMediaCredit,
-} from '@/utilities/extractMediaCreditsByCreatorId'
-import { CreatorProjectsCreditsTable } from '@/components/CreatorProjectsCreditsTable'
-import {
-  CollectionProfileHeader,
-  CollectionProfileLinkItemGroup,
-  CollectionProfileSection,
-} from '@/components/CollectionProfile'
+import { CollectionProfileHeader, CollectionProfileSection } from '@/components/CollectionProfile'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
-  const creators = await payload.find({
-    collection: 'creators',
+  const projects = await payload.find({
+    collection: 'projects',
     draft: false,
     limit: 1000,
     overrideAccess: false,
@@ -34,7 +25,7 @@ export async function generateStaticParams() {
     },
   })
 
-  const params = creators.docs
+  const params = projects.docs
     .filter((doc) => doc.slug)
     .map(({ slug }) => {
       return { slug: String(slug) }
@@ -49,26 +40,22 @@ type Args = {
   }>
 }
 
-export default async function Creator({ params: paramsPromise }: Args) {
+export default async function Project({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { slug = '' } = await paramsPromise
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
-  const url = '/creators/' + decodedSlug
-  const creator = await queryCreatorBySlug({ slug: decodedSlug })
+  const url = '/projects/' + decodedSlug
+  const project = await queryProjectsBySlug({ slug: decodedSlug })
 
-  const creatorId = creator.id
+  if (!project) return <PayloadRedirects url={url} />
 
-  const creditedProjectMedia = await queryCreditedProjectMedia({ id: creator.id })
+  console.debug(`Project:`, project)
 
-  const projectCredits: ProjectMediaCredit[] = extractMediaCreditsByCreatorId(
-    creditedProjectMedia,
-    creatorId,
-  )
+  const { title, id } = project
 
-  if (!creator) return <PayloadRedirects url={url} />
-
-  const { title: creatorName, profileImage, socialLinks } = creator
+  const projectMedia: Media[] = await queryMediaByProjectId({ id: id })
+  console.debug(`Project Media:`, projectMedia)
 
   return (
     <article className="article pointer-events-auto border border-primary/30 bg-background p-16 text-card-foreground">
@@ -79,20 +66,20 @@ export default async function Creator({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <CollectionProfileHeader title={creatorName} image={profileImage} />
+      <CollectionProfileHeader title={title} image={null} />
 
-      <CollectionProfileSection title={'Links'}>
+      {/* <CollectionProfileSection title={'Links'}>
         <CollectionProfileLinkItemGroup links={socialLinks} />
-      </CollectionProfileSection>
+      </CollectionProfileSection> */}
 
       <CollectionProfileSection title={'About'}>
-        {creator.description && (
-          <RichText className="mx-auto" data={creator.description} enableGutter={false} />
+        {project.description && (
+          <RichText className="mx-auto" data={project.description} enableGutter={false} />
         )}
       </CollectionProfileSection>
 
-      <CollectionProfileSection title={'Projects'}>
-        <CreatorProjectsCreditsTable data={projectCredits} />
+      <CollectionProfileSection title={'Media'}>
+        {/* <CreatorProjectsCreditsTable data={projectCredits} /> */}
       </CollectionProfileSection>
     </article>
   )
@@ -102,18 +89,18 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const { slug = '' } = await paramsPromise
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
-  const creator = await queryCreatorBySlug({ slug: decodedSlug })
+  const project = await queryProjectsBySlug({ slug: decodedSlug })
 
-  return generateMeta({ doc: creator })
+  return generateMeta({ doc: project })
 }
 
-const queryCreatorBySlug = cache(async ({ slug }: { slug: string }) => {
+const queryProjectsBySlug = cache(async ({ slug }: { slug: string }) => {
   const { isEnabled: draft } = await draftMode()
 
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
-    collection: 'creators',
+    collection: 'projects',
     draft,
     limit: 1,
     overrideAccess: draft,
@@ -128,21 +115,16 @@ const queryCreatorBySlug = cache(async ({ slug }: { slug: string }) => {
   return result.docs?.[0] || null
 })
 
-const queryCreditedProjectMedia = cache(async ({ id }: { id: string }): Promise<Media[]> => {
-  const { isEnabled: draft } = await draftMode()
-
+const queryMediaByProjectId = cache(async ({ id }: { id: string }): Promise<Media[]> => {
   const payload = await getPayload({ config: configPromise })
 
-  const creatorMedia: PaginatedDocs<Media> = await payload.find({
+  const projectMedia: PaginatedDocs<Media> = await payload.find({
     collection: 'media',
-    draft,
-    limit: 1,
-    overrideAccess: draft,
-    pagination: false,
+    limit: 1000,
     where: {
       and: [
         {
-          'credits.creator': {
+          'project.id': {
             equals: id,
           },
         },
@@ -155,7 +137,7 @@ const queryCreditedProjectMedia = cache(async ({ id }: { id: string }): Promise<
     },
   })
 
-  return creatorMedia.docs
+  return projectMedia.docs
 })
 
 export const queryProjectsById = cache(async ({ projectIds }: { projectIds: string[] }) => {

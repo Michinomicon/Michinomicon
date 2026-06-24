@@ -1,12 +1,12 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+// import { CollectionArchive } from '@/components/CollectionArchive'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload, PaginatedDocs } from 'payload'
 import PageClient from './page.client'
-import { Creator, Media } from '@/payload-types'
+import { Creator, Media, Project } from '@/payload-types'
 import { cache } from 'react'
 import { isMedia } from '@/utilities/isMedia'
 import { CollectionCardItemProperties } from '@/components/Card'
@@ -39,8 +39,8 @@ export async function getCreatorCardItems(
 
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })
-  const creators: PaginatedDocs<Creator> = await payload.find({
-    collection: 'creators',
+  const projects: PaginatedDocs<Project> = await payload.find({
+    collection: 'projects',
     depth: 1,
     limit: 12,
     overrideAccess: false,
@@ -53,7 +53,7 @@ export default async function Page() {
     },
   })
 
-  const items = await getCreatorCardItems(creators.docs)
+  // const items = await getCreatorCardItems(projects.docs)
 
   return (
     <div className="pt-24 pb-24">
@@ -66,18 +66,18 @@ export default async function Page() {
 
       <div className="container mb-8">
         <PageRange
-          collection="creators"
-          currentPage={creators.page}
+          collection="projects"
+          currentPage={projects.page}
           limit={12}
-          totalDocs={creators.totalDocs}
+          totalDocs={projects.totalDocs}
         />
       </div>
 
-      <CollectionArchive items={items} collection={'creators'} />
+      {/* <CollectionArchive items={items} collection={'creators'} /> */}
 
       <div className="container">
-        {creators.totalPages > 1 && creators.page && (
-          <Pagination page={creators.page} totalPages={creators.totalPages} />
+        {projects.totalPages > 1 && projects.page && (
+          <Pagination page={projects.page} totalPages={projects.totalPages} />
         )}
       </div>
     </div>
@@ -86,7 +86,7 @@ export default async function Page() {
 
 export function generateMetadata(): Metadata {
   return {
-    title: `Michinomicon Creators`,
+    title: `Michinomicon Projects`,
   }
 }
 

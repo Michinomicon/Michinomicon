@@ -3,111 +3,65 @@ import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { Fragment, useRef } from 'react'
-import type { Creator, Post, Project } from '@/payload-types'
-import { Media } from '@/components/Media'
-import { isPayloadMedia } from '../Media/types'
+import type { Media } from '@/payload-types'
+import { ImageMedia } from '../Media/ImageMedia'
+import { TypedCollection } from 'payload'
 
-export type PostItem = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
-export type ProjectItem = Pick<Project, 'title' | 'id'>
-export type CreatorItem = Pick<Creator, 'slug' | 'title' | 'description'>
+export type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
+export type SupportedSlug = keyof SupportedConfigs
+export type SupportedCollection = SupportedConfigs[keyof SupportedConfigs]
 
-type BaseProps = {
-  relationTo: 'posts' | 'projects' | 'creators'
-  item: PostItem | ProjectItem | CreatorItem
-}
-interface PostItemProps extends BaseProps {
-  relationTo: 'posts'
-  item: PostItem
-}
-interface ProjectItemProps extends BaseProps {
-  relationTo: 'projects'
-  item: ProjectItem
-}
-interface CreatorItemProps extends BaseProps {
-  relationTo: 'creators'
-  item: CreatorItem
-}
+export type CollectionCardItemPropertiesFunc<
+  C extends keyof SupportedConfigs,
+  T extends SupportedConfigs[C] = SupportedConfigs[C],
+> = (item: T) => CollectionCardItemProperties
 
-export type CollectionCardItemProps = PostItemProps | ProjectItemProps | CreatorItemProps
-export type CollectionCardProps = {
+export type CollectionCardPropsItemProperties<C extends keyof SupportedConfigs> = {
+  title?: string
   alignItems?: 'center'
   className?: string
-  showRelated?: boolean
+  showTags?: boolean
+  collection: C
+  item: CollectionCardItemProperties
+  itemFunc?: never
+}
+
+export type CollectionCardPropsItemFunc<C extends keyof SupportedConfigs> = {
   title?: string
-} & CollectionCardItemProps
-
-function getPostItemProperties(item: PostItem) {
-  const { slug, categories, meta, title } = item
-  const { description, image } = meta || {}
-
-  const relatedItems =
-    categories && Array.isArray(categories) && categories.length > 0
-      ? categories.filter((c) => typeof c === 'object')
-      : null
-  const hasRelatedItems = relatedItems && Array.isArray(relatedItems) && relatedItems.length > 0
-  const metaImage = isPayloadMedia(image) ? image : null
-  const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
-  const href = `/posts/${slug}`
-
-  return {
-    relatedItems: relatedItems,
-    hasRelatedItems: hasRelatedItems,
-    metaImage: metaImage,
-    description: sanitizedDescription,
-    title: title,
-    href: href,
-  }
+  alignItems?: 'center'
+  className?: string
+  showTags?: boolean
+  collection: C
+  item: SupportedConfigs[C]
+  itemFunc: CollectionCardItemPropertiesFunc<C>
 }
 
-function getCreatorItemProperties(item: CreatorItem) {
-  const { slug, title } = item
-  const relatedItems = new Array(0)
-  const hasRelatedItems = relatedItems && Array.isArray(relatedItems) && relatedItems.length > 0
-  const href = `/creators/${slug}`
-  return {
-    relatedItems: relatedItems,
-    hasRelatedItems: hasRelatedItems,
-    metaImage: null,
-    description: '',
-    title: title,
-    href: href,
-  }
+export type CollectionCardProps<C extends keyof SupportedConfigs> =
+  | CollectionCardPropsItemProperties<C>
+  | CollectionCardPropsItemFunc<C>
+
+export type CollectionCardItemProperties = {
+  tags: string[] | null
+  image: Media | null
+  description: string | null
+  title: string
+  href: string
 }
 
-function getProjectItemProperties(item: ProjectItem) {
-  const { title } = item
-  const relatedItems = new Array(0)
-  const hasRelatedItems = relatedItems && Array.isArray(relatedItems) && relatedItems.length > 0
-  const href = `/projects/`
-  return {
-    relatedItems: relatedItems,
-    hasRelatedItems: hasRelatedItems,
-    metaImage: null,
-    description: '',
-    title: title,
-    href: href,
-  }
-}
-
-function getItemProperties({ item, relationTo }: CollectionCardProps) {
-  switch (relationTo) {
-    case 'posts':
-      return getPostItemProperties(item)
-    case 'creators':
-      return getCreatorItemProperties(item)
-    case 'projects':
-      return getProjectItemProperties(item)
-  }
-}
-
-export function CollectionCard(props: CollectionCardProps): React.JSX.Element {
+export function CollectionCard<C extends keyof SupportedConfigs>({
+  className,
+  showTags = true,
+  title: titleFromProps,
+  itemFunc,
+  item: itemFromProps,
+}: CollectionCardProps<C>): React.ReactNode {
   const { card, link } = useClickableCard({})
   const cardCurrentRef = useRef(card.ref.current)
   const linkCurrentRef = useRef(link.ref.current)
-  const { className, showRelated, title: titleFromProps } = props
 
-  const { relatedItems, hasRelatedItems, metaImage, description, title, href } =
-    getItemProperties(props)
+  const { tags, image, description, title, href } = itemFunc
+    ? itemFunc(itemFromProps)
+    : itemFromProps
 
   const titleToUse = titleFromProps || title
 
@@ -121,29 +75,10 @@ export function CollectionCard(props: CollectionCardProps): React.JSX.Element {
     >
       <div className="relative w-full">
         {/* {!metaImage && <div className="">No image</div>} */}
-        {metaImage && <Media resource={metaImage} className="w-[33vw]" />}
+        {/* {metaImage && <Media resource={metaImage} className="w-[33vw]" />} */}
+        {image && typeof image === 'object' && <ImageMedia src={image} />}
       </div>
       <div className="p-4">
-        {showRelated && hasRelatedItems && (
-          <div className="mb-4 text-sm uppercase">
-            {showRelated && hasRelatedItems && (
-              <div>
-                {relatedItems?.map((relatedItem, index) => {
-                  const { title: titleFromItem } = relatedItem
-                  const itemTitle = titleFromItem || 'Untitled'
-                  const isLast = index === relatedItems.length - 1
-
-                  return (
-                    <Fragment key={index}>
-                      {itemTitle}
-                      {!isLast && <Fragment>, &nbsp;</Fragment>}
-                    </Fragment>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
         {titleToUse && (
           <div className="prose">
             <h3>
@@ -155,6 +90,21 @@ export function CollectionCard(props: CollectionCardProps): React.JSX.Element {
         )}
         {description && <div className="mt-2">{description && <p>{description}</p>}</div>}
       </div>
+      {showTags && tags && (
+        <div className="mb-4 px-4 text-sm uppercase">
+          <div>
+            {tags.map((tag, index) => {
+              const isLast = index === tags.length - 1
+              return (
+                <Fragment key={index}>
+                  {tag}
+                  {!isLast && <Fragment>, &nbsp;</Fragment>}
+                </Fragment>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </article>
   )
 }

@@ -6,6 +6,7 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { mapPostsToCollectionArchiveCardItems } from '@/utilities/mapPostsToCollectionArchiveCardItems'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -52,6 +53,8 @@ export const ArchiveBlock: React.FC<
     }
   }
 
+  const items = mapPostsToCollectionArchiveCardItems(posts)
+
   return (
     <div className="archive-block my-16" id={`block-${id}`}>
       {introContent && (
@@ -59,7 +62,7 @@ export const ArchiveBlock: React.FC<
           <RichText className="ms-0 max-w-3xl" data={introContent} enableGutter={false} />
         </div>
       )}
-      <CollectionArchive items={posts} relationTo={'posts'} />
+      <CollectionArchive items={items} collection={'posts'} />
     </div>
   )
 }

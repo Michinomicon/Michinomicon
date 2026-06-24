@@ -51,8 +51,6 @@ export default async function Post({ params: paramsPromise }: Args) {
   const url = '/posts/' + decodedSlug
   const post = await queryPostBySlug({ slug: decodedSlug })
 
-  console.debug('posts/[slug].page => ', { url: url, decodedSlug: decodedSlug, post: post })
-
   if (!post) return <PayloadRedirects url={url} />
 
   return (

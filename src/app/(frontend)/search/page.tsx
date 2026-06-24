@@ -6,7 +6,8 @@ import { getPayload } from 'payload'
 import React from 'react'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
-import { PostItem } from '@/components/Card'
+import { mapPostsToCollectionArchiveCardItems } from '@/utilities/mapPostsToCollectionArchiveCardItems'
+import { Post } from '@/payload-types'
 
 type Args = {
   searchParams: Promise<{
@@ -59,6 +60,8 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       : {}),
   })
 
+  const items = mapPostsToCollectionArchiveCardItems(posts.docs as Post[])
+
   return (
     <div className="pt-24 pb-24">
       <PageClient />
@@ -73,7 +76,7 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       </div>
 
       {posts.totalDocs > 0 ? (
-        <CollectionArchive items={posts.docs as PostItem[]} relationTo={'posts'} />
+        <CollectionArchive items={items} collection={'posts'} />
       ) : (
         <div className="container">No results found.</div>
       )}
