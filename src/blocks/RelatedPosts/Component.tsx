@@ -28,6 +28,7 @@ export const mapToCollectionCardItemProperties: CollectionCardItemPropertiesFunc
   const sanitizedDescription = description?.replace(/\s/g, ' ')
   const href = `/posts/${slug}`
   return {
+    status: '',
     tags: tags,
     image: imageMedia,
     description: sanitizedDescription || null,
@@ -48,7 +49,15 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
           if (typeof doc === 'string') return null
           const cardItem = mapToCollectionCardItemProperties(doc)
 
-          return <CollectionCard key={index} item={cardItem} collection="posts" showTags />
+          return (
+            <CollectionCard
+              key={index}
+              item={cardItem}
+              collection="posts"
+              showTags
+              showStatus={false}
+            />
+          )
         })}
       </div>
     </div>

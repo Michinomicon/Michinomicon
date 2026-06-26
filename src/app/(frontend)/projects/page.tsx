@@ -1,37 +1,35 @@
 import type { Metadata } from 'next/types'
 
-// import { CollectionArchive } from '@/components/CollectionArchive'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload, PaginatedDocs } from 'payload'
 import PageClient from './page.client'
-import { Creator, Media, Project } from '@/payload-types'
-import { cache } from 'react'
-import { isMedia } from '@/utilities/isMedia'
+import { Project } from '@/payload-types'
 import { CollectionCardItemProperties } from '@/components/Card'
+import { CollectionArchive } from '@/components/CollectionArchive'
+import { formatDateTime } from '@/utilities/formatDateTime'
+import { isMedia } from '@/utilities/isMedia'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
 
-export async function getCreatorCardItems(
-  creators: Creator[],
+export async function getProjectCardItems(
+  projects: Project[],
 ): Promise<CollectionCardItemProperties[]> {
   return await Promise.all(
-    creators.map(async (creator) => {
-      const { slug, title, profileImage } = creator
-      const credits: Pick<Media, 'id' | 'credits'>[] = await getMediaByCreatorCredits({
-        creatorId: creator.id,
-      })
-      const roles: string[] = credits.flatMap(({ credits: c }) =>
-        c ? c.map(({ role }) => role) : [],
-      )
+    projects.map(async (project) => {
+      const { slug, title, startDate, endDate, profileImage, status, categories } = project
+
+      const tags = categories?.map((cat) => (typeof cat === 'object' ? cat.title : cat)) ?? []
+
       return {
-        tags: roles.length > 0 ? roles : null,
+        status: status,
+        tags: tags,
         image: isMedia(profileImage) ? profileImage : null,
-        description: '',
+        description: `${formatDateTime(startDate || '')}${' - ' + (endDate ? formatDateTime(endDate) : 'Ongoing')}`,
         title: title,
-        href: `/creators/${slug}`,
+        href: `/projects/${slug}`,
       }
     }),
   )
@@ -44,23 +42,16 @@ export default async function Page() {
     depth: 1,
     limit: 12,
     overrideAccess: false,
-    select: {
-      id: true,
-      title: true,
-      profileImage: true,
-      slug: true,
-      status: true,
-    },
   })
 
-  // const items = await getCreatorCardItems(projects.docs)
+  const items = await getProjectCardItems(projects.docs)
 
   return (
     <div className="pt-24 pb-24">
       <PageClient />
       <div className="container mb-16">
         <div className="prose max-w-none dark:prose-invert">
-          <h1>Creators</h1>
+          <h1>Projects</h1>
         </div>
       </div>
 
@@ -73,7 +64,7 @@ export default async function Page() {
         />
       </div>
 
-      {/* <CollectionArchive items={items} collection={'creators'} /> */}
+      <CollectionArchive items={items} collection={'projects'} />
 
       <div className="container">
         {projects.totalPages > 1 && projects.page && (
@@ -86,45 +77,6 @@ export default async function Page() {
 
 export function generateMetadata(): Metadata {
   return {
-    title: `Michinomicon Projects`,
+    title: `Projects | Michinomicon`,
   }
 }
-
-const getMediaByCreatorCredits = cache(
-  async ({ creatorId }: { creatorId: string }): Promise<Pick<Media, 'id' | 'credits'>[]> => {
-    const payload = await getPayload({ config: configPromise })
-
-    const creatorMedia = await payload.find({
-      collection: 'media',
-      limit: 1000,
-      depth: 2,
-      pagination: false,
-      where: {
-        and: [
-          {
-            credits: {
-              exists: true,
-            },
-          },
-          {
-            'credits.creator.id': {
-              in: creatorId,
-            },
-          },
-          {
-            isForProject: {
-              equals: true,
-            },
-          },
-        ],
-      },
-      select: {
-        credits: {
-          role: true,
-        },
-      },
-    })
-
-    return creatorMedia.docs
-  },
-)

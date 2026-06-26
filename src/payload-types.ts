@@ -485,6 +485,14 @@ export interface Project {
    */
   generateSlug?: boolean | null;
   slug: string;
+  /**
+   * Optional profile picture or avatar
+   */
+  profileImage?: (string | null) | Media;
+  /**
+   * Categories this project falls under. (Useful for grouping projects together}
+   */
+  categories?: (string | Category)[] | null;
   status: 'planned' | 'active' | 'completed' | 'archived';
   startDate?: string | null;
   /**
@@ -1584,6 +1592,8 @@ export interface ProjectsSelect<T extends boolean = true> {
   description?: T;
   generateSlug?: T;
   slug?: T;
+  profileImage?: T;
+  categories?: T;
   status?: T;
   startDate?: T;
   endDate?: T;

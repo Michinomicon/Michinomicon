@@ -14,6 +14,7 @@ export function mapPostsToCollectionArchiveCardItems<T extends Partial<Post>>(
       : []
 
     return {
+      status: '',
       tags: tags.length > 0 ? tags : null,
       image: isMedia(image) ? image : null,
       description: description || null,

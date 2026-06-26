@@ -9,6 +9,10 @@ import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import { getImageMediaMetaData, ImageMediaMetaData } from '@/utilities/getMediaMetaData'
 import { ImageProps, StaticImport } from 'next/dist/shared/lib/get-img-props'
 import RichText from '@/components/RichText'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Info } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import React from 'react'
 
 const { breakpoints } = cssVariables
 
@@ -122,6 +126,7 @@ type ImageMediaComponentProps = {
   imgClassName?: string
   className?: string
   caption?: string
+  captionPosition?: 'tooltip' | 'below'
 }
 
 type NextImageSourceProps = ImageMediaComponentProps &
@@ -141,12 +146,14 @@ export type ImageMediaProps = NextImageSourceProps | PayloadMediaSourceProps
 
 export const ImageMedia = (props: ImageMediaProps) => {
   const mediaProps = getMediaProperties(props)
+  const [tooltipOpen, setTooltipOpen] = React.useState<boolean>(false)
 
   const {
     className,
     imgClassName,
     captionClassName,
     caption: propsCaption,
+    captionPosition = 'tooltip',
   } = props as ImageMediaComponentProps
 
   const caption = mediaProps.caption || propsCaption
@@ -155,8 +162,27 @@ export const ImageMedia = (props: ImageMediaProps) => {
 
   const { id, alt, src, width, height } = nextImageProps
 
+  const onTooltipOpenChange = (isOpen: boolean) => {
+    setTooltipOpen(isOpen)
+  }
   return (
     <div id={`${id}-wrapper`} className={cn('relative h-auto w-full', className)}>
+      {captionPosition === 'tooltip' && (
+        <Tooltip onOpenChange={onTooltipOpenChange} delayDuration={900}>
+          <TooltipTrigger asChild className="group">
+            <Badge
+              variant={tooltipOpen === true ? 'default' : 'outline'}
+              className="absolute top-1 right-1"
+            >
+              <Info data-icon="inline-start" />
+              Info
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            <ImageCaption className={captionClassName} caption={caption}></ImageCaption>
+          </TooltipContent>
+        </Tooltip>
+      )}
       <Image
         id={id}
         className={cn(imgClassName)}
@@ -171,7 +197,9 @@ export const ImageMedia = (props: ImageMediaProps) => {
         loading={'eager'}
         style={{ objectFit: 'contain' }}
       />
-      <ImageCaption className={captionClassName} caption={caption}></ImageCaption>
+      {captionPosition === 'below' && (
+        <ImageCaption className={captionClassName} caption={caption}></ImageCaption>
+      )}
     </div>
   )
 }

@@ -19,7 +19,7 @@ export async function getCreatorCardItems(
 ): Promise<CollectionCardItemProperties[]> {
   return await Promise.all(
     creators.map(async (creator) => {
-      const { slug, title, profileImage } = creator
+      const { slug, title, profileImage, status } = creator
       const credits: Pick<Media, 'id' | 'credits'>[] = await getMediaByCreatorCredits({
         creatorId: creator.id,
       })
@@ -27,6 +27,7 @@ export async function getCreatorCardItems(
         c ? c.map(({ role }) => role) : [],
       )
       return {
+        status: status,
         tags: roles.length > 0 ? roles : null,
         image: isMedia(profileImage) ? profileImage : null,
         description: '',
@@ -86,7 +87,7 @@ export default async function Page() {
 
 export function generateMetadata(): Metadata {
   return {
-    title: `Michinomicon Creators`,
+    title: `Creators | Michinomicon`,
   }
 }
 

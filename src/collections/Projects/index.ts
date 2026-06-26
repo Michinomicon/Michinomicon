@@ -37,6 +37,23 @@ export const Projects: CollectionConfig = {
     },
     slugField(),
     {
+      name: 'profileImage',
+      type: 'upload',
+      relationTo: 'media',
+      admin: {
+        description: 'Optional profile picture or avatar',
+      },
+    },
+    {
+      name: 'categories',
+      type: 'relationship',
+      relationTo: 'categories',
+      hasMany: true,
+      admin: {
+        description: 'Categories this project falls under. (Useful for grouping projects together}',
+      },
+    },
+    {
       type: 'row', // Groups the status and date fields horizontally in the admin UI
       fields: [
         {

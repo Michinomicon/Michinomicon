@@ -7,10 +7,14 @@ import { getPayload, PaginatedDocs } from 'payload'
 import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import RichText from '@/components/RichText'
-import { generateMeta } from '@/utilities/generateMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { CollectionProfileHeader, CollectionProfileSection } from '@/components/CollectionProfile'
+import {
+  extractMediaCreditsByProjectId,
+  ProjectMediaCreators,
+} from '@/utilities/extractMediaCreditsByProjectId'
+import { ProjectMediaTable } from '@/components/ProjectMediaTable'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -50,12 +54,11 @@ export default async function Project({ params: paramsPromise }: Args) {
 
   if (!project) return <PayloadRedirects url={url} />
 
-  console.debug(`Project:`, project)
-
-  const { title, id } = project
+  const { title, id, profileImage } = project
 
   const projectMedia: Media[] = await queryMediaByProjectId({ id: id })
-  console.debug(`Project Media:`, projectMedia)
+
+  const data: ProjectMediaCreators[] = extractMediaCreditsByProjectId(projectMedia, id)
 
   return (
     <article className="article pointer-events-auto border border-primary/30 bg-background p-16 text-card-foreground">
@@ -66,9 +69,13 @@ export default async function Project({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <CollectionProfileHeader title={title} image={null} />
+      <CollectionProfileHeader title={title} image={profileImage} />
 
-      {/* <CollectionProfileSection title={'Links'}>
+      {/* //TODO: 
+        Add section to display basic project stats (start, end, status etc.)
+      */}
+
+      {/* <CollectionProfileSection title={'Details'}>
         <CollectionProfileLinkItemGroup links={socialLinks} />
       </CollectionProfileSection> */}
 
@@ -79,7 +86,7 @@ export default async function Project({ params: paramsPromise }: Args) {
       </CollectionProfileSection>
 
       <CollectionProfileSection title={'Media'}>
-        {/* <CreatorProjectsCreditsTable data={projectCredits} /> */}
+        <ProjectMediaTable data={data} />
       </CollectionProfileSection>
     </article>
   )
@@ -89,9 +96,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const { slug = '' } = await paramsPromise
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
-  const project = await queryProjectsBySlug({ slug: decodedSlug })
+  const { title } = await queryProjectsBySlug({ slug: decodedSlug })
 
-  return generateMeta({ doc: project })
+  return {
+    title: `${title} | Michinomicon`,
+  }
 }
 
 const queryProjectsBySlug = cache(async ({ slug }: { slug: string }) => {

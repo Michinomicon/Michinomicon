@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import type { VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
 
 import { cn } from '@/lib/utils'
@@ -17,27 +18,85 @@ const badgeVariants = cva(
           'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
+        status: '',
+      },
+      status: {
+        planned: '',
+        active: '',
+        completed: '',
+        archived: '',
+        inactive: '',
       },
     },
+    compoundVariants: [
+      {
+        variant: 'status',
+        status: 'planned',
+        className:
+          'bg-purple-50 text-purple-700 [a&]:hover:bg-purple-50/90 dark:bg-purple-950 dark:text-purple-300',
+      },
+      {
+        variant: 'status',
+        status: 'active',
+        className:
+          'bg-green-700 text-green-50 [a&]:hover:bg-green-700/90 dark:bg-green-850 dark:text-green-100',
+      },
+      {
+        variant: 'status',
+        status: 'completed',
+        className: 'bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
+      },
+      {
+        variant: 'status',
+        status: 'archived',
+        className:
+          'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+      },
+      {
+        variant: 'status',
+        status: 'inactive',
+        className: 'bg-muted/50 text-foreground-muted [a&]:hover:bg-muted/70',
+      },
+    ],
     defaultVariants: {
       variant: 'default',
     },
   },
 )
 
+export type BadgeProps = React.ComponentProps<'span'> &
+  VariantProps<typeof badgeVariants> & { asChild?: boolean }
+
+type BadgeStatusMap = {
+  [Key in VariantProps<typeof badgeVariants>['status'] as string & Key]: Key
+}
+const BadgeStatusKeys: BadgeStatusMap = {
+  planned: 'planned',
+  active: 'active',
+  completed: 'completed',
+  archived: 'archived',
+  inactive: 'inactive',
+} as const
+type BadgeStatusKey = keyof typeof BadgeStatusKeys
+
+export function isBadgeStatus(status: string): status is string & BadgeStatusKey {
+  return Object.keys(BadgeStatusKeys).includes(status)
+}
+
 function Badge({
   className,
   variant = 'default',
+  status = null,
   asChild = false,
   ...props
-}: React.ComponentProps<'span'> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+}: BadgeProps) {
   const Comp = asChild ? Slot.Root : 'span'
 
   return (
     <Comp
       data-slot="badge"
       data-variant={variant}
-      className={cn(badgeVariants({ variant }), className)}
+      className={cn(badgeVariants({ variant, status }), className)}
       {...props}
     />
   )

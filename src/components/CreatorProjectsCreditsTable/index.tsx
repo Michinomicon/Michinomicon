@@ -102,10 +102,10 @@ export function CreatorProjectsCreditsTableBody({
                 <Table>
                   <TableHeader className="bg-primary/5">
                     <TableRow>
-                      <TableHead className="w-fit">Item</TableHead>
+                      <TableHead className="w-fit">Asset</TableHead>
                       <TableHead className="w-auto">Title</TableHead>
                       <TableHead className="w-full">Credits</TableHead>
-                      <TableHead className="w-fit text-center">Open</TableHead>
+                      <TableHead className="w-fit text-center">File</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -124,7 +124,7 @@ export function CreatorProjectsCreditsTableBody({
                               size="icon"
                               appearance="ghost"
                               className="rounded-full"
-                              tooltipContent={'Open this item in a new tab.'}
+                              tooltipContent={'Open this file in a new tab.'}
                             >
                               <FileImage className="size-4" />
                             </CMSLink>

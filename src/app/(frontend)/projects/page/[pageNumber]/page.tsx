@@ -7,7 +7,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
-import { getCreatorCardItems } from '../../page'
+import { getProjectCardItems } from '../../page'
 
 export const revalidate = 600
 
@@ -25,8 +25,8 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   if (!Number.isInteger(sanitizedPageNumber)) notFound()
 
-  const creators = await payload.find({
-    collection: 'creators',
+  const projects = await payload.find({
+    collection: 'projects',
     depth: 1,
     limit: 12,
     page: sanitizedPageNumber,
@@ -40,31 +40,31 @@ export default async function Page({ params: paramsPromise }: Args) {
     },
   })
 
-  const items = await getCreatorCardItems(creators.docs)
+  const items = await getProjectCardItems(projects.docs)
 
   return (
     <div className="pt-24 pb-24">
       <PageClient />
       <div className="container mb-16">
         <div className="prose max-w-none dark:prose-invert">
-          <h1>Creators</h1>
+          <h1>Projects</h1>
         </div>
       </div>
 
       <div className="container mb-8">
         <PageRange
-          collection="creators"
-          currentPage={creators.page}
+          collection="projects"
+          currentPage={projects.page}
           limit={12}
-          totalDocs={creators.totalDocs}
+          totalDocs={projects.totalDocs}
         />
       </div>
 
-      <CollectionArchive items={items} collection={'creators'} />
+      <CollectionArchive items={items} collection={'projects'} />
 
       <div className="container">
-        {creators?.page && creators?.totalPages > 1 && (
-          <Pagination page={creators.page} totalPages={creators.totalPages} />
+        {projects?.page && projects?.totalPages > 1 && (
+          <Pagination page={projects.page} totalPages={projects.totalPages} />
         )}
       </div>
     </div>
@@ -74,14 +74,14 @@ export default async function Page({ params: paramsPromise }: Args) {
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { pageNumber } = await paramsPromise
   return {
-    title: `Michinomicon Creators Page ${pageNumber || ''}`,
+    title: `Projects - Page ${pageNumber || ''} | Michinomicon `,
   }
 }
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
   const { totalDocs } = await payload.count({
-    collection: 'creators',
+    collection: 'projects',
     overrideAccess: false,
   })
 

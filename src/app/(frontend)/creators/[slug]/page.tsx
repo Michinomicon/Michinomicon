@@ -7,7 +7,7 @@ import { getPayload, PaginatedDocs } from 'payload'
 import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import RichText from '@/components/RichText'
-import { generateMeta } from '@/utilities/generateMeta'
+import { generatePageOrPostMeta } from '@/utilities/generatePageOrPostMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import {
@@ -102,9 +102,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const { slug = '' } = await paramsPromise
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
-  const creator = await queryCreatorBySlug({ slug: decodedSlug })
+  const { title } = await queryCreatorBySlug({ slug: decodedSlug })
 
-  return generateMeta({ doc: creator })
+  return {
+    title: `${title} | Michinomicon`,
+  }
 }
 
 const queryCreatorBySlug = cache(async ({ slug }: { slug: string }) => {
