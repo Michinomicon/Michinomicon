@@ -5,11 +5,14 @@ import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import React from 'react'
 import PageClient from './page.client'
+import { mapPostsToCollectionArchiveCardItems } from '@/utilities/mapPostsToCollectionArchiveCardItems'
+import { Post } from '@/payload-types'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
+
+type SelectPostProperties = Pick<Post, 'id' | 'title' | 'slug' | 'categories' | 'meta'>
 
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })
@@ -27,11 +30,13 @@ export default async function Page() {
     },
   })
 
+  const items = mapPostsToCollectionArchiveCardItems<SelectPostProperties>(posts.docs)
+
   return (
     <div className="pt-24 pb-24">
       <PageClient />
       <div className="container mb-16">
-        <div className="prose dark:prose-invert max-w-none">
+        <div className="prose max-w-none dark:prose-invert">
           <h1>Posts</h1>
         </div>
       </div>
@@ -45,7 +50,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive posts={posts.docs} />
+      <CollectionArchive items={items} collection={'posts'} />
 
       <div className="container">
         {posts.totalPages > 1 && posts.page && (

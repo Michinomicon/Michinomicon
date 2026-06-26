@@ -8,6 +8,7 @@ import { getPayload } from 'payload'
 import React from 'react'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
+import { mapPostsToCollectionArchiveCardItems } from '@/utilities/mapPostsToCollectionArchiveCardItems'
 
 export const revalidate = 600
 
@@ -33,11 +34,13 @@ export default async function Page({ params: paramsPromise }: Args) {
     overrideAccess: false,
   })
 
+  const items = mapPostsToCollectionArchiveCardItems(posts.docs)
+
   return (
     <div className="pt-24 pb-24">
       <PageClient />
       <div className="container mb-16">
-        <div className="prose dark:prose-invert max-w-none">
+        <div className="prose max-w-none dark:prose-invert">
           <h1>Posts</h1>
         </div>
       </div>
@@ -51,7 +54,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         />
       </div>
 
-      <CollectionArchive posts={posts.docs} />
+      <CollectionArchive items={items} collection={'posts'} />
 
       <div className="container">
         {posts?.page && posts?.totalPages > 1 && (

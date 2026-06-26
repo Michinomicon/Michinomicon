@@ -5,10 +5,18 @@ const defaultLabels = {
   singular: 'Doc',
 }
 
-const defaultCollectionLabels = {
+export const defaultCollectionLabels = {
   posts: {
     plural: 'Posts',
     singular: 'Post',
+  },
+  creators: {
+    plural: 'Creators',
+    singular: 'Creator',
+  },
+  projects: {
+    plural: 'Projects',
+    singular: 'Project',
   },
 }
 

@@ -2,88 +2,120 @@
 import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
-import React, { Fragment, useRef } from 'react'
+import React, { useRef } from 'react'
+import type { Media } from '@/payload-types'
+import { ImageMedia } from '../Media/ImageMedia'
+import { TypedCollection } from 'payload'
+import { Badge, isBadgeStatus } from '../ui/badge'
+import { Separator } from '../ui/separator'
 
-import type { Post } from '@/payload-types'
+export type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
+export type SupportedSlug = keyof SupportedConfigs
+export type SupportedCollection = SupportedConfigs[keyof SupportedConfigs]
 
-import { Media } from '@/components/Media'
-import { isPayloadMedia } from '../Media/types'
+export type CollectionCardItemPropertiesFunc<
+  C extends keyof SupportedConfigs,
+  T extends SupportedConfigs[C] = SupportedConfigs[C],
+> = (item: T) => CollectionCardItemProperties
 
-export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
-
-export const Card: React.FC<{
+export type CollectionCardPropsItemProperties<C extends keyof SupportedConfigs> = {
+  title?: string
   alignItems?: 'center'
   className?: string
-  doc?: CardPostData
-  relationTo?: 'posts'
-  showCategories?: boolean
+  showStatus?: boolean
+  showTags?: boolean
+  showImage?: boolean
+  collection: C
+  item: CollectionCardItemProperties
+  itemFunc?: never
+}
+
+export type CollectionCardPropsItemFunc<C extends keyof SupportedConfigs> = {
   title?: string
-}> = (props) => {
+  alignItems?: 'center'
+  className?: string
+  showStatus?: boolean
+  showTags?: boolean
+  showImage?: boolean
+  collection: C
+  item: SupportedConfigs[C]
+  itemFunc: CollectionCardItemPropertiesFunc<C>
+}
+
+export type CollectionCardProps<C extends keyof SupportedConfigs> =
+  | CollectionCardPropsItemProperties<C>
+  | CollectionCardPropsItemFunc<C>
+
+export type CollectionCardItemProperties = {
+  status: string
+  tags: string[] | null
+  image: Media | null
+  description: string | null
+  title: string
+  href: string
+}
+
+export function CollectionCard<C extends keyof SupportedConfigs>({
+  className,
+  showTags = true,
+  showStatus = true,
+  title: titleFromProps,
+  itemFunc,
+  item: itemFromProps,
+}: CollectionCardProps<C>): React.ReactNode {
   const { card, link } = useClickableCard({})
-  const { className, doc, relationTo, showCategories, title: titleFromProps } = props
-
-  const { slug, categories, meta, title } = doc || {}
-  const { description, image } = meta || {}
-
-  const metaImage = isPayloadMedia(image) ? image : null
-
-  const hasCategories = categories && Array.isArray(categories) && categories.length > 0
-  const titleToUse = titleFromProps || title
-  const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
-  const href = `/${relationTo}/${slug}`
   const cardCurrentRef = useRef(card.ref.current)
   const linkCurrentRef = useRef(link.ref.current)
+
+  const { tags, image, description, title, href, status } = itemFunc
+    ? itemFunc(itemFromProps)
+    : itemFromProps
+
+  const titleToUse = titleFromProps || title
 
   return (
     <article
       className={cn(
-        'article-card border border-primary/30 rounded-lg overflow-hidden hover:cursor-pointer pointer-events-auto bg-background',
+        'article-card pointer-events-auto overflow-hidden rounded-lg border border-primary/30 bg-background hover:cursor-pointer',
         className,
       )}
       ref={cardCurrentRef}
     >
-      <div className="relative w-full ">
-        {/* {!metaImage && <div className="">No image</div>} */}
-        {metaImage && <Media resource={metaImage} size="33vw" />}
+      <div className="relative w-full">
+        {image && typeof image === 'object' && <ImageMedia src={image} />}
       </div>
-      <div className="p-4">
-        {showCategories && hasCategories && (
-          <div className="uppercase text-sm mb-4">
-            {showCategories && hasCategories && (
-              <div>
-                {categories?.map((category, index) => {
-                  if (typeof category === 'object') {
-                    const { title: titleFromCategory } = category
+      <div className="mt-2 px-4">
+        <div className="flex w-full flex-row flex-nowrap items-center justify-between">
+          {titleToUse && (
+            <div className="prose">
+              <h3>
+                <Link className="not-prose" href={href} ref={linkCurrentRef}>
+                  {titleToUse}
+                </Link>
+              </h3>
+            </div>
+          )}
+          {showStatus && (
+            <Badge status={isBadgeStatus(status) ? status : null}>
+              <span className="font-bold uppercase">{status}</span>
+            </Badge>
+          )}
+        </div>
 
-                    const categoryTitle = titleFromCategory || 'Untitled category'
-
-                    const isLast = index === categories.length - 1
-
-                    return (
-                      <Fragment key={index}>
-                        {categoryTitle}
-                        {!isLast && <Fragment>, &nbsp;</Fragment>}
-                      </Fragment>
-                    )
-                  }
-
-                  return null
-                })}
-              </div>
-            )}
-          </div>
-        )}
-        {titleToUse && (
-          <div className="prose">
-            <h3>
-              <Link className="not-prose" href={href} ref={linkCurrentRef}>
-                {titleToUse}
-              </Link>
-            </h3>
-          </div>
-        )}
-        {description && <div className="mt-2">{description && <p>{sanitizedDescription}</p>}</div>}
+        {description && <div className="my-2">{description && <p>{description}</p>}</div>}
       </div>
+      <Separator></Separator>
+      {showTags && tags && (
+        <div className="my-2 px-4 text-sm uppercase">
+          {tags.map((tag, index) => {
+            return (
+              <Badge key={index} variant={'default'}>
+                <span className="font-bold">{tag}</span>
+              </Badge>
+            )
+          })}
+        </div>
+      )}
     </article>
   )
 }

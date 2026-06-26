@@ -69,6 +69,8 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    projects: Project;
+    creators: Creator;
     media: Media;
     categories: Category;
     users: User;
@@ -93,6 +95,8 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    creators: CreatorsSelect<false> | CreatorsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -190,6 +194,14 @@ export interface Page {
               | ({
                   relationTo: 'posts';
                   value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'creators';
+                  value: string | Creator;
+                } | null)
+              | ({
+                  relationTo: 'projects';
+                  value: string | Project;
                 } | null);
             url?: string | null;
             label: string;
@@ -314,11 +326,29 @@ export interface Media {
   id: string;
   title: string;
   /**
+   * Check this box if this asset belongs to a specific community project to assign attribution.
+   */
+  isForProject?: boolean | null;
+  /**
+   * The project this asset belongs to.
+   */
+  project?: (string | null) | Project;
+  /**
+   * Assign community members and their specific roles for this asset.
+   */
+  credits?:
+    | {
+        creator: string | Creator;
+        role: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
    * Select Category.
    */
   category?: (string | null) | Category;
   sortPriority?: number | null;
-  alt?: string | null;
+  alt: string;
   caption?: {
     root: {
       type: string;
@@ -422,6 +452,133 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * Community initiatives, games, mods, or collaborative efforts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: string;
+  title: string;
+  /**
+   * Detailed overview of the project and its goals.
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Optional profile picture or avatar
+   */
+  profileImage?: (string | null) | Media;
+  /**
+   * Categories this project falls under. (Useful for grouping projects together}
+   */
+  categories?: (string | Category)[] | null;
+  status: 'planned' | 'active' | 'completed' | 'archived';
+  startDate?: string | null;
+  /**
+   * Leave blank if the project is ongoing.
+   */
+  endDate?: string | null;
+  homepage: {
+    type?: ('reference' | 'custom') | null;
+    newTab?: boolean | null;
+    reference?:
+      | ({
+          relationTo: 'pages';
+          value: string | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'creators';
+          value: string | Creator;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null);
+    url?: string | null;
+    label: string;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Community members, artists, and contributors.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "creators".
+ */
+export interface Creator {
+  id: string;
+  /**
+   * Artists name or username
+   */
+  title: string;
+  /**
+   * Optional profile picture or avatar
+   */
+  profileImage?: (string | null) | Media;
+  /**
+   * Short biography or introduction
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Links to portfolios, social media, or personal websites.
+   */
+  socialLinks?:
+    | {
+        platform: string;
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  status: 'active' | 'inactive' | 'archived';
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -559,6 +716,14 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -609,6 +774,14 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -1115,6 +1288,14 @@ export interface PayloadLockedDocument {
         value: string | Post;
       } | null)
     | ({
+        relationTo: 'projects';
+        value: string | Project;
+      } | null)
+    | ({
+        relationTo: 'creators';
+        value: string | Creator;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -1404,10 +1585,68 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  generateSlug?: T;
+  slug?: T;
+  profileImage?: T;
+  categories?: T;
+  status?: T;
+  startDate?: T;
+  endDate?: T;
+  homepage?:
+    | T
+    | {
+        type?: T;
+        newTab?: T;
+        reference?: T;
+        url?: T;
+        label?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "creators_select".
+ */
+export interface CreatorsSelect<T extends boolean = true> {
+  title?: T;
+  profileImage?: T;
+  description?: T;
+  socialLinks?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  status?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
   title?: T;
+  isForProject?: T;
+  project?: T;
+  credits?:
+    | T
+    | {
+        creator?: T;
+        role?: T;
+        id?: T;
+      };
   category?: T;
   sortPriority?: T;
   alt?: T;
@@ -1907,6 +2146,14 @@ export interface Header {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -1928,6 +2175,14 @@ export interface Header {
                   | ({
                       relationTo: 'posts';
                       value: string | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'creators';
+                      value: string | Creator;
+                    } | null)
+                  | ({
+                      relationTo: 'projects';
+                      value: string | Project;
                     } | null);
                 url?: string | null;
                 label: string;
@@ -1949,6 +2204,14 @@ export interface Header {
                         | ({
                             relationTo: 'posts';
                             value: string | Post;
+                          } | null)
+                        | ({
+                            relationTo: 'creators';
+                            value: string | Creator;
+                          } | null)
+                        | ({
+                            relationTo: 'projects';
+                            value: string | Project;
                           } | null);
                       url?: string | null;
                       label: string;
@@ -1970,6 +2233,14 @@ export interface Header {
                               | ({
                                   relationTo: 'posts';
                                   value: string | Post;
+                                } | null)
+                              | ({
+                                  relationTo: 'creators';
+                                  value: string | Creator;
+                                } | null)
+                              | ({
+                                  relationTo: 'projects';
+                                  value: string | Project;
                                 } | null);
                             url?: string | null;
                             label: string;
@@ -1991,6 +2262,14 @@ export interface Header {
                                     | ({
                                         relationTo: 'posts';
                                         value: string | Post;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'creators';
+                                        value: string | Creator;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'projects';
+                                        value: string | Project;
                                       } | null);
                                   url?: string | null;
                                   label: string;
@@ -2012,6 +2291,14 @@ export interface Header {
                                           | ({
                                               relationTo: 'posts';
                                               value: string | Post;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'creators';
+                                              value: string | Creator;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'projects';
+                                              value: string | Project;
                                             } | null);
                                         url?: string | null;
                                         label: string;
@@ -2056,6 +2343,14 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;

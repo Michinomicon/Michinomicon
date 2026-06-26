@@ -20,10 +20,10 @@ const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
   return url
 }
 
-export const generateMeta = async (args: {
-  doc: Partial<Page> | Partial<Post> | null
+export const generatePageOrPostMeta = async (args: {
+  pageOrPost: Partial<Page> | Partial<Post> | null
 }): Promise<Metadata> => {
-  const { doc } = args
+  const { pageOrPost: doc } = args
 
   const ogImage = getImageURL(doc?.meta?.image)
 

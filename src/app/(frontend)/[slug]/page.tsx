@@ -9,7 +9,7 @@ import React, { cache } from 'react'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
-import { generateMeta } from '@/utilities/generateMeta'
+import { generatePageOrPostMeta } from '@/utilities/generatePageOrPostMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -108,7 +108,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     slug: decodedSlug,
   })
 
-  return generateMeta({ doc: page })
+  return generatePageOrPostMeta({ pageOrPost: page })
 }
 
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {

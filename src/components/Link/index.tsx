@@ -4,17 +4,27 @@ import Link from 'next/link'
 import React from 'react'
 import { CollectionSlug } from 'payload'
 import { Collections } from '@/utilities/collectionTypes'
+import {
+  DEFAULT_TOOLTIP_DELAY,
+  Tooltip,
+  TooltipProps,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
 export type CMSLinkReference<R extends CollectionSlug, V = Collections[R]> = {
   relationTo: string & R
   value: Partial<V> | string
 }
-export type CMSLinkPageReference = CMSLinkReference<'pages'>
-export type CMSLinkPostReference = CMSLinkReference<'posts'>
 
 export type CMSLinkProps = {
   type?: 'reference' | 'custom' | null
-  reference?: CMSLinkReference<'pages'> | CMSLinkReference<'posts'> | null
+  reference?:
+    | CMSLinkReference<'pages'>
+    | CMSLinkReference<'posts'>
+    | CMSLinkReference<'creators'>
+    | CMSLinkReference<'projects'>
+    | null
   url?: string | null
   label?: string | undefined
   appearance?: ButtonProps['variant'] | null
@@ -22,6 +32,8 @@ export type CMSLinkProps = {
   className?: string
   children?: React.ReactNode
   newTab?: boolean | null
+  tooltipContent?: string | undefined
+  tooltipProps?: TooltipProps
 }
 
 function getHref({ type = 'reference', reference, url }: CMSLinkProps) {
@@ -52,28 +64,52 @@ function getHref({ type = 'reference', reference, url }: CMSLinkProps) {
 }
 
 export const CMSLink: React.FC<CMSLinkProps> = (props) => {
-  const { appearance = 'link', children, className, label, newTab, size: sizeFromProps } = props
+  const {
+    appearance = 'link',
+    children,
+    className,
+    label,
+    newTab,
+    size: sizeFromProps,
+    tooltipContent,
+    tooltipProps,
+  } = props
 
   const size = appearance === 'link' ? 'default' : sizeFromProps
   const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
   const linkHref = getHref(props)
+  const showLabel = size !== 'icon'
 
   /* Ensure we don't break any styles set by richText */
   if (appearance === 'link') {
     return (
-      <Link className={cn(className)} href={linkHref} {...newTabProps}>
-        {label}
-        {children}
-      </Link>
+      <Tooltip
+        delayDuration={DEFAULT_TOOLTIP_DELAY}
+        disableHoverableContent={true}
+        {...tooltipProps}
+      >
+        <TooltipTrigger asChild>
+          <Link className={cn(className)} href={linkHref} {...newTabProps}>
+            {showLabel && label}
+            {children}
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent>{tooltipContent}</TooltipContent>
+      </Tooltip>
     )
   }
 
   return (
-    <Button asChild className={className} size={size} variant={appearance}>
-      <Link className={cn(className)} href={linkHref} {...newTabProps}>
-        {label}
-        {children}
-      </Link>
-    </Button>
+    <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true} {...tooltipProps}>
+      <TooltipTrigger asChild>
+        <Button asChild className={className} size={size} variant={appearance}>
+          <Link className={cn(className)} href={linkHref} {...newTabProps}>
+            {showLabel && label}
+            {children}
+          </Link>
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>{tooltipContent}</TooltipContent>
+    </Tooltip>
   )
 }

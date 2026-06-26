@@ -46,7 +46,7 @@ import {
 } from '@/components/ui/item'
 import { FloatingLabelSlider } from '@/components/ui/slider'
 import {
-  asFlipbookSlelector,
+  asFlipbookSelector,
   clearFlipbookPageIsActiveClasses,
   FirstPageActiveSelector,
   FlipbookPageStateClassIndex,
@@ -80,7 +80,7 @@ const FlipbookPopoverContent: React.FC<{
   const [flipbookRenderCount, setFlipbookRenderCount] = useState<number>(0)
   const [prevIsFullyRendered, setPrevIsFullyRendered] = useState<boolean>(false)
 
-  const [fileloadingProgress, setFileLoadingProgress] = useState<OnLoadProgressArgs>({
+  const [fileLoadingProgress, setFileLoadingProgress] = useState<OnLoadProgressArgs>({
     loaded: 0,
     total: 0,
   })
@@ -229,7 +229,7 @@ const FlipbookPopoverContent: React.FC<{
       console.debug(`PDF Navigation Error. Flipbook Container Element not found.`)
       return
     }
-    const pages = flipbookContainer.querySelectorAll(asFlipbookSlelector('page'))
+    const pages = flipbookContainer.querySelectorAll(asFlipbookSelector('page'))
     const pageCount: number = pages.length
     pages.forEach((page) => page.classList.remove(FlipbookPageStateClassIndex.isActive))
 
@@ -432,12 +432,6 @@ const FlipbookPopoverContent: React.FC<{
     return false
   }
 
-  // React.useEffect(() => {
-  //   setSliderValue([0])
-  //   setActivePages([0])
-  //   setRenderedPagesCount(0)
-  // }, [pageWidth])
-
   if (pageWidth !== prevPageWidth) {
     setPrevPageWidth(pageWidth)
     setSliderValue([0])
@@ -466,23 +460,6 @@ const FlipbookPopoverContent: React.FC<{
       }
     }
   }, [isFullyRendered])
-
-  // React.useEffect(() => {
-  //   if (isFullyRendered === true) {
-  //     setFlipbookRenderCount((prev) => {
-  //       return prev + 1
-  //     })
-  //     const previousNumPages = totalPagesAcrossRendersRef.current ?? 0
-  //     const restoredActivePage = Math.max(...(activePageRangeRef.current ?? [0]), 0)
-  //     if (previousNumPages > 0 && restoredActivePage >= previousNumPages) {
-  //       // overriding default behavior to reach back page
-  //       goToSpecificPage(previousNumPages - 1, true)
-  //       goToSpecificPage(previousNumPages, true)
-  //     } else {
-  //       goToSpecificPage(restoredActivePage, true)
-  //     }
-  //   }
-  // }, [isFullyRendered])
 
   useEffect(() => {
     if (!sliderTimeoutRef || !sliderTimeoutRef.current) {
@@ -709,7 +686,7 @@ const FlipbookPopoverContent: React.FC<{
     const isFirstRender = flipbookRenderCount < 1
     const showDataTransfer = !documentLoaded || isFirstRender
     const showPageProcessing = isFirstRender || processedPagesCount <= totalPages
-    const { loaded: fileDataLoaded, total: totalFileSize }: OnLoadProgressArgs = fileloadingProgress
+    const { loaded: fileDataLoaded, total: totalFileSize }: OnLoadProgressArgs = fileLoadingProgress
     const cardTitle = isFirstRender ? 'Creating Flipbook' : 'Updating Flipbook'
 
     return (
@@ -790,7 +767,7 @@ const FlipbookPopoverContent: React.FC<{
       : 'cursor-auto',
   )
   const floatingNextButtonStyles = { right: `calc(calc(50% - 120px) - ${pageWidth}px)` }
-  const floatingPreviousButtonnStyles = { left: `calc(calc(50% - 120px) - ${pageWidth}px)` }
+  const floatingPreviousButtonStyles = { left: `calc(calc(50% - 120px) - ${pageWidth}px)` }
 
   const readyToMapPages = numPages !== null && numPages > 0 && pageWidth !== null
 
@@ -898,7 +875,7 @@ const FlipbookPopoverContent: React.FC<{
             className={cn([
               `absolute top-1/2 z-50 -translate-y-1/2 rounded-full bg-primary/20 p-4 text-foreground/50 transition-all duration-300 hover:bg-primary/40 hover:text-foreground disabled:pointer-events-none disabled:opacity-0`,
             ])}
-            style={floatingPreviousButtonnStyles}
+            style={floatingPreviousButtonStyles}
             onClick={previousPage}
             onMouseEnter={mouseEnterPreviousPageButton}
             onMouseLeave={clearPageHover}
@@ -998,7 +975,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
   const popoverRef = useRef<HTMLDivElement>(null)
   const [isPopoverOpen, setIsPopoverOpen] = useState(false)
 
-  // Track opened state to minimise re-rendering the PDF
+  // Track opened state to minimize re-rendering the PDF
   const [hasOpened, setHasOpened] = useState(false)
 
   // track the open state without triggering re-renders
@@ -1035,7 +1012,7 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
       }
     }
 
-    // Listen for events from other flipbooks
+    // Listen for events from other flip books
     window.addEventListener('flipbook-opened', handleOtherFlipbookOpened)
 
     return () => {
