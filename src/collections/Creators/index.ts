@@ -1,6 +1,17 @@
 import { hasAccess } from '@/utilities/accessFunctions'
 import { slugField, type CollectionConfig } from 'payload'
 import { revalidateCreator, revalidateCreatorDelete } from './hooks/revalidateCreator'
+import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
+import {
+  lexicalEditor,
+  HeadingFeature,
+  BlocksFeature,
+  FixedToolbarFeature,
+  InlineToolbarFeature,
+  HorizontalRuleFeature,
+} from '@payloadcms/richtext-lexical'
+import { Code } from '@/blocks/Code/config'
 
 export const Creators: CollectionConfig = {
   slug: 'creators',
@@ -44,6 +55,20 @@ export const Creators: CollectionConfig = {
       admin: {
         description: 'Short biography or introduction',
       },
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [
+            ...rootFeatures,
+            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            BlocksFeature({ blocks: [Code, MediaBlock, MediaGalleryBlock] }),
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+            HorizontalRuleFeature(),
+          ]
+        },
+      }),
+      label: false,
+      required: true,
     },
     {
       name: 'socialLinks',

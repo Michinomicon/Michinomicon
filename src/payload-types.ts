@@ -465,7 +465,7 @@ export interface Project {
   /**
    * Detailed overview of the project and its goals.
    */
-  description?: {
+  description: {
     root: {
       type: string;
       children: {
@@ -479,7 +479,7 @@ export interface Project {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
+  };
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -544,7 +544,7 @@ export interface Creator {
   /**
    * Short biography or introduction
    */
-  description?: {
+  description: {
     root: {
       type: string;
       children: {
@@ -558,7 +558,7 @@ export interface Creator {
       version: number;
     };
     [k: string]: unknown;
-  } | null;
+  };
   /**
    * Links to portfolios, social media, or personal websites.
    */

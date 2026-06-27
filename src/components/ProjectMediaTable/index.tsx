@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { CMSLink } from '../Link'
 import { ImageGallery } from '../ImageGallery'
 import {
-  FileImage,
+  Download,
   ListChevronsDownUp,
   ListChevronsUpDown,
   SquareArrowRightEnter,
@@ -89,7 +89,7 @@ export function ProjectMediaTableBody({
               className="rounded-full"
               tooltipContent={'Open this item in a new tab.'}
             >
-              <FileImage className="size-4" />
+              <Download className="size-4" />
             </CMSLink>
           </TableCell>
         </TableRow>
@@ -151,7 +151,7 @@ export function ProjectMediaTableBody({
                               appearance="ghost"
                               size="icon"
                               className="rounded-full"
-                              tooltipContent={'Go to this projects homepage'}
+                              tooltipContent={'View creator profile.'}
                               url={`/creators/${creator.slug}`}
                             >
                               <SquareArrowRightEnter className="size-4" />

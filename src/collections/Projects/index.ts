@@ -1,5 +1,16 @@
+import { Code } from '@/blocks/Code/config'
+import { MediaBlock } from '@/blocks/MediaBlock/config'
+import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
 import { link } from '@/fields/link'
 import { hasAccess } from '@/utilities/accessFunctions'
+import {
+  lexicalEditor,
+  HeadingFeature,
+  BlocksFeature,
+  FixedToolbarFeature,
+  InlineToolbarFeature,
+  HorizontalRuleFeature,
+} from '@payloadcms/richtext-lexical'
 import { slugField, type CollectionConfig } from 'payload'
 
 export const Projects: CollectionConfig = {
@@ -34,6 +45,20 @@ export const Projects: CollectionConfig = {
       admin: {
         description: 'Detailed overview of the project and its goals.',
       },
+      editor: lexicalEditor({
+        features: ({ rootFeatures }) => {
+          return [
+            ...rootFeatures,
+            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            BlocksFeature({ blocks: [Code, MediaBlock, MediaGalleryBlock] }),
+            FixedToolbarFeature(),
+            InlineToolbarFeature(),
+            HorizontalRuleFeature(),
+          ]
+        },
+      }),
+      label: false,
+      required: true,
     },
     slugField(),
     {

@@ -23,6 +23,14 @@ type GlobalSearchProps = {
   buttonProps?: ButtonProps
 }
 
+export const getPageCategoryString = (page: Page): string => {
+  const { parentCategory } = page
+  if (typeof parentCategory === 'object' && parentCategory.breadcrumbs) {
+    return parentCategory.breadcrumbs.map(({ label }) => label ?? '').join(' / ')
+  }
+  return 'Uncategorized'
+}
+
 export default function GlobalSearch({ onSelectionCallback, buttonProps }: GlobalSearchProps) {
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
@@ -79,14 +87,6 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
     router.push(path)
   }
 
-  const getPageCategoryString = (page: Page): string => {
-    const { parentCategory } = page
-    if (typeof parentCategory === 'object' && parentCategory.breadcrumbs) {
-      return parentCategory.breadcrumbs.map(({ label }) => label ?? '').join(' / ')
-    }
-    return 'Uncategorized'
-  }
-
   return (
     <React.Fragment>
       <Button
@@ -129,6 +129,39 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
             )} */}
 
             {/* --- Projects GROUP --- */}
+            {results.projects.length > 0 && (
+              <>
+                <CommandGroup heading="Projects" className={'group p-0'}>
+                  {results.projects.map((project) => (
+                    <CommandItem
+                      key={project.id}
+                      value={`project-${project.id}`}
+                      onSelect={() => {
+                        console.debug(`selected search result: project "${project.slug}"`, project)
+                        handleSelect(`projects/${project.slug}`)
+                      }}
+                      className={'mb-1 flex flex-col'}
+                    >
+                      <div className="flex w-full items-center justify-between">
+                        <span className="font-medium">{project.title}</span>
+                        <span className="text-xs text-muted-foreground">
+                          Updated: {new Date(project.updatedAt).toLocaleDateString()}
+                        </span>
+                      </div>
+
+                      <div className="w-full text-right">
+                        <span className="text-xs text-muted-foreground">
+                          {/* {getPageCategoryString(creator)} */}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                <CommandSeparator className="mx-0 my-1" alwaysRender={true} />
+              </>
+            )}
+
+            {/* --- Creators GROUP --- */}
             {results.creators.length > 0 && (
               <>
                 <CommandGroup heading="Creators" className={'group p-0'}>
@@ -137,7 +170,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                       key={creator.id}
                       value={`creator-${creator.id}`}
                       onSelect={() => {
-                        console.debug(`selected creator item "${creator.slug}"`, creator)
+                        console.debug(`selected search result: "${creator.slug}"`, creator)
                         handleSelect(`creators/${creator.slug}`)
                       }}
                       className={'mb-1 flex flex-col'}
@@ -170,7 +203,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                       key={page.id}
                       value={`page-${page.id}`}
                       onSelect={() => {
-                        console.debug(`selected page item "${page.slug}"`, page)
+                        console.debug(`selected search result: "${page.slug}"`, page)
                         handleSelect(`/${page.slug}`)
                       }}
                       className={'mb-1 flex flex-col'}
@@ -182,11 +215,11 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                         </span>
                       </div>
 
-                      <div className="w-full text-right">
+                      {/* <div className="w-full text-right">
                         <span className="text-xs text-muted-foreground">
                           {getPageCategoryString(page)}
                         </span>
-                      </div>
+                      </div> */}
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -202,7 +235,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                     key={post.id}
                     value={`post-${post.id}`}
                     onSelect={() => {
-                      console.debug(`selected post item "${post.slug}"`, post)
+                      console.debug(`selected search result: "${post.slug}"`, post)
                       handleSelect(`/posts/${post.slug}`)
                     }}
                     className={'mb-1'}
@@ -210,7 +243,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                     <div className="flex w-full items-center justify-between">
                       <span className="font-medium">{post.title}</span>
                       {/* Post Attribute: Category Name */}
-                      <span className="text-xs text-muted-foreground">
+                      {/* <span className="text-xs text-muted-foreground">
                         {post.categories
                           ? post.categories
                               .map((cat) => {
@@ -222,12 +255,12 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
                               })
                               .join(', ')
                           : 'Uncategorized'}
-                      </span>
+                      </span> */}
                     </div>
                     {/* Post Attribute: Last Updated */}
-                    <span className="text-xs text-muted-foreground">
+                    {/* <span className="text-xs text-muted-foreground">
                       Updated: {new Date(post.updatedAt).toLocaleDateString()}
-                    </span>
+                    </span> */}
                   </CommandItem>
                 ))}
               </CommandGroup>
