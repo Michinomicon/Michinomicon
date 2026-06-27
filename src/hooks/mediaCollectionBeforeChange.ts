@@ -4,6 +4,8 @@ import fs from 'fs/promises'
 import sharp from 'sharp'
 import { IAudioMetadata } from 'music-metadata'
 import { Media } from '@/payload-types'
+import NodeClam from 'clamscan'
+import { Readable } from 'stream'
 
 // Must match Payload config here `/src/collections/Media.ts`
 // Media.upload.imageSizes
@@ -289,7 +291,68 @@ const videoBeforeChangeTasks = async ({
   return data
 }
 
-export const mediaCollectionBeforeChange: CollectionBeforeChangeHook<Media> = async ({
+const zipBeforeChangeTasks = async ({
+  data,
+  req,
+}: {
+  data: Partial<Media>
+  req: PayloadRequest
+}): Promise<Partial<Media>> => {
+  // MIME types to scan
+  const scannableTypes = [
+    'application/x-zip-compressed',
+    'application/zip',
+    'application/x-7z-compressed',
+    'application/gzip',
+  ]
+
+  if (req.file && scannableTypes.includes(req.file.mimetype)) {
+    try {
+      // assumes clamd is running locally on default port 3310
+      const clamscan = await new NodeClam().init({
+        clamdscan: {
+          host: '127.0.0.1',
+          port: 3310,
+          timeout: 60000, // 60 sec
+        },
+        preference: 'clamdscan',
+      })
+
+      // req.file.data is Buffer<ArrayBufferLike>
+      // convert to Readable for NodeClam.scanStream(stream: Readable)
+      const fileStream = Readable.from(req.file.data)
+
+      const { isInfected, viruses } = await clamscan.scanStream(fileStream)
+
+      if (isInfected) {
+        console.log(`scan results: isInfected: ${isInfected}  viruses: ${viruses.join(', ')}`)
+        // Reject the payload upload entirely
+        throw new Error(`Malware detected: ${viruses.join(', ')}. Upload rejected.`)
+      } else {
+        console.log(`scan results: isInfected: ${isInfected}`)
+      }
+    } catch (error) {
+      // If it's our infection error, throw it to alert the user
+      if ((error as Error).message.startsWith('Malware detected')) {
+        throw error
+      }
+
+      // If the scanner fails (e.g., daemon is down), fail safely by blocking the upload
+      console.error('ClamAV Scanner Error:', error)
+      throw new Error('Security scanner is currently unavailable. Please try again later.')
+    }
+  } else {
+    console.log(
+      `zipBeforeChangeTasks: invalid MIMEType '${req.file?.mimetype}'. expected:
+       "application/ { x-zip-compressed | zip | x-7z-compressed | gzip }"
+      `,
+    )
+  }
+
+  return data
+}
+
+export const processFileAndPopulateMetaData: CollectionBeforeChangeHook<Media> = async ({
   //collection,     //:SanitizedCollectionConfig;   The Collection in which this Hook is running against.
   //context,        //:RequestContext;              Custom context passed between hooks. More details.
   data, //:Partial<T>;                  The incoming data passed through the operation.
@@ -297,12 +360,20 @@ export const mediaCollectionBeforeChange: CollectionBeforeChangeHook<Media> = as
   // originalDoc,    //?: T;                         The full document before changes are applied. Present on updates; undefined on creates. Use this to read the document id and any unchanged fields.
   req, //:PayloadRequest;              The Web Request object. This is mocked for Local API operations.
 }) => {
-  // Need the id? Don't expect it in `data`.
-  // const id = operation === 'update' ? originalDoc.id : undefined
-
   if ((operation === 'create' || operation === 'update') && req.file) {
-    if (req.file.mimetype === 'application/pdf') {
-      return applicationPdfBeforeChangeTasks({ data, req })
+    if (req.file.mimetype.startsWith('application/')) {
+      if (req.file.mimetype.endsWith('pdf')) {
+        return applicationPdfBeforeChangeTasks({ data, req })
+      }
+
+      if (
+        req.file.mimetype.endsWith('x-zip-compressed') ||
+        req.file.mimetype.endsWith('zip') ||
+        req.file.mimetype.endsWith('x-7z-compressed') ||
+        req.file.mimetype.endsWith('gzip')
+      ) {
+        return zipBeforeChangeTasks({ data, req })
+      }
     }
 
     if (req.file.mimetype.startsWith('image/')) {

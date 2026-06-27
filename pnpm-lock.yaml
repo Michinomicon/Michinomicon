@@ -110,6 +110,9 @@ importers:
       '@react-pdf/renderer':
         specifier: ^4.3.2
         version: 4.5.1(react@19.2.4)
+      clamscan:
+        specifier: ^2.4.0
+        version: 2.4.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -216,6 +219,9 @@ importers:
       '@testing-library/react':
         specifier: 16.3.2
         version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.1.6(@types/react@19.1.8))(@types/react@19.1.8)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@types/clamscan':
+        specifier: ^2.4.1
+        version: 2.4.1
       '@types/escape-html':
         specifier: ^1.0.4
         version: 1.0.4
@@ -2444,6 +2450,9 @@ packages:
   '@types/chai@5.2.3':
     resolution: {integrity: sha512-Mw558oeA9fFbv65/y4mHtXDs9bPnFMZAL/jxdPFUpOHHIXX91mcgEHbS5Lahr+pwZFR8A7GQleRWeI6cGFC2UA==}
 
+  '@types/clamscan@2.4.1':
+    resolution: {integrity: sha512-KhBHhXsMGDoEkk87VRtHtDsjoqXD3epu+a09c1sjW7xqpvoihScxhZNdNIPegVCLDvPOp4khiIpy02XabseztQ==}
+
   '@types/debug@4.1.13':
     resolution: {integrity: sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw==}
 
@@ -3024,6 +3033,10 @@ packages:
   ci-info@4.4.0:
     resolution: {integrity: sha512-77PSwercCZU2Fc4sX94eF8k8Pxte6JAwL4/ICZLFjJLqegs7kCuAsqqj/70NQF6TvDpgFjkubQB2FW2ZZddvQg==}
     engines: {node: '>=8'}
+
+  clamscan@2.4.0:
+    resolution: {integrity: sha512-XBOxUiGOcQGuKmCn5qaM5rIK153fGCwsvJMbjVtcnNJ+j/YHrSj2gKNjyP65yr/E8JsKTTDtKYFG++p7Lzigyw==}
+    engines: {node: '>=16.0.0'}
 
   class-variance-authority@0.7.1:
     resolution: {integrity: sha512-Ka+9Trutv7G8M6WT6SeiRWz792K5qEqIGEGzXKhAE6xOWAY6pPH8U+9IY3oCMv6kqTmLsv7Xh/2w2RigkePMsg==}
@@ -8389,6 +8402,10 @@ snapshots:
       '@types/deep-eql': 4.0.2
       assertion-error: 2.0.1
 
+  '@types/clamscan@2.4.1':
+    dependencies:
+      '@types/node': 25.0.0
+
   '@types/debug@4.1.13':
     dependencies:
       '@types/ms': 2.1.0
@@ -8996,6 +9013,8 @@ snapshots:
   chownr@2.0.0: {}
 
   ci-info@4.4.0: {}
+
+  clamscan@2.4.0: {}
 
   class-variance-authority@0.7.1:
     dependencies:
