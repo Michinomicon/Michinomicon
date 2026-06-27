@@ -1,7 +1,7 @@
 'use client'
 import { ProjectMediaCredit } from '@/utilities/extractMediaCreditsByCreatorId'
 import {
-  FileImage,
+  Download,
   ListChevronsDownUp,
   ListChevronsUpDown,
   SquareArrowRightEnter,
@@ -124,9 +124,9 @@ export function CreatorProjectsCreditsTableBody({
                               size="icon"
                               appearance="ghost"
                               className="rounded-full"
-                              tooltipContent={'Open this file in a new tab.'}
+                              tooltipContent={'Open this file.'}
                             >
-                              <FileImage className="size-4" />
+                              <Download className="size-4" />
                             </CMSLink>
                           </TableCell>
                         </TableRow>

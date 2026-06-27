@@ -79,8 +79,8 @@ const BadgeStatusKeys: BadgeStatusMap = {
 } as const
 type BadgeStatusKey = keyof typeof BadgeStatusKeys
 
-export function isBadgeStatus(status: string): status is string & BadgeStatusKey {
-  return Object.keys(BadgeStatusKeys).includes(status)
+export function isBadgeStatus(status: string | undefined): status is string & BadgeStatusKey {
+  return status !== undefined && Object.keys(BadgeStatusKeys).includes(status)
 }
 
 function Badge({

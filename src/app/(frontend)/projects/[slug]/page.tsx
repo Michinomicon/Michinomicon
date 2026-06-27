@@ -15,6 +15,8 @@ import {
   ProjectMediaCreators,
 } from '@/utilities/extractMediaCreditsByProjectId'
 import { ProjectMediaTable } from '@/components/ProjectMediaTable'
+import { formatDateTime } from '@/utilities/formatDateTime'
+import { Badge } from '@/components/ui/badge'
 
 export async function generateStaticParams() {
   const payload = await getPayload({ config: configPromise })
@@ -54,7 +56,8 @@ export default async function Project({ params: paramsPromise }: Args) {
 
   if (!project) return <PayloadRedirects url={url} />
 
-  const { title, id, profileImage } = project
+  const { title, id, profileImage, categories, status, startDate, endDate, updatedAt, createdAt } =
+    project
 
   const projectMedia: Media[] = await queryMediaByProjectId({ id: id })
 
@@ -69,19 +72,50 @@ export default async function Project({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <CollectionProfileHeader title={title} image={profileImage} />
+      <CollectionProfileHeader title={title} image={profileImage} status={status}>
+        <div className="flex w-full flex-col">
+          <div className="mb-2 flex w-full items-center">
+            <span className="mr-2 text-xs font-bold text-primary uppercase">Categories</span>
+            {categories &&
+              categories.map((cat, index) =>
+                typeof cat === 'object' ? (
+                  <Badge key={index} variant={'outline'}>
+                    <span className="font-bold uppercase">{cat.title}</span>
+                  </Badge>
+                ) : (
+                  ''
+                ),
+              )}
+          </div>
 
-      {/* //TODO: 
-        Add section to display basic project stats (start, end, status etc.)
-      */}
-
-      {/* <CollectionProfileSection title={'Details'}>
-        <CollectionProfileLinkItemGroup links={socialLinks} />
-      </CollectionProfileSection> */}
+          <div className="grid w-full grid-cols-2 gap-x-4">
+            <div className="flex flex-col lg:flex-row">
+              <div className="grow text-left">
+                <span className="mr-1 text-xs font-bold text-primary uppercase">Start:</span>
+                <span className="">{startDate ? formatDateTime(startDate) : '---'}</span>
+              </div>
+              <div className="grow text-left">
+                <span className="mr-1 text-xs font-bold text-primary uppercase">End:</span>
+                <span className="">{endDate ? formatDateTime(endDate) : '---'}</span>
+              </div>
+            </div>
+            <div className="flex flex-col lg:flex-row">
+              <div className="grow text-right lg:text-left">
+                <span className="mr-1 text-xs font-bold text-primary uppercase">Updated:</span>
+                <span className="">{updatedAt ? formatDateTime(updatedAt) : '---'}</span>
+              </div>
+              <div className="grow text-right">
+                <span className="mr-1 text-xs font-bold text-primary uppercase">Created:</span>
+                <span className="">{createdAt ? formatDateTime(createdAt) : '---'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CollectionProfileHeader>
 
       <CollectionProfileSection title={'About'}>
         {project.description && (
-          <RichText className="mx-auto" data={project.description} enableGutter={false} />
+          <RichText className="w-full" data={project.description} enableGutter={false} />
         )}
       </CollectionProfileSection>
 

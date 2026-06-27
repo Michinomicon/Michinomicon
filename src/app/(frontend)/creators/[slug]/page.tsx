@@ -7,7 +7,6 @@ import { getPayload, PaginatedDocs } from 'payload'
 import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import RichText from '@/components/RichText'
-import { generatePageOrPostMeta } from '@/utilities/generatePageOrPostMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import {

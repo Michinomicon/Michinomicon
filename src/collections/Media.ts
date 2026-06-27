@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, FieldHook } from 'payload'
 
 import {
   FixedToolbarFeature,
@@ -8,10 +8,23 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { hasAccess } from '@/utilities/accessFunctions'
-import { mediaCollectionBeforeChange } from '@/hooks/mediaCollectionBeforeChange'
+import { processFileAndPopulateMetaData } from '@/hooks/mediaCollectionBeforeChange'
+import { Media as MediaType } from '@/payload-types'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+type StringFieldHook = FieldHook<MediaType, string | undefined, MediaType>
+
+const adoptFilenameIfEmptyBeforeChange: StringFieldHook = ({ value, siblingData }) => {
+  // If the filename exists, and the field value is empty, adopt the filename
+  const { filename } = siblingData
+  if (filename && (!value || value.length <= 0)) {
+    return filename.replace(/\.[^/.]+$/, '')
+  }
+  // else, keep existing
+  return value
+}
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -33,21 +46,7 @@ export const Media: CollectionConfig = {
       type: 'text',
       required: true,
       hooks: {
-        beforeValidate: [
-          ({ value, req, data }) => {
-            if (value) return value
-            // new upload ? grab the filename from the request.
-            if (req?.file?.name) {
-              // Strip file extension
-              return req.file.name.replace(/\.[^/.]+$/, '')
-            }
-            // use the existing filename if no title is present.
-            if (data?.filename) {
-              return data.filename.replace(/\.[^/.]+$/, '')
-            }
-            return value
-          },
-        ],
+        beforeValidate: [adoptFilenameIfEmptyBeforeChange],
       },
     },
     {
@@ -137,16 +136,7 @@ export const Media: CollectionConfig = {
       type: 'text',
       required: true,
       hooks: {
-        beforeChange: [
-          ({ value, siblingData }) => {
-            // If the alt field is empty, but a title exists, adopt the title
-            if (!value && siblingData?.title) {
-              return siblingData.title
-            }
-            // else, keep existing
-            return value
-          },
-        ],
+        beforeValidate: [adoptFilenameIfEmptyBeforeChange],
       },
     },
     {
@@ -292,7 +282,16 @@ export const Media: CollectionConfig = {
   ],
   upload: {
     staticDir: process.env.PAYLOAD_MEDIA_DIR || path.resolve(dirname, `../../shared-media`),
-    mimeTypes: ['image/*', 'video/*', 'audio/*', 'application/pdf'],
+    mimeTypes: [
+      'image/*',
+      'video/*',
+      'audio/*',
+      'application/pdf',
+      'application/x-zip-compressed', // .zip (windows)
+      'application/zip', // .zip
+      'application/x-7z-compressed', // .7z
+      'application/gzip', // .tar.gz
+    ],
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     displayPreview: true,
@@ -331,7 +330,9 @@ export const Media: CollectionConfig = {
     ],
   },
   hooks: {
-    beforeChange: [mediaCollectionBeforeChange],
+    beforeChange: [processFileAndPopulateMetaData],
+
+    beforeValidate: [],
   },
 }
 

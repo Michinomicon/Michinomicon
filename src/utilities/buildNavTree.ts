@@ -1,5 +1,5 @@
 import { CMSLinkProps } from '@/components/Link'
-import { Category, Header, Page, Post, PostContentBlock } from '@/payload-types'
+import { Category, Creator, Header, Page, Post, PostContentBlock, Project } from '@/payload-types'
 import config from '@payload-config'
 import { BasePayload, getPayload } from 'payload'
 import { getCachedGlobal } from './getGlobals'
@@ -71,10 +71,12 @@ type DocumentCollections = {
   categories: Category[]
   pages: Page[]
   posts: Post[]
+  creators: Creator[]
+  projects: Project[]
 }
 
 function createMenuTreeLinkItemFromLink(
-  { posts, pages }: DocumentCollections,
+  { posts, pages, creators, projects }: DocumentCollections,
   linkConfig: MenuConfigItem,
 ): MenuTreeLinkItem | undefined {
   const { link } = linkConfig
@@ -127,6 +129,44 @@ function createMenuTreeLinkItemFromLink(
           url: `/${postRef.slug}`,
         },
         url: `/${postRef.slug}`,
+      }
+    }
+  }
+
+  if (link.type === 'reference' && link.reference?.relationTo === 'creators') {
+    const { relationTo, value } = link.reference
+    const creatorRef =
+      typeof value === 'object' ? <Creator>value : creators.find(({ id }) => id === value)
+    if (creatorRef) {
+      return {
+        id: creatorRef.id,
+        title: creatorRef.title,
+        type: 'link',
+        link: {
+          ...linkConfig.link,
+          reference: { relationTo: relationTo, value: creatorRef },
+          url: `/${creatorRef.slug}`,
+        },
+        url: `/${creatorRef.slug}`,
+      }
+    }
+  }
+
+  if (link.type === 'reference' && link.reference?.relationTo === 'projects') {
+    const { relationTo, value } = link.reference
+    const projectRef =
+      typeof value === 'object' ? <Project>value : projects.find(({ id }) => id === value)
+    if (projectRef) {
+      return {
+        id: projectRef.id,
+        title: projectRef.title,
+        type: 'link',
+        link: {
+          ...linkConfig.link,
+          reference: { relationTo: relationTo, value: projectRef },
+          url: `/${projectRef.slug}`,
+        },
+        url: `/${projectRef.slug}`,
       }
     }
   }
@@ -293,10 +333,24 @@ async function getDocumentCollections(payload: BasePayload): Promise<DocumentCol
     sort: 'title',
   })
 
+  const { docs: creators } = await payload.find({
+    collection: 'creators',
+    limit: 2000,
+    sort: 'title',
+  })
+
+  const { docs: projects } = await payload.find({
+    collection: 'projects',
+    limit: 2000,
+    sort: 'title',
+  })
+
   return {
     categories,
     pages,
     posts,
+    creators,
+    projects,
   }
 }
 
