@@ -4,7 +4,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle }
 import { CMSLink } from '../Link'
 import { ExternalLinkIcon } from 'lucide-react'
 import { Separator } from '../ui/separator'
-import { Badge, BadgeProps, isBadgeStatus } from '../ui/badge'
+import { Badge, isBadgeStatus } from '../ui/badge'
 
 export type CollectionProfileSectionProps = {
   title: string

@@ -16,20 +16,6 @@ import React from 'react'
 
 const { breakpoints } = cssVariables
 
-type CreditType = {
-  creator: string | Creator
-  role: string
-  id?: string | null
-}
-
-type ImageDetails = {
-  title?: string
-  credits?: CreditType[]
-  project?: Project
-  caption?: DefaultTypedEditorState
-  metadata?: MediaMetaData
-}
-
 // this is used by the browser to determine which image to download at different screen sizes
 const DEFAULT_IMAGE_SIZES = Object.entries(breakpoints)
   .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
