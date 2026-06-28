@@ -1,4 +1,4 @@
-import type { CollectionConfig, FieldHook } from 'payload'
+import type { CollectionConfig, Condition, FieldHook } from 'payload'
 
 import {
   FixedToolbarFeature,
@@ -147,9 +147,6 @@ export const Media: CollectionConfig = {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
       }),
-      admin: {
-        condition: (data) => data?.mimeType?.startsWith('image/'),
-      },
     },
     // --- SHARED IMAGE/VIDEO METADATA FIELDS ---
     {
@@ -276,7 +273,10 @@ export const Media: CollectionConfig = {
       type: 'text',
       admin: {
         readOnly: true,
-        condition: (data) => data?.mimeType?.startsWith('video/'),
+        condition: ((data: MediaType) => data?.mimeType?.startsWith('video/')) as Condition<
+          MediaType,
+          MediaType
+        >,
       },
     },
   ],

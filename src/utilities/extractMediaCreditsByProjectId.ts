@@ -1,4 +1,5 @@
-import { Creator, Media } from '@/payload-types'
+import { Creator, Media, Project } from '@/payload-types'
+import { groupCreditsByCreator } from './groupCreditsByCreator'
 
 export type ProjectMediaCreators = {
   credits: {
@@ -9,8 +10,13 @@ export type ProjectMediaCreators = {
 }
 export const extractMediaCreditsByProjectId = (
   media: Media[],
-  projectId: string,
+  projectOrProjectId: string | Project,
 ): ProjectMediaCreators[] => {
+  const projectId: string = projectOrProjectId
+    ? typeof projectOrProjectId === 'object'
+      ? projectOrProjectId.id
+      : projectOrProjectId
+    : ''
   const projectCredits: ProjectMediaCreators[] = media.reduce(
     (results: ProjectMediaCreators[], current: Media) => {
       const { credits, project } = current
@@ -34,22 +40,4 @@ export const extractMediaCreditsByProjectId = (
   )
 
   return projectCredits
-}
-
-function groupCreditsByCreator(mediaCredits: Media['credits']) {
-  const validCredits: Map<string, { creator: Creator; roles: string[] }> = new Map()
-
-  mediaCredits?.reduce((res, credit) => {
-    const { creator, role } = credit
-    const creatorId = typeof creator === 'object' ? creator.id : creator
-    const stored = validCredits.get(creatorId)
-    if (stored) {
-      stored.roles.push(role)
-    } else if (typeof creator === 'object') {
-      validCredits.set(creatorId, { creator: creator, roles: [role] })
-    }
-    return validCredits
-  }, validCredits)
-
-  return [...validCredits.values()]
 }
