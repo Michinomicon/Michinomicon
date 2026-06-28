@@ -18,9 +18,9 @@ import { Media } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { BeforeSlideDetail, ContainerResizeDetail, InitDetail } from 'lightgallery/lg-events'
-import { getImageMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
 import { cssVariables } from '@/cssVariables'
 import { GalleryItem as LightGalleryItem } from 'lightgallery/lg-utils'
+import { groupCreditsByCreator } from '@/utilities/groupCreditsByCreator'
 
 const { breakpoints } = cssVariables
 
@@ -33,15 +33,15 @@ export interface BaseGalleryItem extends LightGalleryItem {
   alt: string
   size: string
   src: string
-  type: 'image' | 'video'
+  mimeType: 'image' | 'video'
   thumb: string
   subHtml: string
 }
 export interface ImageGalleryItem extends BaseGalleryItem {
-  type: 'image'
+  mimeType: 'image'
 }
 export interface VideoGalleryItem extends BaseGalleryItem {
-  type: 'video'
+  mimeType: 'video'
 }
 export type GalleryItem = ImageGalleryItem | VideoGalleryItem
 
@@ -78,24 +78,34 @@ const getSafeMediaUrl = (fileOrThumbnailUrl: string | null | undefined): string 
   return src
 }
 
+const getGalleryItemSubHtml = (item: Media): string => {
+  const credits = groupCreditsByCreator(item.credits)
+  const captionCredits = credits.map(({ creator, roles }) => {
+    return `<h3><a href='/creators/${creator.slug}'><b>${creator.title}</b></a> - ${roles.join(', ')}</h3>`
+  })
+  return `<div class="lightGallery-captions prose w-full text-center mx-auto">
+      <h3>Title - ${item.title}</h3>
+    ${captionCredits}
+    </div>`
+}
+
 const imageMediaItemToGalleryItem = (item: Media): ImageGalleryItem => {
-  const metaData = getImageMediaMetaData(item)
+  // const metaData = getImageMediaMetaData(item)
+  const subHtml = getGalleryItemSubHtml(item)
   return {
     id: item.id,
     alt: item.alt ?? '',
     size: item.width && item.height ? `${item.width}-${item.height}` : '1280-720',
     src: getSafeMediaUrl(item.url),
-    type: 'image',
+    mimeType: 'image',
     thumb: item.thumbnailURL || item.sizes?.thumbnail?.url || DUMMY_POSTER,
-    subHtml: `<div class="lightGallery-captions">
-                <h4>${metaData.title}</h4>
-                <p>${metaData.createdAt}</p>
-            </div>`,
+    subHtml: subHtml,
   }
 }
 
 const videoMediaItemToGalleryItem = (item: Media): VideoGalleryItem => {
-  const metaData = getVideoMediaMetaData(item)
+  // const metaData = getVideoMediaMetaData(item)
+  const subHtml = getGalleryItemSubHtml(item)
   const posterSrc = item.thumbnailURL || item.sizes?.thumbnail?.url || DUMMY_POSTER
   const videoSrc = {
     html5: true,
@@ -111,13 +121,9 @@ const videoMediaItemToGalleryItem = (item: Media): VideoGalleryItem => {
     alt: item.alt,
     size: item.width && item.height ? `${item.width}-${item.height}` : '1280-720',
     src: JSON.stringify(videoSrc),
-
-    type: 'video',
+    mimeType: 'video',
     thumb: posterSrc,
-    subHtml: `<div class="lightGallery-captions">
-                <h4>${metaData.title}</h4>
-                <p>${metaData.createdAt}</p>
-            </div>`,
+    subHtml: subHtml,
   }
 }
 
@@ -126,7 +132,27 @@ const mapMediaItemsToLightGalleryItems = (
   index: number,
   _array: Media[],
 ): React.ReactNode => {
-  if (item.mimeType?.includes('video')) {
+  const { mimeType, title } = item
+  if (!mimeType) {
+    console.log(
+      `LightGallery Item "${title}" was missing a value for MIMEType. Found: "${item.mimeType}"`,
+      item,
+    )
+    return
+  }
+
+  const itemType: ('image' | 'video') | null = mimeType.includes('image')
+    ? 'image'
+    : mimeType.includes('video')
+      ? 'video'
+      : null
+
+  if (!itemType) {
+    // console.log(`Unexpected MIMEType: ${item.mimeType}`, item)
+    return
+  }
+
+  if (itemType === 'video') {
     const videoItem = videoMediaItemToGalleryItem(item)
     return (
       <a
@@ -134,6 +160,7 @@ const mapMediaItemsToLightGalleryItems = (
         data-lg-size={videoItem.size}
         className={ThumbnailStyles}
         data-video={videoItem.src}
+        data-sub-html={videoItem.subHtml}
       >
         <NextImage
           alt={videoItem.alt}
@@ -152,6 +179,8 @@ const mapMediaItemsToLightGalleryItems = (
       </a>
     )
   } else {
+    // itemType === 'image'
+
     const imageItem = imageMediaItemToGalleryItem(item)
     return (
       <a
@@ -159,6 +188,7 @@ const mapMediaItemsToLightGalleryItems = (
         data-lg-size={imageItem.size}
         className={ThumbnailStyles}
         data-src={imageItem.src}
+        data-sub-html={imageItem.subHtml}
       >
         <NextImage
           alt={imageItem.alt}

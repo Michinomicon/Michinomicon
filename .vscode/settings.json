@@ -12,6 +12,22 @@
   "editor.quickSuggestions": {
     "strings": "on"
   },
+  // Customised Label Patterns for NextJS/React/Tailwind
+  "workbench.editor.customLabels.enabled": true,
+  "workbench.editor.customLabels.patterns": {
+    "**/app/**/\\[*\\]/page.{tsx,jsx}": "${dirname(1)}/${dirname}",
+    "**/app/**/\\[*\\]/route.{ts,js}": "${dirname(1)}/${dirname} API",
+    "**/app/**/page.{tsx,jsx}": "${dirname} - Page",
+    "**/app/**/layout.{tsx,jsx}": "${dirname} - Layout",
+    "**/app/**/route.{ts,js}": "${dirname} - API",
+    "**/app/**/loading.{tsx,jsx}": "${dirname} - Loading",
+    "**/app/**/error.{tsx,jsx}": "${dirname} - Error",
+    "**/app/**/not-found.{tsx,jsx}": "${dirname} - 404",
+    "**/components/**/index.{tsx,ts,jsx,js}": "${dirname}",
+    "**/hooks/**/index.{ts,js}": "${dirname}",
+    "**/tailwind.config.*": "Tailwind",
+    "**/next.config.*": "Next Config"
+  },
   "js/ts.preferences.jsxAttributeCompletionStyle": "braces",
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "[typescript]": {

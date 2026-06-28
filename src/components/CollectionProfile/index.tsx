@@ -1,10 +1,10 @@
 import { Media } from '@/payload-types'
-import { ImageMedia } from '../Media/ImageMedia'
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle } from '../ui/item'
 import { CMSLink } from '../Link'
 import { ExternalLinkIcon } from 'lucide-react'
 import { Separator } from '../ui/separator'
 import { Badge, isBadgeStatus } from '../ui/badge'
+import { ImageGallery } from '../ImageGallery'
 
 export type CollectionProfileSectionProps = {
   title: string
@@ -79,7 +79,9 @@ export const CollectionProfileHeader = ({
   return (
     <div className="grid grid-cols-6 items-center gap-4">
       <div className="col-span-2 col-start-1">
-        {image && typeof image === 'object' && <ImageMedia src={image} />}
+        {image && typeof image === 'object' && (
+          <ImageGallery items={[image]} inlineGallery={false} />
+        )}
       </div>
       <div className="col-span-4 col-start-3">
         <span className="prose">

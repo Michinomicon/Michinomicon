@@ -1,7 +1,7 @@
 'use client'
 
 import { cn } from '@/utilities/ui'
-import Image from 'next/image'
+import NextImage from 'next/image'
 import { cssVariables } from '@/cssVariables'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { Media } from '@/payload-types'
@@ -111,7 +111,7 @@ const ImageCaption = ({ caption, className }: ImageCaptionProps): React.ReactNod
   }
 
   if (typeof caption === 'string') {
-    ;<div className={cn('prose', className)}>{caption}</div>
+    return <div className={cn('prose', className)}>{caption}</div>
   } else {
     return (
       <div className={cn(className)}>
@@ -183,7 +183,7 @@ export const ImageMedia = (props: ImageMediaProps) => {
           </TooltipContent>
         </Tooltip>
       )}
-      <Image
+      <NextImage
         id={id}
         className={cn(imgClassName)}
         alt={alt}
@@ -194,7 +194,7 @@ export const ImageMedia = (props: ImageMediaProps) => {
         height={height}
         blurDataURL={lightPlaceholder}
         quality={100}
-        loading={'eager'}
+        loading={'lazy'}
         style={{ objectFit: 'contain' }}
       />
       {captionPosition === 'below' && (
