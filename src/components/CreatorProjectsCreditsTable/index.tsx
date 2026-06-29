@@ -18,7 +18,6 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { CMSLink } from '@/components/Link'
 import { Button } from '@/components/ui/button'
-import { ProjectStatusBadge } from '@/components/ProjectStatusBadge'
 import {
   DEFAULT_TOOLTIP_DELAY,
   Tooltip,
@@ -28,6 +27,7 @@ import {
 import { formatDateTime } from '@/utilities/formatDateTime'
 import { cn } from '@/lib/utils'
 import { ImageGallery } from '../ImageGallery'
+import { StatusBadge } from '../StatusBadge'
 
 export function CreatorProjectsCreditsTableBody({
   data,
@@ -43,7 +43,7 @@ export function CreatorProjectsCreditsTableBody({
         <TableRow>
           <TableCell>{project.title}</TableCell>
           <TableCell className="text-center">
-            <ProjectStatusBadge project={project} />
+            <StatusBadge status={project.status} />
           </TableCell>
 
           <TableCell>{project.startDate ? formatDateTime(project.startDate) : '---'}</TableCell>
@@ -113,7 +113,7 @@ export function CreatorProjectsCreditsTableBody({
                       return (
                         <TableRow key={index}>
                           <TableCell className={'p-0'}>
-                            <ImageGallery items={[credit.media]} inlineGallery={false} />
+                            <ImageGallery items={[credit.media]} inline={false} />
                           </TableCell>
                           <TableCell>{credit.media.title}</TableCell>
                           <TableCell>{credit.roles.join(', ')}</TableCell>

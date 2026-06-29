@@ -13,12 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { cn } from '@/lib/utils'
 import { CMSLink } from '../Link'
 import { ImageGallery } from '../ImageGallery'
-import {
-  Download,
-  ListChevronsDownUp,
-  ListChevronsUpDown,
-  SquareArrowRightEnter,
-} from 'lucide-react'
+import { Download, ListChevronsDownUp, ListChevronsUpDown, User } from 'lucide-react'
 import {
   DEFAULT_TOOLTIP_DELAY,
   Tooltip,
@@ -27,8 +22,11 @@ import {
 } from '@/components/ui/tooltip'
 import { Button } from '../ui/button'
 import { isMedia } from '@/utilities/isMedia'
-import { Badge, isBadgeStatus } from '../ui/badge'
 import React from 'react'
+import { StatusBadge } from '../StatusBadge'
+import { getMediaFileExtension } from '@/utilities/getMediaFileType'
+import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
+import { MediaFileTypeIcon } from '../MediaIcon'
 
 export function ProjectMediaTableBody({
   data,
@@ -42,13 +40,15 @@ export function ProjectMediaTableBody({
       <TableBody className={cn(isOpen ? 'bg-primary/10' : '', 'rounded-none')}>
         {/* (Always Visible)Media Summary Row */}
         <TableRow>
-          {/* Asset */}
-          <TableCell className={'p-0'}>
-            <ImageGallery items={[media]} inlineGallery={false} />
+          {/* Asset Type */}
+          <TableCell className="text-center">
+            <MediaFileTypeIcon file={media} size={22}></MediaFileTypeIcon>
           </TableCell>
 
-          {/* Type */}
-          <TableCell>{media.mimeType}</TableCell>
+          {/* Asset */}
+          <TableCell className={'p-0 text-center'}>
+            <ImageGallery items={[media]} inline={false} />
+          </TableCell>
 
           {/* Title */}
           <TableCell>{media.title}</TableCell>
@@ -68,15 +68,25 @@ export function ProjectMediaTableBody({
                       </div>
                     ) : (
                       <div className="flex flex-nowrap gap-2">
-                        <span>Show</span>
+                        <span>Expand</span>
                         <ListChevronsDownUp />
                       </div>
                     )}
                   </Button>
                 </CollapsibleTrigger>
               </TooltipTrigger>
-              <TooltipContent>{isOpen ? 'Collapse Credits' : 'Show Credits'}</TooltipContent>
+              <TooltipContent>{isOpen ? 'Collapse Credits' : 'Expand Credits'}</TooltipContent>
             </Tooltip>
+          </TableCell>
+
+          {/* File Name */}
+          <TableCell>
+            <pre className=""></pre>
+          </TableCell>
+
+          {/* File Type */}
+          <TableCell>
+            <pre className="font-semibold">{getMediaFileExtension(media)}</pre>
           </TableCell>
 
           {/* link to file */}
@@ -87,9 +97,9 @@ export function ProjectMediaTableBody({
               size="icon"
               appearance="ghost"
               className="rounded-full"
-              tooltipContent={'Open this item in a new tab.'}
+              tooltipContent={`${media.filename} ( ${getFileMediaMetaData(media).filesize} )`}
             >
-              <Download className="size-4" />
+              <Download />
             </CMSLink>
           </TableCell>
         </TableRow>
@@ -108,7 +118,7 @@ export function ProjectMediaTableBody({
                       <TableHead colSpan={2}>Creator</TableHead>
                       <TableHead className="text-center">Status</TableHead>
                       <TableHead className="w-full">Credits</TableHead>
-                      <TableHead className="w-fit text-center">View</TableHead>
+                      <TableHead className="w-fit text-center">Profile</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -118,19 +128,14 @@ export function ProjectMediaTableBody({
                           {/* Creator Profile Picture */}
                           <TableCell className={'p-0'}>
                             {isMedia(creator.profileImage) && (
-                              <ImageGallery items={[creator.profileImage]} inlineGallery={false} />
+                              <ImageGallery items={[creator.profileImage]} inline={false} />
                             )}
                           </TableCell>
                           {/* Creator Title */}
                           <TableCell>{creator.title}</TableCell>
                           {/* Status */}
-                          <TableCell>
-                            <Badge
-                              variant={'status'}
-                              status={isBadgeStatus(creator.status) ? creator.status : null}
-                            >
-                              <span className="font-bold uppercase">{creator.status}</span>
-                            </Badge>
+                          <TableCell className="text-center">
+                            <StatusBadge variant={'status'} status={creator.status}></StatusBadge>
                           </TableCell>
 
                           {/* Credits */}
@@ -154,7 +159,7 @@ export function ProjectMediaTableBody({
                               tooltipContent={'View creator profile.'}
                               url={`/creators/${creator.slug}`}
                             >
-                              <SquareArrowRightEnter className="size-4" />
+                              <User className="size-4" />
                             </CMSLink>
                           </TableCell>
                         </TableRow>
@@ -204,11 +209,15 @@ export function ProjectMediaTable({
       <TableHeader className="bg-primary/5">
         <TableRow>
           <TableHead className="w-fit">Asset</TableHead>
-          <TableHead className="w-fit">Type</TableHead>
+          <TableHead className="w-fit min-w-12"></TableHead>
+
           <TableHead className="w-auto">Title</TableHead>
           <TableHead className="w-full">Credits</TableHead>
           <TableHead className="w-fit text-center">Details</TableHead>
-          <TableHead className="w-fit text-center">File</TableHead>
+
+          <TableHead colSpan={3} className="w-fit text-center">
+            File
+          </TableHead>
         </TableRow>
       </TableHeader>
 

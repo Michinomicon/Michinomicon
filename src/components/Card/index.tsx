@@ -4,10 +4,10 @@ import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { useRef } from 'react'
 import type { Media } from '@/payload-types'
-import { ImageMedia } from '../Media/ImageMedia'
 import { TypedCollection } from 'payload'
-import { Badge, isBadgeStatus } from '../ui/badge'
+import { Badge, BadgeStatus } from '../ui/badge'
 import { Separator } from '../ui/separator'
+import { ImageGallery } from '../ImageGallery'
 
 export type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
 export type SupportedSlug = keyof SupportedConfigs
@@ -82,7 +82,7 @@ export function CollectionCard<C extends keyof SupportedConfigs>({
       ref={cardCurrentRef}
     >
       <div className="relative w-full">
-        {image && typeof image === 'object' && <ImageMedia src={image} />}
+        {image && typeof image === 'object' && <ImageGallery items={[image]} inline={false} />}
       </div>
       <div className="mt-2 px-4">
         <div className="flex w-full flex-row flex-nowrap items-center justify-between">
@@ -96,7 +96,7 @@ export function CollectionCard<C extends keyof SupportedConfigs>({
             </div>
           )}
           {showStatus && (
-            <Badge status={isBadgeStatus(status) ? status : null}>
+            <Badge status={status as BadgeStatus}>
               <span className="font-bold uppercase">{status}</span>
             </Badge>
           )}
@@ -106,7 +106,7 @@ export function CollectionCard<C extends keyof SupportedConfigs>({
       </div>
       <Separator></Separator>
       {showTags && tags && (
-        <div className="my-2 px-4 text-sm uppercase">
+        <div className="my-2 flex flex-row gap-x-1 px-4 text-sm uppercase">
           {tags.map((tag, index) => {
             return (
               <Badge key={index} variant={'default'}>

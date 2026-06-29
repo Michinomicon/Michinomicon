@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 import TrackLoader from './AudioTrackLoader'
 import { Track } from '@/lib/html-audio'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
-import { getPDFMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
+import { getFileMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
 import { ImageGallery } from '../ImageGallery'
 
 const MESSAGE_FAILED_TO_RENDER = 'Failed to render media.'
@@ -113,7 +113,7 @@ export const Media = (props: MediaProps) => {
               resource={resource}
               title={title}
               description={description}
-              {...{ ...baseProps, metadata: getPDFMediaMetaData(resource) }}
+              {...{ ...baseProps, metadata: getFileMediaMetaData(resource) }}
             />
           </React.Fragment>
         )

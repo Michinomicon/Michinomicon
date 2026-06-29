@@ -72,7 +72,11 @@ export default async function Project({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <CollectionProfileHeader title={title} image={profileImage} status={status}>
+      <CollectionProfileHeader
+        title={title}
+        image={profileImage}
+        statusBadgeProps={{ status: status }}
+      >
         <div className="flex w-full flex-col">
           <div className="mb-2 flex w-full items-center">
             <span className="mr-2 text-xs font-bold text-primary uppercase">Categories</span>
