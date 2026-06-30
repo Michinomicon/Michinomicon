@@ -8,15 +8,11 @@ import { TypedCollection } from 'payload'
 import { Badge, BadgeStatus } from '../ui/badge'
 import { Separator } from '../ui/separator'
 import { ImageGallery } from '../ImageGallery'
+import { StatusBadge } from '../StatusBadge'
 
 export type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
 export type SupportedSlug = keyof SupportedConfigs
 export type SupportedCollection = SupportedConfigs[keyof SupportedConfigs]
-
-export type CollectionCardItemPropertiesFunc<
-  C extends keyof SupportedConfigs,
-  T extends SupportedConfigs[C] = SupportedConfigs[C],
-> = (item: T) => CollectionCardItemProperties
 
 export type CollectionCardPropsItemProperties<C extends keyof SupportedConfigs> = {
   title?: string
@@ -27,27 +23,13 @@ export type CollectionCardPropsItemProperties<C extends keyof SupportedConfigs> 
   showImage?: boolean
   collection: C
   item: CollectionCardItemProperties
-  itemFunc?: never
-}
-
-export type CollectionCardPropsItemFunc<C extends keyof SupportedConfigs> = {
-  title?: string
-  alignItems?: 'center'
-  className?: string
-  showStatus?: boolean
-  showTags?: boolean
-  showImage?: boolean
-  collection: C
-  item: SupportedConfigs[C]
-  itemFunc: CollectionCardItemPropertiesFunc<C>
 }
 
 export type CollectionCardProps<C extends keyof SupportedConfigs> =
-  | CollectionCardPropsItemProperties<C>
-  | CollectionCardPropsItemFunc<C>
+  CollectionCardPropsItemProperties<C>
 
 export type CollectionCardItemProperties = {
-  status: string
+  status: BadgeStatus | null
   tags: string[] | null
   image: Media | null
   description: string | null
@@ -60,16 +42,13 @@ export function CollectionCard<C extends keyof SupportedConfigs>({
   showTags = true,
   showStatus = true,
   title: titleFromProps,
-  itemFunc,
   item: itemFromProps,
 }: CollectionCardProps<C>): React.ReactNode {
   const { card, link } = useClickableCard({})
   const cardCurrentRef = useRef(card.ref.current)
   const linkCurrentRef = useRef(link.ref.current)
 
-  const { tags, image, description, title, href, status } = itemFunc
-    ? itemFunc(itemFromProps)
-    : itemFromProps
+  const { tags, image, description, title, href, status } = itemFromProps
 
   const titleToUse = titleFromProps || title
 
@@ -95,11 +74,7 @@ export function CollectionCard<C extends keyof SupportedConfigs>({
               </h3>
             </div>
           )}
-          {showStatus && (
-            <Badge status={status as BadgeStatus}>
-              <span className="font-bold uppercase">{status}</span>
-            </Badge>
-          )}
+          {showStatus && status && <StatusBadge status={status}></StatusBadge>}
         </div>
 
         {description && <div className="my-2">{description && <p>{description}</p>}</div>}
