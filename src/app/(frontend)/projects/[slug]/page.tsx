@@ -168,6 +168,7 @@ const queryMediaByProjectId = cache(async ({ id }: { id: string }): Promise<Medi
   const projectMedia: PaginatedDocs<Media> = await payload.find({
     collection: 'media',
     limit: 1000,
+    depth: 3,
     where: {
       and: [
         {

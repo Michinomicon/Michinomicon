@@ -1,11 +1,6 @@
 'use client'
 import { ProjectMediaCredit } from '@/utilities/extractMediaCreditsByCreatorId'
-import {
-  Download,
-  ListChevronsDownUp,
-  ListChevronsUpDown,
-  SquareArrowRightEnter,
-} from 'lucide-react'
+import { FolderOpen, ListChevronsDownUp, ListChevronsUpDown } from 'lucide-react'
 import React, { useState } from 'react'
 import {
   Table,
@@ -28,6 +23,9 @@ import { formatDateTime } from '@/utilities/formatDateTime'
 import { cn } from '@/lib/utils'
 import { ImageGallery } from '../ImageGallery'
 import { StatusBadge } from '../StatusBadge'
+import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
+import { getMediaFileExtension } from '@/utilities/getMediaFileType'
+import { isMedia } from '@/utilities/isMedia'
 
 export function CreatorProjectsCreditsTableBody({
   data,
@@ -35,19 +33,28 @@ export function CreatorProjectsCreditsTableBody({
   const [isOpen, setOpen] = useState(false)
   if (!data || data.length <= 0) return
   const { project } = data[0]
+  const profileImage = isMedia(project.profileImage) ? project.profileImage : null
 
   return (
     <Collapsible open={isOpen} onOpenChange={setOpen} asChild>
       <TableBody className={cn(isOpen ? 'bg-primary/10' : '', 'rounded-none')}>
         {/* (Always Visible) Project Credits Summary Row */}
         <TableRow>
+          {/* Asset */}
+          <TableCell className={'p-0 text-center'}>
+            {profileImage && <ImageGallery items={[profileImage]} inline={false} />}
+          </TableCell>
           <TableCell>{project.title}</TableCell>
           <TableCell className="text-center">
             <StatusBadge status={project.status} />
           </TableCell>
 
-          <TableCell>{project.startDate ? formatDateTime(project.startDate) : '---'}</TableCell>
-          <TableCell>{project.endDate ? formatDateTime(project.endDate) : '---'}</TableCell>
+          <TableCell className="text-center">
+            {project.startDate ? formatDateTime(project.startDate) : '---'}
+          </TableCell>
+          <TableCell className="text-center">
+            {project.endDate ? formatDateTime(project.endDate) : '---'}
+          </TableCell>
           <TableCell className="">
             <div className="flex w-full items-center">
               <div className="text-ellipsis">
@@ -59,15 +66,16 @@ export function CreatorProjectsCreditsTableBody({
             <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
               <TooltipTrigger asChild>
                 <CollapsibleTrigger asChild>
-                  <Button variant={isOpen ? 'default' : 'ghost'} size="sm" className="ml-auto">
+                  <Button variant={'ghost'} size="lg" className="ml-auto text-muted-foreground">
                     {isOpen ? (
                       <div className="flex flex-nowrap gap-2">
-                        <span>Collapse</span> <ListChevronsUpDown />
+                        <span>Collapse</span>
+                        <ListChevronsDownUp />
                       </div>
                     ) : (
                       <div className="flex flex-nowrap gap-2">
-                        <span>Show</span>
-                        <ListChevronsDownUp />
+                        <span>Expand</span>
+                        <ListChevronsUpDown />
                       </div>
                     )}
                   </Button>
@@ -80,13 +88,14 @@ export function CreatorProjectsCreditsTableBody({
           </TableCell>
           <TableCell className="text-center">
             <CMSLink
+              newTab={false}
+              size="lg"
               appearance="ghost"
-              size="icon"
-              className="rounded-full"
-              tooltipContent={'Go to this projects homepage'}
-              {...project.homepage}
+              className="lg"
+              tooltipContent={'Project Page'}
+              url={project.homepage.url}
             >
-              <SquareArrowRightEnter className="size-4" />
+              <FolderOpen size={32} />
             </CMSLink>
           </TableCell>
         </TableRow>
@@ -94,18 +103,25 @@ export function CreatorProjectsCreditsTableBody({
         {/* (Initially hidden - Collapsible) Itemized Project Credits Row */}
         <CollapsibleContent asChild>
           <TableRow className={cn('')}>
+            <TableCell colSpan={2} className="bg-card/10"></TableCell>
             <TableCell
               colSpan={7}
-              className={cn('rounded-none bg-card/40 p-0 pl-32', isOpen ? 'border-b' : '')}
+              className={cn('rounded-none bg-card/40 p-0', isOpen ? 'border-b' : '')}
             >
               <div className="w-full rounded-none border-l-2 border-primary/60 bg-card">
                 <Table>
                   <TableHeader className="bg-primary/5">
                     <TableRow>
-                      <TableHead className="w-fit">Asset</TableHead>
-                      <TableHead className="w-auto">Title</TableHead>
-                      <TableHead className="w-full">Credits</TableHead>
-                      <TableHead className="w-fit text-center">File</TableHead>
+                      <TableHead
+                        className="h-auto w-fit min-w-16 p-0 text-left"
+                        aria-label={'Asset'}
+                      ></TableHead>
+                      <TableHead className="h-auto w-auto" aria-label={'Title'}></TableHead>
+                      <TableHead className="h-auto w-full" aria-label={'Credits'}></TableHead>
+                      <TableHead
+                        className="h-auto w-fit text-center"
+                        aria-label={'File'}
+                      ></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -115,18 +131,24 @@ export function CreatorProjectsCreditsTableBody({
                           <TableCell className={'p-0'}>
                             <ImageGallery items={[credit.media]} inline={false} />
                           </TableCell>
-                          <TableCell>{credit.media.title}</TableCell>
-                          <TableCell>{credit.roles.join(', ')}</TableCell>
+                          <TableCell className="text-center text-lg">
+                            {credit.media.title}
+                          </TableCell>
+                          <TableCell className="text-left text-lg">
+                            {credit.roles.join(', ')}
+                          </TableCell>
                           <TableCell className="text-center">
                             <CMSLink
                               url={credit.media.url}
-                              newTab={true}
-                              size="icon"
+                              newTab={false}
+                              size="lg"
                               appearance="ghost"
-                              className="rounded-full"
-                              tooltipContent={'Open this file.'}
+                              className=""
+                              tooltipContent={`${credit.media.filename} ( ${getFileMediaMetaData(credit.media).filesize} )`}
                             >
-                              <Download className="size-4" />
+                              <pre className="font-semibold">
+                                {getMediaFileExtension(credit.media)}
+                              </pre>
                             </CMSLink>
                           </TableCell>
                         </TableRow>
@@ -173,15 +195,18 @@ export function CreatorProjectsCreditsTable({
 }: React.ComponentPropsWithoutRef<typeof Table> & { data?: ProjectMediaCredit[] }) {
   return (
     <Table {...props}>
-      <TableHeader>
+      <TableHeader className="bg-primary/5">
         <TableRow>
-          <TableHead>Project</TableHead>
-          <TableHead className="text-center">Status</TableHead>
-          <TableHead className="w-fit">Started</TableHead>
-          <TableHead className="w-fit">Finished</TableHead>
+          <TableHead className="w-fit min-w-16" aria-label={'Project Picture'}>
+            Project
+          </TableHead>
+          <TableHead aria-label={'Project Title'}></TableHead>
+          <TableHead className="text-center" aria-label={'Status'}></TableHead>
+          <TableHead className="w-fit text-center">Started</TableHead>
+          <TableHead className="w-fit text-center">Finished</TableHead>
           <TableHead className="w-full">Credits</TableHead>
-          <TableHead className="w-fit text-center">Details</TableHead>
-          <TableHead className="w-fit text-center">Homepage</TableHead>
+          <TableHead className="w-fit text-center"></TableHead>
+          <TableHead className="w-fit text-center"></TableHead>
         </TableRow>
       </TableHeader>
       <CreatorProjectsCreditsTableContent data={data} />

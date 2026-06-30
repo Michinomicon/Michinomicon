@@ -18,7 +18,6 @@ export function StatusBadge({
   ...props
 }: StatusBadgeProps) {
   const stringStatus = status ? `${status}` : ''
-  console.log(`StatusBadge: status:`, status)
   return (
     <Badge
       className={cn('', className)}

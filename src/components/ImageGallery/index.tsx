@@ -18,9 +18,9 @@ import { Media } from '@/payload-types'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { BeforeSlideDetail, ContainerResizeDetail, InitDetail } from 'lightgallery/lg-events'
 import { cssVariables } from '@/cssVariables'
-import { mapImageGalleryItems } from './ImageGalleryItem'
-import FileQuestionMarkPNG from '@/public/file-question-mark.png'
-import { MediaFileTypeIcon } from '../MediaIcon'
+import { GalleryItem as LightGalleryItem } from 'lightgallery/lg-utils'
+import { groupCreditsByCreator } from '@/utilities/groupCreditsByCreator'
+import { getMediaDisplayImageSources } from '@/utilities/getMediaDisplayImageSource'
 
 const { breakpoints } = cssVariables
 
@@ -111,6 +111,56 @@ export type ImageGalleryProps = InlineableGalleryProps & {
   containerProps?: React.ComponentPropsWithRef<'div'>
 }
 
+export type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
+  width?: number | `${number}` | undefined
+  height?: number | `${number}` | undefined
+} & {
+  id: string
+  alt: string
+  size: string
+  src: string
+  type: 'image' | 'video'
+  thumb: string
+  subHtml: string
+}
+
+function getItemSubHtml(item: Media): string {
+  const credits = groupCreditsByCreator(item.credits)
+  const captionCredits = credits.map(({ creator, roles }) => {
+    return `<h3><a href='/creators/${creator.slug}'><b>${creator.title}</b></a> - ${roles.join(', ')}</h3>`
+  })
+  return `<div class="lightGallery-captions prose w-full text-center mx-auto">
+        <h3>Title - ${item.title}</h3>
+    ${captionCredits}
+    </div>`
+}
+
+function getItemProperties(media: Media): ItemProperties | undefined {
+  const itemType =
+    typeof media.mimeType === 'string' && media.mimeType.includes('video') ? 'video' : 'image'
+
+  const { source, thumbnail } = getMediaDisplayImageSources(media)
+  const subHtml = getItemSubHtml(media)
+  return {
+    id: media.id,
+    alt: media.alt,
+    size: media.width && media.height ? `${media.width}-${media.height}` : '1280-720',
+    src: source,
+    type: itemType,
+    thumb: thumbnail,
+    subHtml: subHtml,
+  }
+}
+
+export function mapImageGalleryItems(media: Media[]) {
+  const items: ItemProperties[] = media
+    .sort((i, j) => Number(j.sortPriority) - Number(i.sortPriority))
+    .map(getItemProperties)
+    .filter((i) => !!i)
+
+  return items
+}
+
 export const ImageGallery = ({
   items,
   inline = true,
@@ -167,11 +217,6 @@ export const ImageGallery = ({
 
   const lightGallerySettings = inline ? inlineGallerySettings : settingsFromProps
 
-  console.log(`LightGallerySettings: INLINE=${inline} `, {
-    galleryItems: galleryItems.length,
-    items: galleryItems,
-  })
-
   return (
     <div
       className={cn('relative h-auto max-h-200 w-full overflow-hidden rounded-none')}
@@ -192,7 +237,19 @@ export const ImageGallery = ({
         zoom={true}
         mousewheel={true}
         download={false}
-        animateThumb={true}
+        animateThumb={false}
+        backdropDuration={100}
+        hideScrollbar={true}
+        preload={3}
+        startAnimationDuration={100}
+        speed={300}
+        zoomFromOrigin={false}
+        loadYouTubeThumbnail={true}
+        youTubePlayerParams={{
+          modestbranding: 1,
+          showinfo: 0,
+          controls: 0,
+        }}
         // ----------------------------
         // Don't Change
         container={inline ? galleryContainer : null}
@@ -202,7 +259,7 @@ export const ImageGallery = ({
         currentPagerPosition={'middle'}
         alignThumbnails={'middle'}
         videojs={false}
-        elementClassNames={cn('overflow-hidden')}
+        elementClassNames={cn('overflow-hidden rounded-none')}
         isMobile={getIsMobile}
         onContainerResize={handleContainerResize}
         onBeforeSlide={handleBeforeSlide}
@@ -217,7 +274,7 @@ export const ImageGallery = ({
               <a
                 key={index}
                 data-lg-size={item.size}
-                className={ThumbnailStyles}
+                className={cn('rounded-none', ThumbnailStyles)}
                 data-video={item.src}
                 data-sub-html={item.subHtml}
               >
@@ -249,43 +306,16 @@ export const ImageGallery = ({
               >
                 <NextImage
                   alt={item.alt}
-                  className={ImageStyles}
+                  className={cn('rounded-none', ImageStyles)}
                   src={item.thumb}
                   loading={'eager'}
                   width={item.width ?? 1280}
                   height={item.height ?? 720}
                   sizes={ImageSizes}
-                  placeholder={'blur'}
+                  placeholder={'empty'}
                   blurDataURL={PLACEHOLDER_BLUR}
                   style={{ objectFit: 'cover' }}
                 />
-              </a>
-            )
-          }
-          if (item.type === 'unsupported') {
-            return (
-              <a
-                key={item.id}
-                data-lg-size={item.size}
-                className={cn(ThumbnailStyles, 'text-foreground')}
-                data-src={FileQuestionMarkPNG.src}
-                data-sub-html={item.subHtml}
-              >
-                {/* <NextImage
-                  alt={item.alt}
-                  className={ImageStyles}
-                  src={FileQuestionMarkPNG}
-                  loading={'eager'}
-                  width={'1280'}
-                  height={720}
-                  sizes={ImageSizes}
-                  placeholder={'blur'}
-                  blurDataURL={PLACEHOLDER_BLUR}
-                  style={{ objectFit: 'cover' }}
-                /> */}
-                <div className="flex h-full w-full flex-col items-center justify-center opacity-40">
-                  <MediaFileTypeIcon file={item}></MediaFileTypeIcon>
-                </div>
               </a>
             )
           }

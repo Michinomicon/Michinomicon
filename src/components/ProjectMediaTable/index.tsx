@@ -13,7 +13,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/colla
 import { cn } from '@/lib/utils'
 import { CMSLink } from '../Link'
 import { ImageGallery } from '../ImageGallery'
-import { Download, ListChevronsDownUp, ListChevronsUpDown, User } from 'lucide-react'
+import { ListChevronsDownUp, ListChevronsUpDown, User } from 'lucide-react'
 import {
   DEFAULT_TOOLTIP_DELAY,
   Tooltip,
@@ -26,7 +26,6 @@ import React from 'react'
 import { StatusBadge } from '../StatusBadge'
 import { getMediaFileExtension } from '@/utilities/getMediaFileType'
 import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
-import { MediaFileTypeIcon } from '../MediaIcon'
 
 export function ProjectMediaTableBody({
   data,
@@ -40,11 +39,6 @@ export function ProjectMediaTableBody({
       <TableBody className={cn(isOpen ? 'bg-primary/10' : '', 'rounded-none')}>
         {/* (Always Visible)Media Summary Row */}
         <TableRow>
-          {/* Asset Type */}
-          <TableCell className="text-center">
-            <MediaFileTypeIcon file={media} size={22}></MediaFileTypeIcon>
-          </TableCell>
-
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
             <ImageGallery items={[media]} inline={false} />
@@ -61,15 +55,17 @@ export function ProjectMediaTableBody({
             <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
               <TooltipTrigger asChild>
                 <CollapsibleTrigger asChild>
-                  <Button variant={isOpen ? 'default' : 'ghost'} size="sm" className="ml-auto">
+                  <Button variant={'ghost'} size="lg" className="ml-auto text-muted-foreground">
                     {isOpen ? (
                       <div className="flex flex-nowrap gap-2">
-                        <span>Collapse</span> <ListChevronsUpDown />
+                        <span>Collapse</span>
+                        <ListChevronsDownUp />
                       </div>
                     ) : (
                       <div className="flex flex-nowrap gap-2">
-                        <span>Expand</span>
-                        <ListChevronsDownUp />
+                        <span className="">Expand</span>
+
+                        <ListChevronsUpDown />
                       </div>
                     )}
                   </Button>
@@ -79,27 +75,17 @@ export function ProjectMediaTableBody({
             </Tooltip>
           </TableCell>
 
-          {/* File Name */}
-          <TableCell>
-            <pre className=""></pre>
-          </TableCell>
-
-          {/* File Type */}
-          <TableCell>
-            <pre className="font-semibold">{getMediaFileExtension(media)}</pre>
-          </TableCell>
-
           {/* link to file */}
           <TableCell className="text-center">
             <CMSLink
               url={media.url}
-              newTab={true}
-              size="icon"
+              newTab={false}
+              size="lg"
               appearance="ghost"
-              className="rounded-full"
+              className=""
               tooltipContent={`${media.filename} ( ${getFileMediaMetaData(media).filesize} )`}
             >
-              <Download />
+              <pre className="font-semibold">{getMediaFileExtension(media)}</pre>
             </CMSLink>
           </TableCell>
         </TableRow>
@@ -107,39 +93,48 @@ export function ProjectMediaTableBody({
         {/* (Initially hidden - Collapsible) Detailed Credits Table */}
         <CollapsibleContent asChild>
           <TableRow className={cn('')}>
+            <TableCell colSpan={2} className="bg-card/10"></TableCell>
             <TableCell
-              colSpan={7}
-              className={cn('rounded-none bg-card/40 p-0 pl-32', isOpen ? 'border-b' : '')}
+              colSpan={3}
+              className={cn('rounded-none bg-card/40 p-0', isOpen ? 'border-b' : '')}
             >
               <div className="w-full rounded-none border-l-2 border-primary/60 bg-card">
-                <Table>
+                <Table className="">
                   <TableHeader>
                     <TableRow>
-                      <TableHead colSpan={2}>Creator</TableHead>
-                      <TableHead className="text-center">Status</TableHead>
-                      <TableHead className="w-full">Credits</TableHead>
-                      <TableHead className="w-fit text-center">Profile</TableHead>
+                      <TableHead
+                        className="h-auto w-fit min-w-16 p-0 text-left"
+                        aria-label={'Creator Picture'}
+                      ></TableHead>
+                      <TableHead className="h-auto w-fit" aria-label={'Creator Name'}></TableHead>
+                      <TableHead className="h-auto text-center" aria-label={'Status'}></TableHead>
+                      <TableHead className="h-auto w-full" aria-label={'Credits'}></TableHead>
+                      <TableHead
+                        className="h-auto min-w-16 text-center"
+                        aria-label={'Profile'}
+                      ></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {credits.map(({ creator, roles }, index) => {
+                      const profileImage = isMedia(creator.profileImage)
+                        ? creator.profileImage
+                        : null
                       return (
                         <TableRow key={index}>
                           {/* Creator Profile Picture */}
                           <TableCell className={'p-0'}>
-                            {isMedia(creator.profileImage) && (
-                              <ImageGallery items={[creator.profileImage]} inline={false} />
-                            )}
+                            {profileImage && <ImageGallery items={[profileImage]} inline={false} />}
                           </TableCell>
                           {/* Creator Title */}
-                          <TableCell>{creator.title}</TableCell>
+                          <TableCell className="text-center text-lg">{creator.title}</TableCell>
                           {/* Status */}
                           <TableCell className="text-center">
                             <StatusBadge variant={'status'} status={creator.status}></StatusBadge>
                           </TableCell>
 
                           {/* Credits */}
-                          <TableCell>
+                          <TableCell className="text-left text-lg">
                             {roles.map((role, index) => {
                               const isLast = index === credits.length - 1
                               return (
@@ -154,12 +149,12 @@ export function ProjectMediaTableBody({
                           <TableCell className="text-center">
                             <CMSLink
                               appearance="ghost"
-                              size="icon"
-                              className="rounded-full"
+                              size="lg"
+                              className="text-lg"
                               tooltipContent={'View creator profile.'}
                               url={`/creators/${creator.slug}`}
                             >
-                              <User className="size-4" />
+                              <User className="" size={32}></User>
                             </CMSLink>
                           </TableCell>
                         </TableRow>
@@ -208,16 +203,13 @@ export function ProjectMediaTable({
     <Table {...props}>
       <TableHeader className="bg-primary/5">
         <TableRow>
-          <TableHead className="w-fit">Asset</TableHead>
-          <TableHead className="w-fit min-w-12"></TableHead>
+          <TableHead className="w-fit min-w-16">Asset</TableHead>
 
-          <TableHead className="w-auto">Title</TableHead>
+          <TableHead className="w-auto"></TableHead>
           <TableHead className="w-full">Credits</TableHead>
-          <TableHead className="w-fit text-center">Details</TableHead>
+          <TableHead className="w-fit text-center"></TableHead>
 
-          <TableHead colSpan={3} className="w-fit text-center">
-            File
-          </TableHead>
+          <TableHead className="w-fit min-w-16 text-center">File</TableHead>
         </TableRow>
       </TableHeader>
 

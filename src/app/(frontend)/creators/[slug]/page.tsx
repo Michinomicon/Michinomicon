@@ -67,7 +67,7 @@ export default async function Creator({ params: paramsPromise }: Args) {
 
   if (!creator) return <PayloadRedirects url={url} />
 
-  const { title: creatorName, profileImage, socialLinks } = creator
+  const { title: creatorName, profileImage, socialLinks, status } = creator
 
   return (
     <article className="article pointer-events-auto border border-primary/30 bg-background p-16 text-card-foreground">
@@ -78,7 +78,11 @@ export default async function Creator({ params: paramsPromise }: Args) {
 
       {draft && <LivePreviewListener />}
 
-      <CollectionProfileHeader title={creatorName} image={profileImage} />
+      <CollectionProfileHeader
+        title={creatorName}
+        image={profileImage}
+        statusBadgeProps={{ status: status }}
+      />
 
       <CollectionProfileSection title={'Links'}>
         <CollectionProfileLinkItemGroup links={socialLinks} />

@@ -30,6 +30,7 @@ export const Creators: CollectionConfig = {
     title: true,
     slug: true,
     status: true,
+    profileImage: true,
   },
   fields: [
     {

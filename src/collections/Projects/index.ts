@@ -33,6 +33,7 @@ export const Projects: CollectionConfig = {
     startDate: true,
     endDate: true,
     homepage: true,
+    profileImage: true,
   },
   fields: [
     {

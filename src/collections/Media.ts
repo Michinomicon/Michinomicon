@@ -50,6 +50,39 @@ export const Media: CollectionConfig = {
       },
     },
     {
+      name: 'alt',
+      type: 'text',
+      required: true,
+      hooks: {
+        beforeValidate: [adoptFilenameIfEmptyBeforeChange],
+      },
+    },
+    {
+      name: 'coverImage',
+      type: 'relationship',
+      relationTo: 'media',
+      hasMany: false,
+      filterOptions: {
+        or: [
+          {
+            mimeType: {
+              contains: 'image/',
+            },
+          },
+          {
+            mimeType: {
+              contains: 'video/',
+            },
+          },
+        ],
+      },
+      admin: {
+        description: 'Select an image or video that will be used as a preview for this upload.',
+        condition: (data: Partial<MediaType>) =>
+          !data?.mimeType?.startsWith('image/') && !data?.mimeType?.startsWith('video/'),
+      },
+    },
+    {
       name: 'isForProject',
       type: 'checkbox',
       label: 'Is for Project',
@@ -130,14 +163,6 @@ export const Media: CollectionConfig = {
         position: 'sidebar',
       },
       defaultValue: 0,
-    },
-    {
-      name: 'alt',
-      type: 'text',
-      required: true,
-      hooks: {
-        beforeValidate: [adoptFilenameIfEmptyBeforeChange],
-      },
     },
     {
       name: 'caption',
