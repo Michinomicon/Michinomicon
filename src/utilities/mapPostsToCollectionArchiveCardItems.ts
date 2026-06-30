@@ -10,11 +10,11 @@ export function mapPostsToCollectionArchiveCardItems<T extends Partial<Post>>(
     const { image, description } = meta ?? { image: null, description: null }
 
     const tags: string[] = Array.isArray(categories)
-      ? categories.map((cat) => (typeof cat === 'object' ? cat.id : cat))
+      ? categories.map((cat) => (typeof cat === 'object' ? cat.title : cat))
       : []
 
     return {
-      status: '',
+      status: null,
       tags: tags.length > 0 ? tags : null,
       image: isMedia(image) ? image : null,
       description: description || null,

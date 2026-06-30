@@ -2,39 +2,22 @@ import { cn } from '@/utilities/ui'
 import React from 'react'
 import { CollectionCard, CollectionCardItemProperties, SupportedConfigs } from '@/components/Card'
 
-export type CollectionArchiveMapFunc<
-  C extends keyof SupportedConfigs,
-  T extends SupportedConfigs[C] = SupportedConfigs[C],
-> = (value: T, index: number, array: T[]) => CollectionCardItemProperties
-
-export type CollectionArchivePropsMapFunc<C extends keyof SupportedConfigs> = {
-  className?: string
-  showTags?: boolean
-  collection: C
-  items: SupportedConfigs[C][]
-  mapFunc: CollectionArchiveMapFunc<C>
-}
 export type CollectionArchivePropsItemProperties<C extends keyof SupportedConfigs> = {
   className?: string
   showTags?: boolean
   collection: C
   items: CollectionCardItemProperties[]
-  mapFunc?: never
 }
 
 export type CollectionArchiveProps<C extends keyof SupportedConfigs> =
-  | CollectionArchivePropsMapFunc<C>
-  | CollectionArchivePropsItemProperties<C>
+  CollectionArchivePropsItemProperties<C>
 
 export function CollectionArchive<C extends keyof SupportedConfigs>({
   className,
   showTags = true,
-  items: itemsFromProps,
+  items,
   collection,
-  mapFunc,
 }: CollectionArchiveProps<C>): React.ReactNode {
-  const items = mapFunc ? itemsFromProps.map(mapFunc) : itemsFromProps
-
   return (
     <div className={cn('container', className)}>
       <div>

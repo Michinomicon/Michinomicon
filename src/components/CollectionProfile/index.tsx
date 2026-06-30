@@ -3,8 +3,9 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle }
 import { CMSLink } from '../Link'
 import { ExternalLinkIcon } from 'lucide-react'
 import { Separator } from '../ui/separator'
-import { Badge, isBadgeStatus } from '../ui/badge'
 import { ImageGallery } from '../ImageGallery'
+import { StatusBadge, StatusBadgeProps } from '../StatusBadge'
+import { isMedia } from '@/utilities/isMedia'
 
 export type CollectionProfileSectionProps = {
   title: string
@@ -64,34 +65,29 @@ export const CollectionProfileLinkItemGroup = ({
   )
 }
 
-export type CollectionProfileHeaderProps = {
+export type CollectionProfileHeaderProps = React.ComponentPropsWithRef<'div'> & {
   title: string
-  status?: string
+  statusBadgeProps?: StatusBadgeProps
   image: string | Media | null | undefined
   children?: React.ReactNode
 }
 export const CollectionProfileHeader = ({
   title,
-  status,
   image,
   children,
+  statusBadgeProps,
+  ...props
 }: CollectionProfileHeaderProps): React.ReactNode => {
   return (
-    <div className="grid grid-cols-6 items-center gap-4">
+    <div className="grid grid-cols-6 items-center gap-4" {...props}>
       <div className="col-span-2 col-start-1">
-        {image && typeof image === 'object' && (
-          <ImageGallery items={[image]} inlineGallery={false} />
-        )}
+        {isMedia(image) && <ImageGallery items={[image]} inline={false} />}
       </div>
       <div className="col-span-4 col-start-3">
         <span className="prose">
           <h1 className="mb-6 text-3xl md:text-5xl lg:text-6xl">{title}</h1>
           <div className="">
-            {isBadgeStatus(status) && (
-              <Badge variant={'status'} status={status}>
-                <span className="font-bold uppercase">{status}</span>
-              </Badge>
-            )}
+            <StatusBadge {...statusBadgeProps}></StatusBadge>
           </div>
         </span>
       </div>

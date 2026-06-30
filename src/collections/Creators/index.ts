@@ -16,7 +16,7 @@ import { Code } from '@/blocks/Code/config'
 export const Creators: CollectionConfig = {
   slug: 'creators',
   admin: {
-    defaultColumns: ['title', 'slug', 'updatedAt'],
+    defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
     useAsTitle: 'title',
     description: 'Community members, artists, and contributors.',
   },
@@ -29,6 +29,8 @@ export const Creators: CollectionConfig = {
   defaultPopulate: {
     title: true,
     slug: true,
+    status: true,
+    profileImage: true,
   },
   fields: [
     {

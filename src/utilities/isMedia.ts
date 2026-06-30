@@ -8,5 +8,5 @@ import { Media } from '@/payload-types'
  * @return {*}  {item is Media}
  */
 export function isMedia(item: string | Media | null | undefined): item is Media {
-  return item !== null && item !== undefined && typeof item !== 'string'
+  return item !== null && item !== undefined && typeof item !== 'string' && typeof item === 'object'
 }

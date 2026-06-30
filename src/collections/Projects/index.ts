@@ -18,6 +18,7 @@ export const Projects: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     description: 'Community initiatives, games, mods, or collaborative efforts.',
+    defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
   },
   access: {
     create: hasAccess('projects', 'create'),
@@ -32,6 +33,7 @@ export const Projects: CollectionConfig = {
     startDate: true,
     endDate: true,
     homepage: true,
+    profileImage: true,
   },
   fields: [
     {

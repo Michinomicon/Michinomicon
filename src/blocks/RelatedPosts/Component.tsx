@@ -4,19 +4,11 @@ import RichText from '@/components/RichText'
 
 import type { Post } from '@/payload-types'
 
-import { CollectionCard, CollectionCardItemPropertiesFunc } from '../../components/Card'
+import { CollectionCard, CollectionCardItemProperties } from '../../components/Card'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import { isMedia } from '@/utilities/isMedia'
 
-export type RelatedPostsProps = {
-  className?: string
-  docs?: Post[]
-  introContent?: DefaultTypedEditorState
-}
-
-export const mapToCollectionCardItemProperties: CollectionCardItemPropertiesFunc<'posts'> = (
-  item: Post,
-) => {
+function getCollectionCardItemProperties(item: Post): CollectionCardItemProperties {
   const { slug, categories, meta, title } = item
   const { description, image } = meta || {}
   const tags =
@@ -28,7 +20,7 @@ export const mapToCollectionCardItemProperties: CollectionCardItemPropertiesFunc
   const sanitizedDescription = description?.replace(/\s/g, ' ')
   const href = `/posts/${slug}`
   return {
-    status: '',
+    status: null,
     tags: tags,
     image: imageMedia,
     description: sanitizedDescription || null,
@@ -36,29 +28,32 @@ export const mapToCollectionCardItemProperties: CollectionCardItemPropertiesFunc
     href: href,
   }
 }
-
+export type RelatedPostsProps = {
+  className?: string
+  docs?: Post[]
+  introContent?: DefaultTypedEditorState
+}
 export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
   const { className, docs, introContent } = props
+  const items = docs ? docs.map((doc) => getCollectionCardItemProperties(doc)) : []
 
   return (
     <div className={clsx('lg:container', className, 'related-posts-block')}>
       {introContent && <RichText data={introContent} enableGutter={false} />}
 
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-8">
-        {docs?.map((doc, index) => {
-          if (typeof doc === 'string') return null
-          const cardItem = mapToCollectionCardItemProperties(doc)
-
-          return (
-            <CollectionCard
-              key={index}
-              item={cardItem}
-              collection="posts"
-              showTags
-              showStatus={false}
-            />
-          )
-        })}
+        {items &&
+          items.map((item, index) => {
+            return (
+              <CollectionCard
+                key={index}
+                item={item}
+                collection="posts"
+                showTags
+                showStatus={false}
+              />
+            )
+          })}
       </div>
     </div>
   )

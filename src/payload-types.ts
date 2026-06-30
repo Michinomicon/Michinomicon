@@ -325,6 +325,11 @@ export interface Post {
 export interface Media {
   id: string;
   title: string;
+  alt: string;
+  /**
+   * Select an image or video that will be used as a preview for this upload.
+   */
+  coverImage?: (string | null) | Media;
   /**
    * Check this box if this asset belongs to a specific community project to assign attribution.
    */
@@ -348,7 +353,6 @@ export interface Media {
    */
   category?: (string | null) | Category;
   sortPriority?: number | null;
-  alt: string;
   caption?: {
     root: {
       type: string;
@@ -1638,6 +1642,8 @@ export interface CreatorsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   title?: T;
+  alt?: T;
+  coverImage?: T;
   isForProject?: T;
   project?: T;
   credits?:
@@ -1649,7 +1655,6 @@ export interface MediaSelect<T extends boolean = true> {
       };
   category?: T;
   sortPriority?: T;
-  alt?: T;
   caption?: T;
   width?: T;
   height?: T;

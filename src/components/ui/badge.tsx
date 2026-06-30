@@ -67,35 +67,16 @@ const badgeVariants = cva(
 export type BadgeProps = React.ComponentProps<'span'> &
   VariantProps<typeof badgeVariants> & { asChild?: boolean }
 
-type BadgeStatusMap = {
-  [Key in VariantProps<typeof badgeVariants>['status'] as string & Key]: Key
-}
-const BadgeStatusKeys: BadgeStatusMap = {
-  planned: 'planned',
-  active: 'active',
-  completed: 'completed',
-  archived: 'archived',
-  inactive: 'inactive',
-} as const
-type BadgeStatusKey = keyof typeof BadgeStatusKeys
+export type BadgeStatus = string & VariantProps<typeof badgeVariants>['status']
 
-export function isBadgeStatus(status: string | undefined): status is string & BadgeStatusKey {
-  return status !== undefined && Object.keys(BadgeStatusKeys).includes(status)
-}
-
-function Badge({
-  className,
-  variant = 'default',
-  status = null,
-  asChild = false,
-  ...props
-}: BadgeProps) {
+function Badge({ className, variant = 'default', status, asChild = false, ...props }: BadgeProps) {
   const Comp = asChild ? Slot.Root : 'span'
 
   return (
     <Comp
       data-slot="badge"
       data-variant={variant}
+      data-status={status}
       className={cn(badgeVariants({ variant, status }), className)}
       {...props}
     />
