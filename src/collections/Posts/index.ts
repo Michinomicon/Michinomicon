@@ -49,6 +49,8 @@ export const Posts: CollectionConfig<'posts'> = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    enableRichTextRelationship: true,
+    enableRichTextLink: true,
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({

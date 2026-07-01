@@ -151,7 +151,7 @@ export function ProjectMediaTableBody({
                               appearance="ghost"
                               size="lg"
                               className="text-lg"
-                              tooltipContent={'View creator profile.'}
+                              tooltipContent={'Creator Page'}
                               url={`/creators/${creator.slug}`}
                             >
                               <User className="" size={32}></User>

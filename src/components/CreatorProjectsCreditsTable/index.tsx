@@ -93,7 +93,7 @@ export function CreatorProjectsCreditsTableBody({
               appearance="ghost"
               className="lg"
               tooltipContent={'Project Page'}
-              url={project.homepage.url}
+              url={`/projects/${project.slug}`}
             >
               <FolderOpen size={32} />
             </CMSLink>

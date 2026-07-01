@@ -67,7 +67,12 @@ export default async function Creator({ params: paramsPromise }: Args) {
 
   if (!creator) return <PayloadRedirects url={url} />
 
-  const { title: creatorName, profileImage, socialLinks, status } = creator
+  const {
+    title: creatorName,
+    profileImage,
+    status,
+    content: { description, socialLinks },
+  } = creator
 
   return (
     <article className="article pointer-events-auto border border-primary/30 bg-background p-16 text-card-foreground">
@@ -89,9 +94,7 @@ export default async function Creator({ params: paramsPromise }: Args) {
       </CollectionProfileSection>
 
       <CollectionProfileSection title={'About'}>
-        {creator.description && (
-          <RichText className="mx-auto" data={creator.description} enableGutter={false} />
-        )}
+        {description && <RichText className="mx-auto" data={description} enableGutter={false} />}
       </CollectionProfileSection>
 
       <CollectionProfileSection title={'Projects'}>

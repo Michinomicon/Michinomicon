@@ -32,7 +32,7 @@ export const defaultLexical = lexicalEditor({
     OrderedListFeature(),
     ChecklistFeature(),
     RelationshipFeature(),
-    LinkFeature(),
+    // LinkFeature(),
     BlockquoteFeature(),
     UploadFeature(),
     TreeViewFeature(),
@@ -42,7 +42,7 @@ export const defaultLexical = lexicalEditor({
     BoldFeature(),
     ItalicFeature(),
     LinkFeature({
-      enabledCollections: ['pages', 'posts'],
+      enabledCollections: ['pages', 'posts', 'creators', 'projects'],
       fields: ({ defaultFields }) => {
         const defaultFieldsWithoutUrl = defaultFields.filter((field) => {
           if ('name' in field && field.name === 'url') return false
