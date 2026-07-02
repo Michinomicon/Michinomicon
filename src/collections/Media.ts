@@ -32,6 +32,8 @@ export const Media: CollectionConfig = {
   admin: {
     group: 'Globals',
     useAsTitle: 'title',
+    enableRichTextRelationship: true,
+    enableRichTextLink: true,
   },
   disableDuplicate: true,
   access: {

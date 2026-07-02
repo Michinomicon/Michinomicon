@@ -56,8 +56,20 @@ export default async function Project({ params: paramsPromise }: Args) {
 
   if (!project) return <PayloadRedirects url={url} />
 
-  const { title, id, profileImage, categories, status, startDate, endDate, updatedAt, createdAt } =
-    project
+  const {
+    title,
+    id,
+    content,
+    profileImage,
+    categories,
+    status,
+    startDate,
+    endDate,
+    updatedAt,
+    createdAt,
+  } = project
+
+  const { description } = content
 
   const projectMedia: Media[] = await queryMediaByProjectId({ id: id })
 
@@ -118,9 +130,7 @@ export default async function Project({ params: paramsPromise }: Args) {
       </CollectionProfileHeader>
 
       <CollectionProfileSection title={'About'}>
-        {project.description && (
-          <RichText className="w-full" data={project.description} enableGutter={false} />
-        )}
+        {description && <RichText className="w-full" data={description} enableGutter={false} />}
       </CollectionProfileSection>
 
       <CollectionProfileSection title={'Media'}>
@@ -150,11 +160,26 @@ const queryProjectsBySlug = cache(async ({ slug }: { slug: string }) => {
     collection: 'projects',
     draft,
     limit: 1,
+    depth: 4,
     overrideAccess: draft,
     pagination: false,
     where: {
       slug: {
         equals: slug,
+      },
+    },
+    select: {
+      title: true,
+      slug: true,
+      status: true,
+      profileImage: true,
+      startDate: true,
+      endDate: true,
+      categories: true,
+      updatedAt: true,
+      createdAt: true,
+      content: {
+        description: true,
       },
     },
   })

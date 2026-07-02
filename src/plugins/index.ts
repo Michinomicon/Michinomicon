@@ -10,18 +10,18 @@ import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 
-import { Page, Post } from '@/payload-types'
+import { Creator, Page, Post, Project } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { hasAccess } from '@/utilities/accessFunctions'
 import { getAppName } from '@/utilities/getAppName'
 
-const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
+const generateTitle: GenerateTitle<Post | Page | Creator | Project> = ({ doc }) => {
   const appName = getAppName()
   const title = doc?.meta?.title ? doc?.meta?.title + ' | ' + appName : ''
   return title
 }
 
-const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
+const generateURL: GenerateURL<Post | Page | Creator | Project> = ({ doc }) => {
   const url = getServerSideURL()
 
   return doc?.slug ? `${url}/${doc.slug}` : url
@@ -29,7 +29,7 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
-    collections: ['pages', 'posts'],
+    collections: ['pages', 'posts', 'projects', 'creators'],
     overrides: {
       admin: {
         group: 'Plugins',
@@ -115,7 +115,7 @@ export const plugins: Plugin[] = [
     },
   }),
   searchPlugin({
-    collections: ['posts', 'pages'],
+    collections: ['posts', 'pages', 'projects', 'creators'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       admin: {

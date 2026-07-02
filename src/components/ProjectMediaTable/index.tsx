@@ -21,11 +21,12 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { Button } from '../ui/button'
-import { isMedia } from '@/utilities/isMedia'
 import React from 'react'
 import { StatusBadge } from '../StatusBadge'
 import { getMediaFileExtension } from '@/utilities/getMediaFileType'
 import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
+import { MediaAvatar } from '../MediaAvatar'
+import { AvatarGroup } from '../ui/avatar'
 
 export function ProjectMediaTableBody({
   data,
@@ -41,14 +42,25 @@ export function ProjectMediaTableBody({
         <TableRow>
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
-            <ImageGallery items={[media]} inline={false} />
+            <ImageGallery items={[media]} inline={false} thumbnailTooltip={false} />
           </TableCell>
 
           {/* Title */}
-          <TableCell>{media.title}</TableCell>
+          <TableCell className={'text-wrap'}>{media.title}</TableCell>
 
           {/* Credits (Summary) */}
-          <TableCell>{credits.map(({ creator }) => creator.title).join(', ')}</TableCell>
+          <TableCell>
+            <AvatarGroup>
+              {credits.map(({ creator }, index) => (
+                <MediaAvatar
+                  key={index}
+                  media={creator.profileImage}
+                  size={'lg'}
+                  title={creator.title}
+                />
+              ))}
+            </AvatarGroup>
+          </TableCell>
 
           {/* Toggle Details Credits */}
           <TableCell className="text-center">
@@ -93,19 +105,15 @@ export function ProjectMediaTableBody({
         {/* (Initially hidden - Collapsible) Detailed Credits Table */}
         <CollapsibleContent asChild>
           <TableRow className={cn('')}>
-            <TableCell colSpan={2} className="bg-card/10"></TableCell>
+            <TableCell colSpan={1} className="bg-card/10"></TableCell>
             <TableCell
-              colSpan={3}
+              colSpan={4}
               className={cn('rounded-none bg-card/40 p-0', isOpen ? 'border-b' : '')}
             >
               <div className="w-full rounded-none border-l-2 border-primary/60 bg-card">
                 <Table className="">
                   <TableHeader>
                     <TableRow>
-                      <TableHead
-                        className="h-auto w-fit min-w-16 p-0 text-left"
-                        aria-label={'Creator Picture'}
-                      ></TableHead>
                       <TableHead className="h-auto w-fit" aria-label={'Creator Name'}></TableHead>
                       <TableHead className="h-auto text-center" aria-label={'Status'}></TableHead>
                       <TableHead className="h-auto w-full" aria-label={'Credits'}></TableHead>
@@ -117,17 +125,17 @@ export function ProjectMediaTableBody({
                   </TableHeader>
                   <TableBody>
                     {credits.map(({ creator, roles }, index) => {
-                      const profileImage = isMedia(creator.profileImage)
-                        ? creator.profileImage
-                        : null
                       return (
                         <TableRow key={index}>
-                          {/* Creator Profile Picture */}
-                          <TableCell className={'p-0'}>
-                            {profileImage && <ImageGallery items={[profileImage]} inline={false} />}
-                          </TableCell>
                           {/* Creator Title */}
-                          <TableCell className="text-center text-lg">{creator.title}</TableCell>
+                          <TableCell className="flex flex-row flex-nowrap items-center text-center">
+                            <MediaAvatar
+                              media={creator.profileImage}
+                              size={'lg'}
+                              title={creator.title}
+                            />
+                            <span className={'ml-2 text-lg'}>{creator.title}</span>
+                          </TableCell>
                           {/* Status */}
                           <TableCell className="text-center">
                             <StatusBadge variant={'status'} status={creator.status}></StatusBadge>
@@ -151,7 +159,7 @@ export function ProjectMediaTableBody({
                               appearance="ghost"
                               size="lg"
                               className="text-lg"
-                              tooltipContent={'View creator profile.'}
+                              tooltipContent={'Creator Page'}
                               url={`/creators/${creator.slug}`}
                             >
                               <User className="" size={32}></User>
@@ -204,11 +212,9 @@ export function ProjectMediaTable({
       <TableHeader className="bg-primary/5">
         <TableRow>
           <TableHead className="w-fit min-w-16">Asset</TableHead>
-
-          <TableHead className="w-auto"></TableHead>
+          <TableHead className="w-auto max-w-50"></TableHead>
           <TableHead className="w-full">Credits</TableHead>
           <TableHead className="w-fit text-center"></TableHead>
-
           <TableHead className="w-fit min-w-16 text-center">File</TableHead>
         </TableRow>
       </TableHeader>

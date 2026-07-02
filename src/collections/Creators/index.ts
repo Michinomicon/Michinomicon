@@ -12,6 +12,13 @@ import {
   HorizontalRuleFeature,
 } from '@payloadcms/richtext-lexical'
 import { Code } from '@/blocks/Code/config'
+import {
+  OverviewField,
+  MetaTitleField,
+  MetaImageField,
+  MetaDescriptionField,
+  PreviewField,
+} from '@payloadcms/plugin-seo/fields'
 
 export const Creators: CollectionConfig = {
   slug: 'creators',
@@ -19,6 +26,8 @@ export const Creators: CollectionConfig = {
     defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
     useAsTitle: 'title',
     description: 'Community members, artists, and contributors.',
+    enableRichTextRelationship: true,
+    enableRichTextLink: true,
   },
   access: {
     create: hasAccess('creators', 'create'),
@@ -52,57 +61,95 @@ export const Creators: CollectionConfig = {
       },
     },
     {
-      name: 'description',
-      type: 'richText',
-      admin: {
-        description: 'Short biography or introduction',
-      },
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            BlocksFeature({ blocks: [Code, MediaBlock, MediaGalleryBlock] }),
-            FixedToolbarFeature(),
-            InlineToolbarFeature(),
-            HorizontalRuleFeature(),
-          ]
-        },
-      }),
-      label: false,
-      required: true,
-    },
-    {
-      name: 'socialLinks',
-      type: 'array',
-      labels: {
-        singular: 'Social Link',
-        plural: 'Social Links',
-      },
-      admin: {
-        description: 'Links to portfolios, social media, or personal websites.',
-      },
-      fields: [
+      type: 'tabs',
+      tabs: [
         {
-          type: 'row',
+          name: 'meta',
+          label: 'SEO',
+          fields: [
+            OverviewField({
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+              imagePath: 'meta.image',
+            }),
+            MetaTitleField({
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              relationTo: 'media',
+            }),
+
+            MetaDescriptionField({}),
+            PreviewField({
+              // if the `generateUrl` function is configured
+              hasGenerateFn: true,
+
+              // field paths to match the target field for data
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+            }),
+          ],
+        },
+        {
+          name: 'content',
+          label: 'Content',
           fields: [
             {
-              name: 'platform',
-              type: 'text',
-              required: true,
-              admin: {
-                width: '30%',
-                placeholder: 'e.g., ArtStation, Twitter',
+              name: 'socialLinks',
+              type: 'array',
+              labels: {
+                singular: 'Social Link',
+                plural: 'Social Links',
               },
+              admin: {
+                description: 'Links to portfolios, social media, or personal websites.',
+              },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    {
+                      name: 'platform',
+                      type: 'text',
+                      required: true,
+                      admin: {
+                        width: '30%',
+                        placeholder: 'e.g., ArtStation, Twitter',
+                      },
+                    },
+                    {
+                      name: 'url',
+                      type: 'text',
+                      required: true,
+                      admin: {
+                        width: '70%',
+                        placeholder: 'https://...',
+                      },
+                    },
+                  ],
+                },
+              ],
             },
             {
-              name: 'url',
-              type: 'text',
-              required: true,
+              name: 'description',
+              type: 'richText',
               admin: {
-                width: '70%',
-                placeholder: 'https://...',
+                description: 'Short biography or introduction',
               },
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    BlocksFeature({ blocks: [Code, MediaBlock, MediaGalleryBlock] }),
+                    FixedToolbarFeature(),
+                    InlineToolbarFeature(),
+                    HorizontalRuleFeature(),
+                  ]
+                },
+              }),
+              label: false,
+              required: true,
             },
           ],
         },
@@ -114,6 +161,9 @@ export const Creators: CollectionConfig = {
       type: 'select',
       required: true,
       defaultValue: 'active',
+      admin: {
+        position: 'sidebar',
+      },
       options: [
         { label: 'Active', value: 'active' },
         { label: 'Inactive', value: 'inactive' },

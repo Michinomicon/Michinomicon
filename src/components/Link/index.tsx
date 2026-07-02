@@ -2,7 +2,6 @@ import { Button, ButtonProps } from '@/components/ui/button'
 import { cn } from '@/utilities/ui'
 import Link from 'next/link'
 import React from 'react'
-import { CollectionSlug } from 'payload'
 import { Collections } from '@/utilities/collectionTypes'
 import {
   DEFAULT_TOOLTIP_DELAY,
@@ -12,19 +11,31 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 
-export type CMSLinkReference<R extends CollectionSlug, V = Collections[R]> = {
-  relationTo: string & R
+type ValidCollections = Pick<Collections, 'pages' | 'creators' | 'posts' | 'projects'>
+export type CMSLinkReference<R extends keyof ValidCollections, V = ValidCollections[R]> = {
+  relationTo: R
   value: Partial<V> | string
 }
 
+export type CMSLinkPropsReference =
+  | {
+      relationTo: string
+      value:
+        | {
+            [key: string]: unknown
+            slug?: string | undefined
+            id: string
+          }
+        | string
+    }
+  | CMSLinkReference<'pages'>
+  | CMSLinkReference<'posts'>
+  | CMSLinkReference<'creators'>
+  | CMSLinkReference<'projects'>
+
 export type CMSLinkProps = {
   type?: 'reference' | 'custom' | null
-  reference?:
-    | CMSLinkReference<'pages'>
-    | CMSLinkReference<'posts'>
-    | CMSLinkReference<'creators'>
-    | CMSLinkReference<'projects'>
-    | null
+  reference?: CMSLinkPropsReference | null
   url?: string | null
   label?: string | undefined
   appearance?: ButtonProps['variant'] | null
@@ -36,17 +47,32 @@ export type CMSLinkProps = {
   tooltipProps?: TooltipProps
 }
 
-function getHref({ type = 'reference', reference, url }: CMSLinkProps) {
+/**
+ * @description Takes a 'relationTo' reference from Payload and return the approriate href value for a link
+ *
+ * @export
+ * @param {(CMSLinkPropsReference | null | undefined)} [reference]
+ * @return {*}  {string}
+ */
+export function parseCMSLinkReferenceHref(
+  reference?: CMSLinkPropsReference | null | undefined,
+): string | null {
+  if (reference) {
+    const { value, relationTo } = reference as CMSLinkPropsReference
+    if (typeof value === 'object' && value.slug) {
+      const href = `${relationTo !== 'pages' ? `/${relationTo}` : ''}/${value.slug}`
+      return href
+    }
+  }
+  return ''
+}
+
+export function getHref({ type = 'reference', reference, url }: CMSLinkProps) {
   const initialUrl: string = url && url.length > 0 ? url : ''
   let parsedUrl = initialUrl
 
   if (type === 'reference') {
-    parsedUrl =
-      typeof reference?.value === 'object' && reference.value.slug
-        ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
-            reference.value.slug
-          }`
-        : initialUrl
+    parsedUrl = parseCMSLinkReferenceHref(reference) || initialUrl
   } else if (type === 'custom') {
     if (
       !initialUrl.startsWith('http') &&

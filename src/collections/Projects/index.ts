@@ -1,8 +1,14 @@
 import { Code } from '@/blocks/Code/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
-import { link } from '@/fields/link'
 import { hasAccess } from '@/utilities/accessFunctions'
+import {
+  OverviewField,
+  MetaTitleField,
+  MetaImageField,
+  MetaDescriptionField,
+  PreviewField,
+} from '@payloadcms/plugin-seo/fields'
 import {
   lexicalEditor,
   HeadingFeature,
@@ -19,6 +25,8 @@ export const Projects: CollectionConfig = {
     useAsTitle: 'title',
     description: 'Community initiatives, games, mods, or collaborative efforts.',
     defaultColumns: ['title', 'slug', 'status', 'updatedAt'],
+    enableRichTextRelationship: true,
+    enableRichTextLink: true,
   },
   access: {
     create: hasAccess('projects', 'create'),
@@ -30,10 +38,10 @@ export const Projects: CollectionConfig = {
     title: true,
     slug: true,
     status: true,
+    profileImage: true,
     startDate: true,
     endDate: true,
-    homepage: true,
-    profileImage: true,
+    content: true,
   },
   fields: [
     {
@@ -41,28 +49,6 @@ export const Projects: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      name: 'description',
-      type: 'richText',
-      admin: {
-        description: 'Detailed overview of the project and its goals.',
-      },
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            BlocksFeature({ blocks: [Code, MediaBlock, MediaGalleryBlock] }),
-            FixedToolbarFeature(),
-            InlineToolbarFeature(),
-            HorizontalRuleFeature(),
-          ]
-        },
-      }),
-      label: false,
-      required: true,
-    },
-    slugField(),
     {
       name: 'profileImage',
       type: 'upload',
@@ -72,63 +58,112 @@ export const Projects: CollectionConfig = {
       },
     },
     {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'meta',
+          label: 'SEO',
+          fields: [
+            OverviewField({
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+              imagePath: 'meta.image',
+            }),
+            MetaTitleField({
+              hasGenerateFn: true,
+            }),
+            MetaImageField({
+              relationTo: 'media',
+            }),
+
+            MetaDescriptionField({}),
+            PreviewField({
+              // if the `generateUrl` function is configured
+              hasGenerateFn: true,
+
+              // field paths to match the target field for data
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+            }),
+          ],
+        },
+        {
+          name: 'content',
+          label: 'Content',
+          fields: [
+            {
+              name: 'description',
+              type: 'richText',
+              admin: {
+                description: 'Detailed overview of the project and its goals.',
+              },
+              editor: lexicalEditor({
+                features: ({ rootFeatures }) => {
+                  return [
+                    ...rootFeatures,
+                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    BlocksFeature({ blocks: [Code, MediaBlock, MediaGalleryBlock] }),
+                    FixedToolbarFeature(),
+                    InlineToolbarFeature(),
+                    HorizontalRuleFeature(),
+                  ]
+                },
+              }),
+              label: false,
+              required: true,
+            },
+          ],
+        },
+      ],
+    },
+    slugField(),
+    {
       name: 'categories',
       type: 'relationship',
       relationTo: 'categories',
       hasMany: true,
       admin: {
+        position: 'sidebar',
         description: 'Categories this project falls under. (Useful for grouping projects together}',
       },
     },
     {
-      type: 'row', // Groups the status and date fields horizontally in the admin UI
-      fields: [
-        {
-          name: 'status',
-          type: 'select',
-          required: true,
-          defaultValue: 'active',
-          admin: {
-            width: '33%',
-          },
-          options: [
-            { label: 'Planned', value: 'planned' },
-            { label: 'Active', value: 'active' },
-            { label: 'Completed', value: 'completed' },
-            { label: 'Archived', value: 'archived' },
-          ],
-        },
-        {
-          name: 'startDate',
-          type: 'date',
-          admin: {
-            width: '33%',
-            date: {
-              pickerAppearance: 'dayOnly',
-              displayFormat: 'd MMM yyyy',
-            },
-          },
-        },
-        {
-          name: 'endDate',
-          type: 'date',
-          admin: {
-            width: '33%',
-            description: 'Leave blank if the project is ongoing.',
-            date: {
-              pickerAppearance: 'dayOnly',
-              displayFormat: 'd MMM yyyy',
-            },
-          },
-        },
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'active',
+      admin: {
+        position: 'sidebar',
+      },
+      options: [
+        { label: 'Planned', value: 'planned' },
+        { label: 'Active', value: 'active' },
+        { label: 'Completed', value: 'completed' },
+        { label: 'Archived', value: 'archived' },
       ],
     },
-    link({
-      appearances: false,
-      overrides: {
-        required: false,
-        name: 'homepage',
+    {
+      name: 'startDate',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyyy',
+        },
       },
-    }),
+    },
+    {
+      name: 'endDate',
+      type: 'date',
+      admin: {
+        position: 'sidebar',
+        description: 'Leave blank if the project is ongoing.',
+        date: {
+          pickerAppearance: 'dayOnly',
+          displayFormat: 'd MMM yyyy',
+        },
+      },
+    },
   ],
 }

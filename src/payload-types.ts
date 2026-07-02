@@ -467,32 +467,42 @@ export interface Project {
   id: string;
   title: string;
   /**
-   * Detailed overview of the project and its goals.
+   * Optional profile picture or avatar
    */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: any;
+  profileImage?: (string | null) | Media;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  content: {
+    /**
+     * Detailed overview of the project and its goals.
+     */
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
         version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
+      };
+      [k: string]: unknown;
     };
-    [k: string]: unknown;
   };
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
   slug: string;
-  /**
-   * Optional profile picture or avatar
-   */
-  profileImage?: (string | null) | Media;
   /**
    * Categories this project falls under. (Useful for grouping projects together}
    */
@@ -503,29 +513,6 @@ export interface Project {
    * Leave blank if the project is ongoing.
    */
   endDate?: string | null;
-  homepage: {
-    type?: ('reference' | 'custom') | null;
-    newTab?: boolean | null;
-    reference?:
-      | ({
-          relationTo: 'pages';
-          value: string | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: string | Post;
-        } | null)
-      | ({
-          relationTo: 'creators';
-          value: string | Creator;
-        } | null)
-      | ({
-          relationTo: 'projects';
-          value: string | Project;
-        } | null);
-    url?: string | null;
-    label: string;
-  };
   updatedAt: string;
   createdAt: string;
 }
@@ -545,34 +532,44 @@ export interface Creator {
    * Optional profile picture or avatar
    */
   profileImage?: (string | null) | Media;
-  /**
-   * Short biography or introduction
-   */
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
   };
-  /**
-   * Links to portfolios, social media, or personal websites.
-   */
-  socialLinks?:
-    | {
-        platform: string;
-        url: string;
-        id?: string | null;
-      }[]
-    | null;
+  content: {
+    /**
+     * Links to portfolios, social media, or personal websites.
+     */
+    socialLinks?:
+      | {
+          platform: string;
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Short biography or introduction
+     */
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+  };
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -1108,6 +1105,14 @@ export interface Redirect {
       | ({
           relationTo: 'posts';
           value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null)
+      | ({
+          relationTo: 'creators';
+          value: string | Creator;
         } | null);
     url?: string | null;
   };
@@ -1149,6 +1154,14 @@ export interface Search {
     | {
         relationTo: 'pages';
         value: string | Page;
+      }
+    | {
+        relationTo: 'projects';
+        value: string | Project;
+      }
+    | {
+        relationTo: 'creators';
+        value: string | Creator;
       };
   slug?: string | null;
   meta?: {
@@ -1593,23 +1606,25 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface ProjectsSelect<T extends boolean = true> {
   title?: T;
-  description?: T;
+  profileImage?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  content?:
+    | T
+    | {
+        description?: T;
+      };
   generateSlug?: T;
   slug?: T;
-  profileImage?: T;
   categories?: T;
   status?: T;
   startDate?: T;
   endDate?: T;
-  homepage?:
-    | T
-    | {
-        type?: T;
-        newTab?: T;
-        reference?: T;
-        url?: T;
-        label?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1620,13 +1635,24 @@ export interface ProjectsSelect<T extends boolean = true> {
 export interface CreatorsSelect<T extends boolean = true> {
   title?: T;
   profileImage?: T;
-  description?: T;
-  socialLinks?:
+  meta?:
     | T
     | {
-        platform?: T;
-        url?: T;
-        id?: T;
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  content?:
+    | T
+    | {
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
+              id?: T;
+            };
+        description?: T;
       };
   generateSlug?: T;
   slug?: T;

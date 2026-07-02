@@ -1,19 +1,18 @@
 import type { Metadata } from 'next'
 import type { Creator, Media } from '@/payload-types'
-
-import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload, PaginatedDocs } from 'payload'
+import { PayloadRedirects } from '@/components/PayloadRedirects'
+import { LivePreviewListener } from '@/components/LivePreviewListener'
+import PageClient from './page.client'
 import { draftMode } from 'next/headers'
 import { cache } from 'react'
 import RichText from '@/components/RichText'
-import PageClient from './page.client'
-import { LivePreviewListener } from '@/components/LivePreviewListener'
 import {
   extractMediaCreditsByCreatorId,
   ProjectMediaCredit,
 } from '@/utilities/extractMediaCreditsByCreatorId'
-import { CreatorProjectsCreditsTable } from '@/components/CreatorProjectsCreditsTable'
+import { CreatorCreditsTable } from '@/components/CreatorCreditsTable'
 import {
   CollectionProfileHeader,
   CollectionProfileLinkItemGroup,
@@ -55,19 +54,15 @@ export default async function Creator({ params: paramsPromise }: Args) {
   const decodedSlug = decodeURIComponent(slug)
   const url = '/creators/' + decodedSlug
   const creator = await queryCreatorBySlug({ slug: decodedSlug })
+  if (!creator) return <PayloadRedirects url={url} />
 
   const creatorId = creator.id
-
   const creditedProjectMedia = await queryCreditedProjectMedia({ id: creator.id })
 
   const projectCredits: ProjectMediaCredit[] = extractMediaCreditsByCreatorId(
     creditedProjectMedia,
     creatorId,
   )
-
-  if (!creator) return <PayloadRedirects url={url} />
-
-  const { title: creatorName, profileImage, socialLinks, status } = creator
 
   return (
     <article className="article pointer-events-auto border border-primary/30 bg-background p-16 text-card-foreground">
@@ -79,23 +74,25 @@ export default async function Creator({ params: paramsPromise }: Args) {
       {draft && <LivePreviewListener />}
 
       <CollectionProfileHeader
-        title={creatorName}
-        image={profileImage}
-        statusBadgeProps={{ status: status }}
+        title={creator.title}
+        image={creator.profileImage}
+        statusBadgeProps={{ status: creator.status }}
       />
 
       <CollectionProfileSection title={'Links'}>
-        <CollectionProfileLinkItemGroup links={socialLinks} />
+        {creator.content.socialLinks && creator.content.socialLinks.length > 0 && (
+          <CollectionProfileLinkItemGroup links={creator.content.socialLinks} />
+        )}
       </CollectionProfileSection>
 
       <CollectionProfileSection title={'About'}>
-        {creator.description && (
-          <RichText className="mx-auto" data={creator.description} enableGutter={false} />
+        {creator.content.description && (
+          <RichText className="mx-auto" data={creator.content.description} enableGutter={false} />
         )}
       </CollectionProfileSection>
 
       <CollectionProfileSection title={'Projects'}>
-        <CreatorProjectsCreditsTable data={projectCredits} />
+        <CreatorCreditsTable data={projectCredits} />
       </CollectionProfileSection>
     </article>
   )
@@ -126,6 +123,15 @@ const queryCreatorBySlug = cache(async ({ slug }: { slug: string }) => {
     where: {
       slug: {
         equals: slug,
+      },
+    },
+    select: {
+      title: true,
+      status: true,
+      profileImage: true,
+      content: {
+        socialLinks: true,
+        description: true,
       },
     },
   })
@@ -176,6 +182,20 @@ export const queryProjectsById = cache(async ({ projectIds }: { projectIds: stri
     where: {
       id: {
         in: projectIds,
+      },
+    },
+    select: {
+      title: true,
+      slug: true,
+      status: true,
+      profileImage: true,
+      startDate: true,
+      endDate: true,
+      categories: true,
+      updatedAt: true,
+      createdAt: true,
+      content: {
+        description: true,
       },
     },
   })
