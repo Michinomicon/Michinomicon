@@ -497,29 +497,6 @@ export interface Project {
       };
       [k: string]: unknown;
     };
-    homepage: {
-      type?: ('reference' | 'custom') | null;
-      newTab?: boolean | null;
-      reference?:
-        | ({
-            relationTo: 'pages';
-            value: string | Page;
-          } | null)
-        | ({
-            relationTo: 'posts';
-            value: string | Post;
-          } | null)
-        | ({
-            relationTo: 'creators';
-            value: string | Creator;
-          } | null)
-        | ({
-            relationTo: 'projects';
-            value: string | Project;
-          } | null);
-      url?: string | null;
-      label: string;
-    };
   };
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
@@ -1641,15 +1618,6 @@ export interface ProjectsSelect<T extends boolean = true> {
     | T
     | {
         description?: T;
-        homepage?:
-          | T
-          | {
-              type?: T;
-              newTab?: T;
-              reference?: T;
-              url?: T;
-              label?: T;
-            };
       };
   generateSlug?: T;
   slug?: T;

@@ -1,7 +1,6 @@
 import { Code } from '@/blocks/Code/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
-import { link } from '@/fields/link'
 import { hasAccess } from '@/utilities/accessFunctions'
 import {
   OverviewField,
@@ -42,7 +41,7 @@ export const Projects: CollectionConfig = {
     profileImage: true,
     startDate: true,
     endDate: true,
-    homepage: true,
+    content: true,
   },
   fields: [
     {
@@ -113,13 +112,6 @@ export const Projects: CollectionConfig = {
               label: false,
               required: true,
             },
-            link({
-              appearances: false,
-              overrides: {
-                required: false,
-                name: 'homepage',
-              },
-            }),
           ],
         },
       ],

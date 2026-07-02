@@ -59,7 +59,7 @@ export default async function Project({ params: paramsPromise }: Args) {
   const {
     title,
     id,
-    content: { description },
+    content,
     profileImage,
     categories,
     status,
@@ -68,6 +68,8 @@ export default async function Project({ params: paramsPromise }: Args) {
     updatedAt,
     createdAt,
   } = project
+
+  const { description } = content
 
   const projectMedia: Media[] = await queryMediaByProjectId({ id: id })
 
@@ -164,6 +166,20 @@ const queryProjectsBySlug = cache(async ({ slug }: { slug: string }) => {
     where: {
       slug: {
         equals: slug,
+      },
+    },
+    select: {
+      title: true,
+      slug: true,
+      status: true,
+      profileImage: true,
+      startDate: true,
+      endDate: true,
+      categories: true,
+      updatedAt: true,
+      createdAt: true,
+      content: {
+        description: true,
       },
     },
   })

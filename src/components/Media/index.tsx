@@ -1,5 +1,4 @@
 import React from 'react'
-import { ImageMediaProps } from './ImageMedia'
 import { VideoMedia } from './VideoMedia'
 import { isPayloadMedia, type MediaProps, type VideoMediaProps } from './types'
 import RichText from '@/components/RichText'
@@ -9,6 +8,7 @@ import { Track } from '@/lib/html-audio'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
 import { getFileMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
 import { ImageGallery } from '../ImageGallery'
+import { ImageMedia, ImageMediaProps } from './ImageMedia'
 
 const MESSAGE_FAILED_TO_RENDER = 'Failed to render media.'
 const MESSAGE_RESOURCE_MISSING = 'Resource was missing or invalid.'
@@ -27,6 +27,9 @@ export const Media = (props: MediaProps) => {
     title,
     ...baseProps
   } = props
+
+  const useBasicImage = false
+  const useBasicVideo = true
 
   const getMediaPlaceholder = (message: string, details?: string) => {
     return (
@@ -52,40 +55,59 @@ export const Media = (props: MediaProps) => {
 
   switch (true) {
     case mimeType.includes('image'):
-      const imageProps: ImageMediaProps = {
-        ...baseProps,
-        alt,
-        fill,
-        loading,
-        src: resource,
+      if (useBasicImage) {
+        const imageProps: ImageMediaProps = {
+          alt,
+          fill,
+          loading,
+          src: resource,
+        }
+        return <ImageMedia {...imageProps} />
+      } else {
+        const { lightGalleryProps, inline, itemStyles, thumbnailStyles } = baseProps
+        return (
+          <React.Fragment>
+            <ImageGallery
+              items={[resource]}
+              itemStyles={itemStyles}
+              thumbnailStyles={thumbnailStyles}
+              inline={inline}
+              lightGalleryProps={lightGalleryProps}
+            />
+          </React.Fragment>
+        )
       }
-
-      console.log(`imageProps:`, imageProps)
-
-      return (
-        <React.Fragment>
-          <ImageGallery items={[resource]} />
-          {/* <ImageMedia {...imageProps} /> */}
-        </React.Fragment>
-      )
     case mimeType.includes('video'):
-      const videoProps: VideoMediaProps = {
-        ...baseProps,
-        resource,
-        videoClassName,
-        ref: baseProps.ref as React.Ref<HTMLVideoElement>,
-        metadata: getVideoMediaMetaData(resource),
+      if (useBasicVideo) {
+        const videoProps: VideoMediaProps = {
+          ...baseProps,
+          resource,
+          videoClassName,
+          ref: baseProps.ref as React.Ref<HTMLVideoElement>,
+          metadata: getVideoMediaMetaData(resource),
+        }
+        return (
+          <React.Fragment>
+            <VideoMedia {...videoProps} />
+            {resource.caption && (
+              <div className={cn('')}>
+                <RichText data={resource.caption} enableGutter={false} />
+              </div>
+            )}
+          </React.Fragment>
+        )
+      } else {
+        const { lightGalleryProps, inline } = baseProps
+        return (
+          <React.Fragment>
+            <ImageGallery
+              items={[resource]}
+              lightGalleryProps={lightGalleryProps}
+              inline={inline}
+            />
+          </React.Fragment>
+        )
       }
-      return (
-        <React.Fragment>
-          <VideoMedia {...videoProps} />
-          {resource.caption && (
-            <div className={cn('')}>
-              <RichText data={resource.caption} enableGutter={false} />
-            </div>
-          )}
-        </React.Fragment>
-      )
     case mimeType.includes('audio'):
       const audioTrack: Track = {
         id: resource.id,

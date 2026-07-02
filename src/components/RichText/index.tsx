@@ -3,6 +3,7 @@ import {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedLinkNode,
+  SerializedUploadNode,
   type DefaultTypedEditorState,
 } from '@payloadcms/richtext-lexical'
 import {
@@ -22,6 +23,7 @@ import type {
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
+import { parseCMSLinkReferenceHref } from '../Link'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -29,19 +31,39 @@ type NodeTypes =
       CTABlockProps | MediaBlockProps | MediaGalleryBlockProps | BannerBlockProps | CodeBlockProps
     >
 
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  console.log(`internalDocToHref => linkNode`, linkNode)
-  const { value, relationTo } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
-  }
-  const slug = value.slug
-  return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
+const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }): string => {
+  const href = parseCMSLinkReferenceHref(linkNode.fields.doc) || ''
+  return href
 }
 
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
   ...defaultConverters,
   ...LinkJSXConverter({ internalDocToHref }),
+  upload: ({ node }: { node: SerializedUploadNode }) => (
+    <MediaBlock
+      blockType="mediaBlock"
+      mediaComponentProps={{
+        inline: false,
+        itemStyles: 'not-prose',
+        lightGalleryProps: {
+          closable: false,
+          showCloseIcon: false,
+          thumbnail: false,
+          controls: false,
+          showMaximizeIcon: false,
+          mousewheel: false,
+          download: false,
+          enableDrag: false,
+        },
+      }}
+      media={
+        node.type === 'upload' && node.relationTo === 'media' && typeof node.value === 'object'
+          ? node.value
+          : ''
+      }
+      {...node.fields}
+    />
+  ),
   blocks: {
     banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} />,
     mediaBlock: ({ node }: { node: SerializedBlockNode<MediaBlockProps> }) => (

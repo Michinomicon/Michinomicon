@@ -11,11 +11,10 @@
 .lg-outer .lg-thumb-item {
   border-radius: inherit !important;
 }
-.lg-outer .lg-thumb-item img{
+.lg-outer .lg-thumb-item img {
   border-radius: inherit !important;
   border-color: var(--border) !important;
 }
-
 
 @layer base {
   .lg-container * {
@@ -23,3 +22,5 @@
     border-radius: 0;
   }
 }
+
+@custom-variant lg-open (&:where(*:is(.lg-container.mlg-gallery.lg-show.lg-show-in .lg-sub-html * )));

@@ -21,7 +21,7 @@ export const revalidateCreator: CollectionAfterChangeHook<Creator> = ({
 
     // If the post was previously published, we need to revalidate the old path
     if (previousDoc._status === 'published' && doc._status !== 'published') {
-      const oldPath = `/posts/${previousDoc.slug}`
+      const oldPath = `/creators/${previousDoc.slug}`
 
       payload.logger.info(`Revalidating old creator at path: ${oldPath}`)
 

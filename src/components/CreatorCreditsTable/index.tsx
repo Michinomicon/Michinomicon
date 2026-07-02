@@ -27,7 +27,7 @@ import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
 import { getMediaFileExtension } from '@/utilities/getMediaFileType'
 import { isMedia } from '@/utilities/isMedia'
 
-export function CreatorProjectsCreditsTableBody({
+export function CreatorCreditsTableBody({
   data,
 }: React.ComponentPropsWithoutRef<typeof TableBody> & { data?: ProjectMediaCredit[] }) {
   const [isOpen, setOpen] = useState(false)
@@ -42,7 +42,9 @@ export function CreatorProjectsCreditsTableBody({
         <TableRow>
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
-            {profileImage && <ImageGallery items={[profileImage]} inline={false} />}
+            {profileImage && (
+              <ImageGallery items={[profileImage]} inline={false} thumbnailTooltip={false} />
+            )}
           </TableCell>
           <TableCell>{project.title}</TableCell>
           <TableCell className="text-center">
@@ -129,7 +131,11 @@ export function CreatorProjectsCreditsTableBody({
                       return (
                         <TableRow key={index}>
                           <TableCell className={'p-0'}>
-                            <ImageGallery items={[credit.media]} inline={false} />
+                            <ImageGallery
+                              items={[credit.media]}
+                              inline={false}
+                              thumbnailTooltip={false}
+                            />
                           </TableCell>
                           <TableCell className="text-center text-lg">
                             {credit.media.title}
@@ -165,7 +171,7 @@ export function CreatorProjectsCreditsTableBody({
   )
 }
 
-export function CreatorProjectsCreditsTableContent({
+export function CreatorCreditsTableContent({
   data,
   ...props
 }: React.ComponentPropsWithoutRef<typeof TableBody> & { data?: ProjectMediaCredit[] }) {
@@ -185,14 +191,14 @@ export function CreatorProjectsCreditsTableContent({
   )
 
   return Object.entries(dataGroupedByProject).map(([projectId, creditData]) => (
-    <CreatorProjectsCreditsTableBody key={projectId} data={creditData} {...props} />
+    <CreatorCreditsTableBody key={projectId} data={creditData} {...props} />
   ))
 }
 
-export function CreatorProjectsCreditsTable({
+export function CreatorCreditsTable({
   data,
   ...props
-}: React.ComponentPropsWithoutRef<typeof Table> & { data?: ProjectMediaCredit[] }) {
+}: React.ComponentPropsWithoutRef<typeof Table> & { data: ProjectMediaCredit[] }) {
   return (
     <Table {...props}>
       <TableHeader className="bg-primary/5">
@@ -209,7 +215,7 @@ export function CreatorProjectsCreditsTable({
           <TableHead className="w-fit text-center"></TableHead>
         </TableRow>
       </TableHeader>
-      <CreatorProjectsCreditsTableContent data={data} />
+      <CreatorCreditsTableContent data={data} />
     </Table>
   )
 }

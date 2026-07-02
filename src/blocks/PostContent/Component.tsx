@@ -155,7 +155,7 @@ export const PostContentBlock: React.FC<
               key={post.id || index}
               data-post="true"
               data-post-slug={post.slug}
-              className="mb-24 border-b pb-16 last:mb-0 last:border-b-0"
+              className="mb-24 rounded-none border-b pb-16 last:mb-0 last:border-b-0"
             >
               <div className="mb-8">
                 {showTitle && (

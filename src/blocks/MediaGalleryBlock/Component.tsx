@@ -8,6 +8,7 @@ import { ImageGallery } from '@/components/ImageGallery'
 type Props = MediaGalleryBlockProps & {
   className?: string
   enableGutter?: boolean
+  disableInnerContainer?: boolean
 }
 
 export const MediaGalleryBlock: React.FC<Props> = async (props) => {
