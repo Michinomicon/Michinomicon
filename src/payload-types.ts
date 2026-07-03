@@ -845,15 +845,25 @@ export interface ArchiveBlock {
     };
     [k: string]: unknown;
   } | null;
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
+  populateBy: 'collection' | 'selection';
+  relationTo?: ('posts' | 'projects' | 'creators') | null;
   categories?: (string | Category)[] | null;
   limit?: number | null;
   selectedDocs?:
-    | {
-        relationTo: 'posts';
-        value: string | Post;
-      }[]
+    | (
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+        | {
+            relationTo: 'creators';
+            value: string | Creator;
+          }
+        | {
+            relationTo: 'projects';
+            value: string | Project;
+          }
+      )[]
     | null;
   id?: string | null;
   blockName?: string | null;

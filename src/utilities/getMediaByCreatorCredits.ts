@@ -7,7 +7,7 @@ import { unstable_cache } from 'next/cache'
 async function getMediaByCreatorCredit(
   creatorId: string,
   limit: number = 1000,
-  depth: number = 0,
+  depth: number = 1,
   isForProject: boolean = true,
 ): Promise<Pick<Media, 'id' | 'credits'>[]> {
   const payload = await getPayload({ config: configPromise })

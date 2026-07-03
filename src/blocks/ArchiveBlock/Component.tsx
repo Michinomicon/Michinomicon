@@ -1,68 +1,109 @@
-import type { Post, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
+import type { Post, ArchiveBlock as ArchiveBlockProps, Project, Creator } from '@/payload-types'
 
 import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { DataFromCollectionSlug, getPayload } from 'payload'
 import React from 'react'
 import RichText from '@/components/RichText'
-
 import { CollectionArchive } from '@/components/CollectionArchive'
-import { mapPostsToCollectionArchiveCardItems } from '@/utilities/mapPostsToCollectionArchiveCardItems'
+import {
+  mapCreatorsToCollectionArchiveCardItems,
+  mapPostsToCollectionArchiveCardItems,
+  mapProjectsToCollectionArchiveCardItems,
+} from '@/utilities/mapPostsToCollectionArchiveCardItems'
+import { CollectionCardItemProperties } from '@/components/Card'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
     id?: string
   }
 > = async (props) => {
-  const { id, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props
+  const {
+    id,
+    categories: categoriesFromProps,
+    introContent,
+    limit: limitFromProps,
+    relationTo,
+    populateBy,
+    selectedDocs,
+  } = props
 
   const limit = limitFromProps || 3
+  const categories = categoriesFromProps || []
+  let archiveItems: CollectionCardItemProperties[] = []
 
-  let posts: Post[] = []
+  if (relationTo) {
+    if (populateBy === 'collection') {
+      const payload = await getPayload({ config: configPromise })
 
-  if (populateBy === 'collection') {
-    const payload = await getPayload({ config: configPromise })
+      const flattenedCategories: string[] = categories.map((category) => {
+        if (typeof category === 'object') return category.id
+        else return category
+      })
 
-    const flattenedCategories = categories?.map((category) => {
-      if (typeof category === 'object') return category.id
-      else return category
-    })
-
-    const fetchedPosts = await payload.find({
-      collection: 'posts',
-      depth: 1,
-      limit,
-      ...(flattenedCategories && flattenedCategories.length > 0
-        ? {
-            where: {
-              categories: {
-                in: flattenedCategories,
+      const results = await payload.find({
+        collection: relationTo,
+        depth: 1,
+        limit,
+        ...(flattenedCategories && flattenedCategories.length > 0
+          ? {
+              where: {
+                categories: {
+                  in: flattenedCategories,
+                },
               },
-            },
-          }
-        : {}),
-    })
+            }
+          : {}),
+      })
 
-    posts = fetchedPosts.docs
-  } else {
-    if (selectedDocs?.length) {
-      const filteredSelectedPosts = selectedDocs.map((post) => {
-        if (typeof post.value === 'object') return post.value
-      }) as Post[]
+      switch (relationTo) {
+        case 'creators':
+          archiveItems = await mapCreatorsToCollectionArchiveCardItems(
+            results.docs as DataFromCollectionSlug<typeof relationTo>[],
+          )
+          break
+        case 'posts':
+          archiveItems = mapPostsToCollectionArchiveCardItems(
+            results.docs as DataFromCollectionSlug<typeof relationTo>[],
+          )
+          break
+        case 'projects':
+          archiveItems = mapProjectsToCollectionArchiveCardItems(
+            results.docs as DataFromCollectionSlug<typeof relationTo>[],
+          )
+          break
+      }
+    } else {
+      if (selectedDocs?.length) {
+        const filteredSelectedItems = selectedDocs
+          .map((doc) => doc.value)
+          .filter((value) => typeof value === 'object')
 
-      posts = filteredSelectedPosts
+        switch (relationTo) {
+          case 'creators':
+            archiveItems = await mapCreatorsToCollectionArchiveCardItems(
+              filteredSelectedItems as Creator[],
+            )
+            break
+          case 'posts':
+            archiveItems = mapPostsToCollectionArchiveCardItems(filteredSelectedItems as Post[])
+            break
+          case 'projects':
+            archiveItems = mapProjectsToCollectionArchiveCardItems(
+              filteredSelectedItems as Project[],
+            )
+            break
+        }
+      }
     }
+    return (
+      <div className="archive-block my-16" id={`block-${id}`}>
+        {introContent && (
+          <div className="container mb-16">
+            <RichText className="ms-0 max-w-3xl" data={introContent} enableGutter={false} />
+          </div>
+        )}
+        <CollectionArchive items={archiveItems} collection={relationTo} />
+      </div>
+    )
   }
-
-  const items = mapPostsToCollectionArchiveCardItems(posts)
-
-  return (
-    <div className="archive-block my-16" id={`block-${id}`}>
-      {introContent && (
-        <div className="container mb-16">
-          <RichText className="ms-0 max-w-3xl" data={introContent} enableGutter={false} />
-        </div>
-      )}
-      <CollectionArchive items={items} collection={'posts'} />
-    </div>
-  )
 }
