@@ -15,14 +15,14 @@ function getCollectionCardItemProperties(item: Post): CollectionCardItemProperti
     Array.isArray(categories) && categories.length > 0
       ? categories.filter((c) => typeof c === 'object').map(({ title }) => title)
       : null
-  const imageMedia = isMedia(image) ? image : null
+  const imageMedia = isMedia(image) ? [image] : null
   // replace non-breaking space with white space
   const sanitizedDescription = description?.replace(/\s/g, ' ')
   const href = `/posts/${slug}`
   return {
     status: null,
     tags: tags,
-    image: imageMedia,
+    images: imageMedia,
     description: sanitizedDescription || null,
     title: title,
     href: href,

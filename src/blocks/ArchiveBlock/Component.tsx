@@ -8,9 +8,9 @@ import { CollectionArchive } from '@/components/CollectionArchive'
 import {
   mapCreatorsToCollectionArchiveCardItems,
   mapPostsToCollectionArchiveCardItems,
-  mapProjectsToCollectionArchiveCardItems,
 } from '@/utilities/mapPostsToCollectionArchiveCardItems'
 import { CollectionCardItemProperties } from '@/components/Card'
+import { getProjectCardItems } from '@/app/(frontend)/projects/page'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -67,9 +67,12 @@ export const ArchiveBlock: React.FC<
           )
           break
         case 'projects':
-          archiveItems = mapProjectsToCollectionArchiveCardItems(
+          archiveItems = await getProjectCardItems(
             results.docs as DataFromCollectionSlug<typeof relationTo>[],
           )
+          // archiveItems = mapProjectsToCollectionArchiveCardItems(
+          //   results.docs as DataFromCollectionSlug<typeof relationTo>[],
+          // )
           break
       }
     } else {
@@ -88,9 +91,10 @@ export const ArchiveBlock: React.FC<
             archiveItems = mapPostsToCollectionArchiveCardItems(filteredSelectedItems as Post[])
             break
           case 'projects':
-            archiveItems = mapProjectsToCollectionArchiveCardItems(
-              filteredSelectedItems as Project[],
-            )
+            archiveItems = await getProjectCardItems(filteredSelectedItems as Project[])
+            // archiveItems = mapProjectsToCollectionArchiveCardItems(
+            //   filteredSelectedItems as Project[],
+            // )
             break
         }
       }

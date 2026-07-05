@@ -38,7 +38,7 @@ const InlineDisabledDefaultPropValues: Pick<DefaultLightGalleryProps, InlineView
   {
     controls: true,
     showMaximizeIcon: false,
-    thumbnail: true,
+    // thumbnail: true,
     closable: true,
     showCloseIcon: true,
     allowMediaOverlap: true,
@@ -46,7 +46,7 @@ const InlineDisabledDefaultPropValues: Pick<DefaultLightGalleryProps, InlineView
 const InlineEnabledDefaultPropValues: Pick<DefaultLightGalleryProps, InlineViewGalleryPropNames> = {
   controls: true,
   showMaximizeIcon: true,
-  thumbnail: true,
+  // thumbnail: true,
   closable: false,
   showCloseIcon: false,
   allowMediaOverlap: true,
@@ -87,12 +87,13 @@ type DefaultLightGalleryProps = Omit<
   | 'mode'
   | 'width'
   | 'plugins'
+  | 'thumbnail'
 >
 
 // LightGallery props that require specific settings to make the inline gallery view work
 type InlineViewGalleryPropNames = keyof Pick<
   DefaultLightGalleryProps,
-  'controls' | 'showMaximizeIcon' | 'thumbnail' | 'closable' | 'showCloseIcon' | 'allowMediaOverlap'
+  'controls' | 'showMaximizeIcon' | 'closable' | 'showCloseIcon' | 'allowMediaOverlap' // | 'thumbnail'
 >
 type InlineGalleryViewEnabledProps = Omit<DefaultLightGalleryProps, InlineViewGalleryPropNames>
 
@@ -111,14 +112,6 @@ type InlineableGalleryProps =
       inline?: false | undefined
       lightGalleryProps?: DefaultLightGalleryProps
     }
-
-export type ImageGalleryProps = InlineableGalleryProps & {
-  items: Media[]
-  thumbnailTooltip?: boolean
-  itemStyles?: string
-  thumbnailStyles?: string
-  containerProps?: React.ComponentPropsWithRef<'div'>
-}
 
 export type ItemProjectDetails = {
   href: string
@@ -237,10 +230,22 @@ export function mapImageGalleryItems(media: Media[]) {
   return items
 }
 
+export type ImageGalleryProps = InlineableGalleryProps & {
+  layout?: 'inline-gallery' | 'card-gallery' | 'default'
+  items: Media[]
+  thumbnailTooltip?: boolean
+  itemStyles?: string
+  thumbnailStyles?: string
+  galleryStyles?: string
+  containerProps?: React.ComponentPropsWithRef<'div'>
+}
+
 export const ImageGallery = ({
+  layout = 'inline-gallery',
   items,
   inline = true,
   thumbnailTooltip = true,
+  galleryStyles,
   lightGalleryProps = InlineEnabledDefaultPropValues,
   itemStyles,
   thumbnailStyles,
@@ -280,6 +285,8 @@ export const ImageGallery = ({
     return isMobile
   }
 
+  const showCaptions: boolean = false
+
   // Settings required to make it work well inline
   const inlineGallerySettings = {
     container: galleryContainer,
@@ -293,126 +300,133 @@ export const ImageGallery = ({
 
   const lightGallerySettings = inline ? inlineGallerySettings : settingsFromProps
 
+  const LayoutClass = `mlg-${layout}`
+
+  const prevIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>`
+  const nextIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>`
+
   return (
-    <div>
-      <div
-        className={cn('relative h-auto max-h-200 w-full overflow-hidden rounded-none')}
-        ref={containerRef}
-        {...containerProps}
+    <div
+      className={cn('relative h-auto w-full overflow-hidden rounded-none')}
+      ref={containerRef}
+      {...containerProps}
+    >
+      <LightGallery
+        // ----------------------------
+        // Safe to Change
+        closable={lightGallerySettings.closable}
+        showCloseIcon={false} //lightGallerySettings.showCloseIcon
+        thumbnail={false} //lightGallerySettings.thumbnail
+        controls={lightGallerySettings.controls}
+        showMaximizeIcon={lightGallerySettings.showMaximizeIcon}
+        allowMediaOverlap={lightGallerySettings.allowMediaOverlap}
+        counter={galleryItems.length > 1}
+        loop={true}
+        escKey={true}
+        zoom={true}
+        mousewheel={true}
+        download={false}
+        animateThumb={false}
+        backdropDuration={100}
+        hideScrollbar={true}
+        preload={3}
+        startAnimationDuration={100}
+        speed={300}
+        zoomFromOrigin={false}
+        loadYouTubeThumbnail={true}
+        youTubePlayerParams={{
+          modestbranding: 1,
+          showinfo: 0,
+          controls: 0,
+        }}
+        // ----------------------------
+        // Don't Change
+        prevHtml={prevIcon}
+        nextHtml={nextIcon}
+        appendSubHtmlTo={'.lg-sub-html'}
+        subHtmlSelectorRelative={false}
+        addClass={cn('mlg-gallery group', LayoutClass)}
+        container={inline ? galleryContainer : null}
+        autoplayVideoOnSlide={false}
+        autoplayFirstVideo={false}
+        gotoNextSlideOnVideoEnd={false}
+        currentPagerPosition={'middle'}
+        alignThumbnails={'middle'}
+        videojs={false}
+        elementClassNames={cn('overflow-hidden rounded-none', galleryStyles)}
+        isMobile={getIsMobile}
+        onContainerResize={handleContainerResize}
+        onInit={onInit}
+        mode={'lg-lollipop'}
+        width={'100%'}
+        plugins={[lgThumbnail, lgZoom, lgVideo]}
       >
-        <LightGallery
-          // ----------------------------
-          // Safe to Change
-          closable={lightGallerySettings.closable}
-          showCloseIcon={lightGallerySettings.showCloseIcon}
-          thumbnail={lightGallerySettings.thumbnail}
-          controls={lightGallerySettings.controls}
-          showMaximizeIcon={lightGallerySettings.showMaximizeIcon}
-          allowMediaOverlap={lightGallerySettings.allowMediaOverlap}
-          counter={galleryItems.length > 1}
-          loop={true}
-          escKey={true}
-          zoom={true}
-          mousewheel={true}
-          download={false}
-          animateThumb={false}
-          backdropDuration={100}
-          hideScrollbar={true}
-          preload={3}
-          startAnimationDuration={100}
-          speed={300}
-          zoomFromOrigin={false}
-          loadYouTubeThumbnail={true}
-          youTubePlayerParams={{
-            modestbranding: 1,
-            showinfo: 0,
-            controls: 0,
-          }}
-          // ----------------------------
-          // Don't Change
-          appendSubHtmlTo={'.lg-sub-html'}
-          subHtmlSelectorRelative={false}
-          addClass={'mlg-gallery group'}
-          container={inline ? galleryContainer : null}
-          autoplayVideoOnSlide={false}
-          autoplayFirstVideo={false}
-          gotoNextSlideOnVideoEnd={false}
-          currentPagerPosition={'middle'}
-          alignThumbnails={'middle'}
-          videojs={false}
-          elementClassNames={cn('overflow-hidden rounded-none')}
-          isMobile={getIsMobile}
-          onContainerResize={handleContainerResize}
-          onInit={onInit}
-          mode={'lg-lollipop'}
-          width={'100%'}
-          plugins={[lgThumbnail, lgZoom, lgVideo]}
-        >
-          {galleryItems.map((item, index) => {
-            if (item.type === 'video') {
-              return (
-                <a
-                  key={index}
-                  data-lg-size={item.size}
-                  className={cn(LightGalleryItemStyles, itemStyles)}
-                  data-video={item.src}
-                  data-sub-html={`#caption-${item.id}`}
-                >
-                  {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
-                  <NextImage
-                    alt={item.alt}
-                    className={cn(ThumbnailStyles, thumbnailStyles)}
-                    src={item.thumb}
-                    width={item.width ?? 1280}
-                    height={item.height ?? 720}
-                    loading="lazy"
-                    sizes={ImageSizes}
-                    placeholder={'blur'}
-                    blurDataURL={PLACEHOLDER_BLUR}
-                    style={{
-                      objectFit: 'cover',
-                      objectPosition: '50% 50%',
-                    }}
-                  />
-                </a>
-              )
-            }
-            if (item.type === 'image') {
-              return (
-                <a
-                  key={item.id}
-                  data-lg-size={item.size}
-                  className={cn(LightGalleryItemStyles, itemStyles)}
-                  data-src={item.src}
-                  data-sub-html={`#caption-${item.id}`}
-                >
-                  {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
-                  <NextImage
-                    alt={item.alt}
-                    className={cn(ThumbnailStyles, thumbnailStyles)}
-                    src={item.thumb}
-                    loading={'eager'}
-                    width={item.width ?? 1280}
-                    height={item.height ?? 720}
-                    sizes={ImageSizes}
-                    placeholder={'empty'}
-                    blurDataURL={PLACEHOLDER_BLUR}
-                    style={{ objectFit: 'cover' }}
-                  />
-                </a>
-              )
-            }
-          })}
-        </LightGallery>
-      </div>
-      {galleryItems.map((item, index) => (
-        <GalleryItemCaption
-          key={index}
-          id={`caption-${item.id}`}
-          className="lg-caption hidden"
-          item={item}
-        />
-      ))}
+        {galleryItems.map((item, index) => {
+          if (item.type === 'video') {
+            return (
+              <a
+                key={index}
+                data-lg-size={item.size}
+                className={cn(LightGalleryItemStyles, itemStyles)}
+                data-video={item.src}
+                data-sub-html={`#caption-${item.id}`}
+              >
+                {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
+                <NextImage
+                  alt={item.alt}
+                  className={cn(ThumbnailStyles, thumbnailStyles)}
+                  src={item.thumb}
+                  width={item.width ?? 1280}
+                  height={item.height ?? 720}
+                  loading="lazy"
+                  sizes={ImageSizes}
+                  placeholder={'blur'}
+                  blurDataURL={PLACEHOLDER_BLUR}
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: '50% 50%',
+                  }}
+                />
+              </a>
+            )
+          }
+          if (item.type === 'image') {
+            return (
+              <a
+                key={item.id}
+                data-lg-size={item.size}
+                className={cn(LightGalleryItemStyles, itemStyles)}
+                data-src={item.src}
+                data-sub-html={`#caption-${item.id}`}
+              >
+                {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
+                <NextImage
+                  alt={item.alt}
+                  className={cn(ThumbnailStyles, thumbnailStyles)}
+                  src={item.thumb}
+                  loading={'eager'}
+                  width={item.width ?? 1280}
+                  height={item.height ?? 720}
+                  sizes={ImageSizes}
+                  placeholder={'empty'}
+                  blurDataURL={PLACEHOLDER_BLUR}
+                  style={{ objectFit: 'cover', objectPosition: '50% 50%' }}
+                />
+              </a>
+            )
+          }
+        })}
+      </LightGallery>
+
+      {showCaptions &&
+        galleryItems.map((item, index) => (
+          <GalleryItemCaption
+            key={index}
+            id={`caption-${item.id}`}
+            className="lg-caption hidden"
+            item={item}
+          />
+        ))}
     </div>
   )
 }

@@ -29,7 +29,7 @@ export async function getCreatorCardItems(
       return {
         status: status,
         tags: roles.length > 0 ? roles : null,
-        image: isMedia(profileImage) ? profileImage : null,
+        images: isMedia(profileImage) ? [profileImage] : null,
         description: '',
         title: title,
         href: `/creators/${slug}`,

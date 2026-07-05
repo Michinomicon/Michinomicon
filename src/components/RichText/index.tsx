@@ -48,7 +48,6 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
         lightGalleryProps: {
           closable: false,
           showCloseIcon: false,
-          thumbnail: false,
           controls: false,
           showMaximizeIcon: false,
           mousewheel: false,

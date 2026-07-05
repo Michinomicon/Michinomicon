@@ -1,5 +1,5 @@
 import { CollectionCardItemProperties } from '@/components/Card'
-import { Creator, Post, Project } from '@/payload-types'
+import { Creator, Post } from '@/payload-types'
 import { isMedia } from './isMedia'
 import { getCachedMediaByCreatorCredit } from './getMediaByCreatorCredits'
 
@@ -16,7 +16,7 @@ export async function mapCreatorsToCollectionArchiveCardItems<T extends Creator>
       return {
         status: status || null,
         tags: tags.length > 0 ? tags : null,
-        image: isMedia(profileImage) ? profileImage : null,
+        images: isMedia(profileImage) ? [profileImage] : null,
         description: '',
         title: title ?? '',
         href: `/creators/${slug}`,
@@ -26,26 +26,24 @@ export async function mapCreatorsToCollectionArchiveCardItems<T extends Creator>
   return items
 }
 
-export function mapProjectsToCollectionArchiveCardItems<T extends Project>(
-  projects: Array<T>,
-): CollectionCardItemProperties[] {
-  return projects.map((project) => {
-    const { categories, title, slug, status, profileImage } = project
-
-    const tags: string[] = Array.isArray(categories)
-      ? categories.map((cat) => (typeof cat === 'object' ? cat.title : cat))
-      : []
-
-    return {
-      status: status || null,
-      tags: tags.length > 0 ? tags : null,
-      image: isMedia(profileImage) ? profileImage : null,
-      description: '',
-      title: title ?? '',
-      href: `/projects/${slug}`,
-    }
-  })
-}
+// export function mapProjectsToCollectionArchiveCardItems<T extends Project>(
+//   projects: Array<T>,
+// ): CollectionCardItemProperties[] {
+//   return projects.map((project) => {
+//     const { categories, title, slug, status, profileImage } = project
+//     const tags: string[] = Array.isArray(categories)
+//       ? categories.map((cat) => (typeof cat === 'object' ? cat.title : cat))
+//       : []
+//     return {
+//       status: status || null,
+//       tags: tags.length > 0 ? tags : null,
+//       images: isMedia(profileImage) ? [profileImage] : null,
+//       description: '',
+//       title: title ?? '',
+//       href: `/projects/${slug}`,
+//     }
+//   })
+// }
 
 export function mapPostsToCollectionArchiveCardItems<T extends Partial<Post>>(
   posts: Array<T>,
@@ -61,7 +59,7 @@ export function mapPostsToCollectionArchiveCardItems<T extends Partial<Post>>(
     return {
       status: null,
       tags: tags.length > 0 ? tags : null,
-      image: isMedia(image) ? image : null,
+      images: isMedia(image) ? [image] : null,
       description: description || null,
       title: title ?? '',
       href: `/posts/${slug}`,
