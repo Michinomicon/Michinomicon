@@ -25,19 +25,26 @@ export const Archive: Block = {
         },
       }),
       label: 'Intro Content',
+      admin: {
+        description: 'Text content to display above the the card group.',
+      },
     },
     {
       name: 'populateBy',
       type: 'select',
       required: true,
       defaultValue: 'collection',
+      admin: {
+        description:
+          'The source of the items that will be displayed as cards. "Collection" Displays all items from one of the Posts, Projects or Creators collections with options to filter by Category and set a maximum limit of items. "Manual Selection" Individually select the items to display from any of the Posts, Projects or Creators collections.',
+      },
       options: [
         {
           label: 'Collection',
           value: 'collection',
         },
         {
-          label: 'Individual Selection',
+          label: 'Manual Selection',
           value: 'selection',
         },
       ],
@@ -50,7 +57,7 @@ export const Archive: Block = {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
       },
       defaultValue: 'posts',
-      label: 'Collections To Show',
+      label: 'Collection',
       options: [
         {
           label: 'Posts',
@@ -71,6 +78,7 @@ export const Archive: Block = {
       type: 'relationship',
       admin: {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
+        description: 'Only items belonging to these categories will be included.',
       },
       hasMany: true,
       label: 'Categories To Show',
@@ -80,21 +88,67 @@ export const Archive: Block = {
       name: 'limit',
       type: 'number',
       admin: {
+        description: 'The maximum number of items to display. [Default: 10]',
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
         step: 1,
       },
       defaultValue: 10,
-      label: 'Limit',
+      label: 'Max. Items',
     },
     {
       name: 'selectedDocs',
       type: 'relationship',
       admin: {
         condition: (_, siblingData) => siblingData.populateBy === 'selection',
+        description: 'Individually select one or more Post, Project or Creator items to include.',
       },
       hasMany: true,
       label: 'Selection',
       relationTo: ['posts', 'creators', 'projects'],
+    },
+    {
+      type: 'collapsible',
+      label: 'Card Display Options',
+      admin: {
+        initCollapsed: true,
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'showTitle',
+              type: 'checkbox',
+              defaultValue: true,
+              label: 'Show Title',
+              admin: {
+                description:
+                  'If the card title should be displayed or not. When disabled the description will use the full height of the card. [Default: true]',
+              },
+            },
+            {
+              name: 'showDescription',
+              type: 'checkbox',
+              defaultValue: true,
+              label: 'Show Description',
+              admin: {
+                description:
+                  'If the card description should be displayed or not. When disabled the title (if enabled) will be vertically centered. [Default: true]',
+              },
+            },
+            {
+              name: 'showImages',
+              type: 'checkbox',
+              defaultValue: true,
+              label: 'Show Images',
+              admin: {
+                description:
+                  'If the card image panel should be displayed or not. When disabled the title and description will use the full width of the card. [Default: true]',
+              },
+            },
+          ],
+        },
+      ],
     },
   ],
   labels: {

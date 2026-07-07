@@ -32,7 +32,6 @@ export const defaultLexical = lexicalEditor({
     OrderedListFeature(),
     ChecklistFeature(),
     RelationshipFeature(),
-    // LinkFeature(),
     BlockquoteFeature(),
     UploadFeature(),
     TreeViewFeature(),

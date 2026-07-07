@@ -70,9 +70,7 @@ export default async function Project({ params: paramsPromise }: Args) {
   } = project
 
   const { description } = content
-
   const projectMedia: Media[] = await queryMediaByProjectId({ id: id })
-
   const data: ProjectMediaCreators[] = extractMediaCreditsByProjectId(projectMedia, id)
 
   return (

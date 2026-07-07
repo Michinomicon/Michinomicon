@@ -7,7 +7,6 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
-import { getCreatorCardItems } from '../../page'
 
 export const revalidate = 600
 
@@ -27,7 +26,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const creators = await payload.find({
     collection: 'creators',
-    depth: 1,
+    depth: 3,
     limit: 12,
     page: sanitizedPageNumber,
     overrideAccess: false,
@@ -37,10 +36,9 @@ export default async function Page({ params: paramsPromise }: Args) {
       profileImage: true,
       slug: true,
       status: true,
+      content: true,
     },
   })
-
-  const items = await getCreatorCardItems(creators.docs)
 
   return (
     <div className="pt-24 pb-24">
@@ -60,7 +58,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         />
       </div>
 
-      <CollectionArchive items={items} collection={'creators'} />
+      <CollectionArchive items={creators.docs} collection={'creators'} />
 
       <div className="container">
         {creators?.page && creators?.totalPages > 1 && (
