@@ -52,7 +52,11 @@ export const MediaGalleryBlock: React.FC<Props> = async (props) => {
         className,
       )}
     >
-      <ImageGallery items={galleryItems} />
+      <ImageGallery
+        items={galleryItems}
+        galleryClassNames={'media-gallery-block'}
+        layout={'inline'}
+      />
     </div>
   )
 }

@@ -43,7 +43,7 @@ export function CreatorCreditsTableBody({
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
             {profileImage && (
-              <ImageGallery items={[profileImage]} inline={false} thumbnailTooltip={false} />
+              <ImageGallery items={[profileImage]} layout={'default'} thumbnailTooltip={false} />
             )}
           </TableCell>
           <TableCell>{project.title}</TableCell>
@@ -133,7 +133,7 @@ export function CreatorCreditsTableBody({
                           <TableCell className={'p-0'}>
                             <ImageGallery
                               items={[credit.media]}
-                              inline={false}
+                              layout={'default'}
                               thumbnailTooltip={false}
                             />
                           </TableCell>

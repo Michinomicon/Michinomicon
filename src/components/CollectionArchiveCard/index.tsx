@@ -86,7 +86,7 @@ export function CollectionArchiveCard({
                 images.map((image, index) => (
                   <CarouselItem key={index} className="basis-1/2 lg:basis-1/3">
                     {isMedia(image) && (
-                      <ImageGallery thumbnailTooltip={false} items={[image]} inline={false} />
+                      <ImageGallery thumbnailTooltip={false} items={[image]} layout={'card'} />
                     )}
                   </CarouselItem>
                 ))}
@@ -164,12 +164,11 @@ export function CollectionArchiveCard({
               <div className={cn('h-50 w-50')}>
                 <AspectRatio ratio={1 / 1} className={cn('w-full')}>
                   <ImageGallery
-                    layout={'card-gallery'}
-                    containerProps={{ className: 'h-full' }}
-                    galleryStyles={'h-full'}
+                    layout={'card'}
+                    containerClassNames={'h-full'}
+                    galleryClassNames={'h-full'}
                     thumbnailTooltip={false}
                     items={images}
-                    inline={true}
                   />
                 </AspectRatio>
               </div>

@@ -42,7 +42,7 @@ export function ProjectMediaTableBody({
         <TableRow>
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
-            <ImageGallery items={[media]} inline={false} thumbnailTooltip={false} />
+            <ImageGallery items={[media]} layout={'default'} thumbnailTooltip={false} />
           </TableCell>
 
           {/* Title */}

@@ -2,7 +2,7 @@
 
 import NextImage from 'next/image'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import LightGallery, { LightGalleryProps } from 'lightgallery/react'
+import LightGallery from 'lightgallery/react'
 import lgThumbnail from 'lightgallery/plugins/thumbnail'
 import lgVideo from 'lightgallery/plugins/video'
 import lgZoom from 'lightgallery/plugins/video'
@@ -27,6 +27,15 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { Info } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { MediaAvatar } from '../MediaAvatar'
+import {
+  applyLayoutSettings,
+  GalleryLayout,
+  ImageGallerySettings,
+  nextIcon,
+  prevIcon,
+} from './settings'
+
+type LightGallery = InitDetail['instance']
 
 const { breakpoints } = cssVariables
 
@@ -34,25 +43,8 @@ const ImageSizes = Object.entries(breakpoints)
   .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
   .join(', ')
 
-const InlineDisabledDefaultPropValues: Pick<DefaultLightGalleryProps, InlineViewGalleryPropNames> =
-  {
-    controls: true,
-    showMaximizeIcon: false,
-    // thumbnail: true,
-    closable: true,
-    showCloseIcon: true,
-    allowMediaOverlap: true,
-  }
-const InlineEnabledDefaultPropValues: Pick<DefaultLightGalleryProps, InlineViewGalleryPropNames> = {
-  controls: true,
-  showMaximizeIcon: true,
-  // thumbnail: true,
-  closable: false,
-  showCloseIcon: false,
-  allowMediaOverlap: true,
-}
-
-const LightGalleryItemStyles = cn(
+const GalleryItemStyles = cn(
+  'not-prose',
   'rounded-none',
   'bg-card',
   'border border-primary/30',
@@ -60,58 +52,10 @@ const LightGalleryItemStyles = cn(
   'block relative',
 )
 
-const ThumbnailStyles = cn('relative block rounded-none', 'size-full object-cover')
+const ItemThumbnailStyles = cn('relative block rounded-none size-full object-cover')
 
 const PLACEHOLDER_BLUR =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPgo8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTZlN2ViIi8+Cjwvc3ZnPg=='
-
-type LightGallery = InitDetail['instance']
-
-// Light Gallery Props that are safe to change per instance
-// A.K.A Props that will not break things entirely if changed
-type DefaultLightGalleryProps = Omit<
-  LightGalleryProps,
-  | 'licenseKey'
-  | 'container'
-  | 'autoplayVideoOnSlide'
-  | 'autoplayFirstVideo'
-  | 'gotoNextSlideOnVideoEnd'
-  | 'currentPagerPosition'
-  | 'alignThumbnails'
-  | 'videojs'
-  | 'elementClassNames'
-  | 'isMobile'
-  | 'onContainerResize'
-  | 'onBeforeSlide'
-  | 'onInit'
-  | 'mode'
-  | 'width'
-  | 'plugins'
-  | 'thumbnail'
->
-
-// LightGallery props that require specific settings to make the inline gallery view work
-type InlineViewGalleryPropNames = keyof Pick<
-  DefaultLightGalleryProps,
-  'controls' | 'showMaximizeIcon' | 'closable' | 'showCloseIcon' | 'allowMediaOverlap' // | 'thumbnail'
->
-type InlineGalleryViewEnabledProps = Omit<DefaultLightGalleryProps, InlineViewGalleryPropNames>
-
-// IF inline == true
-// THEN
-//    don't allow the LightGallery props that impact the inline view working to be changed
-// IF inline == false
-// THEN
-//    those props can be overridden as required
-type InlineableGalleryProps =
-  | {
-      inline: true
-      lightGalleryProps?: InlineGalleryViewEnabledProps
-    }
-  | {
-      inline?: false | undefined
-      lightGalleryProps?: DefaultLightGalleryProps
-    }
 
 export type ItemProjectDetails = {
   href: string
@@ -230,32 +174,31 @@ export function mapImageGalleryItems(media: Media[]) {
   return items
 }
 
-export type ImageGalleryProps = InlineableGalleryProps & {
-  layout?: 'inline-gallery' | 'card-gallery' | 'default'
+export type ImageGalleryProps = {
+  layout: GalleryLayout | undefined
   items: Media[]
   thumbnailTooltip?: boolean
-  itemStyles?: string
-  thumbnailStyles?: string
-  galleryStyles?: string
-  containerProps?: React.ComponentPropsWithRef<'div'>
+  galleryItemClassNames?: string
+  thumbnailClassNames?: string
+  galleryClassNames?: string
+  containerClassNames?: string
+  settings?: ImageGallerySettings
 }
 
 export const ImageGallery = ({
-  layout = 'inline-gallery',
+  layout = 'inline',
   items,
-  inline = true,
   thumbnailTooltip = true,
-  galleryStyles,
-  lightGalleryProps = InlineEnabledDefaultPropValues,
-  itemStyles,
-  thumbnailStyles,
-  containerProps,
+  galleryClassNames: galleryClassNamesFromProps,
+  settings: settingsFromProps,
+  galleryItemClassNames: galleryItemClassNamesFromProps,
+  thumbnailClassNames: thumbnailClassNamesFromProps,
+  containerClassNames: containerClassNamesFromProps,
 }: ImageGalleryProps): React.ReactNode => {
   const isMobile = useIsMobile()
   const lightGallery: React.RefObject<LightGallery | null> = useRef<LightGallery | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [galleryContainer, setGalleryContainer] = useState<HTMLDivElement | null>(null)
-  const showThumbnailTooltip = inline ? false : thumbnailTooltip
 
   const galleryItems = mapImageGalleryItems(items)
 
@@ -269,12 +212,13 @@ export const ImageGallery = ({
     ({ instance }: InitDetail) => {
       if (instance) {
         lightGallery.current = instance
-        if (inline) {
+        if (layout === 'inline' || layout === 'card') {
           lightGallery.current.openGallery()
         }
+        console.debug(`lightGallery.current.settings:`, lightGallery.current.settings)
       }
     },
-    [inline],
+    [layout],
   )
 
   const handleContainerResize = (_detail: ContainerResizeDetail) => {
@@ -285,81 +229,41 @@ export const ImageGallery = ({
     return isMobile
   }
 
+  const instanceSettings: ImageGallerySettings = applyLayoutSettings(layout, settingsFromProps)
+
+  console.debug(`[${layout}] LightGallery:`, {
+    settingsFromProps: settingsFromProps ?? 'NONE',
+    containerClassNamesFromProps: containerClassNamesFromProps ?? 'NONE',
+    settingsWithLayout: instanceSettings,
+  })
+
+  const lightGalleryClassNames = cn('overflow-hidden rounded-none', galleryClassNamesFromProps)
+  const showThumbnailTooltip = layout === 'inline' ? false : thumbnailTooltip
   const showCaptions: boolean = false
-
-  // Settings required to make it work well inline
-  const inlineGallerySettings = {
-    container: galleryContainer,
-    ...InlineEnabledDefaultPropValues,
-  }
-
-  const settingsFromProps = {
-    ...lightGalleryProps,
-    ...InlineDisabledDefaultPropValues,
-  }
-
-  const lightGallerySettings = inline ? inlineGallerySettings : settingsFromProps
-
-  const LayoutClass = `mlg-${layout}`
-
-  const prevIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6"/></svg>`
-  const nextIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6"/></svg>`
 
   return (
     <div
-      className={cn('relative h-auto w-full overflow-hidden rounded-none')}
+      className={cn(
+        'mlg-gallery-container relative w-full overflow-hidden rounded-none',
+        containerClassNamesFromProps,
+        layout === 'inline' ? 'max-h-[80vh]' : '',
+      )}
       ref={containerRef}
-      {...containerProps}
     >
       <LightGallery
-        // ----------------------------
-        // Safe to Change
-        closable={lightGallerySettings.closable}
-        showCloseIcon={false} //lightGallerySettings.showCloseIcon
-        thumbnail={false} //lightGallerySettings.thumbnail
-        controls={lightGallerySettings.controls}
-        showMaximizeIcon={lightGallerySettings.showMaximizeIcon}
-        allowMediaOverlap={lightGallerySettings.allowMediaOverlap}
-        counter={galleryItems.length > 1}
-        loop={true}
-        escKey={true}
-        zoom={true}
-        mousewheel={true}
-        download={false}
-        animateThumb={false}
-        backdropDuration={100}
-        hideScrollbar={true}
-        preload={3}
-        startAnimationDuration={100}
-        speed={300}
-        zoomFromOrigin={false}
-        loadYouTubeThumbnail={true}
-        youTubePlayerParams={{
-          modestbranding: 1,
-          showinfo: 0,
-          controls: 0,
-        }}
-        // ----------------------------
-        // Don't Change
-        prevHtml={prevIcon}
-        nextHtml={nextIcon}
-        appendSubHtmlTo={'.lg-sub-html'}
-        subHtmlSelectorRelative={false}
-        addClass={cn('mlg-gallery group', LayoutClass)}
-        container={inline ? galleryContainer : null}
-        autoplayVideoOnSlide={false}
-        autoplayFirstVideo={false}
-        gotoNextSlideOnVideoEnd={false}
-        currentPagerPosition={'middle'}
-        alignThumbnails={'middle'}
-        videojs={false}
-        elementClassNames={cn('overflow-hidden rounded-none', galleryStyles)}
-        isMobile={getIsMobile}
-        onContainerResize={handleContainerResize}
-        onInit={onInit}
-        mode={'lg-lollipop'}
+        container={layout === 'inline' || layout === 'card' ? galleryContainer : null}
+        elementClassNames={cn(lightGalleryClassNames)}
         width={'100%'}
         plugins={[lgThumbnail, lgZoom, lgVideo]}
+        mode={'lg-lollipop'}
+        addClass={cn('mlg-gallery', `mlg-${layout}`)}
+        prevHtml={prevIcon}
+        nextHtml={nextIcon}
+        videojs={false}
+        onContainerResize={handleContainerResize}
+        onInit={onInit}
+        isMobile={getIsMobile}
+        {...instanceSettings}
       >
         {galleryItems.map((item, index) => {
           if (item.type === 'video') {
@@ -367,14 +271,14 @@ export const ImageGallery = ({
               <a
                 key={index}
                 data-lg-size={item.size}
-                className={cn(LightGalleryItemStyles, itemStyles)}
+                className={cn(GalleryItemStyles, galleryItemClassNamesFromProps)}
                 data-video={item.src}
                 data-sub-html={`#caption-${item.id}`}
               >
                 {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
                 <NextImage
                   alt={item.alt}
-                  className={cn(ThumbnailStyles, thumbnailStyles)}
+                  className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
                   src={item.thumb}
                   width={item.width ?? 1280}
                   height={item.height ?? 720}
@@ -395,14 +299,14 @@ export const ImageGallery = ({
               <a
                 key={item.id}
                 data-lg-size={item.size}
-                className={cn(LightGalleryItemStyles, itemStyles)}
+                className={cn(GalleryItemStyles, galleryItemClassNamesFromProps)}
                 data-src={item.src}
                 data-sub-html={`#caption-${item.id}`}
               >
                 {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
                 <NextImage
                   alt={item.alt}
-                  className={cn(ThumbnailStyles, thumbnailStyles)}
+                  className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
                   src={item.thumb}
                   loading={'eager'}
                   width={item.width ?? 1280}

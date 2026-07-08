@@ -64,15 +64,23 @@ export const Media = (props: MediaProps) => {
         }
         return <ImageMedia {...imageProps} />
       } else {
-        const { lightGalleryProps, inline, itemStyles, thumbnailStyles } = baseProps
+        const {
+          settings,
+          layout,
+          galleryItemClassNames,
+          thumbnailClassNames,
+          containerClassNames,
+        } = baseProps
         return (
           <React.Fragment>
             <ImageGallery
               items={[resource]}
-              itemStyles={itemStyles}
-              thumbnailStyles={thumbnailStyles}
-              inline={inline}
-              lightGalleryProps={lightGalleryProps}
+              galleryClassNames={'media-component'}
+              galleryItemClassNames={galleryItemClassNames}
+              thumbnailClassNames={thumbnailClassNames}
+              layout={layout}
+              settings={settings}
+              containerClassNames={containerClassNames}
             />
           </React.Fragment>
         )
@@ -97,13 +105,13 @@ export const Media = (props: MediaProps) => {
           </React.Fragment>
         )
       } else {
-        const { lightGalleryProps, inline } = baseProps
+        const { settings: lightGalleryProps, layout } = baseProps
         return (
           <React.Fragment>
             <ImageGallery
               items={[resource]}
-              lightGalleryProps={lightGalleryProps}
-              inline={inline}
+              settings={lightGalleryProps}
+              layout={layout ?? 'default'}
             />
           </React.Fragment>
         )
