@@ -1,6 +1,6 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { Search } from '@/search/Component'
@@ -74,7 +74,7 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       </div>
 
       {posts.totalDocs > 0 ? (
-        <CollectionArchive items={results} collection={'posts'} />
+        <CollectionItemGroup items={results} collection={'posts'} />
       ) : (
         <div className="container">No results found.</div>
       )}

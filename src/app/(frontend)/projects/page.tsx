@@ -6,7 +6,7 @@ import configPromise from '@payload-config'
 import { getPayload, PaginatedDocs } from 'payload'
 import PageClient from './page.client'
 import { Project } from '@/payload-types'
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
@@ -38,7 +38,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive items={projects.docs} collection={'projects'} />
+      <CollectionItemGroup items={projects.docs} collection={'projects'} />
 
       <div className="container">
         {projects.totalPages > 1 && projects.page && (

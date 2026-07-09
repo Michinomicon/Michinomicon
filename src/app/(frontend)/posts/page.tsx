@@ -1,6 +1,6 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
@@ -45,7 +45,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive items={posts.docs as Post[]} collection={'posts'} />
+      <CollectionItemGroup items={posts.docs as Post[]} collection={'posts'} />
 
       <div className="container">
         {posts.totalPages > 1 && posts.page && (

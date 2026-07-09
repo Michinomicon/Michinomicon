@@ -66,10 +66,10 @@ const BaseSettings: ImageGallerySettings = {
 const DefaultLayoutSettings: ImageGallerySettings = {
   ...BaseSettings,
   controls: true,
-  showMaximizeIcon: true,
+  showMaximizeIcon: false,
   thumbnail: true,
-  closable: false,
-  showCloseIcon: false,
+  closable: true,
+  showCloseIcon: true,
   allowMediaOverlap: true,
 
   zoomFromOrigin: false,
@@ -203,19 +203,15 @@ export function applyLayoutSettings(
 //   extraProps: [],
 //   exThumbImage: '',
 //   mobileSettings: {},
-
-//   /**
-//     LightGalleryCoreStrings: {
-//         closeGallery: string;
-//         toggleMaximize: string;
-//         previousSlide: string;
-//         nextSlide: string;
-//         download: string;
-//         playVideo: string;
-//         mediaLoadingFailed: string;
-//     }
-//    */
-//   strings: undefined,
+// strings: {
+//   closeGallery: string,
+//   toggleMaximize: string,
+//   previousSlide: string,
+//   nextSlide: string,
+//   download: string,
+//   playVideo: string,
+//   mediaLoadingFailed: string
+// }
 //   scale: 0,
 //   zoom: false,
 //   infiniteZoom: false,
@@ -223,16 +219,11 @@ export function applyLayoutSettings(
 //   enableZoomAfter: 0,
 //   showZoomInOutIcons: false,
 //   actualSizeIcons: { zoomIn: 'lg-actual-size', zoomOut: 'lg-zoom-out' },
-
-//   /**
-//     ZoomStrings:  {
+//   zoomPluginStrings: {
 //         zoomIn: string;
 //         zoomOut: string;
 //         viewActualSize: string;
-//     }
-//    */
-//   zoomPluginStrings: undefined,
-
+//     },
 //   thumbnail: false,
 //   animateThumb: false,
 //   currentPagerPosition: 'middle',

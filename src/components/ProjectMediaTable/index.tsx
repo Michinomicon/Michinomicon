@@ -23,10 +23,10 @@ import {
 import { Button } from '../ui/button'
 import React from 'react'
 import { StatusBadge } from '../StatusBadge'
-import { getMediaFileExtension } from '@/utilities/getMediaFileType'
 import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
 import { MediaAvatar } from '../MediaAvatar'
 import { AvatarGroup } from '../ui/avatar'
+import { getMediaFileExtension } from '@/utilities/mediaInfo'
 
 export function ProjectMediaTableBody({
   data,
@@ -136,6 +136,7 @@ export function ProjectMediaTableBody({
                             />
                             <span className={'ml-2 text-lg'}>{creator.title}</span>
                           </TableCell>
+
                           {/* Status */}
                           <TableCell className="text-center">
                             <StatusBadge variant={'status'} status={creator.status}></StatusBadge>

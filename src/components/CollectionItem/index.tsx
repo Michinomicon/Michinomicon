@@ -20,25 +20,9 @@ import { AspectRatio } from '../ui/aspect-ratio'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import RichText from '../RichText'
 
-export type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
-export type SupportedSlug = keyof SupportedConfigs
-export type SupportedCollection = SupportedConfigs[keyof SupportedConfigs]
+type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
 
-export type CollectionCardPropsItemProperties = {
-  title?: string
-  alignItems?: 'center'
-  className?: string
-  showStatus?: boolean
-  showTags?: boolean
-  showImage?: boolean
-  layout?: 'vertical' | 'horizontal'
-  item: CollectionCardItemProperties<keyof SupportedConfigs>
-}
-
-export type CollectionCardProps = React.ComponentPropsWithRef<typeof Item> &
-  CollectionCardPropsItemProperties
-
-type BaseCollectionCardItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfigs> = {
+type BaseItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfigs> = {
   collection: T
   status: BadgeStatus | null
   tags: string[] | null
@@ -47,17 +31,29 @@ type BaseCollectionCardItemProperties<T extends keyof SupportedConfigs = keyof S
   title: string
   href: string
 }
-export type CollectionCardItemProperties<T extends keyof SupportedConfigs> =
-  BaseCollectionCardItemProperties<T>
+export type CollectionItemProperties<T extends keyof SupportedConfigs> = BaseItemProperties<T>
 
-export function CollectionArchiveCard({
+export type CollectionItemProps<T extends keyof SupportedConfigs> = React.ComponentPropsWithRef<
+  typeof Item
+> & {
+  title?: string
+  alignItems?: 'center'
+  className?: string
+  showStatus?: boolean
+  showTags?: boolean
+  showImage?: boolean
+  layout?: 'vertical' | 'horizontal'
+  item: CollectionItemProperties<T>
+}
+
+export function CollectionItem<T extends keyof SupportedConfigs>({
   className,
   showTags = true,
   layout = 'vertical',
   title: titleFromProps,
   item: itemFromProps,
   ...props
-}: CollectionCardProps): React.ReactNode {
+}: CollectionItemProps<T>): React.ReactNode {
   const { card, link } = useClickableCard<HTMLDivElement>({})
   const cardCurrentRef = useRef<HTMLDivElement>(card.ref.current)
   const linkCurrentRef = useRef(link.ref.current)

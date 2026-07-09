@@ -24,8 +24,8 @@ import { cn } from '@/lib/utils'
 import { ImageGallery } from '../ImageGallery'
 import { StatusBadge } from '../StatusBadge'
 import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
-import { getMediaFileExtension } from '@/utilities/getMediaFileType'
 import { isMedia } from '@/utilities/isMedia'
+import { getMediaFileExtension } from '@/utilities/mediaInfo'
 
 export function CreatorCreditsTableBody({
   data,

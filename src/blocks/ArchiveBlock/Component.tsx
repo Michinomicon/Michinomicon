@@ -2,7 +2,7 @@ import type { ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
 import React from 'react'
 import RichText from '../../components/RichText'
-import { CollectionArchive, CollectionArchiveProps } from '../../components/CollectionArchive'
+import { CollectionItemGroup, CollectionItemGroupProps } from '../../components/CollectionItemGroup'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -11,7 +11,7 @@ export const ArchiveBlock: React.FC<
 > = async (props) => {
   const { id, categories, introContent, limit, relationTo, populateBy, selectedDocs } = props
 
-  let archiveProps: CollectionArchiveProps | null = null
+  let archiveProps: CollectionItemGroupProps | null = null
   if (populateBy) {
     if (populateBy === 'collection' && relationTo) {
       archiveProps = {
@@ -35,7 +35,7 @@ export const ArchiveBlock: React.FC<
           <RichText className="ms-0 max-w-3xl" data={introContent} enableGutter={false} />
         </div>
       )}
-      {archiveProps && <CollectionArchive {...archiveProps} />}
+      {archiveProps && <CollectionItemGroup {...archiveProps} />}
     </div>
   )
 }

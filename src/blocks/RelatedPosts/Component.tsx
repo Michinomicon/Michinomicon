@@ -4,9 +4,9 @@ import RichText from '@/components/RichText'
 
 import type { Post } from '@/payload-types'
 
-import { CollectionArchiveCard } from '../../components/CollectionArchiveCard'
+import { CollectionItem } from '../../components/CollectionItem'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
-import { postToCollectionCardItemProperties } from '@/utilities/getCollectionArchiveCardProperties'
+import { postToCollectionItemProperties } from '@/utilities/getCollectionArchiveCardProperties'
 
 export type RelatedPostsProps = {
   className?: string
@@ -15,7 +15,7 @@ export type RelatedPostsProps = {
 }
 export const RelatedPosts: React.FC<RelatedPostsProps> = async (props) => {
   const { className, docs, introContent } = props
-  const items = docs ? await Promise.all(docs.map(postToCollectionCardItemProperties)) : []
+  const items = docs ? await Promise.all(docs.map(postToCollectionItemProperties)) : []
 
   return (
     <div className={clsx('lg:container', className, 'related-posts-block')}>
@@ -24,7 +24,7 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = async (props) => {
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-8">
         {items &&
           items.map((item, index) => {
-            return <CollectionArchiveCard key={index} item={item} showTags showStatus={false} />
+            return <CollectionItem key={index} item={item} showTags showStatus={false} />
           })}
       </div>
     </div>

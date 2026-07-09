@@ -1,5 +1,33 @@
-/* Lightgallery Overrides  */
+/* LIGHT GALLERY GLOBAL STYLES */
+.lg-thumb-item.active,
+.lg-thumb-item:hover {
+  border-color: var(--color-primary) !important;
+}
+.lg-thumb.lg-group {
+  justify-content: center !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+}
+.lg-thumb-item {
+  border-radius: inherit !important;
+}
+.lg-thumb-item img {
+  border-radius: inherit !important;
+  border-color: var(--color-border) !important;
+}
 
+@layer base {
+  .lg-container * {
+    @apply rounded-none;
+    border-radius: 0;
+    user-select: text !important;
+    caret-color: transparent !important;
+  }
+}
+
+@custom-variant lg-open (&:where(*:is(.lg-container.mlg-gallery.lg-show.lg-show-in .lg-sub-html * )));
+
+/* Lightgallery Overrides  */
 .lg-toolbar {
   background-image: transparent !important;
   background-color: rgba(0, 0, 0, 0) !important;
@@ -40,60 +68,39 @@
   height: 1.25rem;
 }
 
-/* LIGHT GALLERY GLOBAL STYLES */
-.lg-thumb-item.active,
-.lg-thumb-item:hover {
-  border-color: var(--color-primary) !important;
+.lg-single-item .lg-prev.lg-icon,
+.lg-single-item .lg-next.lg-icon,
+.lg-single-item .lg-toolbar .lg-counter {
+  display: none !important;
 }
-.lg-thumb.lg-group {
-  justify-content: center !important;
-  display: flex !important;
-  flex-wrap: wrap !important;
-}
-.lg-thumb-item {
-  border-radius: inherit !important;
-}
-.lg-thumb-item img {
-  border-radius: inherit !important;
-  border-color: var(--color-border) !important;
-}
-
-@layer base {
-  .lg-container * {
-    @apply rounded-none;
-    border-radius: 0;
-  }
-}
-
-@custom-variant lg-open (&:where(*:is(.lg-container.mlg-gallery.lg-show.lg-show-in .lg-sub-html * )));
-
 /* Card Gallery Layout  */
-.mlg-card .lg-prev {
+
+.mlg-gallery.mlg-card .lg-prev {
   left: 0px;
 }
-.mlg-card .lg-next {
+.mlg-gallery.mlg-card .lg-next {
   right: 0px;
 }
 
-.mlg-card .lg-toolbar {
+.mlg-gallery.mlg-card .lg-toolbar {
   user-select: none;
   opacity: 1;
 }
 
-.mlg-card .lg-toolbar .lg-counter {
+.mlg-gallery.mlg-card .lg-toolbar .lg-counter {
   position: absolute;
   padding-top: 10px;
   padding-left: 12px;
   font-weight: 600;
 }
 
-.mlg-card .lg-toolbar .lg-icon,
-.mlg-card .lg-toolbar .lg-counter,
-.mlg-card .lg-toolbar .lg-maximize {
+.mlg-gallery.mlg-card .lg-toolbar .lg-icon,
+.mlg-gallery.mlg-card .lg-toolbar .lg-counter,
+.mlg-gallery.mlg-card .lg-toolbar .lg-maximize {
   opacity: 0.2;
 }
 
-.mlg-card .lg-outer:hover {
+.mlg-gallery.mlg-card .lg-outer:hover {
   .lg-toolbar {
     background-color: rgba(0, 0, 0, 0.2);
   }
@@ -109,7 +116,7 @@
   }
 }
 
-.mlg-card .lg-outer:hover {
+.mlg-gallery.mlg-card .lg-outer:hover {
   .lg-icon:hover {
     opacity: 1;
   }

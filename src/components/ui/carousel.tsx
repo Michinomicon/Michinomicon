@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
-type CarouselOptions = UseCarouselParameters[0]
+export type CarouselOptions = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
 
 type CarouselProps = {
@@ -138,52 +138,56 @@ const Carousel = React.forwardRef<
 })
 Carousel.displayName = 'Carousel'
 
-const CarouselContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
-    const { carouselRef, orientation } = useCarousel()
-
-    return (
-      <div ref={carouselRef} className="overflow-hidden rounded-none">
-        <div
-          ref={ref}
-          className={cn(
-            'flex',
-            orientation === 'horizontal' ? '-ml-4' : '-mt-4 flex-col',
-            className,
-          )}
-          {...props}
-        />
-      </div>
-    )
-  },
-)
-CarouselContent.displayName = 'CarouselContent'
-
-const CarouselItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
-  ({ className, ...props }, ref) => {
-    const { orientation } = useCarousel()
-
-    return (
+const CarouselContent = React.forwardRef<
+  HTMLDivElement,
+  React.HTMLAttributes<HTMLDivElement> & { slideSpacing?: number }
+>(({ slideSpacing = 4, className, ...props }, ref) => {
+  const { carouselRef, orientation } = useCarousel()
+  const slideSpacingClassName =
+    orientation === 'horizontal' ? `-ml-${slideSpacing}` : `-mt-${slideSpacing} flex-col`
+  return (
+    <div ref={carouselRef} className="embla__viewport overflow-hidden rounded-none">
       <div
         ref={ref}
-        role="group"
-        aria-roledescription="slide"
-        className={cn(
-          'min-w-0 shrink-0 grow-0 basis-full',
-          orientation === 'horizontal' ? 'pl-4' : 'pt-4',
-          className,
-        )}
+        className={cn(slideSpacingClassName, 'embla__container flex', className)}
         {...props}
       />
-    )
-  },
-)
+    </div>
+  )
+})
+CarouselContent.displayName = 'CarouselContent'
+
+const CarouselItem = React.forwardRef<
+  HTMLDivElement,
+  { slideSize?: number; slideSpacing?: number } & React.HTMLAttributes<HTMLDivElement>
+>(({ slideSize = 70, slideSpacing = 4, className, ...props }, ref) => {
+  const { orientation } = useCarousel()
+  const slideSpacingClassName = orientation === 'horizontal' ? `pl-${slideSpacing}` : 'pt-4'
+  const slideSizeClassName = `basis-${slideSize}/100`
+
+  return (
+    <div
+      ref={ref}
+      role="group"
+      aria-roledescription="slide"
+      className={cn(
+        slideSizeClassName,
+        'embla__slide',
+        'min-w-0 shrink-0 grow-0',
+        // orientation === 'horizontal' ? 'pl-4' : 'pt-4',
+        slideSpacingClassName,
+        className,
+      )}
+      {...props}
+    />
+  )
+})
 CarouselItem.displayName = 'CarouselItem'
 
 const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
   ({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
-    const { orientation, scrollPrev, canScrollPrev } = useCarousel()
-
+    const { orientation, scrollPrev, canScrollPrev, api } = useCarousel()
+    const nodeCount = api?.slideNodes()?.length ?? 0
     return (
       <Button
         ref={ref}
@@ -196,7 +200,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
             : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
           className,
         )}
-        disabled={!canScrollPrev}
+        disabled={!canScrollPrev || nodeCount < 2}
         onClick={scrollPrev}
         {...props}
       >
@@ -210,8 +214,8 @@ CarouselPrevious.displayName = 'CarouselPrevious'
 
 const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
   ({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
-    const { orientation, scrollNext, canScrollNext } = useCarousel()
-
+    const { orientation, scrollNext, canScrollNext, api } = useCarousel()
+    const nodeCount = api?.slideNodes()?.length ?? 0
     return (
       <Button
         ref={ref}
@@ -224,7 +228,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
             : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
           className,
         )}
-        disabled={!canScrollNext}
+        disabled={!canScrollNext || nodeCount < 2}
         onClick={scrollNext}
         {...props}
       >

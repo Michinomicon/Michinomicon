@@ -19,14 +19,7 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import { ContainerResizeDetail, InitDetail } from 'lightgallery/lg-events'
 import { cssVariables } from '@/cssVariables'
 import { GalleryItem as LightGalleryItem } from 'lightgallery/lg-utils'
-import { groupCreditsByCreator } from '@/utilities/groupCreditsByCreator'
 import { getMediaDisplayImageSources } from '@/utilities/getMediaDisplayImageSource'
-import { isMedia } from '@/utilities/isMedia'
-import { formatDateTime } from '@/utilities/formatDateTime'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { Info } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
-import { MediaAvatar } from '../MediaAvatar'
 import {
   applyLayoutSettings,
   GalleryLayout,
@@ -34,6 +27,9 @@ import {
   nextIcon,
   prevIcon,
 } from './settings'
+import { MediaCaption } from '../MediaCaption'
+import { MediaTooltip } from '../MediaTooltip'
+import { getMediaInfo, MediaInfo } from '@/utilities/mediaInfo'
 
 type LightGallery = InitDetail['instance']
 
@@ -57,30 +53,7 @@ const ItemThumbnailStyles = cn('relative block rounded-none size-full object-cov
 const PLACEHOLDER_BLUR =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPgo8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTZlN2ViIi8+Cjwvc3ZnPg=='
 
-export type ItemProjectDetails = {
-  href: string
-  slug: string
-  title: string
-  status: 'planned' | 'active' | 'completed' | 'archived'
-  profileImage: Media | null
-  categories: { title: string; slug: string }[] | undefined
-  startDate: string | null
-  endDate: string | null
-}
-
-export type ItemCredit = {
-  href: string
-  title: string
-  roles: string[]
-  image: Media | null
-}
-export type ItemCaption = {
-  title: string
-  credits?: ItemCredit[]
-  project?: ItemProjectDetails
-}
-
-export type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
+type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
   width?: number | `${number}` | undefined
   height?: number | `${number}` | undefined
 } & {
@@ -90,85 +63,34 @@ export type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
   src: string
   type: 'image' | 'video'
   thumb: string
-  subHtml: string
-  caption: ItemCaption
+  caption: MediaInfo
 }
 
-function getItemSubHtml(item: Media): string {
-  const credits = groupCreditsByCreator(item.credits)
-  const captionCredits = credits.map(({ creator, roles }) => {
-    return `<h3><a href='/creators/${creator.slug}'><b>${creator.title}</b></a> - ${roles.join(', ')}</h3>`
-  })
-  return `<div class="lightGallery-captions prose w-full text-center mx-auto">
-        <h3>Title - ${item.title}</h3>
-    ${captionCredits}
-    </div>`
+function getItemType(media: Media): 'image' | 'video' {
+  return typeof media.mimeType === 'string' && media.mimeType.includes('video') ? 'video' : 'image'
 }
 
-function getItemProjectDetails(item: Media): ItemProjectDetails | undefined {
-  const { project } = item
-  if (project && typeof project === 'object') {
-    const { slug, title, profileImage, categories, status, startDate, endDate } = project
-    return {
-      slug,
-      title,
-      status,
-      profileImage: isMedia(profileImage) ? profileImage : null,
-      categories: categories
-        ?.filter((cat) => typeof cat === 'object')
-        .map(({ title, slug }) => ({ title, slug })),
-      startDate: startDate ? formatDateTime(startDate) : null,
-      endDate: endDate ? formatDateTime(endDate) : null,
-      href: `/projects/${slug}`,
-    }
-  }
+function getMediaSizeString(media: Media): string {
+  return media.width && media.height ? `${media.width}-${media.height}` : '1280-720'
 }
 
-function getItemCaptionCredits(item: Media): ItemCredit[] | undefined {
-  if (item.credits) {
-    return groupCreditsByCreator(item.credits).map(({ creator, roles }) => ({
-      href: `/creators/${creator.slug}`,
-      title: creator.title,
-      roles: roles,
-      image: isMedia(creator.profileImage) ? creator.profileImage : null,
-    }))
-  }
-}
-
-function getItemCaption(item: Media): ItemCaption {
-  return {
-    title: item.title,
-    credits: getItemCaptionCredits(item),
-    project: getItemProjectDetails(item),
-  }
-}
-
-function getItemType(item: Media): 'image' | 'video' {
-  return typeof item.mimeType === 'string' && item.mimeType.includes('video') ? 'video' : 'image'
-}
-
-function getItemSize(item: Media): string {
-  return item.width && item.height ? `${item.width}-${item.height}` : '1280-720'
-}
-
-function getItemProperties(media: Media): ItemProperties | undefined {
+function getItemPropertiesFromMedia(media: Media): ItemProperties | undefined {
   const { source, thumbnail } = getMediaDisplayImageSources(media)
   return {
     id: media.id,
     alt: media.alt,
-    size: getItemSize(media),
+    size: getMediaSizeString(media),
     src: source,
     type: getItemType(media),
     thumb: thumbnail,
-    subHtml: getItemSubHtml(media),
-    caption: getItemCaption(media),
+    caption: getMediaInfo(media),
   }
 }
 
-export function mapImageGalleryItems(media: Media[]) {
+function mapImageGalleryItems(media: Media[]) {
   const items: ItemProperties[] = media
     .sort((i, j) => Number(j.sortPriority) - Number(i.sortPriority))
-    .map(getItemProperties)
+    .map(getItemPropertiesFromMedia)
     .filter((i) => !!i)
 
   return items
@@ -178,6 +100,7 @@ export type ImageGalleryProps = {
   layout: GalleryLayout | undefined
   items: Media[]
   thumbnailTooltip?: boolean
+  hideCaption?: boolean
   galleryItemClassNames?: string
   thumbnailClassNames?: string
   galleryClassNames?: string
@@ -189,6 +112,7 @@ export const ImageGallery = ({
   layout = 'inline',
   items,
   thumbnailTooltip = true,
+  hideCaption = false,
   galleryClassNames: galleryClassNamesFromProps,
   settings: settingsFromProps,
   galleryItemClassNames: galleryItemClassNamesFromProps,
@@ -200,7 +124,12 @@ export const ImageGallery = ({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [galleryContainer, setGalleryContainer] = useState<HTMLDivElement | null>(null)
 
+  const instanceSettings: ImageGallerySettings = applyLayoutSettings(layout, settingsFromProps)
   const galleryItems = mapImageGalleryItems(items)
+
+  const lightGalleryClassNames = cn('overflow-hidden rounded-none', galleryClassNamesFromProps)
+  const showThumbnailTooltip = layout === 'inline' ? false : thumbnailTooltip
+  const showCaption = !hideCaption && layout !== 'card'
 
   useEffect(() => {
     if (containerRef.current) {
@@ -215,7 +144,6 @@ export const ImageGallery = ({
         if (layout === 'inline' || layout === 'card') {
           lightGallery.current.openGallery()
         }
-        console.debug(`lightGallery.current.settings:`, lightGallery.current.settings)
       }
     },
     [layout],
@@ -228,18 +156,6 @@ export const ImageGallery = ({
   const getIsMobile = () => {
     return isMobile
   }
-
-  const instanceSettings: ImageGallerySettings = applyLayoutSettings(layout, settingsFromProps)
-
-  console.debug(`[${layout}] LightGallery:`, {
-    settingsFromProps: settingsFromProps ?? 'NONE',
-    containerClassNamesFromProps: containerClassNamesFromProps ?? 'NONE',
-    settingsWithLayout: instanceSettings,
-  })
-
-  const lightGalleryClassNames = cn('overflow-hidden rounded-none', galleryClassNamesFromProps)
-  const showThumbnailTooltip = layout === 'inline' ? false : thumbnailTooltip
-  const showCaptions: boolean = false
 
   return (
     <div
@@ -275,7 +191,7 @@ export const ImageGallery = ({
                 data-video={item.src}
                 data-sub-html={`#caption-${item.id}`}
               >
-                {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
+                {showThumbnailTooltip && <MediaTooltip info={item.caption} />}
                 <NextImage
                   alt={item.alt}
                   className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
@@ -303,7 +219,7 @@ export const ImageGallery = ({
                 data-src={item.src}
                 data-sub-html={`#caption-${item.id}`}
               >
-                {showThumbnailTooltip && <ImageThumbnailTooltip item={item} />}
+                {showThumbnailTooltip && <MediaTooltip info={item.caption} />}
                 <NextImage
                   alt={item.alt}
                   className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
@@ -322,122 +238,15 @@ export const ImageGallery = ({
         })}
       </LightGallery>
 
-      {showCaptions &&
+      {showCaption &&
         galleryItems.map((item, index) => (
-          <GalleryItemCaption
+          <MediaCaption
             key={index}
             id={`caption-${item.id}`}
             className="lg-caption hidden"
-            item={item}
+            info={item.caption}
           />
         ))}
     </div>
-  )
-}
-
-function CreditBadge({
-  href,
-  title,
-  image,
-}: React.ComponentPropsWithoutRef<typeof Badge> & {
-  href: string
-  title: string
-  image: Media | null
-}) {
-  const [mouseOver, setMouseOver] = React.useState<boolean>(false)
-  const onMouseEnter = (_event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
-    setMouseOver(true)
-  }
-  const onMouseLeave = (_event: React.MouseEvent<HTMLSpanElement, MouseEvent>) => {
-    setMouseOver(false)
-  }
-  return (
-    <Badge
-      asChild
-      variant={mouseOver ? 'outline' : 'link'}
-      className={cn('pr-1 pl-0.5')}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
-      <a href={href}>
-        <MediaAvatar media={image} className="mr-1" size="sm" title={title} />
-        <span className="">{title}</span>
-      </a>
-    </Badge>
-  )
-}
-
-function GalleryItemCaption({
-  item,
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<'div'> & { item: ItemProperties }): React.ReactNode {
-  const { title, credits, project } = item.caption
-  return (
-    <div className={cn(className)} {...props}>
-      <div className="mx-auto flex w-auto flex-col items-center justify-center">
-        <div className="text-center text-xl whitespace-nowrap lg-open:text-2xl">
-          <span className="">
-            {title}
-            {project && (
-              <span>
-                {' - '}
-                <a href={project.href} className="">
-                  <b>{project.title}</b>
-                </a>
-              </span>
-            )}
-          </span>
-        </div>
-
-        {credits &&
-          credits.map(({ href, title, image, roles }, index) => (
-            <div key={index} className="flex flex-row flex-nowrap lg-open:text-xl">
-              <div className={cn('flex flex-row flex-nowrap items-center gap-x-1')}>
-                {roles.map((role, index) => {
-                  const isLast = index === roles.length - 1
-                  return (
-                    <span key={index} className={cn('mr-1 text-right text-lg')}>
-                      {role}
-                      {roles.length > 1 && !isLast ? ',' : ''}
-                    </span>
-                  )
-                })}
-              </div>
-              <CreditBadge {...{ href, title, image }} className={'lg-open:text-xl'} />
-            </div>
-          ))}
-      </div>
-    </div>
-  )
-}
-
-function ImageThumbnailTooltip({
-  item,
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<'span'> & { item: ItemProperties }): React.ReactNode {
-  const [tooltipOpen, setTooltipOpen] = React.useState<boolean>(false)
-  const onTooltipOpenChange = (isOpen: boolean) => {
-    setTooltipOpen(isOpen)
-  }
-  return (
-    <Tooltip onOpenChange={onTooltipOpenChange} delayDuration={600}>
-      <TooltipTrigger asChild className={cn(className)} {...props}>
-        <Badge
-          variant={'caption'}
-          className={cn(
-            'absolute top-1 right-1 z-10 h-6 transition-transform delay-10 duration-590',
-            tooltipOpen === true ? '' : 'opacity-50',
-          )}
-        >
-          <Info className="inline-start" />
-          <span className={cn(tooltipOpen === true ? '' : 'hidden')}>Details</span>
-        </Badge>
-      </TooltipTrigger>
-      <TooltipContent>
-        <GalleryItemCaption id={item.id} className="lg-caption-tooltip" item={item} />
-      </TooltipContent>
-    </Tooltip>
   )
 }
