@@ -7,18 +7,11 @@ import type { Media } from '@/payload-types'
 import { TypedCollection } from 'payload'
 import { Badge, BadgeStatus } from '../ui/badge'
 import { ImageGallery } from '../ImageGallery'
-import { Item, ItemContent, ItemDescription, ItemFooter, ItemHeader, ItemTitle } from '../ui/item'
-import { isMedia } from '@/utilities/isMedia'
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from '../ui/carousel'
+import { Item, ItemFooter } from '../ui/item'
 import { AspectRatio } from '../ui/aspect-ratio'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import RichText from '../RichText'
+import { cva, VariantProps } from 'class-variance-authority'
 
 type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
 
@@ -33,8 +26,9 @@ type BaseItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfig
 }
 export type CollectionItemProperties<T extends keyof SupportedConfigs> = BaseItemProperties<T>
 
-export type CollectionItemProps<T extends keyof SupportedConfigs> = React.ComponentPropsWithRef<
-  typeof Item
+export type CollectionItemProps<T extends keyof SupportedConfigs> = Omit<
+  React.ComponentPropsWithRef<typeof Item>,
+  'size'
 > & {
   title?: string
   alignItems?: 'center'
@@ -42,32 +36,264 @@ export type CollectionItemProps<T extends keyof SupportedConfigs> = React.Compon
   showStatus?: boolean
   showTags?: boolean
   showImage?: boolean
-  layout?: 'vertical' | 'horizontal'
   item: CollectionItemProperties<T>
 }
+
+type ItemTitleProps = {
+  title: string
+  href: string
+  link: ReturnType<typeof useClickableCard>['link']
+}
+function ItemTitle({ title, href, link }: ItemTitleProps): React.ReactNode {
+  const linkCurrentRef = useRef(link.ref.current)
+  return (
+    <div className={'w-full grow-0 p-2'}>
+      <Link className="" href={href} ref={linkCurrentRef}>
+        <span className={'text-2xl'}>{title}</span>
+      </Link>
+    </div>
+  )
+}
+
+// type ItemDescriptionProps = {
+//   description: string | DefaultTypedEditorState | null | undefined
+// }
+// function ItemDescription({ description }: ItemDescriptionProps): React.ReactNode {
+//   return (
+//     <div className={'h-full w-full overflow-hidden rounded-none'}>
+//       {description && typeof description === 'object' ? (
+//         <RichText
+//           className={'h-full w-full overflow-scroll'}
+//           data={description}
+//           enableGutter={false}
+//         />
+//       ) : (
+//         <span className="prose">{description}</span>
+//       )}
+//     </div>
+//   )
+// }
+
+const itemImageVariants = cva('image-container', {
+  variants: {
+    size: {
+      sm: 'h-50 w-50',
+      md: 'h-80 w-80',
+      lg: 'h-100 w-100',
+      xl: 'h-100 w-100',
+    },
+  },
+  defaultVariants: {
+    size: 'sm',
+  },
+})
+type ItemImageProps = { items: Media[] | null } & VariantProps<typeof itemImageVariants>
+function ItemImage({ size, items }: ItemImageProps): React.ReactNode {
+  const className = itemImageVariants({ size })
+  if (!items || items.length <= 0) {
+    return
+  }
+  return (
+    <div className={cn(className)}>
+      <AspectRatio ratio={1 / 1} className={cn('w-full')}>
+        <ImageGallery
+          layout={'card'}
+          containerClassNames={'h-full'}
+          galleryClassNames={'h-full'}
+          thumbnailTooltip={false}
+          items={items}
+        />
+      </AspectRatio>
+    </div>
+  )
+}
+
+const ContentSizeHeight = cva('', {
+  variants: {
+    size: {
+      sm: 'h-50',
+      md: 'h-80',
+      lg: 'h-100',
+      xl: 'h-100',
+    },
+  },
+  defaultVariants: {
+    size: 'sm',
+  },
+})
+
+// const horizontalLeftPanel =
+//   'flex h-full w-full grow flex-col items-start justify-start rounded-none select-none'
+// const ContentSizeWidth = cva('', {
+//   variants: {
+//     size: {
+//       sm: 'w-50',
+//       md: 'w-80',
+//       lg: 'w-100',
+//       xl: 'w-100',
+//     },
+//   },
+//   defaultVariants: {
+//     size: 'sm',
+//   },
+// })
+
+export const CollectionItemVariants = cva('', {
+  variants: {
+    layout: {
+      vertical: '',
+      verticalWide: '',
+      horizontal: '',
+    },
+    size: {
+      sm: '',
+      md: '',
+      lg: '',
+      xl: '',
+    },
+  },
+  defaultVariants: {
+    size: 'sm',
+    layout: 'horizontal',
+  },
+})
+export type SizeProps = VariantProps<typeof CollectionItemVariants>['size']
+export type ItemLayoutProps = VariantProps<typeof CollectionItemVariants>['layout']
 
 export function CollectionItem<T extends keyof SupportedConfigs>({
   className,
   showTags = true,
-  layout = 'vertical',
+  layout: layoutFromProps,
   title: titleFromProps,
   item: itemFromProps,
+  size,
   ...props
-}: CollectionItemProps<T>): React.ReactNode {
+}: CollectionItemProps<T> & VariantProps<typeof CollectionItemVariants>): React.ReactNode {
   const { card, link } = useClickableCard<HTMLDivElement>({})
   const cardCurrentRef = useRef<HTMLDivElement>(card.ref.current)
-  const linkCurrentRef = useRef(link.ref.current)
 
-  const { tags, images, description, title, href } = itemFromProps
+  const { tags, images, description, title: titleFromItemProps, href } = itemFromProps
+  const title = titleFromProps || titleFromItemProps
 
-  const titleToUse = titleFromProps || title
+  const itemTitle = <ItemTitle {...{ title, href, link }} />
+  const itemDescription = (
+    <div
+      className={cn('h-full w-full overflow-hidden rounded-none p-1', ContentSizeHeight({ size }))}
+    >
+      {description && typeof description === 'object' ? (
+        <RichText
+          className={'h-full w-full overflow-scroll rounded-none'}
+          data={description}
+          enableGutter={false}
+        />
+      ) : (
+        <span className="prose">{description}</span>
+      )}
+    </div>
+  )
+  const itemImage = <ItemImage size={size} items={images} />
 
-  const useHorizontal = layout === 'horizontal'
+  const layout = layoutFromProps || 'horizontal'
 
-  const hasImages = Array.isArray(images) && images.length > 0
+  const ContentColContainerClassName = cn(
+    'flex flex-col grow flex-nowrap items-start justify-start overflow-hidden',
+  )
+  const ContentRowContainerClassName = cn(
+    'flex grow flex-nowrap items-start justify-center overflow-hidden',
+  )
 
-  if (!useHorizontal) {
-    return (
+  const innerContent = () => {
+    switch (layout) {
+      case 'horizontal':
+        return (
+          <div className={cn(ContentRowContainerClassName)}>
+            <div className={cn(ContentColContainerClassName, ContentSizeHeight({ size }))}>
+              {itemTitle}
+              {itemDescription}
+            </div>
+            <div
+              className={cn(
+                'flex h-full shrink grow-0 flex-col items-center justify-center',
+                'rounded-tl-none rounded-bl-none border-l border-l-border',
+              )}
+            >
+              {itemImage}
+            </div>
+          </div>
+        )
+
+      case 'vertical':
+        return (
+          <div className={cn(ContentColContainerClassName)}>
+            <div
+              className={cn(
+                ContentSizeHeight({ size }),
+                'flex h-full w-full shrink grow-0 flex-col items-center justify-center',
+                'rounded-none border-b border-b-border',
+              )}
+            >
+              {itemImage}
+            </div>
+            <div className={cn(ContentColContainerClassName)}>
+              {itemTitle}
+              {itemDescription}
+            </div>
+          </div>
+        )
+
+      case 'verticalWide':
+        return (
+          <div className={cn(ContentColContainerClassName)}>
+            <div className={cn(ContentRowContainerClassName, ContentSizeHeight({ size }))}>
+              <div className={cn(ContentColContainerClassName, ContentSizeHeight({ size }))}>
+                {itemTitle}
+              </div>
+              <div
+                className={cn(
+                  ContentSizeHeight({ size }),
+                  'flex h-full w-full shrink grow-0 flex-col items-center justify-center',
+                  'rounded-none border-b border-b-border',
+                )}
+              >
+                {itemImage}
+              </div>
+            </div>
+            <div className={cn(ContentRowContainerClassName, ContentSizeHeight({ size }))}>
+              {itemDescription}
+            </div>
+          </div>
+        )
+    }
+  }
+
+  return (
+    <Item
+      ref={cardCurrentRef}
+      className={cn('gap-0 bg-card p-0', className)}
+      variant="outline"
+      {...props}
+    >
+      {innerContent()}
+
+      {showTags && tags && (
+        <ItemFooter className={cn('flex flex-col items-start justify-center rounded-none p-0')}>
+          <div className="flex flex-row gap-x-1 border-t px-2 py-1 text-sm uppercase">
+            {tags.map((tag, index) => {
+              return (
+                <Badge key={index} variant={'default'}>
+                  <span className="font-bold">{tag}</span>
+                </Badge>
+              )
+            })}
+          </div>
+        </ItemFooter>
+      )}
+    </Item>
+  )
+}
+
+/**    
+ * return (
       <Item ref={cardCurrentRef} className={cn('p-0', '')} variant="outline" {...props}>
         <ItemHeader className={''}>
           <Carousel
@@ -116,76 +342,4 @@ export function CollectionItem<T extends keyof SupportedConfigs>({
         </ItemFooter>
       </Item>
     )
-  } else {
-    return (
-      <Item
-        ref={cardCurrentRef}
-        className={cn('gap-0 bg-card p-0', className)}
-        variant="outline"
-        {...props}
-      >
-        <div className={cn('flex h-50 grow flex-row flex-nowrap items-start overflow-hidden')}>
-          {/* left side of card  */}
-          <div
-            className={cn(
-              'flex h-full w-full grow flex-col items-start justify-start rounded-none select-none',
-            )}
-          >
-            <div className={'w-full grow-0 p-2'}>
-              <Link className="" href={href} ref={linkCurrentRef}>
-                <span className={'text-2xl'}>{titleToUse}</span>
-              </Link>
-            </div>
-            <div className={'h-full w-full grow overflow-hidden rounded-none p-2'}>
-              {description && typeof description === 'object' ? (
-                <RichText
-                  className={'w-full overflow-scroll'}
-                  data={description}
-                  enableGutter={false}
-                />
-              ) : (
-                <span className="prose">{description}</span>
-              )}
-            </div>
-          </div>
-
-          {/* right side of card */}
-
-          {hasImages && (
-            <div
-              className={cn(
-                'flex h-auto shrink grow-0 flex-col items-center justify-center rounded-tl-none rounded-bl-none border-l border-l-border',
-              )}
-            >
-              <div className={cn('h-50 w-50')}>
-                <AspectRatio ratio={1 / 1} className={cn('w-full')}>
-                  <ImageGallery
-                    layout={'card'}
-                    containerClassNames={'h-full'}
-                    galleryClassNames={'h-full'}
-                    thumbnailTooltip={false}
-                    items={images}
-                  />
-                </AspectRatio>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {showTags && tags && (
-          <ItemFooter className={cn('flex flex-col items-start justify-center rounded-none p-0')}>
-            <div className="flex flex-row gap-x-1 border-t px-2 py-1 text-sm uppercase">
-              {tags.map((tag, index) => {
-                return (
-                  <Badge key={index} variant={'default'}>
-                    <span className="font-bold">{tag}</span>
-                  </Badge>
-                )
-              })}
-            </div>
-          </ItemFooter>
-        )}
-      </Item>
-    )
-  }
-}
+ */

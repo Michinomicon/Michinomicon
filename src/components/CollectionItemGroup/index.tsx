@@ -1,6 +1,11 @@
 import { cn } from '@/utilities/ui'
 import React from 'react'
-import { CollectionItem, CollectionItemProperties } from '@/components/CollectionItem'
+import {
+  CollectionItem,
+  CollectionItemProperties,
+  ItemLayoutProps,
+  SizeProps,
+} from '@/components/CollectionItem'
 import { ItemGroup } from '@/components/ui/item'
 import { ArchiveBlock, Category, Creator, Post, Project } from '@/payload-types'
 import { getCollectionItemProperties } from '@/utilities/getCollectionArchiveCardProperties'
@@ -12,6 +17,7 @@ import {
   CarouselNext,
   CarouselOptions,
 } from '../ui/carousel'
+import { Separator } from '../ui/separator'
 
 export type CollectionTypes = {
   posts: Post
@@ -83,7 +89,6 @@ export async function CollectionItemGroup({
     // watchResize: false,
     // watchSlides: false,
     // watchFocus: false,
-
     // container: null,
     // slides: null,
     // active: false,
@@ -139,25 +144,116 @@ export async function CollectionItemGroup({
       </div>
     )
   } else {
+    const sizes: SizeProps[] = ['sm', 'md', 'lg', 'xl']
+    const layouts: ItemLayoutProps[] = ['vertical', 'verticalWide', 'horizontal']
+
+    const CarouselVariant = {
+      vertical: {
+        sm: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-5/12') },
+        },
+        md: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-7/12') },
+        },
+        lg: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+        xl: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+      },
+      verticalWide: {
+        sm: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+        md: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+        lg: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+        xl: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+      },
+      horizontal: {
+        sm: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+        md: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+        lg: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+        xl: {
+          carousel: { width: cn('max-w-3/4') },
+          item: { width: cn('w-11/12') },
+        },
+      },
+    }
+
     return (
-      <div className={cn('flex w-full flex-col items-center justify-center')}>
-        <Carousel orientation={'horizontal'} opts={carouselOptions} className={cn('max-w-3/4')}>
-          <CarouselContent className={cn()}>
-            {items?.map((item, index) => (
-              <CarouselItem key={index} className={cn('w-11/12')}>
-                <CollectionItem
-                  className={cn('')}
-                  layout={itemLayout}
-                  item={item}
-                  showTags={showTags}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          {items.length > 1 && <CarouselPrevious />}
-          {items.length > 1 && <CarouselNext />}
-        </Carousel>
-      </div>
+      <React.Fragment>
+        {layouts.map((layout, index) => {
+          if (layout) {
+            return (
+              <React.Fragment key={`${index}-${layout}`}>
+                <Separator />
+                {sizes.map((size, index) => {
+                  if (size) {
+                    return (
+                      <React.Fragment key={`${index}-${layout}-${size}`}>
+                        <p className="mb-2 text-2xl">
+                          Variant: <span className="text-2xl">{layout}</span>
+                          <span className="ml-4 text-3xl">{size}</span>
+                        </p>
+                        <div className={cn('flex w-full flex-col items-center justify-center')}>
+                          <Carousel
+                            orientation={'horizontal'}
+                            opts={carouselOptions}
+                            className={cn(CarouselVariant[layout][size].carousel.width)}
+                          >
+                            <CarouselContent className={cn()}>
+                              {items?.map((item, index) => (
+                                <CarouselItem
+                                  key={index}
+                                  className={cn(CarouselVariant[layout][size].item.width)}
+                                >
+                                  <CollectionItem
+                                    className={cn('')}
+                                    showTags={showTags}
+                                    layout={layout}
+                                    size={size}
+                                    item={item}
+                                  />
+                                </CarouselItem>
+                              ))}
+                            </CarouselContent>
+                            {items.length > 1 && <CarouselPrevious />}
+                            {items.length > 1 && <CarouselNext />}
+                          </Carousel>
+                        </div>
+                      </React.Fragment>
+                    )
+                  }
+                })}
+              </React.Fragment>
+            )
+          }
+        })}
+      </React.Fragment>
     )
   }
 }
