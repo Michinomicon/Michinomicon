@@ -53,20 +53,6 @@ export const MediaBlock: React.FC<Props> = (props) => {
           src={staticImage}
           {...mediaProps}
           layout={'mediaBlock'}
-          // {...{
-          //   layout: 'mediaBlock',
-          //   ...mediaProps,
-          //   // galleryItemClassNames: 'not-prose',
-          //   // settings: {
-          //   //   closable: false,
-          //   //   showCloseIcon: false,
-          //   //   controls: false,
-          //   //   showMaximizeIcon: false,
-          //   //   mousewheel: false,
-          //   //   download: false,
-          //   //   enableDrag: false,
-          //   // },
-          // }}
         />
       )}
       {caption && (

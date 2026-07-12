@@ -234,9 +234,11 @@ export const PostContentBlock: React.FC<
               </div>
 
               {post.content && (
-                <div className="prose max-w-none dark:prose-invert">
-                  <RichText data={post.content} enableGutter={false} />
-                </div>
+                <RichText
+                  data={post.content}
+                  enableGutter={false}
+                  className="prose max-w-none dark:prose-invert"
+                />
               )}
             </div>
           )

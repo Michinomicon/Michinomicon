@@ -2,7 +2,6 @@
 
 import { cn } from '@/utilities/ui'
 import NextImage from 'next/image'
-import { cssVariables } from '@/cssVariables'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { Media } from '@/payload-types'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
@@ -14,12 +13,7 @@ import { Info } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import React from 'react'
 
-const { breakpoints } = cssVariables
-
-// this is used by the browser to determine which image to download at different screen sizes
-const DEFAULT_IMAGE_SIZES = Object.entries(breakpoints)
-  .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
-  .join(', ')
+import { DEFAULT_IMAGE_SIZES } from '@/defaultImageSizes'
 
 // White 1x1 pixel image with 0.3 opacity
 export const lightPlaceholder =

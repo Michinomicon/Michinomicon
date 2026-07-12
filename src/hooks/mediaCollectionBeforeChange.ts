@@ -1,4 +1,4 @@
-import type { CollectionBeforeChangeHook, ImageSize, PayloadRequest } from 'payload'
+import type { CollectionBeforeChangeHook, PayloadRequest } from 'payload'
 import path from 'path'
 import fs from 'fs/promises'
 import sharp from 'sharp'
@@ -6,42 +6,7 @@ import { IAudioMetadata } from 'music-metadata'
 import { Media } from '@/payload-types'
 import NodeClam from 'clamscan'
 import { Readable } from 'stream'
-
-// Must match Payload config here `/src/collections/Media.ts`
-// Media.upload.imageSizes
-const configuredUploadImageSizes: ImageSize[] = [
-  {
-    name: 'thumbnail',
-    width: 300,
-  },
-  {
-    name: 'square',
-    width: 500,
-    height: 500,
-  },
-  {
-    name: 'small',
-    width: 600,
-  },
-  {
-    name: 'medium',
-    width: 900,
-  },
-  {
-    name: 'large',
-    width: 1400,
-  },
-  {
-    name: 'xlarge',
-    width: 1920,
-  },
-  {
-    name: 'og',
-    width: 1200,
-    height: 630,
-    crop: 'center',
-  },
-]
+import { UploadImageSizes } from '@/collections/Media'
 
 const applicationPdfBeforeChangeTasks = async ({
   data,
@@ -72,7 +37,7 @@ const applicationPdfBeforeChangeTasks = async ({
     const resolvedStaticDir = uploadConfig.staticDir
     const baseName = (data.filename || req.file.name).replace(/\.pdf$/i, '')
 
-    for (const { name, width } of configuredUploadImageSizes) {
+    for (const { name, width } of UploadImageSizes) {
       if (width) {
         const pdfImageArray = await pdf2img.convert(req.file.data, {
           width: width,
@@ -244,7 +209,7 @@ const videoBeforeChangeTasks = async ({
     const sharp = (await import('sharp')).default
     const midpointSec = Math.max(0, durationSec / 2).toFixed(2)
 
-    for (const { name, width, height } of configuredUploadImageSizes) {
+    for (const { name, width, height } of UploadImageSizes) {
       const sizeFilename = `${baseName}-${name}.png`
       const uploadPath = path.join(resolvedStaticDir, sizeFilename)
 

@@ -27,6 +27,15 @@ const config = {
     'bg-warning/30',
   ],
   theme: {
+    screens: {
+      '3xl': '120rem', // 1920px
+      '2xl': '96rem', // 1536px
+      xl: '80rem', // 1280px
+      lg: '64rem', // 1024px
+      md: '48rem', // 768px
+      sm: '40rem', // 640px
+      xs: '30rem', // 480px
+    },
     container: {
       center: true,
       padding: {
@@ -36,13 +45,6 @@ const config = {
         md: '2rem',
         sm: '1rem',
         xl: '2rem',
-      },
-      screens: {
-        '2xl': '86rem',
-        lg: '64rem',
-        md: '48rem',
-        sm: '40rem',
-        xl: '80rem',
       },
     },
     extend: {

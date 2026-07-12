@@ -17,7 +17,6 @@ import { cn } from '@/utilities/ui'
 import { Media } from '@/payload-types'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { ContainerResizeDetail, InitDetail } from 'lightgallery/lg-events'
-import { cssVariables } from '@/cssVariables'
 import { GalleryItem as LightGalleryItem } from 'lightgallery/lg-utils'
 import { getMediaDisplayImageSources } from '@/utilities/getMediaDisplayImageSource'
 import {
@@ -30,14 +29,10 @@ import {
 import { MediaCaption } from '../MediaCaption'
 import { MediaTooltip } from '../MediaTooltip'
 import { getMediaInfo, MediaInfo } from '@/utilities/mediaInfo'
+import { DEFAULT_IMAGE_SIZES } from '@/defaultImageSizes'
+import { getImageMediaMetaData } from '@/utilities/getMediaMetaData'
 
 type LightGallery = InitDetail['instance']
-
-const { breakpoints } = cssVariables
-
-const ImageSizes = Object.entries(breakpoints)
-  .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
-  .join(', ')
 
 const GalleryItemStyles = cn(
   'not-prose',
@@ -54,8 +49,8 @@ const PLACEHOLDER_BLUR =
   'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPgo8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTZlN2ViIi8+Cjwvc3ZnPg=='
 
 type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
-  width?: number | `${number}` | undefined
-  height?: number | `${number}` | undefined
+  width: number | `${number}`
+  height: number | `${number}`
 } & {
   id: string
   alt: string
@@ -70,16 +65,29 @@ function getItemType(media: Media): 'image' | 'video' {
   return typeof media.mimeType === 'string' && media.mimeType.includes('video') ? 'video' : 'image'
 }
 
-function getMediaSizeString(media: Media): string {
-  return media.width && media.height ? `${media.width}-${media.height}` : '1280-720'
+function getMediaSize(media: Media): Pick<ItemProperties, 'width' | 'height' | 'size'> {
+  const { width: metaDataWidth, height: metaDataHeight } = getImageMediaMetaData(media)
+  const mediaWidth: number = Math.max(Number(media.width ?? metaDataWidth), 0)
+  const mediaHeight: number = Math.max(Number(media.height ?? metaDataHeight), 0)
+  const width: number = mediaWidth > 0 ? mediaWidth : 1200
+  const height: number = mediaHeight > 0 ? mediaHeight : 630
+  return {
+    width: width,
+    height: height,
+    size: `${width}-${height}`,
+  }
 }
 
 function getItemPropertiesFromMedia(media: Media): ItemProperties | undefined {
   const { source, thumbnail } = getMediaDisplayImageSources(media)
+  const { width, height, size } = getMediaSize(media)
+
   return {
     id: media.id,
     alt: media.alt,
-    size: getMediaSizeString(media),
+    width: width,
+    height: height,
+    size: size,
     src: source,
     type: getItemType(media),
     thumb: thumbnail,
@@ -196,10 +204,10 @@ export const ImageGallery = ({
                   alt={item.alt}
                   className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
                   src={item.thumb}
-                  width={item.width ?? 1280}
-                  height={item.height ?? 720}
+                  width={item.width}
+                  height={item.height}
                   loading="lazy"
-                  sizes={ImageSizes}
+                  sizes={DEFAULT_IMAGE_SIZES}
                   placeholder={'blur'}
                   blurDataURL={PLACEHOLDER_BLUR}
                   style={{
@@ -223,12 +231,12 @@ export const ImageGallery = ({
                 <NextImage
                   alt={item.alt}
                   className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
-                  src={item.thumb}
+                  src={item.src}
                   loading={'eager'}
-                  width={item.width ?? 1280}
-                  height={item.height ?? 720}
-                  sizes={ImageSizes}
-                  placeholder={'empty'}
+                  width={item.width}
+                  height={item.height}
+                  sizes={DEFAULT_IMAGE_SIZES}
+                  placeholder={'blur'}
                   blurDataURL={PLACEHOLDER_BLUR}
                   style={{ objectFit: 'cover', objectPosition: '50% 50%' }}
                 />
