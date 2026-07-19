@@ -36,7 +36,7 @@ function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
       <Tooltip delayDuration={800} disableHoverableContent={true}>
         <TooltipTrigger className="py-0" asChild>
           <Badge
-            variant="destructive"
+            variant="default"
             className="flex h-fit w-fit gap-0 rounded-[0.4rem] px-1 py-0 text-xs font-medium xl:text-base"
           >
             {isMobile && (
@@ -162,7 +162,7 @@ export default function TwitchStatus() {
         <Image
           src={TwitchGlitchIcon.src}
           alt="twitch logo"
-          className="h-auto w-auto rounded-none max-md:hidden"
+          className="rounded-none max-md:hidden"
           width="20"
           height="20"
           loading="eager"

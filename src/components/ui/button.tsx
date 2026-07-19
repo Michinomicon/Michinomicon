@@ -16,6 +16,8 @@ const buttonVariants = cva(
         secondary: 'bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80',
         ghost: 'hover:bg-primary hover:text-primary-foreground',
         link: 'text-primary underline-offset-4 hover:underline',
+        carouselControl:
+          'border-none hover:bg-primary/10 hover:text-primary text-primary/80 [&_svg]:size-8',
       },
       size: {
         default: 'h-9 px-4 py-2',

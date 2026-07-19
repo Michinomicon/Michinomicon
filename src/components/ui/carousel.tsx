@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import useEmblaCarousel, { type UseEmblaCarouselType } from 'embla-carousel-react'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -126,7 +126,7 @@ const Carousel = React.forwardRef<
       <div
         ref={ref}
         onKeyDownCapture={handleKeyDown}
-        className={cn('relative', className)}
+        className={cn('relative rounded-none border-r border-l', className)}
         role="region"
         aria-roledescription="carousel"
         {...props}
@@ -188,26 +188,75 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
   ({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
     const { orientation, scrollPrev, canScrollPrev, api } = useCarousel()
     const nodeCount = api?.slideNodes()?.length ?? 0
-    return (
-      <Button
-        ref={ref}
-        variant={variant}
-        size={size}
-        className={cn(
-          'absolute h-8 w-8 rounded-full',
-          orientation === 'horizontal'
-            ? 'top-1/2 -left-12 -translate-y-1/2'
-            : '-top-12 left-1/2 -translate-x-1/2 rotate-90',
-          className,
-        )}
-        disabled={!canScrollPrev || nodeCount < 2}
-        onClick={scrollPrev}
-        {...props}
-      >
-        <ArrowLeft className="h-4 w-4" />
-        <span className="sr-only">Previous slide</span>
-      </Button>
-    )
+    const isDisabled = !canScrollPrev || nodeCount < 2
+    const buttonStyle = 'large'
+
+    if (buttonStyle === 'large') {
+      return (
+        <React.Fragment>
+          {/* Shadow */}
+          <div className={cn('absolute top-1/100 -left-11 z-9 h-98/100 w-11')}>
+            <div
+              className={cn(
+                'relative top-1/100 left-0 h-98/100 w-full shadow-[8px_0px_20px_-15px_rgba(0,0,0,0.8)]',
+              )}
+            ></div>
+          </div>
+
+          {/* Button */}
+          <div
+            className={cn(
+              'border-r border-border/10',
+              'absolute z-10 h-full w-11 rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-none py-2',
+              '',
+              orientation === 'horizontal'
+                ? `-translate-y- top-0 -left-11`
+                : `-top-9 left-1/2 -translate-x-1/2 rotate-90`,
+            )}
+          >
+            <Button
+              ref={ref}
+              variant={'carouselControl'}
+              size={size}
+              className={cn(
+                'h-full w-full rounded-tl-lg rounded-tr-none rounded-br-none rounded-bl-lg',
+                isDisabled ? 'border-border/40 grayscale' : 'border-border',
+                className,
+              )}
+              disabled={isDisabled}
+              onClick={scrollPrev}
+              {...props}
+            >
+              <ChevronLeft className={cn('h-8 w-8', isDisabled ? 'opacity-40' : '')} />
+              <span className="sr-only">Next slide</span>
+            </Button>
+          </div>
+        </React.Fragment>
+      )
+    } else {
+      return (
+        <Button
+          ref={ref}
+          variant={variant}
+          size={size}
+          className={cn(
+            'absolute h-8 w-8 rounded-full',
+            orientation === 'horizontal'
+              ? `top-1/2 -left-9 -translate-y-1/2`
+              : `-top-9 left-1/2 -translate-x-1/2 rotate-90`,
+            isDisabled ? 'border-border/40 grayscale' : 'border-border',
+            'text-border',
+            className,
+          )}
+          disabled={isDisabled}
+          onClick={scrollPrev}
+          {...props}
+        >
+          <ChevronLeft className={cn('h-4 w-4', isDisabled ? 'opacity-40' : '')} />
+          <span className="sr-only">Previous slide</span>
+        </Button>
+      )
+    }
   },
 )
 CarouselPrevious.displayName = 'CarouselPrevious'
@@ -216,26 +265,75 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
   ({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
     const { orientation, scrollNext, canScrollNext, api } = useCarousel()
     const nodeCount = api?.slideNodes()?.length ?? 0
-    return (
-      <Button
-        ref={ref}
-        variant={variant}
-        size={size}
-        className={cn(
-          'absolute h-8 w-8 rounded-full',
-          orientation === 'horizontal'
-            ? 'top-1/2 -right-12 -translate-y-1/2'
-            : '-bottom-12 left-1/2 -translate-x-1/2 rotate-90',
-          className,
-        )}
-        disabled={!canScrollNext || nodeCount < 2}
-        onClick={scrollNext}
-        {...props}
-      >
-        <ArrowRight className="h-4 w-4" />
-        <span className="sr-only">Next slide</span>
-      </Button>
-    )
+    const isDisabled = !canScrollNext || nodeCount < 2
+    const buttonStyle = 'large'
+
+    if (buttonStyle === 'large') {
+      return (
+        <React.Fragment>
+          {/* Shadow */}
+          <div className={cn('absolute top-1/100 -right-11 z-9 h-98/100 w-11')}>
+            <div
+              className={cn(
+                'relative top-1/100 right-0 h-98/100 w-full shadow-[-8px_0px_20px_-15px_rgba(0,0,0,0.8)]',
+              )}
+            ></div>
+          </div>
+
+          {/* Button */}
+          <div
+            className={cn(
+              'border-l border-border/10',
+              'absolute z-10 h-full w-11 rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-none py-2',
+              '',
+              orientation === 'horizontal'
+                ? `-translate-y- top-0 -right-11`
+                : `-bottom-9 left-1/2 -translate-x-1/2 rotate-90`,
+            )}
+          >
+            <Button
+              ref={ref}
+              variant={'carouselControl'}
+              size={size}
+              className={cn(
+                'h-full w-full rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-none',
+                isDisabled ? 'border-border/40 grayscale' : 'border-border',
+                className,
+              )}
+              disabled={isDisabled}
+              onClick={scrollNext}
+              {...props}
+            >
+              <ChevronRight className={cn('h-8 w-8', isDisabled ? 'opacity-40' : '')} />
+              <span className="sr-only">Next slide</span>
+            </Button>
+          </div>
+        </React.Fragment>
+      )
+    } else {
+      return (
+        <Button
+          ref={ref}
+          variant={variant}
+          size={size}
+          className={cn(
+            'absolute h-8 w-8 rounded-full',
+            orientation === 'horizontal'
+              ? `top-1/2 -right-9 -translate-y-1/2`
+              : `-bottom-9 left-1/2 -translate-x-1/2 rotate-90`,
+            isDisabled ? 'border-border/40 grayscale' : 'border-border',
+            'text-border',
+            className,
+          )}
+          disabled={isDisabled}
+          onClick={scrollNext}
+          {...props}
+        >
+          <ChevronRight className={cn('h-4 w-4', isDisabled ? 'opacity-40' : '')} />
+          <span className="sr-only">Next slide</span>
+        </Button>
+      )
+    }
   },
 )
 CarouselNext.displayName = 'CarouselNext'
