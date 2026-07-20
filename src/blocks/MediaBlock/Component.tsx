@@ -10,11 +10,6 @@ import { Media } from '../../components/Media'
 import { MediaProps as MediaComponentProps } from '@/components/Media/types'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
-type GalleryProps = Pick<
-  MediaComponentProps,
-  'inline' | 'lightGalleryProps' | 'itemStyles' | 'thumbnailStyles'
-> & {}
-
 type Props = MediaBlockProps & {
   breakout?: boolean
   captionClassName?: string
@@ -23,7 +18,7 @@ type Props = MediaBlockProps & {
   imgClassName?: string
   staticImage?: StaticImageData
   disableInnerContainer?: boolean
-  mediaComponentProps?: GalleryProps
+  mediaProps?: MediaComponentProps
 }
 
 export const MediaBlock: React.FC<Props> = (props) => {
@@ -34,7 +29,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
     imgClassName,
     media,
     staticImage,
-    mediaComponentProps,
+    mediaProps,
     disableInnerContainer,
   } = props
 
@@ -56,7 +51,8 @@ export const MediaBlock: React.FC<Props> = (props) => {
           className={cn('', imgClassName)}
           resource={media}
           src={staticImage}
-          {...mediaComponentProps}
+          {...mediaProps}
+          layout={'mediaBlock'}
         />
       )}
       {caption && (

@@ -20,7 +20,7 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { hasAccess } from '@/utilities/accessFunctions'
+import { hasAccess } from '../../utilities/accessFunctions'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',

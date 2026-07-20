@@ -81,7 +81,7 @@ export const CollectionProfileHeader = ({
   return (
     <div className="grid grid-cols-6 items-center gap-4" {...props}>
       <div className="col-span-2 col-start-1">
-        {isMedia(image) && <ImageGallery items={[image]} inline={false} />}
+        {isMedia(image) && <ImageGallery items={[image]} layout={'default'} />}
       </div>
       <div className="col-span-4 col-start-3">
         <span className="prose">

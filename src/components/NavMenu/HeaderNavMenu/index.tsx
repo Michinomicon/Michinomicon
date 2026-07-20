@@ -325,9 +325,9 @@ function PageContentPanel({ item }: { item: MenuTreePageItem }): React.JSX.Eleme
           ))}
         </div>
       ) : (
-        <p className="text-center text-sm text-muted-foreground">
+        <span className="text-center text-sm text-muted-foreground">
           No posts available under this page.
-        </p>
+        </span>
       )}
     </div>
   )

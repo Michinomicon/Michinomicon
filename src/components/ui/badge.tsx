@@ -19,7 +19,7 @@ const badgeVariants = cva(
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
         status: '',
-        caption: 'bg-black text-white [a&]:hover:bg-black',
+        caption: `bg-transparent text-white [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [a&]:hover:border-border underline-offset-4 [a&]:hover:underline`,
       },
       status: {
         planned: '',

@@ -1,4 +1,4 @@
-import type { CollectionConfig, Condition, FieldHook } from 'payload'
+import type { CollectionConfig, Condition, FieldHook, ImageSize } from 'payload'
 
 import {
   FixedToolbarFeature,
@@ -25,6 +25,49 @@ const adoptFilenameIfEmptyBeforeChange: StringFieldHook = ({ value, siblingData 
   // else, keep existing
   return value
 }
+
+export const UploadImageSizes: ImageSize[] = [
+  {
+    name: 'thumbnail',
+    width: 400,
+  },
+  {
+    name: 'square',
+    width: 500,
+    height: 500,
+    crop: 'center',
+  },
+  {
+    name: 'sm',
+    width: 640,
+  },
+  {
+    name: 'md',
+    width: 768,
+  },
+  {
+    name: 'lg',
+    width: 1024,
+  },
+  {
+    name: 'xl',
+    width: 1280,
+  },
+  {
+    name: '2xl',
+    width: 1536,
+  },
+  {
+    name: '3xl',
+    width: 1920,
+  },
+  {
+    name: 'og',
+    width: 1200,
+    height: 630,
+    crop: 'center',
+  },
+]
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -322,39 +365,7 @@ export const Media: CollectionConfig = {
     adminThumbnail: 'thumbnail',
     focalPoint: true,
     displayPreview: true,
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 300,
-      },
-      {
-        name: 'square',
-        width: 500,
-        height: 500,
-      },
-      {
-        name: 'small',
-        width: 600,
-      },
-      {
-        name: 'medium',
-        width: 900,
-      },
-      {
-        name: 'large',
-        width: 1400,
-      },
-      {
-        name: 'xlarge',
-        width: 1920,
-      },
-      {
-        name: 'og',
-        width: 1200,
-        height: 630,
-        crop: 'center',
-      },
-    ],
+    imageSizes: UploadImageSizes,
   },
   hooks: {
     beforeChange: [processFileAndPopulateMetaData],

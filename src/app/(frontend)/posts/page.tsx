@@ -1,18 +1,15 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import PageClient from './page.client'
-import { mapPostsToCollectionArchiveCardItems } from '@/utilities/mapPostsToCollectionArchiveCardItems'
 import { Post } from '@/payload-types'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
-
-type SelectPostProperties = Pick<Post, 'id' | 'title' | 'slug' | 'categories' | 'meta'>
 
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })
@@ -29,8 +26,6 @@ export default async function Page() {
       meta: true,
     },
   })
-
-  const items = mapPostsToCollectionArchiveCardItems<SelectPostProperties>(posts.docs)
 
   return (
     <div className="pt-24 pb-24">
@@ -50,7 +45,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive items={items} collection={'posts'} />
+      <CollectionItemGroup items={posts.docs as Post[]} collection={'posts'} />
 
       <div className="container">
         {posts.totalPages > 1 && posts.page && (

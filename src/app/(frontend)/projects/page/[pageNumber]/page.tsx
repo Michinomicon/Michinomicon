@@ -1,13 +1,12 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import PageClient from './page.client'
 import { notFound } from 'next/navigation'
-import { getProjectCardItems } from '../../page'
 
 export const revalidate = 600
 
@@ -27,11 +26,12 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const projects = await payload.find({
     collection: 'projects',
-    depth: 1,
+    depth: 3,
     limit: 12,
     page: sanitizedPageNumber,
     overrideAccess: false,
     select: {
+      content: true,
       id: true,
       title: true,
       profileImage: true,
@@ -39,8 +39,6 @@ export default async function Page({ params: paramsPromise }: Args) {
       status: true,
     },
   })
-
-  const items = await getProjectCardItems(projects.docs)
 
   return (
     <div className="pt-24 pb-24">
@@ -60,7 +58,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         />
       </div>
 
-      <CollectionArchive items={items} collection={'projects'} />
+      <CollectionItemGroup items={projects.docs} collection={'projects'} />
 
       <div className="container">
         {projects?.page && projects?.totalPages > 1 && (

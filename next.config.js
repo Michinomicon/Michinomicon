@@ -9,9 +9,8 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    deviceSizes: [640, 768, 1024, 1280, 1536, 1920, 2048, 3840],
-    imageSizes: [32, 48, 64, 96, 128, 256, 384],
-    qualities: [75, 100],
+    deviceSizes: [480, 640, 768, 1024, 1280, 1536, 1920, 3840],
+    imageSizes: [64, 96, 128, 256, 400, 500],
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL].map((item) => {
         const url = new URL(item)

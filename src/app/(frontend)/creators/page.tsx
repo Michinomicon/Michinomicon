@@ -1,48 +1,21 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload, PaginatedDocs } from 'payload'
 import PageClient from './page.client'
-import { Creator, Media } from '@/payload-types'
-import { cache } from 'react'
-import { isMedia } from '@/utilities/isMedia'
-import { CollectionCardItemProperties } from '@/components/Card'
+import { Creator } from '@/payload-types'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
-
-export async function getCreatorCardItems(
-  creators: Creator[],
-): Promise<CollectionCardItemProperties[]> {
-  return await Promise.all(
-    creators.map(async (creator) => {
-      const { slug, title, profileImage, status } = creator
-      const credits: Pick<Media, 'id' | 'credits'>[] = await getMediaByCreatorCredits({
-        creatorId: creator.id,
-      })
-      const roles: string[] = credits.flatMap(({ credits: c }) =>
-        c ? c.map(({ role }) => role) : [],
-      )
-      return {
-        status: status,
-        tags: roles.length > 0 ? roles : null,
-        image: isMedia(profileImage) ? profileImage : null,
-        description: '',
-        title: title,
-        href: `/creators/${slug}`,
-      }
-    }),
-  )
-}
 
 export default async function Page() {
   const payload = await getPayload({ config: configPromise })
   const creators: PaginatedDocs<Creator> = await payload.find({
     collection: 'creators',
-    depth: 1,
+    depth: 3,
     limit: 12,
     overrideAccess: false,
     select: {
@@ -51,10 +24,9 @@ export default async function Page() {
       profileImage: true,
       slug: true,
       status: true,
+      content: true,
     },
   })
-
-  const items = await getCreatorCardItems(creators.docs)
 
   return (
     <div className="pt-24 pb-24">
@@ -74,7 +46,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive items={items} collection={'creators'} />
+      <CollectionItemGroup items={creators.docs} collection={'creators'} />
 
       <div className="container">
         {creators.totalPages > 1 && creators.page && (
@@ -90,42 +62,3 @@ export function generateMetadata(): Metadata {
     title: `Creators | Michinomicon`,
   }
 }
-
-const getMediaByCreatorCredits = cache(
-  async ({ creatorId }: { creatorId: string }): Promise<Pick<Media, 'id' | 'credits'>[]> => {
-    const payload = await getPayload({ config: configPromise })
-
-    const creatorMedia = await payload.find({
-      collection: 'media',
-      limit: 1000,
-      depth: 2,
-      pagination: false,
-      where: {
-        and: [
-          {
-            credits: {
-              exists: true,
-            },
-          },
-          {
-            'credits.creator.id': {
-              in: creatorId,
-            },
-          },
-          {
-            isForProject: {
-              equals: true,
-            },
-          },
-        ],
-      },
-      select: {
-        credits: {
-          role: true,
-        },
-      },
-    })
-
-    return creatorMedia.docs
-  },
-)

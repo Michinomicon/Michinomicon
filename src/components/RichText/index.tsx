@@ -41,21 +41,9 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
   ...LinkJSXConverter({ internalDocToHref }),
   upload: ({ node }: { node: SerializedUploadNode }) => (
     <MediaBlock
+      className={'rich-text-upload'}
       blockType="mediaBlock"
-      mediaComponentProps={{
-        inline: false,
-        itemStyles: 'not-prose',
-        lightGalleryProps: {
-          closable: false,
-          showCloseIcon: false,
-          thumbnail: false,
-          controls: false,
-          showMaximizeIcon: false,
-          mousewheel: false,
-          download: false,
-          enableDrag: false,
-        },
-      }}
+      mediaProps={{ containerClassNames: 'rich-text-upload', layout: 'inline' }}
       media={
         node.type === 'upload' && node.relationTo === 'media' && typeof node.value === 'object'
           ? node.value
@@ -68,12 +56,13 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
     banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} />,
     mediaBlock: ({ node }: { node: SerializedBlockNode<MediaBlockProps> }) => (
       <MediaBlock
-        className="col-span-3 col-start-1"
+        className="rich-text-block-media col-span-3 col-start-1"
         imgClassName="m-0"
-        {...node.fields}
         captionClassName="mx-auto max-w-3xl"
         enableGutter={false}
         disableInnerContainer={true}
+        mediaProps={{ containerClassNames: 'rich-text-block-media' }}
+        {...node.fields}
       />
     ),
     code: ({ node }) => <CodeBlock className="col-start-2" {...node.fields} />,
@@ -93,7 +82,7 @@ export default function RichText(props: Props) {
     <ConvertRichText
       converters={jsxConverters}
       className={cn(
-        'payload-richtext',
+        'payload-richtext rounded-none',
         {
           container: enableGutter,
           'max-w-none': !enableGutter,

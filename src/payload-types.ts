@@ -415,7 +415,7 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    small?: {
+    sm?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -423,7 +423,7 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    medium?: {
+    md?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -431,7 +431,7 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    large?: {
+    lg?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -439,7 +439,23 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    xlarge?: {
+    xl?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    '2xl'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    '3xl'?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -830,6 +846,9 @@ export interface MediaGalleryBlock {
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
+  /**
+   * Text content to display above the the card group.
+   */
   introContent?: {
     root: {
       type: string;
@@ -845,16 +864,58 @@ export interface ArchiveBlock {
     };
     [k: string]: unknown;
   } | null;
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
+  /**
+   * The source of the items that will be displayed as cards. "Collection" Displays all items from one of the Posts, Projects or Creators collections with options to filter by Category and set a maximum limit of items. "Manual Selection" Individually select the items to display from any of the Posts, Projects or Creators collections.
+   */
+  populateBy: 'collection' | 'selection';
+  relationTo?: ('posts' | 'projects' | 'creators') | null;
+  /**
+   * Only items belonging to these categories will be included.
+   */
   categories?: (string | Category)[] | null;
+  /**
+   * The maximum number of items to display. [Default: 10]
+   */
   limit?: number | null;
+  /**
+   * Individually select one or more Post, Project or Creator items to include.
+   */
   selectedDocs?:
-    | {
-        relationTo: 'posts';
-        value: string | Post;
-      }[]
+    | (
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+        | {
+            relationTo: 'creators';
+            value: string | Creator;
+          }
+        | {
+            relationTo: 'projects';
+            value: string | Project;
+          }
+      )[]
     | null;
+  /**
+   * If the card description should be displayed or not. When disabled the title (if enabled) will be vertically centered. [Default: true]
+   */
+  showDescription?: boolean | null;
+  /**
+   * If the card image panel should be displayed or not. When disabled the title and description will use the full width of the card. [Default: true]
+   */
+  showImages?: boolean | null;
+  /**
+   * The horizontal size of the item card
+   */
+  cardWidth: 'sm' | 'md' | 'lg';
+  /**
+   * The vertical size of the item card
+   */
+  cardHeight: 'sm' | 'md' | 'lg';
+  /**
+   * The orientation of the card content
+   */
+  cardLayout: 'horizontal' | 'vertical';
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
@@ -1535,6 +1596,11 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
+  showDescription?: T;
+  showImages?: T;
+  cardWidth?: T;
+  cardHeight?: T;
+  cardLayout?: T;
   id?: T;
   blockName?: T;
 }
@@ -1732,7 +1798,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        small?:
+        sm?:
           | T
           | {
               url?: T;
@@ -1742,7 +1808,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        medium?:
+        md?:
           | T
           | {
               url?: T;
@@ -1752,7 +1818,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        large?:
+        lg?:
           | T
           | {
               url?: T;
@@ -1762,7 +1828,27 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        xlarge?:
+        xl?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        '2xl'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        '3xl'?:
           | T
           | {
               url?: T;

@@ -4,38 +4,18 @@ import RichText from '@/components/RichText'
 
 import type { Post } from '@/payload-types'
 
-import { CollectionCard, CollectionCardItemProperties } from '../../components/Card'
+import { CollectionItem } from '../../components/CollectionItem'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
-import { isMedia } from '@/utilities/isMedia'
+import { postToCollectionItemProperties } from '@/utilities/getCollectionArchiveCardProperties'
 
-function getCollectionCardItemProperties(item: Post): CollectionCardItemProperties {
-  const { slug, categories, meta, title } = item
-  const { description, image } = meta || {}
-  const tags =
-    Array.isArray(categories) && categories.length > 0
-      ? categories.filter((c) => typeof c === 'object').map(({ title }) => title)
-      : null
-  const imageMedia = isMedia(image) ? image : null
-  // replace non-breaking space with white space
-  const sanitizedDescription = description?.replace(/\s/g, ' ')
-  const href = `/posts/${slug}`
-  return {
-    status: null,
-    tags: tags,
-    image: imageMedia,
-    description: sanitizedDescription || null,
-    title: title,
-    href: href,
-  }
-}
 export type RelatedPostsProps = {
   className?: string
   docs?: Post[]
   introContent?: DefaultTypedEditorState
 }
-export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
+export const RelatedPosts: React.FC<RelatedPostsProps> = async (props) => {
   const { className, docs, introContent } = props
-  const items = docs ? docs.map((doc) => getCollectionCardItemProperties(doc)) : []
+  const items = docs ? await Promise.all(docs.map(postToCollectionItemProperties)) : []
 
   return (
     <div className={clsx('lg:container', className, 'related-posts-block')}>
@@ -44,15 +24,7 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-8">
         {items &&
           items.map((item, index) => {
-            return (
-              <CollectionCard
-                key={index}
-                item={item}
-                collection="posts"
-                showTags
-                showStatus={false}
-              />
-            )
+            return <CollectionItem key={index} item={item} showTags showStatus={false} />
           })}
       </div>
     </div>

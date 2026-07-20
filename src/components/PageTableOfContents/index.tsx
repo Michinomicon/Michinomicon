@@ -340,7 +340,7 @@ export function PageTableOfContentsTrigger(props: PageTOCProps) {
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}</p>
+        {open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}
       </TooltipContent>
     </Tooltip>
   )
@@ -367,7 +367,7 @@ export function PageTOCTriggerButton(props: PageTOCProps) {
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}</p>
+        {open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}
       </TooltipContent>
     </Tooltip>
   )

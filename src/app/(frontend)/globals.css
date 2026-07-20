@@ -23,7 +23,7 @@
 
 @theme inline {
   --header-height: 100px;
-  --inset-shadow-header: inset 0px 5px 0px rgba(0, 0, 0, 0.10); 
+  --inset-shadow-header: inset 0px 5px 0px rgba(0, 0, 0, 0.1);
   --footer-height: 50px;
 
   --color-background: var(--background);
@@ -84,13 +84,11 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
-
-
 }
 
 @layer base {
   * {
-    @apply rounded-(--radius) outline-ring/50 border-primary/30 ;
+    @apply rounded-(--radius) border-primary/30 outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
@@ -110,20 +108,17 @@
   }
 }
 
-
-
-
 /** 
   EYES WALLPAPER
 */
 
 .dark {
-  .eyes-background-container.spotlight-disabled{
-      .eyes-background-base{
-        fill-opacity: 0.6;
-      }
+  .eyes-background-container.spotlight-disabled {
+    .eyes-background-base {
+      fill-opacity: 0.6;
     }
   }
+}
 
 .eyes-background-container {
   border-radius: 0;

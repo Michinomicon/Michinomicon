@@ -1,8 +1,8 @@
-import { hasAccess } from '@/utilities/accessFunctions'
+import { hasAccess } from '../../utilities/accessFunctions'
 import { slugField, type CollectionConfig } from 'payload'
 import { revalidateCreator, revalidateCreatorDelete } from './hooks/revalidateCreator'
-import { MediaBlock } from '@/blocks/MediaBlock/config'
-import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
+import { MediaBlock } from '../../blocks/MediaBlock/config'
+import { MediaGalleryBlock } from '../../blocks/MediaGalleryBlock/config'
 import {
   lexicalEditor,
   HeadingFeature,
@@ -11,7 +11,7 @@ import {
   InlineToolbarFeature,
   HorizontalRuleFeature,
 } from '@payloadcms/richtext-lexical'
-import { Code } from '@/blocks/Code/config'
+import { Code } from '../../blocks/Code/config'
 import {
   OverviewField,
   MetaTitleField,
@@ -40,6 +40,7 @@ export const Creators: CollectionConfig = {
     slug: true,
     status: true,
     profileImage: true,
+    content: true,
   },
   fields: [
     {

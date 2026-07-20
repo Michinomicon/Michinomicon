@@ -1,0 +1,202 @@
+import { CollectionItemProperties } from '@/components/CollectionItem'
+import { Category, Creator, Post, Project } from '@/payload-types'
+import { isMedia } from './isMedia'
+import { getCachedMediaByCreatorCredit } from './getMediaByCreatorCredits'
+import { getCachedMediaByProjectId } from './getMediaByProjectId'
+import { DataFromCollectionSlug, getPayload, PaginatedDocs } from 'payload'
+import configPromise from '@payload-config'
+import {
+  CollectionItemGroupPopulateByCollection,
+  CollectionItemGroupPopulateBySelection,
+  CollectionItemGroupProperties,
+  CollectionTypes,
+} from '@/components/CollectionItemGroup'
+
+async function creatorToCollectionItemProperties(
+  creator: Creator,
+): Promise<CollectionItemProperties<'creators'>> {
+  const { title, slug, status, profileImage, id, content } = creator
+  const coverImage = isMedia(profileImage) ? profileImage : null
+  const creatorMedia = await getCachedMediaByCreatorCredit(id)()
+  const images = creatorMedia.length > 0 ? creatorMedia : coverImage ? [coverImage] : null
+  const tags = creatorMedia
+    ?.flatMap(({ credits }) => credits?.map(({ role }) => role))
+    .filter((tag) => typeof tag === 'string')
+  const { description } = content
+  return {
+    collection: 'creators',
+    status: status || null,
+    tags: tags.length > 0 ? tags : null,
+    images: images,
+    description: description,
+    title: title,
+    href: `/creators/${slug}`,
+  }
+}
+
+async function projectToCollectionItemProperties(
+  project: Project,
+): Promise<CollectionItemProperties<'projects'>> {
+  const { slug, title, profileImage, status, categories, id, content } = project
+  const { description } = content
+  const coverImage = isMedia(profileImage) ? profileImage : null
+  const projectMedia = await getCachedMediaByProjectId(id)()
+  const images = projectMedia.length > 0 ? projectMedia : coverImage ? [coverImage] : null
+  const tags = categories?.map((cat) => (typeof cat === 'object' ? cat.title : cat)) ?? []
+  return {
+    collection: 'projects',
+    status: status,
+    tags: tags,
+    images: images,
+    description: description,
+    title: title,
+    href: `/projects/${slug}`,
+  }
+}
+
+export async function postToCollectionItemProperties(
+  post: Post,
+): Promise<CollectionItemProperties<'posts'>> {
+  const { categories, title, slug, meta } = post
+  const { image, description } = meta ?? { image: null, description: null }
+  const tags: string[] = Array.isArray(categories)
+    ? categories.map((cat) => (typeof cat === 'object' ? cat.title : cat))
+    : []
+  return {
+    collection: 'posts',
+    status: null,
+    tags: tags.length > 0 ? tags : null,
+    images: isMedia(image) ? [image] : null,
+    description: description,
+    title: title,
+    href: `/posts/${slug}`,
+  }
+}
+
+async function getDocuments<T extends keyof CollectionTypes>(
+  collection: T,
+  limit?: number | null | undefined,
+  categories?: (string | Category)[] | null | undefined,
+) {
+  const payload = await getPayload({ config: configPromise })
+
+  const flattenedCategories = categories?.map((category) => {
+    if (typeof category === 'object') return category.id
+    else return category
+  })
+
+  const results: PaginatedDocs<DataFromCollectionSlug<T>> = await payload.find({
+    collection: collection,
+    depth: 3,
+    limit: limit || 10,
+    pagination: false,
+    ...(flattenedCategories && flattenedCategories.length > 0
+      ? {
+          where: {
+            categories: {
+              in: flattenedCategories,
+            },
+          },
+        }
+      : {}),
+  })
+
+  const docs: DataFromCollectionSlug<T>[] = results.docs
+  return docs
+}
+
+export function getCollectionArchiveCardItemPropsMapFunc<T extends keyof CollectionTypes>(
+  collection: T,
+):
+  | ((creator: Creator) => Promise<CollectionItemProperties<'creators'>>)
+  | ((post: Post) => Promise<CollectionItemProperties<'posts'>>)
+  | ((project: Project) => Promise<CollectionItemProperties<'projects'>>) {
+  switch (collection) {
+    case 'creators':
+      return creatorToCollectionItemProperties
+    case 'posts':
+      return postToCollectionItemProperties
+    case 'projects':
+      return projectToCollectionItemProperties
+  }
+}
+
+async function getCollectionArchiveItemsByCollection<T extends keyof CollectionTypes>(
+  props: CollectionItemGroupPopulateByCollection<T>,
+): Promise<
+  | CollectionItemProperties<'creators'>[]
+  | CollectionItemProperties<'posts'>[]
+  | CollectionItemProperties<'projects'>[]
+> {
+  const { collection, limit, categories } = props
+  switch (collection) {
+    case 'creators':
+      const creatorDocs = await getDocuments<'creators'>(collection, limit, categories)
+      return Promise.all(creatorDocs.map(creatorToCollectionItemProperties))
+    case 'posts':
+      const postDocs = await getDocuments<'posts'>(collection, limit, categories)
+      return Promise.all(postDocs.map(postToCollectionItemProperties))
+    case 'projects':
+      const projectDocs = await getDocuments<'projects'>(collection, limit, categories)
+      return Promise.all(projectDocs.map(projectToCollectionItemProperties))
+  }
+}
+
+async function getCardPropertiesBySelection(
+  props: CollectionItemGroupPopulateBySelection,
+): Promise<CollectionItemProperties<keyof CollectionTypes>[]> {
+  const { items } = props
+
+  const selectionsWithValues: Array<Promise<CollectionItemProperties<keyof CollectionTypes>>> = []
+
+  if (items) {
+    items.reduce((results, selection) => {
+      const { relationTo, value } = selection
+      if (typeof value === 'object') {
+        switch (relationTo) {
+          case 'creators':
+            results.push(creatorToCollectionItemProperties(value))
+            break
+          case 'posts':
+            results.push(postToCollectionItemProperties(value))
+            break
+          case 'projects':
+            results.push(projectToCollectionItemProperties(value))
+            break
+        }
+      }
+      return results
+    }, selectionsWithValues)
+  }
+  return Promise.all(selectionsWithValues)
+}
+
+export async function getCollectionItemProperties(
+  props: CollectionItemGroupProperties<keyof CollectionTypes>,
+) {
+  let cardProps: CollectionItemProperties<keyof CollectionTypes>[] = []
+  const { populateBy } = props
+  if (populateBy) {
+    if (populateBy === 'collection') {
+      cardProps = await getCollectionArchiveItemsByCollection(props)
+    } else if (populateBy === 'selection') {
+      cardProps = await getCardPropertiesBySelection(props)
+    }
+  } else if (props.collection) {
+    const { collection, items } = props
+    switch (collection) {
+      case 'creators':
+        cardProps = await Promise.all(items.map(creatorToCollectionItemProperties))
+        break
+      case 'posts':
+        cardProps = await Promise.all(items.map(postToCollectionItemProperties))
+        break
+      case 'projects':
+        cardProps = await Promise.all(items.map(projectToCollectionItemProperties))
+        break
+    }
+  } else {
+    cardProps = props.items
+  }
+  return cardProps
+}
