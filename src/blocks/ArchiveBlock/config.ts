@@ -117,16 +117,6 @@ export const Archive: Block = {
           type: 'row',
           fields: [
             {
-              name: 'showTitle',
-              type: 'checkbox',
-              defaultValue: true,
-              label: 'Show Title',
-              admin: {
-                description:
-                  'If the card title should be displayed or not. When disabled the description will use the full height of the card. [Default: true]',
-              },
-            },
-            {
               name: 'showDescription',
               type: 'checkbox',
               defaultValue: true,
@@ -145,6 +135,79 @@ export const Archive: Block = {
                 description:
                   'If the card image panel should be displayed or not. When disabled the title and description will use the full width of the card. [Default: true]',
               },
+            },
+          ],
+        },
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'cardWidth',
+              type: 'select',
+              required: true,
+              defaultValue: 'md',
+              label: 'Card Width',
+              admin: {
+                description: 'The horizontal size of the item card',
+              },
+              options: [
+                {
+                  label: 'Small',
+                  value: 'sm',
+                },
+                {
+                  label: 'Medium',
+                  value: 'md',
+                },
+                {
+                  label: 'Large',
+                  value: 'lg',
+                },
+              ],
+            },
+            {
+              name: 'cardHeight',
+              type: 'select',
+              required: true,
+              defaultValue: 'md',
+              label: 'Card Height',
+              admin: {
+                description: 'The vertical size of the item card',
+              },
+              options: [
+                {
+                  label: 'Small',
+                  value: 'sm',
+                },
+                {
+                  label: 'Medium',
+                  value: 'md',
+                },
+                {
+                  label: 'Large',
+                  value: 'lg',
+                },
+              ],
+            },
+            {
+              name: 'cardLayout',
+              type: 'select',
+              required: true,
+              defaultValue: 'horizontal',
+              label: 'Card Layout',
+              admin: {
+                description: 'The orientation of the card content',
+              },
+              options: [
+                {
+                  label: 'Horizontal',
+                  value: 'horizontal',
+                },
+                {
+                  label: 'Vertical',
+                  value: 'vertical',
+                },
+              ],
             },
           ],
         },

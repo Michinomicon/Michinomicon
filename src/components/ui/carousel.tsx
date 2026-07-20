@@ -9,11 +9,12 @@ import { Button } from '@/components/ui/button'
 
 type CarouselApi = UseEmblaCarouselType[1]
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>
-export type CarouselOptions = UseCarouselParameters[0]
+export type CarouselOptions = NonNullable<Required<UseCarouselParameters[0]>>
+export type CarouselOptionsProp = UseCarouselParameters[0]
 type CarouselPlugin = UseCarouselParameters[1]
 
 type CarouselProps = {
-  opts?: CarouselOptions
+  opts?: CarouselOptionsProp
   plugins?: CarouselPlugin
   orientation?: 'horizontal' | 'vertical'
   setApi?: (api: CarouselApi) => void
@@ -174,7 +175,6 @@ const CarouselItem = React.forwardRef<
         slideSizeClassName,
         'embla__slide',
         'min-w-0 shrink-0 grow-0',
-        // orientation === 'horizontal' ? 'pl-4' : 'pt-4',
         slideSpacingClassName,
         className,
       )}
@@ -223,7 +223,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
                 isDisabled ? 'border-border/40 grayscale' : 'border-border',
                 className,
               )}
-              disabled={isDisabled}
+              disabled={!canScrollPrev || nodeCount < 2}
               onClick={scrollPrev}
               {...props}
             >
@@ -248,7 +248,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
             'text-border',
             className,
           )}
-          disabled={isDisabled}
+          disabled={!canScrollPrev || nodeCount < 2}
           onClick={scrollPrev}
           {...props}
         >
@@ -300,7 +300,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
                 isDisabled ? 'border-border/40 grayscale' : 'border-border',
                 className,
               )}
-              disabled={isDisabled}
+              disabled={!canScrollNext || nodeCount < 2}
               onClick={scrollNext}
               {...props}
             >
@@ -325,7 +325,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
             'text-border',
             className,
           )}
-          disabled={isDisabled}
+          disabled={!canScrollNext || nodeCount < 2}
           onClick={scrollNext}
           {...props}
         >

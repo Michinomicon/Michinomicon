@@ -897,10 +897,6 @@ export interface ArchiveBlock {
       )[]
     | null;
   /**
-   * If the card title should be displayed or not. When disabled the description will use the full height of the card. [Default: true]
-   */
-  showTitle?: boolean | null;
-  /**
    * If the card description should be displayed or not. When disabled the title (if enabled) will be vertically centered. [Default: true]
    */
   showDescription?: boolean | null;
@@ -908,6 +904,18 @@ export interface ArchiveBlock {
    * If the card image panel should be displayed or not. When disabled the title and description will use the full width of the card. [Default: true]
    */
   showImages?: boolean | null;
+  /**
+   * The horizontal size of the item card
+   */
+  cardWidth: 'sm' | 'md' | 'lg';
+  /**
+   * The vertical size of the item card
+   */
+  cardHeight: 'sm' | 'md' | 'lg';
+  /**
+   * The orientation of the card content
+   */
+  cardLayout: 'horizontal' | 'vertical';
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
@@ -1588,9 +1596,11 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
-  showTitle?: T;
   showDescription?: T;
   showImages?: T;
+  cardWidth?: T;
+  cardHeight?: T;
+  cardLayout?: T;
   id?: T;
   blockName?: T;
 }

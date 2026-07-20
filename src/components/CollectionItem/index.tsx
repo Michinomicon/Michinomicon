@@ -34,14 +34,17 @@ export type CollectionItemProps<T extends keyof SupportedConfigs> = Omit<
   className?: string
   showStatus?: boolean
   showTags?: boolean
-  showImage?: boolean
+  showDescription?: boolean
+  showImages?: boolean
   layout?: 'vertical' | 'horizontal'
   item: CollectionItemProperties<T>
 }
 
 export function CollectionItem<T extends keyof SupportedConfigs>({
   className,
-  showTags = true,
+  showTags = false,
+  showDescription = true,
+  showImages = true,
   layout: layoutFromProps,
   title: titleFromProps,
   item: itemFromProps,
@@ -65,27 +68,30 @@ export function CollectionItem<T extends keyof SupportedConfigs>({
               'item-content flex grow flex-col flex-nowrap items-start justify-start overflow-hidden',
             )}
           >
-            <div
-              className={cn(
-                'item-image-container bg-black',
-                'flex h-full w-full shrink grow-0 flex-col items-center justify-center',
-                'rounded-none border-b border-b-border',
-              )}
-            >
-              <div className={cn('item-image-wrapper')}>
-                <AspectRatio ratio={1 / 1} className={cn('w-full')}>
-                  {images && (
-                    <ImageGallery
-                      layout={'card'}
-                      containerClassNames={'h-full'}
-                      galleryClassNames={'h-full'}
-                      thumbnailTooltip={false}
-                      items={images}
-                    />
-                  )}
-                </AspectRatio>
+            {showImages && (
+              <div
+                className={cn(
+                  'item-image-container bg-black',
+                  'flex h-full w-full shrink grow-0 flex-col items-center justify-center',
+                  'rounded-none border-b border-b-border',
+                )}
+              >
+                <div className={cn('item-image-wrapper')}>
+                  <AspectRatio ratio={1 / 1} className={cn('w-full')}>
+                    {images && (
+                      <ImageGallery
+                        layout={'card'}
+                        containerClassNames={'h-full'}
+                        galleryClassNames={'h-full'}
+                        thumbnailTooltip={false}
+                        items={images}
+                      />
+                    )}
+                  </AspectRatio>
+                </div>
               </div>
-            </div>
+            )}
+
             <div
               className={cn(
                 'item-text-container flex grow flex-col flex-nowrap items-start justify-start overflow-hidden',
@@ -96,17 +102,21 @@ export function CollectionItem<T extends keyof SupportedConfigs>({
                   <span className={'text-2xl'}>{title}</span>
                 </Link>
               </div>
-              <div className={cn('item-description rounded-non h-full w-full overflow-hidden p-1')}>
-                {description && typeof description === 'object' ? (
-                  <RichText
-                    className={'h-full w-full overflow-scroll rounded-none'}
-                    data={description}
-                    enableGutter={false}
-                  />
-                ) : (
-                  <span className="prose">{description}</span>
-                )}
-              </div>
+              {showDescription && (
+                <div
+                  className={cn('item-description rounded-non h-full w-full overflow-hidden p-1')}
+                >
+                  {description && typeof description === 'object' ? (
+                    <RichText
+                      className={'h-full w-full overflow-scroll rounded-none'}
+                      data={description}
+                      enableGutter={false}
+                    />
+                  ) : (
+                    <span className="prose">{description}</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )
@@ -123,44 +133,48 @@ export function CollectionItem<T extends keyof SupportedConfigs>({
                   <span className={'text-2xl'}>{title}</span>
                 </Link>
               </div>
-              <div
-                className={cn(
-                  'item-description h-full w-full overflow-hidden rounded-none border-t border-t-border/30 bg-foreground/5 p-2 pt-0',
-                )}
-              >
-                {description && typeof description === 'object' ? (
-                  <RichText
-                    className={'h-full w-full overflow-scroll rounded-none'}
-                    data={description}
-                    enableGutter={false}
-                  />
-                ) : (
-                  <span className="prose">{description}</span>
-                )}
-              </div>
+              {showDescription && (
+                <div
+                  className={cn(
+                    'item-description h-full w-full overflow-hidden rounded-none border-t border-t-border/30 bg-foreground/5 p-2 pt-0',
+                  )}
+                >
+                  {description && typeof description === 'object' ? (
+                    <RichText
+                      className={'h-full w-full overflow-scroll rounded-none'}
+                      data={description}
+                      enableGutter={false}
+                    />
+                  ) : (
+                    <span className="prose">{description}</span>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div
-              className={cn(
-                'item-image-container shrink-0 grow-0 bg-black',
-                'flex flex-col flex-nowrap items-center justify-center overflow-hidden',
-                'rounded-tl-none rounded-bl-none border-l border-l-border',
-              )}
-            >
-              <div className={cn('item-image-wrapper')}>
-                <AspectRatio ratio={1 / 1} className={cn('w-full')}>
-                  {images && (
-                    <ImageGallery
-                      layout={'card'}
-                      containerClassNames={'h-full'}
-                      galleryClassNames={'h-full'}
-                      thumbnailTooltip={false}
-                      items={images}
-                    />
-                  )}
-                </AspectRatio>
+            {showImages && (
+              <div
+                className={cn(
+                  'item-image-container shrink-0 grow-0 bg-black',
+                  'flex flex-col flex-nowrap items-center justify-center overflow-hidden',
+                  'rounded-tl-none rounded-bl-none border-l border-l-border',
+                )}
+              >
+                <div className={cn('item-image-wrapper')}>
+                  <AspectRatio ratio={1 / 1} className={cn('w-full')}>
+                    {images && (
+                      <ImageGallery
+                        layout={'card'}
+                        containerClassNames={'h-full'}
+                        galleryClassNames={'h-full'}
+                        thumbnailTooltip={false}
+                        items={images}
+                      />
+                    )}
+                  </AspectRatio>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )
     }

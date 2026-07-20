@@ -100,7 +100,7 @@ const InlineLayoutSettings: ImageGallerySettings = {
 const CardLayoutSettings: ImageGallerySettings = {
   ...BaseSettings,
   controls: true,
-  showMaximizeIcon: true,
+  showMaximizeIcon: false,
   thumbnail: false,
   closable: false,
   showCloseIcon: false,

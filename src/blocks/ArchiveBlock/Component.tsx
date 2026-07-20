@@ -9,7 +9,20 @@ export const ArchiveBlock: React.FC<
     id?: string
   }
 > = async (props) => {
-  const { id, categories, introContent, limit, relationTo, populateBy, selectedDocs } = props
+  const {
+    id,
+    categories,
+    introContent,
+    limit,
+    relationTo,
+    populateBy,
+    selectedDocs,
+    cardHeight,
+    cardWidth,
+    cardLayout,
+    showDescription,
+    showImages,
+  } = props
 
   let archiveProps: CollectionItemGroupProps | null = null
   if (populateBy) {
@@ -19,11 +32,25 @@ export const ArchiveBlock: React.FC<
         collection: relationTo,
         categories: categories,
         limit: limit,
+        cardStyle: {
+          showDescription: showDescription === true,
+          showImages: showImages === true,
+          width: cardWidth,
+          height: cardHeight,
+          layout: cardLayout,
+        },
       }
     } else if (populateBy === 'selection') {
       archiveProps = {
         populateBy: populateBy,
         items: selectedDocs,
+        cardStyle: {
+          showDescription: showDescription === true,
+          showImages: showImages === true,
+          width: cardWidth,
+          height: cardHeight,
+          layout: cardLayout,
+        },
       }
     }
   }

@@ -114,135 +114,145 @@ const CarouselItemVariant = cva('', {
   ],
 })
 
-const CarouselVariant = cva(
-  // 'max-w-3/4',
-
-  'max-w-11/12',
-  {
-    variants: {
-      layout: {
-        vertical: '',
-        horizontal: '',
-      },
-      size: {
-        'sm-sm': '',
-        'sm-md': '',
-        'sm-lg': '',
-        'md-sm': '',
-        'md-md': '',
-        'md-lg': '',
-        'lg-sm': '',
-        'lg-md': '',
-        'lg-lg': '',
-      },
+const CarouselVariant = cva('max-w-11/12', {
+  variants: {
+    layout: {
+      vertical: '',
+      horizontal: '',
     },
-    compoundVariants: [
-      {
-        layout: 'horizontal',
-        size: 'sm-sm',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'sm', width: 'sm' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'sm-md',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'sm', width: 'md' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'sm-lg',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'sm', width: 'lg' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'md-sm',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'md', width: 'sm' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'md-md',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'md', width: 'md' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'md-lg',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'md', width: 'lg' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'lg-sm',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'lg', width: 'sm' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'lg-md',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'lg', width: 'md' }),
-      },
-      {
-        layout: 'horizontal',
-        size: 'lg-lg',
-        className: CarouselItemVariant({ layout: 'horizontal', height: 'lg', width: 'lg' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'sm-sm',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'sm', width: 'sm' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'sm-md',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'sm', width: 'md' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'sm-lg',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'sm', width: 'lg' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'md-sm',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'md', width: 'sm' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'md-md',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'md', width: 'md' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'md-lg',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'md', width: 'lg' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'lg-sm',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'lg', width: 'sm' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'lg-md',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'lg', width: 'md' }),
-      },
-      {
-        layout: 'vertical',
-        size: 'lg-lg',
-        className: CarouselItemVariant({ layout: 'vertical', height: 'lg', width: 'lg' }),
-      },
-    ],
+    height: {
+      sm: '',
+      md: '',
+      lg: '',
+    },
+    width: {
+      sm: '',
+      md: '',
+      lg: '',
+    },
   },
-)
+  compoundVariants: [
+    {
+      layout: 'horizontal',
+      height: 'sm',
+      width: 'sm',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'sm', width: 'sm' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'sm',
+      width: 'md',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'sm', width: 'md' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'sm',
+      width: 'lg',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'sm', width: 'lg' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'md',
+      width: 'sm',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'md', width: 'sm' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'md',
+      width: 'md',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'md', width: 'md' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'md',
+      width: 'lg',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'md', width: 'lg' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'lg',
+      width: 'sm',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'lg', width: 'sm' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'lg',
+      width: 'md',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'lg', width: 'md' }),
+    },
+    {
+      layout: 'horizontal',
+      height: 'lg',
+      width: 'lg',
+      className: CarouselItemVariant({ layout: 'horizontal', height: 'lg', width: 'lg' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'sm',
+      width: 'sm',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'sm', width: 'sm' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'sm',
+      width: 'md',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'sm', width: 'md' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'sm',
+      width: 'lg',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'sm', width: 'lg' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'md',
+      width: 'sm',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'md', width: 'sm' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'md',
+      width: 'md',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'md', width: 'md' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'md',
+      width: 'lg',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'md', width: 'lg' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'lg',
+      width: 'sm',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'lg', width: 'sm' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'lg',
+      width: 'md',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'lg', width: 'md' }),
+    },
+    {
+      layout: 'vertical',
+      height: 'lg',
+      width: 'lg',
+      className: CarouselItemVariant({ layout: 'vertical', height: 'lg', width: 'lg' }),
+    },
+  ],
+})
 
-const TestCarouselSizes: VariantProps<typeof CarouselVariant>['size'][] = [
-  'sm-sm',
-  'sm-md',
-  'sm-lg',
-  'md-sm',
-  'md-md',
-  'md-lg',
-  'lg-sm',
-  'lg-md',
-  'lg-lg',
-]
-const layouts: VariantProps<typeof CarouselVariant>['layout'][] = ['vertical', 'horizontal']
+export type CarouselCardDimension = 'sm' | 'md' | 'lg'
+export type CarouselCardLayout = 'vertical' | 'horizontal'
+export type CarouselCardStyle = {
+  showDescription: boolean
+  showImages: boolean
+  showTags?: boolean
+  width: CarouselCardDimension
+  height: CarouselCardDimension
+  layout: CarouselCardLayout
+}
 
 export type CollectionTypes = {
   posts: Post
@@ -295,21 +305,31 @@ export type CollectionItemGroupProperties<T extends keyof CollectionTypes> =
 
 export type CollectionItemGroupProps = CollectionItemGroupProperties<keyof CollectionTypes> & {
   className?: string
-  showTags?: boolean
-  layout?: 'carousel' | 'grid'
+
+  cardStyle?: CarouselCardStyle
+  collectionStyle?: 'carousel' | 'grid'
 }
 
 export async function CollectionItemGroup({
   className,
-  showTags = false,
-  layout = 'carousel',
+
+  collectionStyle = 'carousel',
+  cardStyle = {
+    showTags: false,
+    showDescription: true,
+    showImages: true,
+    width: 'md',
+    height: 'md',
+    layout: 'horizontal',
+  },
   ...props
 }: CollectionItemGroupProps): Promise<React.ReactNode> {
-  const itemLayout: 'vertical' | 'horizontal' = 'horizontal'
+  const carouselScrollDirection: 'vertical' | 'horizontal' = 'horizontal'
+  const alignment: CarouselOptions['align'] = 'center'
 
-  const carouselOptions: CarouselOptions = {
+  const carouselOptions: Partial<CarouselOptions> = {
     loop: true,
-    align: 'start',
+    align: alignment,
     // watchDrag: false,
     // watchResize: false,
     // watchSlides: false,
@@ -332,7 +352,7 @@ export async function CollectionItemGroup({
 
   const items = await getCollectionItemProperties(props)
 
-  if (layout === 'grid') {
+  if (collectionStyle === 'grid') {
     const VerticalCardsClassName = {
       Group:
         'grid grid-cols-4 gap-x-4 gap-y-4 sm:grid-cols-8 lg:grid-cols-12 lg:gap-x-8 lg:gap-y-8 xl:gap-x-8',
@@ -347,7 +367,7 @@ export async function CollectionItemGroup({
       <div className={cn('flex w-full flex-col', className)}>
         <ItemGroup
           className={cn(
-            itemLayout === 'horizontal'
+            cardStyle.layout === 'horizontal'
               ? HorizontalCardsClassName.Group
               : VerticalCardsClassName.Group,
           )}
@@ -356,96 +376,139 @@ export async function CollectionItemGroup({
             <CollectionItem
               key={index}
               className={cn(
-                itemLayout === 'horizontal'
+                cardStyle.layout === 'horizontal'
                   ? HorizontalCardsClassName.Card
                   : VerticalCardsClassName.Card,
               )}
-              layout={itemLayout}
+              showDescription={cardStyle.showDescription}
+              showImages={cardStyle.showImages}
+              layout={cardStyle.layout}
               item={item}
-              showTags={showTags}
+              showTags={cardStyle.showTags}
             />
           ))}
         </ItemGroup>
       </div>
     )
   } else {
-    return (
-      <React.Fragment>
-        {layouts.map((layout, index) => {
-          if (layout) {
-            return (
-              <React.Fragment key={`${index}-${layout}`}>
-                {TestCarouselSizes.map((size, index) => {
-                  const className = CarouselVariant({ layout: layout, size: size })
-                  console.debug(
-                    `CarouselVariant layout: ${layout} size: ${size} ClassName:`,
-                    className,
-                  )
-                  if (size) {
-                    const [height, width, ..._rest] = size.split('-')
-                    return (
-                      <React.Fragment key={`${index}-${layout}-${size}`}>
-                        <Separator className="mt-6 mb-6"></Separator>
-                        <div className="mb-1 flex w-full flex-nowrap justify-center gap-3 text-2xl">
-                          <div className="grid grid-cols-2">
-                            Card Layout:{' '}
-                            <div className="ml-1 w-fit border bg-popover px-3 text-popover-foreground uppercase">
-                              {layout}
+    const useDemo: boolean = false
+    if (useDemo) {
+      const TestCarouselSizes: ('sm' | 'md' | 'lg')[] = ['sm', 'md', 'lg']
+      const TextLayouts: VariantProps<typeof CarouselVariant>['layout'][] = [
+        'vertical',
+        'horizontal',
+      ]
+      return (
+        <React.Fragment>
+          {TextLayouts.map((layout, index) => {
+            if (layout) {
+              return (
+                <React.Fragment key={`${index}-${layout}`}>
+                  {TestCarouselSizes.map((width, _index) => {
+                    return TestCarouselSizes.map((height, index) => {
+                      console.debug(
+                        `CarouselVariant layout: ${layout} width: ${width} height: ${height}`,
+                        className,
+                      )
+                      return (
+                        <React.Fragment key={`${index}-${layout}-${width}-${height}`}>
+                          <Separator className="mt-6 mb-6"></Separator>
+                          <div className="mb-1 flex w-full flex-nowrap justify-center gap-3 text-2xl">
+                            <div className="grid grid-cols-2">
+                              Card Layout:{' '}
+                              <div className="ml-1 w-fit border bg-popover px-3 text-popover-foreground uppercase">
+                                {layout}
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2">
+                              Height:{' '}
+                              <div className="ml-1 w-fit border bg-popover px-3 text-popover-foreground uppercase">
+                                {height}
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2">
+                              Width:{' '}
+                              <div className="ml-1 w-fit border bg-popover px-3 text-popover-foreground uppercase">
+                                {width}
+                              </div>
                             </div>
                           </div>
-                          <div className="grid grid-cols-2">
-                            Height:{' '}
-                            <div className="ml-1 w-fit border bg-popover px-3 text-popover-foreground uppercase">
-                              {height}
-                            </div>
-                          </div>
-                          <div className="grid grid-cols-2">
-                            Width:{' '}
-                            <div className="ml-1 w-fit border bg-popover px-3 text-popover-foreground uppercase">
-                              {width}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="mx-auto mb-2">
-                          <div
-                            className={cn(
-                              'flex w-full flex-col items-center justify-center gap-y-2',
-                            )}
-                          >
-                            <Carousel
-                              orientation={'horizontal'}
-                              opts={carouselOptions}
+                          <div className="mx-auto mb-2">
+                            <div
                               className={cn(
-                                'carousel',
-                                CarouselVariant({ layout: layout, size: size }),
+                                'flex w-full flex-col items-center justify-center gap-y-2',
                               )}
                             >
-                              <CarouselContent className={cn('carousel-content', 'my-2')}>
-                                {items?.map((item, index) => (
-                                  <CarouselItem key={index} className={cn('carousel-item')}>
-                                    <CollectionItem
-                                      className={cn('collection-item')}
-                                      showTags={showTags}
-                                      layout={layout}
-                                      item={item}
-                                    />
-                                  </CarouselItem>
-                                ))}
-                              </CarouselContent>
-                              {items.length > 1 && <CarouselPrevious />}
-                              {items.length > 1 && <CarouselNext />}
-                            </Carousel>
+                              <Carousel
+                                orientation={'horizontal'}
+                                opts={carouselOptions}
+                                className={cn(
+                                  'carousel',
+                                  CarouselVariant({
+                                    layout: layout,
+                                    width: width,
+                                    height: height,
+                                  }),
+                                )}
+                              >
+                                <CarouselContent className={cn('carousel-content', 'my-2')}>
+                                  {items?.map((item, index) => (
+                                    <CarouselItem key={index} className={cn('carousel-item')}>
+                                      <CollectionItem
+                                        className={cn('collection-item')}
+                                        showDescription={cardStyle.showDescription}
+                                        showImages={cardStyle.showImages}
+                                        showTags={cardStyle.showTags}
+                                        layout={layout}
+                                        item={item}
+                                      />
+                                    </CarouselItem>
+                                  ))}
+                                </CarouselContent>
+                                {items.length > 1 && <CarouselPrevious />}
+                                {items.length > 1 && <CarouselNext />}
+                              </Carousel>
+                            </div>
                           </div>
-                        </div>
-                      </React.Fragment>
-                    )
-                  }
-                })}
-              </React.Fragment>
-            )
-          }
-        })}
-      </React.Fragment>
+                        </React.Fragment>
+                      )
+                    })
+                  })}
+                </React.Fragment>
+              )
+            }
+          })}
+        </React.Fragment>
+      )
+    }
+
+    return (
+      <div className="mx-auto mb-2">
+        <div className={cn('flex w-full flex-col items-center justify-center gap-y-2')}>
+          <Carousel
+            orientation={carouselScrollDirection}
+            opts={carouselOptions}
+            className={cn('carousel', CarouselVariant(cardStyle))}
+          >
+            <CarouselContent className={cn('carousel-content', 'my-2')}>
+              {items?.map((item, index) => (
+                <CarouselItem key={index} className={cn('carousel-item')}>
+                  <CollectionItem
+                    className={cn('collection-item')}
+                    showTags={cardStyle.showTags}
+                    showDescription={cardStyle.showDescription}
+                    showImages={cardStyle.showImages}
+                    layout={cardStyle.layout}
+                    item={item}
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            {items.length > 1 && <CarouselPrevious />}
+            {items.length > 1 && <CarouselNext />}
+          </Carousel>
+        </div>
+      </div>
     )
   }
 }
