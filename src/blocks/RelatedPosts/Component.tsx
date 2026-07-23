@@ -24,7 +24,7 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = async (props) => {
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-8">
         {items &&
           items.map((item, index) => {
-            return <CollectionItem key={index} item={item} showTags showStatus={false} />
+            return <CollectionItem key={index} item={item} showTags />
           })}
       </div>
     </div>

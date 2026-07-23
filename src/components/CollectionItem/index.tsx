@@ -32,7 +32,6 @@ export type CollectionItemProps<T extends keyof SupportedConfigs> = Omit<
   title?: string
   alignItems?: 'center'
   className?: string
-  showStatus?: boolean
   showTags?: boolean
   showDescription?: boolean
   showImages?: boolean
