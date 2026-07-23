@@ -188,7 +188,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
   ({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
     const { orientation, scrollPrev, canScrollPrev, api } = useCarousel()
     const nodeCount = api?.slideNodes()?.length ?? 0
-    const isDisabled = !canScrollPrev || nodeCount < 2
+    const isDisabled = !canScrollPrev
     const buttonStyle = 'large'
 
     if (buttonStyle === 'large') {
@@ -206,6 +206,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
           {/* Button */}
           <div
             className={cn(
+              nodeCount < 2 ? 'hidden' : '',
               'border-r border-border/10',
               'absolute z-10 h-full w-11 rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-none py-2',
               '',
@@ -223,7 +224,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
                 isDisabled ? 'border-border/40 grayscale' : 'border-border',
                 className,
               )}
-              disabled={!canScrollPrev || nodeCount < 2}
+              disabled={isDisabled}
               onClick={scrollPrev}
               {...props}
             >
@@ -240,6 +241,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
           variant={variant}
           size={size}
           className={cn(
+            nodeCount < 2 ? 'hidden' : '',
             'absolute h-8 w-8 rounded-full',
             orientation === 'horizontal'
               ? `top-1/2 -left-9 -translate-y-1/2`
@@ -248,7 +250,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
             'text-border',
             className,
           )}
-          disabled={!canScrollPrev || nodeCount < 2}
+          disabled={isDisabled}
           onClick={scrollPrev}
           {...props}
         >
@@ -265,7 +267,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
   ({ className, variant = 'outline', size = 'icon', ...props }, ref) => {
     const { orientation, scrollNext, canScrollNext, api } = useCarousel()
     const nodeCount = api?.slideNodes()?.length ?? 0
-    const isDisabled = !canScrollNext || nodeCount < 2
+    const isDisabled = !canScrollNext
     const buttonStyle = 'large'
 
     if (buttonStyle === 'large') {
@@ -296,11 +298,12 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
               variant={'carouselControl'}
               size={size}
               className={cn(
+                nodeCount < 2 ? 'hidden' : '',
                 'h-full w-full rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-none',
                 isDisabled ? 'border-border/40 grayscale' : 'border-border',
                 className,
               )}
-              disabled={!canScrollNext || nodeCount < 2}
+              disabled={isDisabled}
               onClick={scrollNext}
               {...props}
             >
@@ -317,6 +320,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
           variant={variant}
           size={size}
           className={cn(
+            nodeCount < 2 ? 'hidden' : '',
             'absolute h-8 w-8 rounded-full',
             orientation === 'horizontal'
               ? `top-1/2 -right-9 -translate-y-1/2`
@@ -325,7 +329,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
             'text-border',
             className,
           )}
-          disabled={!canScrollNext || nodeCount < 2}
+          disabled={isDisabled}
           onClick={scrollNext}
           {...props}
         >

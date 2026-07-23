@@ -24,6 +24,7 @@ function getSafeImageSource(media?: Media | string | null | undefined): string |
       }
     }
     if (src && src.length > 0) {
+      console.debug(`${media.title} src: `, src)
       return src
     }
   }
@@ -34,6 +35,7 @@ function getThumbnailSource(media?: Media | string | null | undefined): string |
   if (isMediaWithMIMEType(media)) {
     if (mediaIsVideo(media) || mediaIsImage(media)) {
       const thumbnail = media.thumbnailURL || media.sizes?.thumbnail?.url || media.url || null
+      console.debug(`"${media.title}" THUMBNAIL SOURCE:`, thumbnail, JSON.stringify(media))
       return thumbnail
     }
   }
