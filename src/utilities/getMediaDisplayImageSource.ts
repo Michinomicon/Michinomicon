@@ -31,12 +31,50 @@ function getSafeImageSource(media?: Media | string | null | undefined): string |
   return null
 }
 
+function getSafeThumbnailUrl(url: string): string | null {
+  let returnUrl = getMediaUrl(url)
+  if (typeof returnUrl === 'string' && returnUrl.startsWith('http')) {
+    try {
+      const urlObj = new URL(returnUrl)
+      // If the URL matches localhost, strip it down to just the relative path
+      if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+        returnUrl = urlObj.pathname + urlObj.search
+      }
+    } catch (_err) {
+      // Silently ignore invalid URLs
+    }
+  }
+  if (returnUrl && returnUrl.length > 0) {
+    return returnUrl
+  }
+  return null
+}
+
 function getThumbnailSource(media?: Media | string | null | undefined): string | null {
+  let thumbnailUrl: string | null = null
   if (isMediaWithMIMEType(media)) {
     if (mediaIsVideo(media) || mediaIsImage(media)) {
-      const thumbnail = media.thumbnailURL || media.sizes?.thumbnail?.url || media.url || null
-      console.debug(`"${media.title}" THUMBNAIL SOURCE:`, thumbnail, JSON.stringify(media))
-      return thumbnail
+      if (media.thumbnailURL) {
+        console.log(`"${media.title}" Found thumbnail URL at 'media.thumbnailURL':`, thumbnailUrl)
+        thumbnailUrl = media.thumbnailURL
+      } else if (media.sizes?.thumbnail?.url) {
+        console.log(
+          `"${media.title}" Found thumbnail URL at 'media.sizes?.thumbnail?.url':`,
+          media.sizes?.thumbnail?.url,
+        )
+        thumbnailUrl = media.sizes?.thumbnail?.url
+      } else if (media.url) {
+        console.log(
+          `"${media.title}" Found thumbnail URL at 'media.sizes?.thumbnail?.url':`,
+          media.url,
+        )
+        thumbnailUrl = media.url
+      }
+    }
+    if (thumbnailUrl) {
+      const safeUrl = getSafeThumbnailUrl(thumbnailUrl)
+      console.log(`safe thumbnail URL:`, safeUrl)
+      return safeUrl
     }
   }
   return null

@@ -231,7 +231,7 @@ export const ImageGallery = ({
                 <NextImage
                   alt={item.alt}
                   className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
-                  src={item.src}
+                  src={item.thumb}
                   loading={'eager'}
                   width={item.width}
                   height={item.height}
