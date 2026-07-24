@@ -15,13 +15,8 @@ import React from 'react'
 
 import { DEFAULT_IMAGE_SIZES } from '@/defaultImageSizes'
 
-// White 1x1 pixel image with 0.3 opacity
-export const lightPlaceholder =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP87wMAAlABTQluYBcAAAAASUVORK5CYII='
-
-// Black 1x1 pixel image with 0.3 opacity
-export const darkPlaceholder =
-  'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+export const blurPlaceholder =
+  'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiCiAgICAgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiCiAgICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJibGFjayIgb3BhY2l0eT0iMC41IiAvPgo8L3N2Zz4='
 
 function getMediaResourceUrl(resource: Media): string {
   let src: string = ''
@@ -186,7 +181,7 @@ export const ImageMedia = (props: ImageMediaProps) => {
         placeholder="blur"
         width={width}
         height={height}
-        blurDataURL={lightPlaceholder}
+        blurDataURL={blurPlaceholder}
         quality={100}
         loading={'lazy'}
         style={{ objectFit: 'contain' }}

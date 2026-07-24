@@ -45,8 +45,8 @@ const GalleryItemStyles = cn(
 
 const ItemThumbnailStyles = cn('relative block rounded-none size-full object-cover')
 
-const PLACEHOLDER_BLUR =
-  'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxIiBoZWlnaHQ9IjEiPgo8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZTZlN2ViIi8+Cjwvc3ZnPg=='
+export const blurPlaceholder =
+  'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiCiAgICAgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiCiAgICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJibGFjayIgb3BhY2l0eT0iMC41IiAvPgo8L3N2Zz4='
 
 type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
   width: number | `${number}`
@@ -209,7 +209,7 @@ export const ImageGallery = ({
                   loading="lazy"
                   sizes={DEFAULT_IMAGE_SIZES}
                   placeholder={'blur'}
-                  blurDataURL={PLACEHOLDER_BLUR}
+                  blurDataURL={blurPlaceholder}
                   style={{
                     objectFit: 'cover',
                     objectPosition: '50% 50%',
@@ -237,7 +237,7 @@ export const ImageGallery = ({
                   height={item.height}
                   sizes={DEFAULT_IMAGE_SIZES}
                   placeholder={'blur'}
-                  blurDataURL={PLACEHOLDER_BLUR}
+                  blurDataURL={blurPlaceholder}
                   style={{ objectFit: 'cover', objectPosition: '50% 50%' }}
                 />
               </a>
