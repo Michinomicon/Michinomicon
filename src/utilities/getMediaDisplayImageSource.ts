@@ -35,19 +35,10 @@ function getThumbnailSource(media?: Media | string | null | undefined): string |
   if (isMediaWithMIMEType(media)) {
     if (mediaIsVideo(media) || mediaIsImage(media)) {
       if (media.thumbnailURL) {
-        console.log(
-          `"${media.title}" Found thumbnail URL at 'media.thumbnailURL':`,
-          media.thumbnailURL,
-        )
         thumbnailUrl = media.thumbnailURL
       } else if (media.sizes?.thumbnail?.url) {
-        console.log(
-          `"${media.title}" Found thumbnail URL at 'media.sizes?.thumbnail?.url':`,
-          media.sizes?.thumbnail?.url,
-        )
         thumbnailUrl = media.sizes?.thumbnail?.url
       } else if (media.url) {
-        console.log(`"${media.title}" Found thumbnail URL at 'media.url':`, media.url)
         thumbnailUrl = media.url
       }
     }
