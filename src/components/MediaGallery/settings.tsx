@@ -105,6 +105,7 @@ const CardLayoutSettings: MediaGallerySettings = {
   closable: false,
   showCloseIcon: false,
   allowMediaOverlap: true,
+  preload: 3,
 }
 const MediaBlockLayoutSettings: MediaGallerySettings = {
   ...BaseSettings,
@@ -112,12 +113,10 @@ const MediaBlockLayoutSettings: MediaGallerySettings = {
   showCloseIcon: false,
   thumbnail: false,
   controls: false,
-  showMaximizeIcon: true,
+  showMaximizeIcon: false,
   mousewheel: false,
   download: false,
   enableDrag: false,
-  allowMediaOverlap: true,
-  animateThumb: true,
 }
 
 export const LayoutVariantSettings = {
