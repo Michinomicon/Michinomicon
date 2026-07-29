@@ -324,6 +324,15 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  youtubeId?: string | null;
+  /**
+   * Youtube Video URL
+   */
+  youtubeUrl?: string | null;
+  /**
+   * Paste this thumbnail URL in the remote file input above
+   */
+  youtubeThumbnailUrl?: string | null;
   title: string;
   alt: string;
   /**
@@ -1733,6 +1742,9 @@ export interface CreatorsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  youtubeId?: T;
+  youtubeUrl?: T;
+  youtubeThumbnailUrl?: T;
   title?: T;
   alt?: T;
   coverImage?: T;

@@ -6,7 +6,7 @@ import React, { useRef } from 'react'
 import type { Media } from '@/payload-types'
 import { TypedCollection } from 'payload'
 import { Badge, BadgeStatus } from '../ui/badge'
-import { ImageGallery } from '../ImageGallery'
+import { MediaGallery } from '../MediaGallery'
 import { Item, ItemFooter } from '../ui/item'
 import { AspectRatio } from '../ui/aspect-ratio'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
@@ -78,7 +78,7 @@ export function CollectionItem<T extends keyof SupportedConfigs>({
                 <div className={cn('item-image-wrapper')}>
                   <AspectRatio ratio={1 / 1} className={cn('w-full')}>
                     {images && (
-                      <ImageGallery
+                      <MediaGallery
                         layout={'card'}
                         containerClassNames={'h-full'}
                         galleryClassNames={'h-full'}
@@ -162,7 +162,7 @@ export function CollectionItem<T extends keyof SupportedConfigs>({
                 <div className={cn('item-image-wrapper')}>
                   <AspectRatio ratio={1 / 1} className={cn('w-full')}>
                     {images && (
-                      <ImageGallery
+                      <MediaGallery
                         layout={'card'}
                         containerClassNames={'h-full'}
                         galleryClassNames={'h-full'}

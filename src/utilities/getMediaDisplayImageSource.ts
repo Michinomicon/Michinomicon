@@ -7,7 +7,6 @@ import FolderArchivePNG from '@/public/folder-archive.png'
 import FilePNG from '@/public/file.png'
 import { Media } from '@/payload-types'
 import { isMedia } from './isMedia'
-// import { getMediaUrl } from './getMediaUrl'
 
 function getSafeImageSource(media?: Media | string | null | undefined): string | null {
   if (isMedia(media) && media.mimeType?.includes('image')) {
@@ -86,11 +85,28 @@ function getVideoSources(media: Media): MediaDisplayImageSources {
       preload: 'none',
       controls: true,
       poster: poster,
+      playsinline: true,
     },
   }
   return {
     source: JSON.stringify(videoSrc),
     thumbnail: poster,
+  }
+}
+
+function getYouTubeSources(media: Media): MediaDisplayImageSources {
+  let source: string = ''
+  let thumbnail: string = ''
+
+  const { youtubeId, youtubeUrl, youtubeThumbnailUrl } = media
+
+  if (youtubeId && youtubeThumbnailUrl && youtubeUrl) {
+    source = youtubeUrl
+    thumbnail = youtubeThumbnailUrl
+  }
+  return {
+    source: source,
+    thumbnail: thumbnail,
   }
 }
 
@@ -135,6 +151,15 @@ function mediaIsImage(media?: Media | string | null | undefined): boolean {
   return false
 }
 
+function mediaIsYouTube(media?: Media | string | null | undefined): boolean {
+  if (isMedia(media)) {
+    if (media.youtubeId || media.youtubeUrl) {
+      return true
+    }
+  }
+  return false
+}
+
 type MediaDisplayImageSources = {
   source: string
   thumbnail: string
@@ -150,6 +175,8 @@ export function getMediaDisplayImageSources(
   }
 
   switch (true) {
+    case mediaIsYouTube(media):
+      return getYouTubeSources(media)
     case mediaIsImage(media):
       return {
         source: getSafeImageSource(media) ?? getFallbackSourceByMIMEType(media.mimeType),

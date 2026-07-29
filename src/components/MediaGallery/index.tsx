@@ -22,7 +22,7 @@ import { getMediaDisplayImageSources } from '@/utilities/getMediaDisplayImageSou
 import {
   applyLayoutSettings,
   GalleryLayout,
-  ImageGallerySettings,
+  MediaGallerySettings,
   nextIcon,
   prevIcon,
 } from './settings'
@@ -39,7 +39,7 @@ const GalleryItemStyles = cn(
   'rounded-none',
   'bg-card',
   'border border-primary/30',
-  ' overflow-hidden hover:opacity-80 transition-opacity cursor-pointer',
+  'overflow-hidden hover:opacity-80 transition-opacity cursor-pointer',
   'block relative',
 )
 
@@ -56,12 +56,13 @@ type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
   alt: string
   size: string
   src: string
-  type: 'image' | 'video'
+  type: 'image' | 'video' | 'youtube'
   thumb: string
   caption: MediaInfo
 }
 
-function getItemType(media: Media): 'image' | 'video' {
+function getItemType(media: Media): 'image' | 'video' | 'youtube' {
+  if (media.youtubeId && media.youtubeId.length > 0) return 'youtube'
   return typeof media.mimeType === 'string' && media.mimeType.includes('video') ? 'video' : 'image'
 }
 
@@ -95,7 +96,7 @@ function getItemPropertiesFromMedia(media: Media): ItemProperties | undefined {
   }
 }
 
-function mapImageGalleryItems(media: Media[]) {
+function mapMediaGalleryItems(media: Media[]) {
   const items: ItemProperties[] = media
     .sort((i, j) => Number(j.sortPriority) - Number(i.sortPriority))
     .map(getItemPropertiesFromMedia)
@@ -104,7 +105,7 @@ function mapImageGalleryItems(media: Media[]) {
   return items
 }
 
-export type ImageGalleryProps = {
+export type MediaGalleryProps = {
   layout: GalleryLayout | undefined
   items: Media[]
   thumbnailTooltip?: boolean
@@ -113,10 +114,10 @@ export type ImageGalleryProps = {
   thumbnailClassNames?: string
   galleryClassNames?: string
   containerClassNames?: string
-  settings?: ImageGallerySettings
+  settings?: MediaGallerySettings
 }
 
-export const ImageGallery = ({
+export const MediaGallery = ({
   layout = 'inline',
   items,
   thumbnailTooltip = true,
@@ -126,14 +127,15 @@ export const ImageGallery = ({
   galleryItemClassNames: galleryItemClassNamesFromProps,
   thumbnailClassNames: thumbnailClassNamesFromProps,
   containerClassNames: containerClassNamesFromProps,
-}: ImageGalleryProps): React.ReactNode => {
+}: MediaGalleryProps): React.ReactNode => {
   const isMobile = useIsMobile()
   const lightGallery: React.RefObject<LightGallery | null> = useRef<LightGallery | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
+  const galleryOpened = useRef(false)
   const [galleryContainer, setGalleryContainer] = useState<HTMLDivElement | null>(null)
 
-  const instanceSettings: ImageGallerySettings = applyLayoutSettings(layout, settingsFromProps)
-  const galleryItems = mapImageGalleryItems(items)
+  const instanceSettings: MediaGallerySettings = applyLayoutSettings(layout, settingsFromProps)
+  const galleryItems = mapMediaGalleryItems(items)
 
   const lightGalleryClassNames = cn('overflow-hidden rounded-none', galleryClassNamesFromProps)
   const showThumbnailTooltip = layout === 'inline' ? false : thumbnailTooltip
@@ -149,8 +151,16 @@ export const ImageGallery = ({
     ({ instance }: InitDetail) => {
       if (instance) {
         lightGallery.current = instance
-        if (layout === 'inline' || layout === 'card') {
-          lightGallery.current.openGallery()
+        if (
+          layout === 'inline' ||
+          layout === 'card' ||
+          (layout === 'mediaBlock' && !galleryOpened.current)
+        ) {
+          galleryOpened.current = true
+          //small timeout to avoid lg-video race condition
+          setTimeout(() => {
+            lightGallery.current?.openGallery()
+          }, 50)
         }
       }
     },
@@ -175,7 +185,11 @@ export const ImageGallery = ({
       ref={containerRef}
     >
       <LightGallery
-        container={layout === 'inline' || layout === 'card' ? galleryContainer : null}
+        container={
+          layout === 'inline' || layout === 'card' || layout === 'mediaBlock'
+            ? galleryContainer
+            : null
+        }
         elementClassNames={cn(lightGalleryClassNames)}
         width={'100%'}
         plugins={[lgThumbnail, lgZoom, lgVideo]}
@@ -190,6 +204,35 @@ export const ImageGallery = ({
         {...instanceSettings}
       >
         {galleryItems.map((item, index) => {
+          if (item.type === 'youtube') {
+            return (
+              <a
+                key={item.id || index}
+                data-lg-size={item.size}
+                className={cn(GalleryItemStyles, galleryItemClassNamesFromProps)}
+                data-src={item.src}
+                data-sub-html={`#caption-${item.id}`}
+              >
+                {showThumbnailTooltip && <MediaTooltip info={item.caption} />}
+                <NextImage
+                  alt={item.alt}
+                  className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
+                  src={item.thumb}
+                  width={item.width}
+                  height={item.height}
+                  loading="eager"
+                  sizes={DEFAULT_IMAGE_SIZES}
+                  placeholder={'blur'}
+                  blurDataURL={blurPlaceholder}
+                  style={{
+                    objectFit: 'cover',
+                    objectPosition: '50% 50%',
+                  }}
+                />
+              </a>
+            )
+          }
+
           if (item.type === 'video') {
             return (
               <a

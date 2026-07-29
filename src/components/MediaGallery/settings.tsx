@@ -17,11 +17,11 @@ export type InternalGallerySettings = Pick<
 >
 
 // Settings that can be changed
-export type ImageGallerySettings = Partial<
+export type MediaGallerySettings = Partial<
   Omit<LightGalleryAllSettings, keyof InternalGallerySettings | 'container' | 'licenseKey'>
 >
 
-const BaseSettings: ImageGallerySettings = {
+const BaseSettings: MediaGallerySettings = {
   /* Light Gallery Core Settings */
   controls: true,
   showMaximizeIcon: true,
@@ -36,7 +36,6 @@ const BaseSettings: ImageGallerySettings = {
   download: false,
   backdropDuration: 100,
   hideScrollbar: true,
-  preload: 3,
   startAnimationDuration: 100,
   speed: 300,
   appendSubHtmlTo: '.lg-sub-html',
@@ -49,21 +48,22 @@ const BaseSettings: ImageGallerySettings = {
   youTubePlayerParams: {
     modestbranding: 1,
     showinfo: 0,
-    controls: 0,
+    rel: 0,
+    controls: 1,
   },
   autoplayVideoOnSlide: false,
   autoplayFirstVideo: false,
   gotoNextSlideOnVideoEnd: false,
 
   /* lgThumbnail Plugin Settings */
-  loadYouTubeThumbnail: true,
+  loadYouTubeThumbnail: false,
   currentPagerPosition: 'middle',
   alignThumbnails: 'middle',
   thumbnail: true,
   animateThumb: false,
 }
 
-const DefaultLayoutSettings: ImageGallerySettings = {
+const DefaultLayoutSettings: MediaGallerySettings = {
   ...BaseSettings,
   controls: true,
   showMaximizeIcon: false,
@@ -80,14 +80,13 @@ const DefaultLayoutSettings: ImageGallerySettings = {
   download: false,
   backdropDuration: 100,
   hideScrollbar: true,
-  preload: 3,
   startAnimationDuration: 100,
   speed: 300,
   appendSubHtmlTo: '.lg-sub-html',
   subHtmlSelectorRelative: false,
 }
 
-const InlineLayoutSettings: ImageGallerySettings = {
+const InlineLayoutSettings: MediaGallerySettings = {
   ...BaseSettings,
   controls: true,
   showMaximizeIcon: false,
@@ -96,8 +95,9 @@ const InlineLayoutSettings: ImageGallerySettings = {
   showCloseIcon: false,
   allowMediaOverlap: true,
   mousewheel: false,
+  autoplayVideoOnSlide: true,
 }
-const CardLayoutSettings: ImageGallerySettings = {
+const CardLayoutSettings: MediaGallerySettings = {
   ...BaseSettings,
   controls: true,
   showMaximizeIcon: false,
@@ -106,22 +106,18 @@ const CardLayoutSettings: ImageGallerySettings = {
   showCloseIcon: false,
   allowMediaOverlap: true,
 }
-const MediaBlockLayoutSettings: ImageGallerySettings = {
+const MediaBlockLayoutSettings: MediaGallerySettings = {
   ...BaseSettings,
-  closable: true,
-  showCloseIcon: true,
+  closable: false,
+  showCloseIcon: false,
   thumbnail: false,
-  controls: true,
-  showMaximizeIcon: false,
+  controls: false,
+  showMaximizeIcon: true,
   mousewheel: false,
   download: false,
   enableDrag: false,
-}
-
-export interface GalleryLayoutVariantSettings {
-  default: ImageGallerySettings
-  inline: ImageGallerySettings
-  card: ImageGallerySettings
+  allowMediaOverlap: true,
+  animateThumb: true,
 }
 
 export const LayoutVariantSettings = {
@@ -134,11 +130,11 @@ export type GalleryLayout = `${keyof typeof LayoutVariantSettings}`
 
 export function applyLayoutSettings(
   layout: GalleryLayout,
-  setings?: ImageGallerySettings | null | undefined,
-): ImageGallerySettings {
-  const layoutSettings: ImageGallerySettings = LayoutVariantSettings[layout]
+  setings?: MediaGallerySettings | null | undefined,
+): MediaGallerySettings {
+  const layoutSettings: MediaGallerySettings = LayoutVariantSettings[layout]
   if (setings) {
-    const updatedSettings: ImageGallerySettings = {
+    const updatedSettings: MediaGallerySettings = {
       ...setings,
       ...layoutSettings,
     }

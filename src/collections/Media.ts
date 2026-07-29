@@ -9,6 +9,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { hasAccess } from '@/utilities/accessFunctions'
 import { processFileAndPopulateMetaData } from '@/hooks/mediaCollectionBeforeChange'
+import { renameYouTubeThumbnail } from '@/hooks/renameYouTubeThumbnail'
 import { Media as MediaType } from '@/payload-types'
 
 const filename = fileURLToPath(import.meta.url)
@@ -24,6 +25,34 @@ const adoptFilenameIfEmptyBeforeChange: StringFieldHook = ({ value, siblingData 
   }
   // else, keep existing
   return value
+}
+
+const afterReadYoutubeThumbnailUrl: StringFieldHook = ({ value, siblingData }) => {
+  // If there is a YouTube video ID, set the thumbnailUrl
+  const { youtubeId } = siblingData
+  if (typeof youtubeId === 'string' && youtubeId.length > 0) {
+    const thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
+    return thumbnailUrl
+  }
+  return value
+}
+
+const afterReadYoutubeVideoUrl: StringFieldHook = ({ value, siblingData }) => {
+  // If there is a YouTube video ID, set the url
+  const { youtubeId } = siblingData
+  if (typeof youtubeId === 'string' && youtubeId.length > 0) {
+    const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`
+    return videoUrl
+  }
+  return value
+}
+
+const hasYouTubeIdCondition = (data: Partial<MediaType>) => {
+  const { youtubeId } = data
+  if (typeof youtubeId === 'string' && youtubeId.length > 0) {
+    return true
+  }
+  return false
 }
 
 export const UploadImageSizes: ImageSize[] = [
@@ -87,6 +116,42 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
+      name: 'youtubeId',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '@/components/MediaUploadYoutubeRemoteURListener',
+        },
+      },
+    },
+    {
+      name: 'youtubeUrl',
+      label: 'YouTube Video Url',
+      type: 'text',
+      hooks: {
+        afterRead: [afterReadYoutubeVideoUrl],
+      },
+      admin: {
+        description: 'Youtube Video URL',
+        readOnly: true,
+        condition: hasYouTubeIdCondition,
+      },
+    },
+    {
+      name: 'youtubeThumbnailUrl',
+      label: 'YouTube Video Thumbnail Url',
+      type: 'text',
+      virtual: true,
+      hooks: {
+        afterRead: [afterReadYoutubeThumbnailUrl],
+      },
+      admin: {
+        description: 'Paste this thumbnail URL in the remote file input above',
+        readOnly: true,
+        condition: hasYouTubeIdCondition,
+      },
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,
@@ -124,7 +189,9 @@ export const Media: CollectionConfig = {
       admin: {
         description: 'Select an image or video that will be used as a preview for this upload.',
         condition: (data: Partial<MediaType>) =>
-          !data?.mimeType?.startsWith('image/') && !data?.mimeType?.startsWith('video/'),
+          !data?.mimeType?.startsWith('image/') &&
+          !data?.mimeType?.startsWith('video/') &&
+          (!data?.youtubeId || data?.youtubeId.length < 1),
       },
     },
     {
@@ -351,6 +418,24 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: {
+    pasteURL: {
+      allowList: [
+        {
+          hostname: 'img.youtube.com', // required
+          pathname: '/vi/*',
+          port: '',
+          protocol: 'https',
+          search: '',
+        },
+        {
+          hostname: 'youtube.com', // required
+          pathname: '',
+          port: '',
+          protocol: 'https',
+          search: 'watch?v=',
+        },
+      ],
+    },
     staticDir: process.env.PAYLOAD_MEDIA_DIR || path.resolve(dirname, `../../shared-media`),
     mimeTypes: [
       'image/*',
@@ -368,12 +453,10 @@ export const Media: CollectionConfig = {
     imageSizes: UploadImageSizes,
   },
   hooks: {
+    beforeOperation: [renameYouTubeThumbnail],
     beforeChange: [processFileAndPopulateMetaData],
-
-    beforeValidate: [],
   },
 }
-
 /* -------------------------- IMAGE METADATA TYPES --------------------------
 sharp.Metadata  = {
   orientation: 0,

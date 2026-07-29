@@ -12,8 +12,8 @@ import { Fragment } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '../ui/collapsible'
 import { cn } from '@/lib/utils'
 import { CMSLink } from '../Link'
-import { ImageGallery } from '../ImageGallery'
-import { ListChevronsDownUp, ListChevronsUpDown, User } from 'lucide-react'
+import { MediaGallery } from '../MediaGallery'
+import { ExternalLink, ListChevronsDownUp, ListChevronsUpDown, User } from 'lucide-react'
 import {
   DEFAULT_TOOLTIP_DELAY,
   Tooltip,
@@ -42,7 +42,7 @@ export function ProjectMediaTableBody({
         <TableRow>
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
-            <ImageGallery items={[media]} layout={'default'} thumbnailTooltip={false} />
+            <MediaGallery items={[media]} layout={'default'} thumbnailTooltip={false} />
           </TableCell>
 
           {/* Title */}
@@ -89,16 +89,30 @@ export function ProjectMediaTableBody({
 
           {/* link to file */}
           <TableCell className="text-center">
-            <CMSLink
-              url={media.url}
-              newTab={false}
-              size="lg"
-              appearance="ghost"
-              className=""
-              tooltipContent={`${media.filename} ( ${getFileMediaMetaData(media).filesize} )`}
-            >
-              <pre className="font-semibold">{getMediaFileExtension(media)}</pre>
-            </CMSLink>
+            {media.youtubeId ? (
+              <CMSLink
+                url={media.youtubeUrl}
+                newTab={true}
+                size="lg"
+                appearance="ghost"
+                className=""
+                tooltipContent={`YouTube - ${media.title} ( opens in a new tab )`}
+              >
+                <pre className="font-semibold">Youtube</pre>
+                <ExternalLink></ExternalLink>
+              </CMSLink>
+            ) : (
+              <CMSLink
+                url={media.url}
+                newTab={false}
+                size="lg"
+                appearance="ghost"
+                className=""
+                tooltipContent={`${media.filename} ( ${getFileMediaMetaData(media).filesize} )`}
+              >
+                <pre className="font-semibold">{getMediaFileExtension(media)}</pre>
+              </CMSLink>
+            )}
           </TableCell>
         </TableRow>
 
@@ -216,7 +230,7 @@ export function ProjectMediaTable({
           <TableHead className="w-auto max-w-50"></TableHead>
           <TableHead className="w-full">Credits</TableHead>
           <TableHead className="w-fit text-center"></TableHead>
-          <TableHead className="w-fit min-w-16 text-center">File</TableHead>
+          <TableHead className="w-fit min-w-16 text-center">Resource</TableHead>
         </TableRow>
       </TableHeader>
 

@@ -1,6 +1,6 @@
 'use client'
 import { ProjectMediaCredit } from '@/utilities/extractMediaCreditsByCreatorId'
-import { FolderOpen, ListChevronsDownUp, ListChevronsUpDown } from 'lucide-react'
+import { ExternalLink, FolderOpen, ListChevronsDownUp, ListChevronsUpDown } from 'lucide-react'
 import React, { useState } from 'react'
 import {
   Table,
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/tooltip'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import { cn } from '@/lib/utils'
-import { ImageGallery } from '../ImageGallery'
+import { MediaGallery } from '../MediaGallery'
 import { StatusBadge } from '../StatusBadge'
 import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
 import { isMedia } from '@/utilities/isMedia'
@@ -43,7 +43,7 @@ export function CreatorCreditsTableBody({
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
             {profileImage && (
-              <ImageGallery items={[profileImage]} layout={'default'} thumbnailTooltip={false} />
+              <MediaGallery items={[profileImage]} layout={'default'} thumbnailTooltip={false} />
             )}
           </TableCell>
           <TableCell>{project.title}</TableCell>
@@ -131,7 +131,7 @@ export function CreatorCreditsTableBody({
                       return (
                         <TableRow key={index}>
                           <TableCell className={'p-0'}>
-                            <ImageGallery
+                            <MediaGallery
                               items={[credit.media]}
                               layout={'default'}
                               thumbnailTooltip={false}
@@ -144,18 +144,32 @@ export function CreatorCreditsTableBody({
                             {credit.roles.join(', ')}
                           </TableCell>
                           <TableCell className="text-center">
-                            <CMSLink
-                              url={credit.media.url}
-                              newTab={false}
-                              size="lg"
-                              appearance="ghost"
-                              className=""
-                              tooltipContent={`${credit.media.filename} ( ${getFileMediaMetaData(credit.media).filesize} )`}
-                            >
-                              <pre className="font-semibold">
-                                {getMediaFileExtension(credit.media)}
-                              </pre>
-                            </CMSLink>
+                            {credit.media.youtubeId ? (
+                              <CMSLink
+                                url={credit.media.youtubeUrl}
+                                newTab={true}
+                                size="lg"
+                                appearance="ghost"
+                                className=""
+                                tooltipContent={`YouTube - ${credit.media.title} ( opens in a new tab )`}
+                              >
+                                <pre className="font-semibold">Youtube</pre>
+                                <ExternalLink></ExternalLink>
+                              </CMSLink>
+                            ) : (
+                              <CMSLink
+                                url={credit.media.url}
+                                newTab={false}
+                                size="lg"
+                                appearance="ghost"
+                                className=""
+                                tooltipContent={`${credit.media.filename} ( ${getFileMediaMetaData(credit.media).filesize} )`}
+                              >
+                                <pre className="font-semibold">
+                                  {getMediaFileExtension(credit.media)}
+                                </pre>
+                              </CMSLink>
+                            )}
                           </TableCell>
                         </TableRow>
                       )

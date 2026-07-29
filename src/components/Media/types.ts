@@ -3,7 +3,7 @@ import type { ElementType, Ref } from 'react'
 import type { Media as MediaType } from '@/payload-types'
 import { Nullable } from '@/utilities/types'
 import { ImageMediaProps } from './ImageMedia'
-import { ImageGalleryProps } from '../ImageGallery'
+import { MediaGalleryProps } from '../MediaGallery'
 
 export type MediaMetaData = { [key: string]: string }
 
@@ -35,7 +35,7 @@ export interface PdfMediaProps extends BaseMediaProps {
 }
 
 export type MediaProps = BaseMediaProps &
-  Partial<Omit<ImageGalleryProps, keyof BaseMediaProps>> &
+  Partial<Omit<MediaGalleryProps, keyof BaseMediaProps>> &
   Partial<Omit<ImageMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<VideoMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<AudioMediaProps, keyof BaseMediaProps>> &

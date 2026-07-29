@@ -50,7 +50,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
         <Media
           className={cn('', imgClassName)}
           resource={media}
-          src={staticImage}
+          // src={staticImage}
           {...mediaProps}
           layout={'mediaBlock'}
         />
