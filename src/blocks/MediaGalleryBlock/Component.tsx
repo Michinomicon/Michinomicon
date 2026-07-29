@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { cn } from '@/utilities/ui'
 import type { Media, MediaGalleryBlock as MediaGalleryBlockProps } from '@/payload-types'
-import { ImageGallery } from '@/components/ImageGallery'
+import { MediaGallery } from '@/components/MediaGallery'
 
 type Props = MediaGalleryBlockProps & {
   className?: string
@@ -52,7 +52,7 @@ export const MediaGalleryBlock: React.FC<Props> = async (props) => {
         className,
       )}
     >
-      <ImageGallery
+      <MediaGallery
         items={galleryItems}
         galleryClassNames={'media-gallery-block'}
         layout={'inline'}

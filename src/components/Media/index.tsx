@@ -7,7 +7,7 @@ import TrackLoader from './AudioTrackLoader'
 import { Track } from '@/lib/html-audio'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
 import { getFileMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
-import { ImageGallery } from '../ImageGallery'
+import { MediaGallery } from '../MediaGallery'
 import { ImageMedia, ImageMediaProps } from './ImageMedia'
 
 const MESSAGE_FAILED_TO_RENDER = 'Failed to render media.'
@@ -73,7 +73,7 @@ export const Media = (props: MediaProps) => {
         } = baseProps
         return (
           <React.Fragment>
-            <ImageGallery
+            <MediaGallery
               items={[resource]}
               galleryClassNames={'media-component'}
               galleryItemClassNames={galleryItemClassNames}
@@ -108,7 +108,7 @@ export const Media = (props: MediaProps) => {
         const { settings: lightGalleryProps, layout } = baseProps
         return (
           <React.Fragment>
-            <ImageGallery
+            <MediaGallery
               items={[resource]}
               settings={lightGalleryProps}
               layout={layout ?? 'default'}
