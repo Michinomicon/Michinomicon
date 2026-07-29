@@ -41,7 +41,7 @@ const afterReadYoutubeVideoUrl: StringFieldHook = ({ value, siblingData }) => {
   // If there is a YouTube video ID, set the url
   const { youtubeId } = siblingData
   if (typeof youtubeId === 'string' && youtubeId.length > 0) {
-    const videoUrl = `https://www.youtube.com/watch?v=${youtubeId}`
+    const videoUrl = `https://youtube-nocookie.com/watch?v=${youtubeId}`
     return videoUrl
   }
   return value
