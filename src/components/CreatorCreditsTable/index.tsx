@@ -146,7 +146,7 @@ export function CreatorCreditsTableBody({
                           <TableCell className="text-center">
                             {credit.media.youtubeId ? (
                               <CMSLink
-                                url={credit.media.youtubeUrl}
+                                url={`https://youtube.com/watch?v=${credit.media.youtubeId}`}
                                 newTab={true}
                                 size="lg"
                                 appearance="ghost"

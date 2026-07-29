@@ -61,7 +61,7 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
         captionClassName="mx-auto max-w-3xl"
         enableGutter={false}
         disableInnerContainer={true}
-        mediaProps={{ containerClassNames: 'rich-text-block-media' }}
+        mediaProps={{ containerClassNames: 'rich-text-block-media', layout: 'inline' }}
         {...node.fields}
       />
     ),

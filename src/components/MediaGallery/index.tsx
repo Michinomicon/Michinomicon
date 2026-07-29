@@ -151,16 +151,14 @@ export const MediaGallery = ({
     ({ instance }: InitDetail) => {
       if (instance) {
         lightGallery.current = instance
-        if (
-          layout === 'inline' ||
-          layout === 'card' ||
-          (layout === 'mediaBlock' && !galleryOpened.current)
-        ) {
-          galleryOpened.current = true
-          //small timeout to avoid lg-video race condition
-          setTimeout(() => {
-            lightGallery.current?.openGallery()
-          }, 50)
+        if (layout === 'inline' || layout === 'card' || layout === 'mediaBlock') {
+          if (!galleryOpened.current === false) {
+            galleryOpened.current = true
+            //small timeout to avoid lg-video race condition
+            setTimeout(() => {
+              lightGallery.current?.openGallery()
+            }, 50)
+          }
         }
       }
     },

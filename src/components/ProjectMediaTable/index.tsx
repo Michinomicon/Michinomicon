@@ -91,7 +91,7 @@ export function ProjectMediaTableBody({
           <TableCell className="text-center">
             {media.youtubeId ? (
               <CMSLink
-                url={media.youtubeUrl}
+                url={`https://youtube.com/watch?v=${media.youtubeId}`}
                 newTab={true}
                 size="lg"
                 appearance="ghost"
