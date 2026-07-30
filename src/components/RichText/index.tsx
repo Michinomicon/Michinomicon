@@ -18,7 +18,6 @@ import type {
   BannerBlock as BannerBlockProps,
   CallToActionBlock as CTABlockProps,
   MediaBlock as MediaBlockProps,
-  MediaGalleryBlock as MediaGalleryBlockProps,
 } from '@/payload-types'
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -27,9 +26,7 @@ import { parseCMSLinkReferenceHref } from '../Link'
 
 type NodeTypes =
   | DefaultNodeTypes
-  | SerializedBlockNode<
-      CTABlockProps | MediaBlockProps | MediaGalleryBlockProps | BannerBlockProps | CodeBlockProps
-    >
+  | SerializedBlockNode<CTABlockProps | MediaBlockProps | BannerBlockProps | CodeBlockProps>
 
 const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }): string => {
   const href = parseCMSLinkReferenceHref(linkNode.fields.doc) || ''
@@ -43,7 +40,9 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
     <MediaBlock
       className={'rich-text-upload'}
       blockType="mediaBlock"
-      mediaProps={{ containerClassNames: 'rich-text-upload', layout: 'inline' }}
+      mediaProps={{ containerClassNames: 'rich-text-upload', hideCaption: true }}
+      enableGutter={false}
+      disableInnerContainer={true}
       media={
         node.type === 'upload' && node.relationTo === 'media' && typeof node.value === 'object'
           ? node.value
@@ -61,7 +60,7 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
         captionClassName="mx-auto max-w-3xl"
         enableGutter={false}
         disableInnerContainer={true}
-        mediaProps={{ containerClassNames: 'rich-text-block-media', layout: 'inline' }}
+        mediaProps={{ containerClassNames: 'rich-text-block-media', hideCaption: true }}
         {...node.fields}
       />
     ),
