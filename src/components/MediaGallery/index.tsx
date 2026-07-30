@@ -151,14 +151,12 @@ export const MediaGallery = ({
     ({ instance }: InitDetail) => {
       if (instance) {
         lightGallery.current = instance
-        if (layout === 'inline' || layout === 'card' || layout === 'mediaBlock') {
-          if (!galleryOpened.current === false) {
-            galleryOpened.current = true
-            //small timeout to avoid lg-video race condition
-            setTimeout(() => {
-              lightGallery.current?.openGallery()
-            }, 50)
-          }
+        galleryOpened.current = instance.lgOpened
+        if (!galleryOpened.current && (layout === 'inline' || layout === 'card')) {
+          //small timeout to avoid lg-video race condition
+          setTimeout(() => {
+            lightGallery.current?.openGallery()
+          }, 50)
         }
       }
     },
@@ -183,11 +181,7 @@ export const MediaGallery = ({
       ref={containerRef}
     >
       <LightGallery
-        container={
-          layout === 'inline' || layout === 'card' || layout === 'mediaBlock'
-            ? galleryContainer
-            : null
-        }
+        container={layout === 'inline' || layout === 'card' ? galleryContainer : null}
         elementClassNames={cn(lightGalleryClassNames)}
         width={'100%'}
         plugins={[lgThumbnail, lgZoom, lgVideo]}

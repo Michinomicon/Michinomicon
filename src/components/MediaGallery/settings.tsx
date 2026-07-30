@@ -109,7 +109,7 @@ const CardLayoutSettings: MediaGallerySettings = {
 }
 const MediaBlockLayoutSettings: MediaGallerySettings = {
   ...BaseSettings,
-  closable: false,
+  closable: true,
   showCloseIcon: false,
   thumbnail: false,
   controls: false,
@@ -117,6 +117,7 @@ const MediaBlockLayoutSettings: MediaGallerySettings = {
   mousewheel: false,
   download: false,
   enableDrag: false,
+  escKey: true,
 }
 
 export const LayoutVariantSettings = {
