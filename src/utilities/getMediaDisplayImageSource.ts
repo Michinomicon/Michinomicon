@@ -98,11 +98,11 @@ function getYouTubeSources(media: Media): MediaDisplayImageSources {
   let source: string = ''
   let thumbnail: string = ''
 
-  const { youtubeId, youtubeUrl, youtubeThumbnailUrl } = media
+  const { youtubeId, youtubeUrl, url } = media
 
-  if (youtubeId && youtubeThumbnailUrl && youtubeUrl) {
+  if (youtubeId && url && youtubeUrl) {
     source = youtubeUrl
-    thumbnail = youtubeThumbnailUrl
+    thumbnail = url
   }
   return {
     source: source,
