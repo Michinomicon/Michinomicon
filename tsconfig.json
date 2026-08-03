@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
-    "noImplicitAny":true,
+    "noImplicitAny": true,
     "allowUnreachableCode": false,
     "esModuleInterop": true,
     "target": "ES2024",
@@ -51,7 +51,8 @@
     "next-env.d.ts",
     "next.config.js",
     "next-sitemap.config.cjs",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

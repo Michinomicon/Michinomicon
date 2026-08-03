@@ -1299,7 +1299,7 @@ export interface Export {
  */
 export interface Import {
   id: string;
-  collectionSlug: string;
+  collectionSlug: 'pages' | 'posts' | 'projects' | 'creators';
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -2774,36 +2774,16 @@ export interface FooterSelect<T extends boolean = true> {
  */
 export interface TaskCreateCollectionExport {
   input: {
-    id: string;
-    name: string;
-    batchSize?: number | null;
-    collectionSlug:
-      | 'pages'
-      | 'posts'
-      | 'projects'
-      | 'creators'
-      | 'media'
-      | 'categories'
-      | 'users'
-      | 'slugs'
-      | 'rights'
-      | 'redirects'
-      | 'forms'
-      | 'form-submissions'
-      | 'search'
-      | 'exports'
-      | 'imports';
-    drafts?: ('yes' | 'no') | null;
-    exportCollection: string;
-    fields?: string[] | null;
+    name?: string | null;
     format: 'csv' | 'json';
     limit?: number | null;
-    locale?: string | null;
-    maxLimit?: number | null;
     page?: number | null;
     sort?: string | null;
-    userCollection?: string | null;
-    userID?: string | null;
+    sortOrder?: ('asc' | 'desc') | null;
+    drafts?: ('yes' | 'no') | null;
+    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+    fields?: string[] | null;
+    collectionSlug: string;
     where?:
       | {
           [k: string]: unknown;
@@ -2813,6 +2793,10 @@ export interface TaskCreateCollectionExport {
       | number
       | boolean
       | null;
+    userID?: string | null;
+    userCollection?: string | null;
+    exportCollection?: string | null;
+    maxLimit?: number | null;
   };
   output?: unknown;
 }
