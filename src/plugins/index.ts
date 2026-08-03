@@ -1,6 +1,7 @@
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
 import { AccessResult, Plugin } from 'payload'
@@ -131,5 +132,77 @@ export const plugins: Plugin[] = [
         return [...defaultFields, ...searchFields]
       },
     },
+  }),
+  importExportPlugin({
+    debug: true,
+    // Global limits (0 = unlimited, which is the default)
+    exportLimit: 10000,
+    importLimit: 5000,
+
+    // Override default export collection (e.g., add access control)
+    // This will be used by all collections unless they further override the config
+    overrideExportCollection: ({ collection }) => {
+      collection.access = {
+        ...collection.access,
+        read: ({ req }) => req.user?.role === 'admin',
+      }
+      return collection
+    },
+
+    // Per-collection settings
+    collections: [
+      {
+        slug: 'pages',
+        // export: false, // Disable export for pages
+        export: {
+          format: 'json',
+          // disableDownload: true,
+          limit: 1000, // Override global exportLimit for this collection
+        },
+        import: {
+          defaultVersionStatus: 'draft',
+          limit: 500, // Override global importLimit for this collection
+        },
+      },
+      {
+        slug: 'posts',
+        // export: false, // Disable export for posts
+        export: {
+          format: 'json',
+          // disableDownload: true,
+          limit: 1000, // Override global exportLimit for this collection
+        },
+        import: {
+          defaultVersionStatus: 'draft',
+          limit: 500, // Override global importLimit for this collection
+        },
+      },
+      {
+        slug: 'projects',
+        // export: false, // Disable export for projects
+        export: {
+          format: 'json',
+          // disableDownload: true,
+          limit: 1000, // Override global exportLimit for this collection
+        },
+        import: {
+          defaultVersionStatus: 'draft',
+          limit: 500, // Override global importLimit for this collection
+        },
+      },
+      {
+        slug: 'creators',
+        // export: false, // Disable export for creators
+        export: {
+          format: 'json',
+          // disableDownload: true,
+          limit: 1000, // Override global exportLimit for this collection
+        },
+        import: {
+          defaultVersionStatus: 'draft',
+          limit: 500, // Override global importLimit for this collection
+        },
+      },
+    ],
   }),
 ]

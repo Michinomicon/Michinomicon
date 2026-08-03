@@ -361,9 +361,7 @@ export async function getMainMenu(): Promise<MenuTree> {
     const { menuItems }: Header = await getCachedGlobal('header')()
 
     if (!menuItems || !Array.isArray(menuItems) || menuItems.length === 0) {
-      const errorMsg = `Invalid main menu config: ${JSON.stringify(menuItems)}`
-      console.error(errorMsg, JSON.stringify(menuItems))
-      throw new Error(errorMsg, { cause: JSON.stringify(menuItems) })
+      console.warn(`Empty Main Menu config!`, { config: JSON.stringify(menuItems) })
     }
 
     // console.log(`Building Menu Tree from config:`, menuItems)
