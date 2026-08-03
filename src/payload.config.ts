@@ -36,7 +36,7 @@ export default buildConfig({
     // autoLogin:
     //   process.env.NODE_ENV === 'development'
     //     ? {
-    //         email: 'test@michinomicon.com',
+    //         email: 'test@domain.com',
     //         password: 'test',
     //         prefillOnly: true,
     //       }
@@ -77,8 +77,8 @@ export default buildConfig({
     },
   },
   email: nodemailerAdapter({
-    defaultFromAddress: 'system@michinomicon.com',
-    defaultFromName: 'Michinomicon',
+    defaultFromAddress: 'system@domain.com',
+    defaultFromName: 'AppName',
     // streamTransport skips all network requests entirely
     transportOptions: {
       streamTransport: true,
@@ -108,10 +108,18 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   jobs: {
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => {
+      if (!defaultJobsCollection.admin) {
+        defaultJobsCollection.admin = {}
+      }
+
+      defaultJobsCollection.admin.hidden = false
+      return defaultJobsCollection
+    },
     autoRun: [
       {
-        allQueues: true,
-        cron: '*/5 * * * *',
+        cron: '*/5 * * * *', // Check every 5 minutes
+        queue: 'default',
       },
     ],
     access: {

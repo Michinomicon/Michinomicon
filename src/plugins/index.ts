@@ -4,7 +4,7 @@ import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import { AccessResult, Plugin } from 'payload'
+import { AccessResult, CollectionSlug, Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -144,65 +144,24 @@ export const plugins: Plugin[] = [
     overrideExportCollection: ({ collection }) => {
       collection.access = {
         ...collection.access,
-        read: ({ req }) => req.user?.role === 'admin',
+        read: hasAccess('pages', 'read'),
       }
       return collection
     },
 
     // Per-collection settings
-    collections: [
-      {
-        slug: 'pages',
-        // export: false, // Disable export for pages
-        export: {
-          format: 'json',
-          // disableDownload: true,
-          limit: 1000, // Override global exportLimit for this collection
-        },
-        import: {
-          defaultVersionStatus: 'draft',
-          limit: 500, // Override global importLimit for this collection
-        },
+    collections: ['pages', 'posts', 'projects', 'creators'].map((slug) => ({
+      slug: slug as CollectionSlug,
+      export: {
+        format: 'json',
+        // Generates e.g., "{slug}-export-2026-08-03" (without the .json extension)
+        filename: `${slug}-export-${new Date().toISOString().split('T')[0]}`,
+        limit: 1000,
       },
-      {
-        slug: 'posts',
-        // export: false, // Disable export for posts
-        export: {
-          format: 'json',
-          // disableDownload: true,
-          limit: 1000, // Override global exportLimit for this collection
-        },
-        import: {
-          defaultVersionStatus: 'draft',
-          limit: 500, // Override global importLimit for this collection
-        },
+      import: {
+        defaultVersionStatus: 'draft',
+        limit: 500,
       },
-      {
-        slug: 'projects',
-        // export: false, // Disable export for projects
-        export: {
-          format: 'json',
-          // disableDownload: true,
-          limit: 1000, // Override global exportLimit for this collection
-        },
-        import: {
-          defaultVersionStatus: 'draft',
-          limit: 500, // Override global importLimit for this collection
-        },
-      },
-      {
-        slug: 'creators',
-        // export: false, // Disable export for creators
-        export: {
-          format: 'json',
-          // disableDownload: true,
-          limit: 1000, // Override global exportLimit for this collection
-        },
-        import: {
-          defaultVersionStatus: 'draft',
-          limit: 500, // Override global importLimit for this collection
-        },
-      },
-    ],
+    })),
   }),
 ]
