@@ -6,9 +6,6 @@ import { defineConfig, devices } from '@playwright/test'
  */
 import 'dotenv/config'
 
-/** TODO:
- * Create `.env.CI` file to use during CI
- */
 process.env.APP_NAME = 'Test Application Name'
 
 /**
@@ -16,7 +13,6 @@ process.env.APP_NAME = 'Test Application Name'
  */
 export default defineConfig({
   testDir: './tests/e2e',
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
@@ -26,9 +22,7 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: 'http://localhost:3000',
-
+    baseURL: 'http://127.0.0.1:3000',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
@@ -44,7 +38,7 @@ export default defineConfig({
       : 'pnpm run build && pnpm run start:standalone',
     reuseExistingServer: !process.env.CI,
     url: 'http://127.0.0.1:3000',
-    timeout: 300 * 1000, // 5 minutes
+    timeout: 300 * 1000,
     stdout: 'pipe',
     stderr: 'pipe',
   },
