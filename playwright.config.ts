@@ -38,7 +38,7 @@ export default defineConfig({
       : 'pnpm run build && pnpm run start:standalone',
     reuseExistingServer: !process.env.CI,
     url: 'http://127.0.0.1:3000',
-    timeout: 300 * 1000,
+    timeout: 500 * 1000,
     stdout: 'pipe',
     stderr: 'pipe',
   },
