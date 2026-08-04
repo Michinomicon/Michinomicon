@@ -25,7 +25,7 @@ type GlobalSearchProps = {
 
 export const getPageCategoryString = (page: Page): string => {
   const { parentCategory } = page
-  if (typeof parentCategory === 'object' && parentCategory.breadcrumbs) {
+  if (parentCategory && typeof parentCategory === 'object' && parentCategory.breadcrumbs) {
     return parentCategory.breadcrumbs.map(({ label }) => label ?? '').join(' / ')
   }
   return 'Uncategorized'

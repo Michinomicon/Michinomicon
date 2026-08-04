@@ -24,6 +24,7 @@ export function Logo({
   return (
     <div
       className={cn(
+        'app-logo',
         '@container h-full min-h-8.5 w-auto max-w-60 min-w-10 rounded-none md:max-h-8.5 md:max-w-80',
         className,
       )}
@@ -40,7 +41,7 @@ export function Logo({
           <text
             x={showIcon ? '38' : '0'}
             y="26"
-            className={cn('text-[30px] no-underline', textClassName)}
+            className={cn('app-logo-text text-[30px] no-underline', textClassName)}
             fill="var(--color-foreground)"
           >
             {logoText}

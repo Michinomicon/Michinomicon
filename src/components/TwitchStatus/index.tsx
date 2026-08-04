@@ -41,11 +41,9 @@ function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
           >
             {isMobile && (
               <Image
-                src={TwitchGlitchIcon.src}
+                src={TwitchGlitchIcon}
                 alt="twitch logo"
-                className="rounded-none"
-                width="12"
-                height="12"
+                className="h-3 w-3 rounded-none"
                 loading="eager"
               />
             )}
@@ -83,11 +81,9 @@ function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
       >
         {isMobile && (
           <Image
-            src={TwitchGlitchIcon.src}
+            src={TwitchGlitchIcon}
             alt="twitch logo"
-            className="rounded-none"
-            width="12"
-            height="12"
+            className="h-3 w-3 rounded-none"
             loading="eager"
           />
         )}
@@ -160,11 +156,9 @@ export default function TwitchStatus() {
     <div className={outerContainerClassName}>
       <div className={innerContainerClassName}>
         <Image
-          src={TwitchGlitchIcon.src}
+          src={TwitchGlitchIcon}
           alt="twitch logo"
-          className="rounded-none max-md:hidden"
-          width="20"
-          height="20"
+          className="h-5 w-5 rounded-none"
           loading="eager"
         />
         <Link
