@@ -169,7 +169,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   title: string;
-  parentCategory: string | Category;
+  parentCategory?: (string | null) | Category;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {

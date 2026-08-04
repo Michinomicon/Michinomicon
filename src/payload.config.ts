@@ -21,6 +21,7 @@ import { Slugs } from './collections/Slugs'
 import { Rights } from './collections/Rights'
 import { Projects } from './collections/Projects'
 import { Creators } from './collections/Creators'
+import { hasAccess } from './utilities/accessFunctions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -113,7 +114,8 @@ export default buildConfig({
         defaultJobsCollection.admin = {}
       }
 
-      defaultJobsCollection.admin.hidden = false
+      defaultJobsCollection.admin.hidden =
+        !hasAccess('exports', 'read') || !hasAccess('exports', 'read')
       return defaultJobsCollection
     },
     autoRun: [

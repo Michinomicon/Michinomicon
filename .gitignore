@@ -6,6 +6,12 @@ node_modules
 /.pnp
 .pnp.js
 
+# Collection Import files
+/imports
+
+# Collection Export files
+/exports
+
 # DB Backups
 /db_backups
 

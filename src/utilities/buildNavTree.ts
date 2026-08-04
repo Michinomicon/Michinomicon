@@ -360,9 +360,9 @@ export async function getMainMenu(): Promise<MenuTree> {
   try {
     const { menuItems }: Header = await getCachedGlobal('header')()
 
-    if (!menuItems || !Array.isArray(menuItems) || menuItems.length === 0) {
-      console.warn(`Empty Main Menu config!`, { config: JSON.stringify(menuItems) })
-    }
+    // if (!menuItems || !Array.isArray(menuItems) || menuItems.length === 0) {
+    //   console.warn(`Empty Main Menu config!`, { config: JSON.stringify(menuItems) })
+    // }
 
     // console.log(`Building Menu Tree from config:`, menuItems)
 
