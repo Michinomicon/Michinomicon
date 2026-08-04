@@ -65,7 +65,6 @@ export const Pages: CollectionConfig<'pages'> = {
       name: 'parentCategory',
       type: 'relationship',
       relationTo: 'categories',
-      required: true,
       admin: {
         position: 'sidebar',
       },

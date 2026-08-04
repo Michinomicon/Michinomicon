@@ -135,17 +135,41 @@ export const plugins: Plugin[] = [
   }),
   importExportPlugin({
     debug: true,
-    // Global limits (0 = unlimited, which is the default)
+    // Global limits (0 = unlimited = default)
     exportLimit: 10000,
     importLimit: 5000,
-
-    // Override default export collection (e.g., add access control)
-    // This will be used by all collections unless they further override the config
     overrideExportCollection: ({ collection }) => {
       collection.access = {
         ...collection.access,
-        read: hasAccess('pages', 'read'),
+        read: hasAccess('exports', 'read'),
+        create: hasAccess('exports', 'create'),
+        update: hasAccess('exports', 'upd'),
+        delete: hasAccess('exports', 'del'),
       }
+      collection.admin = {
+        ...collection.admin,
+        group: 'System',
+        hidden: !hasAccess('exports', 'read'), // Hide from sidebar if not admin
+      }
+      return collection
+    },
+    // Configure the Imports collection
+    overrideImportCollection: ({ collection }) => {
+      collection.access = {
+        ...collection.access,
+        read: hasAccess('imports', 'read'),
+        create: hasAccess('imports', 'create'),
+        update: hasAccess('imports', 'upd'),
+        delete: hasAccess('imports', 'del'),
+      }
+
+      // Inject Admin UI settings
+      collection.admin = {
+        ...collection.admin,
+        group: 'System',
+        hidden: !hasAccess('imports', 'read'), // Hide from sidebar if not admin
+      }
+
       return collection
     },
 
@@ -154,8 +178,6 @@ export const plugins: Plugin[] = [
       slug: slug as CollectionSlug,
       export: {
         format: 'json',
-        // Generates e.g., "{slug}-export-2026-08-03" (without the .json extension)
-        filename: `${slug}-export-${new Date().toISOString().split('T')[0]}`,
         limit: 1000,
       },
       import: {
