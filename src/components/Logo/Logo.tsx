@@ -32,7 +32,7 @@ export function Logo({
     >
       {showText && (
         <svg
-          viewBox="0 0 240 34"
+          viewBox="0 0 250 34"
           preserveAspectRatio="xMinYMid meet"
           xmlns="http://www.w3.org/2000/svg"
           className="h-full w-full"
@@ -41,7 +41,7 @@ export function Logo({
           <text
             x={showIcon ? '38' : '0'}
             y="26"
-            className={cn('app-logo-text text-[30px] no-underline', textClassName)}
+            className={cn('app-logo-text text-[30px] capitalize no-underline', textClassName)}
             fill="var(--color-foreground)"
           >
             {logoText}
