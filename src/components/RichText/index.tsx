@@ -8,7 +8,6 @@ import {
 } from '@payloadcms/richtext-lexical'
 import {
   JSXConvertersFunction,
-  LinkJSXConverter,
   RichText as ConvertRichText,
 } from '@payloadcms/richtext-lexical/react'
 
@@ -22,7 +21,9 @@ import type {
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
-import { parseCMSLinkReferenceHref } from '../Link'
+import { parseCMSLinkReferenceHref } from '@/components/Link'
+import HoverCardLink from '@/components/HoverCardLink'
+import Link from 'next/link'
 
 type NodeTypes =
   | DefaultNodeTypes
@@ -35,7 +36,40 @@ const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }): stri
 
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
   ...defaultConverters,
-  ...LinkJSXConverter({ internalDocToHref }),
+  link: ({ node, nodesToJSX }) => {
+    const children = nodesToJSX({ nodes: node.children })
+    const fields = node.fields
+
+    if (fields.linkType === 'internal' && fields.enableHoverCard && fields.doc) {
+      const pageData = fields.doc
+      const url = internalDocToHref({ linkNode: node })
+      return (
+        <HoverCardLink url={url} reference={pageData} key={node.format}>
+          {children}
+        </HoverCardLink>
+      )
+    }
+    // Fallback: Standard Link Rendering
+    let href = fields.url || '#'
+    if (
+      fields.linkType === 'internal' &&
+      typeof fields.doc?.value === 'object' &&
+      fields.doc?.value?.slug
+    ) {
+      href = internalDocToHref({ linkNode: node })
+    }
+    const newTabProps = fields.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+    return (
+      <Link
+        href={href}
+        key={node.format}
+        {...newTabProps}
+        className="non-hover text-primary underline"
+      >
+        {children}
+      </Link>
+    )
+  },
   upload: ({ node }: { node: SerializedUploadNode }) => (
     <MediaBlock
       className={'rich-text-upload'}

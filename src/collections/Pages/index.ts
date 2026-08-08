@@ -36,6 +36,15 @@ export const Pages: CollectionConfig<'pages'> = {
   defaultPopulate: {
     title: true,
     slug: true,
+    meta: {
+      title: true,
+      image: true,
+      description: true,
+    },
+    hero: {
+      richText: true,
+      media: true,
+    },
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],

@@ -60,11 +60,20 @@ export function parseCMSLinkReferenceHref(
   if (reference) {
     const { value, relationTo } = reference as CMSLinkPropsReference
     if (typeof value === 'object' && value.slug) {
-      const href = `${relationTo !== 'pages' ? `/${relationTo}` : ''}/${value.slug}`
-      return href
+      switch (relationTo) {
+        case 'posts':
+          return `/posts/${value.slug}`
+        case 'creators':
+          return `/creators/${value.slug}`
+        case 'projects':
+          return `/projects/${value.slug}`
+        case 'pages':
+        default:
+          return `/${value.slug}`
+      }
     }
   }
-  return ''
+  return null
 }
 
 export function getHref({ type = 'reference', reference, url }: CMSLinkProps) {
