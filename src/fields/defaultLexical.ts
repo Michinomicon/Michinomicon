@@ -65,6 +65,33 @@ export const defaultLexical = lexicalEditor({
               return value ? true : 'URL is required'
             }) as TextFieldSingleValidation,
           },
+          {
+            name: 'enableHoverCard',
+            type: 'checkbox',
+            label: 'Enable Hover Card Preview?',
+            defaultValue: false,
+            admin: {
+              condition: (_data, siblingData) => siblingData?.linkType === 'internal',
+            },
+          },
+          {
+            name: 'showCoverImage',
+            type: 'checkbox',
+            label: 'Show preview image on preview card?',
+            defaultValue: true,
+            admin: {
+              condition: (_data, siblingData) => siblingData?.enableHoverCard === true,
+            },
+          },
+          {
+            name: 'showDescription',
+            type: 'checkbox',
+            label: 'Show description on preview card?',
+            defaultValue: true,
+            admin: {
+              condition: (_data, siblingData) => siblingData?.enableHoverCard === true,
+            },
+          },
         ]
       },
     }),
