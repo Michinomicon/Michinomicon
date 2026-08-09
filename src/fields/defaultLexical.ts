@@ -74,6 +74,24 @@ export const defaultLexical = lexicalEditor({
               condition: (_data, siblingData) => siblingData?.linkType === 'internal',
             },
           },
+          {
+            name: 'showCoverImage',
+            type: 'checkbox',
+            label: 'Show preview image on preview card?',
+            defaultValue: true,
+            admin: {
+              condition: (_data, siblingData) => siblingData?.enableHoverCard === true,
+            },
+          },
+          {
+            name: 'showDescription',
+            type: 'checkbox',
+            label: 'Show description on preview card?',
+            defaultValue: true,
+            admin: {
+              condition: (_data, siblingData) => siblingData?.enableHoverCard === true,
+            },
+          },
         ]
       },
     }),

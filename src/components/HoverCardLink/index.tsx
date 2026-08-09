@@ -12,6 +12,7 @@ import RichText from '@/components/RichText'
 import Link from 'next/link'
 import { AspectRatio } from '../ui/aspect-ratio'
 import { cn } from '@/utilities/ui'
+import React from 'react'
 
 type ValidCollections = Pick<Collections, 'pages' | 'creators' | 'posts' | 'projects'>
 export type HoverCardLinkReference<R extends keyof ValidCollections, V = ValidCollections[R]> = {
@@ -109,9 +110,17 @@ interface HoverCardLinkProps {
   url: string
   reference?: HoverCardLinkPropsReference | null
   children: React.ReactNode
+  showCoverImage?: boolean
+  showDescription?: boolean
 }
 
-export default function HoverCardLink({ url, reference, children }: HoverCardLinkProps) {
+export default function HoverCardLink({
+  url,
+  reference,
+  children,
+  showCoverImage = true,
+  showDescription = true,
+}: HoverCardLinkProps) {
   const { title, description, coverImage } = parseHoverCardLinkReference(reference)
 
   return (
@@ -124,10 +133,10 @@ export default function HoverCardLink({ url, reference, children }: HoverCardLin
 
       <HoverCardContent
         side="top"
-        className="not-prose grid h-auto w-auto grid-cols-3 flex-nowrap overflow-clip border border-border p-0"
+        className="not-prose grid h-auto w-auto max-w-150 grid-cols-[auto_repeat(2,minmax(0,1fr))] flex-nowrap overflow-clip border border-border p-0"
       >
-        <div className="pointer-events-none w-full rounded-tl-lg rounded-tr-none rounded-br-none rounded-bl-lg border-r border-border">
-          {isMedia(coverImage) && (
+        <div className="pointer-events-none h-30 w-30 rounded-tl-lg rounded-tr-none rounded-br-none rounded-bl-lg border-r border-border">
+          {showCoverImage && isMedia(coverImage) && (
             <AspectRatio
               ratio={1 / 1}
               className={cn(
@@ -138,16 +147,29 @@ export default function HoverCardLink({ url, reference, children }: HoverCardLin
             </AspectRatio>
           )}
         </div>
-        <div className="col-span-2 flex w-full flex-col p-2">
+        <div
+          className={cn(
+            'flex max-h-30 w-full flex-col p-2',
+            showCoverImage ? 'col-span-2' : 'col-span-3',
+          )}
+        >
           {title && <span className="text-sm font-semibold">{title}</span>}
-          {description && typeof description === 'object' ? (
-            <RichText
-              className={'h-full w-full overflow-scroll rounded-none text-sm text-muted-foreground'}
-              data={description}
-              enableGutter={false}
-            />
-          ) : (
-            <div className="prose line-clamp-2 text-sm text-muted-foreground">{description}</div>
+          {showDescription && (
+            <div className={'overflow-hidden'}>
+              {description && typeof description === 'object' ? (
+                <RichText
+                  className={
+                    'h-full w-full overflow-clip rounded-none text-sm text-ellipsis text-muted-foreground'
+                  }
+                  data={description}
+                  enableGutter={false}
+                />
+              ) : (
+                <div className="prose line-clamp-2 text-sm text-muted-foreground">
+                  {description}
+                </div>
+              )}
+            </div>
           )}
         </div>
       </HoverCardContent>

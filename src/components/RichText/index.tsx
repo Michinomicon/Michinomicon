@@ -41,10 +41,18 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
     const fields = node.fields
 
     if (fields.linkType === 'internal' && fields.enableHoverCard && fields.doc) {
+      const showCoverImage = fields.showCoverImage === true
+      const showDescription = fields.showDescription === true
       const pageData = fields.doc
       const url = internalDocToHref({ linkNode: node })
       return (
-        <HoverCardLink url={url} reference={pageData} key={node.format}>
+        <HoverCardLink
+          url={url}
+          reference={pageData}
+          key={node.format}
+          showDescription={showDescription}
+          showCoverImage={showCoverImage}
+        >
           {children}
         </HoverCardLink>
       )
