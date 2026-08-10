@@ -4,9 +4,9 @@ import RichText from '@/components/RichText'
 
 import type { Post } from '@/payload-types'
 
-import { CollectionItem } from '../../components/CollectionItem'
+import { CollectionItemCard } from '../../components/CollectionItemCard'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
-import { postToCollectionItemProperties } from '@/utilities/getCollectionArchiveCardProperties'
+import { postToCollectionItemProperties } from '@/utilities/getItemGroupCardProperties'
 
 export type RelatedPostsProps = {
   className?: string
@@ -24,7 +24,7 @@ export const RelatedPosts: React.FC<RelatedPostsProps> = async (props) => {
       <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-8">
         {items &&
           items.map((item, index) => {
-            return <CollectionItem key={index} item={item} showTags />
+            return <CollectionItemCard key={index} item={item} showTags />
           })}
       </div>
     </div>
