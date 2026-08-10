@@ -1,11 +1,11 @@
-import type { ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
+import type { ItemGroup as ItemGroupProps } from '@/payload-types'
 
 import React from 'react'
 import RichText from '../../components/RichText'
 import { CollectionItemGroup, CollectionItemGroupProps } from '../../components/CollectionItemGroup'
 
-export const ArchiveBlock: React.FC<
-  ArchiveBlockProps & {
+export const ItemGroupBlock: React.FC<
+  ItemGroupProps & {
     id?: string
   }
 > = async (props) => {
@@ -17,6 +17,7 @@ export const ArchiveBlock: React.FC<
     relationTo,
     populateBy,
     selectedDocs,
+    layout,
     cardHeight,
     cardWidth,
     cardLayout,
@@ -24,10 +25,11 @@ export const ArchiveBlock: React.FC<
     showImages,
   } = props
 
-  let archiveProps: CollectionItemGroupProps | null = null
+  let collectionItemGroupProps: CollectionItemGroupProps | null = null
   if (populateBy) {
     if (populateBy === 'collection' && relationTo) {
-      archiveProps = {
+      collectionItemGroupProps = {
+        layout: layout,
         populateBy: populateBy,
         collection: relationTo,
         categories: categories,
@@ -41,7 +43,8 @@ export const ArchiveBlock: React.FC<
         },
       }
     } else if (populateBy === 'selection') {
-      archiveProps = {
+      collectionItemGroupProps = {
+        layout: layout,
         populateBy: populateBy,
         items: selectedDocs,
         cardStyle: {
@@ -56,13 +59,13 @@ export const ArchiveBlock: React.FC<
   }
 
   return (
-    <div className="archive-block my-16" id={`block-${id}`}>
+    <div className="item-group-block my-16" id={`block-${id}`}>
       {introContent && (
         <div className="container mb-16">
           <RichText className="ms-0 max-w-3xl" data={introContent} enableGutter={false} />
         </div>
       )}
-      {archiveProps && <CollectionItemGroup {...archiveProps} />}
+      {collectionItemGroupProps && <CollectionItemGroup {...collectionItemGroupProps} />}
     </div>
   )
 }

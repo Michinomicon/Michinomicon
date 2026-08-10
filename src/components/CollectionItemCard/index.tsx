@@ -12,7 +12,7 @@ import { AspectRatio } from '../ui/aspect-ratio'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import RichText from '../RichText'
 
-type SupportedConfigs = Pick<TypedCollection, 'creators' | 'posts' | 'projects'>
+type SupportedConfigs = Pick<TypedCollection, 'creators' | 'pages' | 'posts' | 'projects'>
 
 type BaseItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfigs> = {
   collection: T
@@ -25,7 +25,7 @@ type BaseItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfig
 }
 export type CollectionItemProperties<T extends keyof SupportedConfigs> = BaseItemProperties<T>
 
-export type CollectionItemProps<T extends keyof SupportedConfigs> = Omit<
+export type CollectionItemCardProps<T extends keyof SupportedConfigs> = Omit<
   React.ComponentPropsWithRef<typeof Item>,
   'size'
 > & {
@@ -39,7 +39,7 @@ export type CollectionItemProps<T extends keyof SupportedConfigs> = Omit<
   item: CollectionItemProperties<T>
 }
 
-export function CollectionItem<T extends keyof SupportedConfigs>({
+export function CollectionItemCard<T extends keyof SupportedConfigs>({
   className,
   showTags = false,
   showDescription = true,
@@ -48,7 +48,7 @@ export function CollectionItem<T extends keyof SupportedConfigs>({
   title: titleFromProps,
   item: itemFromProps,
   ...props
-}: CollectionItemProps<T>): React.ReactNode {
+}: CollectionItemCardProps<T>): React.ReactNode {
   const { card, link } = useClickableCard<HTMLDivElement>({})
   const linkCurrentRef = useRef(link.ref.current)
   const cardCurrentRef = useRef<HTMLDivElement>(card.ref.current)

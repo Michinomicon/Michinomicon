@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { Archive } from '../../blocks/ArchiveBlock/config'
+import { ItemGroup } from '../../blocks/ItemGroup/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
@@ -95,7 +95,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 Content,
                 MediaBlock,
                 MediaGalleryBlock,
-                Archive,
+                ItemGroup,
                 FormBlock,
                 PostContent,
               ],

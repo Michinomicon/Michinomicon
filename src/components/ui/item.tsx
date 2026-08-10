@@ -5,12 +5,20 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 
-function ItemGroup({ className, ...props }: React.ComponentProps<'div'>) {
+function ItemGroup({
+  direction = 'column',
+  className,
+  ...props
+}: React.ComponentProps<'div'> & { direction?: 'row' | 'column' }) {
   return (
     <div
       role="list"
       data-slot="item-group"
-      className={cn('group/item-group flex flex-col', className)}
+      className={cn(
+        'group/item-group flex',
+        direction === 'column' ? 'flex-col' : 'flex-row flex-wrap',
+        className,
+      )}
       {...props}
     />
   )
