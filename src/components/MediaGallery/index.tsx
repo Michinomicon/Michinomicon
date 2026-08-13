@@ -166,6 +166,14 @@ export const MediaGallery = ({
   const handleContainerResize = (_detail: ContainerResizeDetail) => {
     // console.debug(`LightGallery container resized: `, detail)
   }
+  const handleAfterOpen = () => {
+    const lgContainer = document.querySelector('.lg-outer')
+
+    if (lgContainer) {
+      // Prevent the right-click menu anywhere inside the zoomed gallery
+      lgContainer.addEventListener('contextmenu', (e) => e.preventDefault())
+    }
+  }
 
   const getIsMobile = () => {
     return isMobile
@@ -194,6 +202,8 @@ export const MediaGallery = ({
         onInit={onInit}
         isMobile={getIsMobile}
         {...instanceSettings}
+        download={false}
+        onAfterOpen={handleAfterOpen}
       >
         {galleryItems.map((item, index) => {
           if (item.type === 'youtube') {

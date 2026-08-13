@@ -10,7 +10,6 @@ import {
 } from '@/payload-types'
 import { getCollectionItemProperties } from '@/utilities/getItemGroupCardProperties'
 import { CollectionItemClientGroup } from './CollectionItemClientGroup'
-import { GridCardStyleName } from './GridLayoutToolbar'
 
 export type CollectionItemCardDimension = 'sm' | 'md' | 'lg'
 export type CollectionItemCardLayout = 'vertical' | 'horizontal'
@@ -75,7 +74,7 @@ export type CollectionItemGroupProperties<T extends keyof CollectionTypes> =
 
 export type CollectionItemGroupProps = CollectionItemGroupProperties<keyof CollectionTypes> & {
   className?: string
-  cardStyle?: CollectionItemCardStyle | GridCardStyleName
+  cardStyle?: CollectionItemCardStyle
   layout?: 'carousel' | 'grid'
 }
 

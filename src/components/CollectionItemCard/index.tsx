@@ -6,11 +6,11 @@ import React, { useRef } from 'react'
 import type { Media } from '@/payload-types'
 import { TypedCollection } from 'payload'
 import { Badge, BadgeStatus } from '../ui/badge'
-import { MediaGallery } from '../MediaGallery'
 import { Item, ItemFooter } from '../ui/item'
 import { AspectRatio } from '../ui/aspect-ratio'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import RichText from '../RichText'
+import { ImageMedia } from '../Media/ImageMedia'
 
 type SupportedConfigs = Pick<TypedCollection, 'creators' | 'pages' | 'posts' | 'projects'>
 
@@ -77,15 +77,7 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
               >
                 <div className={cn('item-image-wrapper')}>
                   <AspectRatio ratio={1 / 1} className={cn('w-full')}>
-                    {images && (
-                      <MediaGallery
-                        layout={'card'}
-                        containerClassNames={'h-full'}
-                        galleryClassNames={'h-full'}
-                        thumbnailTooltip={false}
-                        items={images}
-                      />
-                    )}
+                    {images && images.length > 0 && <ImageMedia src={images[0]}></ImageMedia>}
                   </AspectRatio>
                 </div>
               </div>
@@ -122,14 +114,29 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
       case 'horizontal':
         return (
           <div className={cn('item-content flex w-full flex-nowrap overflow-hidden')}>
+            {showImages && (
+              <div
+                className={cn(
+                  'item-image-container shrink-0 grow-0 bg-black',
+                  'flex flex-col flex-nowrap items-center justify-center overflow-hidden',
+                  'rounded-tr-none rounded-br-none border-r border-r-border',
+                )}
+              >
+                <div className={cn('item-image-wrapper')}>
+                  <AspectRatio ratio={1 / 1} className={cn('w-full')}>
+                    {images && images.length > 0 && <ImageMedia src={images[0]}></ImageMedia>}
+                  </AspectRatio>
+                </div>
+              </div>
+            )}
             <div
               className={cn(
-                'item-text-container flex grow flex-col flex-nowrap items-start justify-start overflow-hidden',
+                'item-text-container flex grow flex-col flex-nowrap items-start justify-center overflow-hidden',
               )}
             >
               <div className={'w-full grow-0 p-2'}>
                 <Link className="" href={href} ref={linkCurrentRef}>
-                  <span className={'text-2xl'}>{title}</span>
+                  <span className={'text-2xl hover:underline'}>{title}</span>
                 </Link>
               </div>
               {showDescription && (
@@ -150,30 +157,6 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
                 </div>
               )}
             </div>
-
-            {showImages && (
-              <div
-                className={cn(
-                  'item-image-container shrink-0 grow-0 bg-black',
-                  'flex flex-col flex-nowrap items-center justify-center overflow-hidden',
-                  'rounded-tl-none rounded-bl-none border-l border-l-border',
-                )}
-              >
-                <div className={cn('item-image-wrapper')}>
-                  <AspectRatio ratio={1 / 1} className={cn('w-full')}>
-                    {images && (
-                      <MediaGallery
-                        layout={'card'}
-                        containerClassNames={'h-full'}
-                        galleryClassNames={'h-full'}
-                        thumbnailTooltip={false}
-                        items={images}
-                      />
-                    )}
-                  </AspectRatio>
-                </div>
-              </div>
-            )}
           </div>
         )
     }

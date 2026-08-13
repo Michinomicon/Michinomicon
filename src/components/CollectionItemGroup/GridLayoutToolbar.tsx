@@ -12,7 +12,7 @@ const GridLayoutProps: CollectionItemCardStyle = {
   showDescription: true,
   showImages: true,
   width: 'sm',
-  height: 'md',
+  height: 'sm',
   layout: 'vertical',
 }
 

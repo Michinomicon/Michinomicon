@@ -24,7 +24,7 @@ export interface CollectionItemClientGroupProps {
   items: CollectionItemProperties<keyof CollectionTypes>[]
   className?: string
   layout: 'carousel' | 'grid'
-  cardStyle?: CollectionItemCardStyle | GridCardStyleName
+  cardStyle?: CollectionItemCardStyle
 }
 
 const _defaultCardStyle: CollectionItemCardStyle = {
@@ -40,7 +40,7 @@ export function CollectionItemClientGroup({
   items,
   className,
   layout,
-  cardStyle: cardStyleFromProps = 'list',
+  cardStyle: cardStyleFromProps,
 }: CollectionItemClientGroupProps) {
   const isMobile = useIsMobile()
   const carouselScrollDirection: 'vertical' | 'horizontal' = 'horizontal'
@@ -67,31 +67,32 @@ export function CollectionItemClientGroup({
     // startIndex: 0,
     // breakpoints: {},
   }
+  let defaultGirdLayout: GridCardStyleName = 'list'
+
   if (isMobile) {
     layout = 'grid'
-    cardStyleFromProps = 'list'
+    defaultGirdLayout = 'compact-list'
+    cardStyleFromProps = getGridCardStyle('compact-list')
+  } else if (layout === 'grid' && !cardStyleFromProps) {
+    cardStyleFromProps = getGridCardStyle(defaultGirdLayout)
   }
 
   const intialCardStyle: CollectionItemCardStyle =
-    cardStyleFromProps && typeof cardStyleFromProps === 'object'
-      ? cardStyleFromProps
-      : getGridCardStyle(cardStyleFromProps ? cardStyleFromProps : 'list')
+    cardStyleFromProps || getGridCardStyle(defaultGirdLayout)
+
   const [cardStyle, setCardStyle] = useState<CollectionItemCardStyle>(intialCardStyle)
 
   if (layout === 'grid') {
-    const cardGridStyle =
-      cardStyleFromProps && typeof cardStyleFromProps !== 'object' ? cardStyleFromProps : 'list'
-    const showGridLayoutToolbar: boolean =
-      cardStyleFromProps && typeof cardStyleFromProps !== 'object'
-
+    console.debug(`isMobile: `, isMobile)
+    console.debug(`defaultGirdLayout: `, defaultGirdLayout)
     console.debug(`cardStyleFromProps: `, cardStyleFromProps)
     console.debug(`cardStyle: `, cardStyle)
 
     return (
       <React.Fragment>
         <div className="relative mx-auto mb-2 flex w-full flex-col items-center justify-center">
-          {!isMobile && showGridLayoutToolbar && (
-            <GridLayoutToolbar value={cardGridStyle} onValueChange={setCardStyle} />
+          {!isMobile && (
+            <GridLayoutToolbar value={defaultGirdLayout} onValueChange={setCardStyle} />
           )}
           <ItemGroup
             direction={'row'}
