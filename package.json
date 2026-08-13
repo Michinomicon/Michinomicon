@@ -8,7 +8,7 @@
     "build": "pnpm lint && cross-env NODE_OPTIONS=--no-deprecation next build",
     "build:clean": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm lint && next build",
     "postbuild": "next-sitemap --config next-sitemap.config.cjs",
-    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
+    "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev -H 0.0.0.0",
     "dev:clean": "cross-env NODE_OPTIONS=\"--no-deprecation --inspect\" rm -rf .next && next build && pnpm dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",

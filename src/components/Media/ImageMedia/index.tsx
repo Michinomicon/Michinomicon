@@ -14,6 +14,8 @@ import { Badge } from '@/components/ui/badge'
 import React from 'react'
 
 import { DEFAULT_IMAGE_SIZES } from '@/defaultImageSizes'
+import { MediaTooltip } from '@/components/MediaTooltip'
+import { getMediaInfo } from '@/utilities/mediaInfo'
 
 export const blurPlaceholder =
   'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiCiAgICAgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiCiAgICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJibGFjayIgb3BhY2l0eT0iMC41IiAvPgo8L3N2Zz4='
@@ -27,7 +29,8 @@ function getMediaResourceUrl(resource: Media): string {
       try {
         const urlObj = new URL(src)
         // If the URL matches localhost, strip it down to just the relative path
-        if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+        const localHosts = ['localhost', '127.0.0.1', process.env.LOCAL_DEV_IP ?? '']
+        if (localHosts.includes(urlObj.hostname)) {
           src = urlObj.pathname + urlObj.search
         }
       } catch (_err) {
@@ -134,7 +137,9 @@ type PayloadMediaSourceProps = ImageMediaComponentProps &
 export type ImageMediaProps = NextImageSourceProps | PayloadMediaSourceProps
 
 export const ImageMedia = (props: ImageMediaProps) => {
+  const isPayloadMedia = isPayloadMediaProps(props)
   const mediaProps = getMediaProperties(props)
+
   const [tooltipOpen, setTooltipOpen] = React.useState<boolean>(false)
 
   const {
@@ -154,29 +159,35 @@ export const ImageMedia = (props: ImageMediaProps) => {
   const onTooltipOpenChange = (isOpen: boolean) => {
     setTooltipOpen(isOpen)
   }
+
+  const imageSrc = isPayloadMedia ? getMediaResourceUrl(props.src) : src
+
   return (
     <div id={`${id}-wrapper`} className={cn('relative h-auto w-full', className)}>
-      {captionPosition === 'tooltip' && (
-        <Tooltip onOpenChange={onTooltipOpenChange} delayDuration={900}>
-          <TooltipTrigger asChild className="group">
-            <Badge
-              variant={tooltipOpen === true ? 'default' : 'outline'}
-              className="absolute top-1 right-1"
-            >
-              <Info data-icon="inline-start" />
-              Info
-            </Badge>
-          </TooltipTrigger>
-          <TooltipContent>
-            <ImageCaption className={captionClassName} caption={caption}></ImageCaption>
-          </TooltipContent>
-        </Tooltip>
-      )}
+      {captionPosition === 'tooltip' &&
+        (isPayloadMedia ? (
+          <MediaTooltip info={getMediaInfo(props.src)} />
+        ) : (
+          <Tooltip onOpenChange={onTooltipOpenChange} delayDuration={900}>
+            <TooltipTrigger asChild className="group">
+              <Badge
+                variant={tooltipOpen === true ? 'default' : 'outline'}
+                className="absolute top-1 right-1"
+              >
+                <Info data-icon="inline-start" />
+                Info
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <ImageCaption className={captionClassName} caption={caption}></ImageCaption>
+            </TooltipContent>
+          </Tooltip>
+        ))}
       <NextImage
         id={id}
-        className={cn(imgClassName)}
+        className={cn('rounded-none', imgClassName)}
         alt={alt}
-        src={src}
+        src={imageSrc}
         sizes={DEFAULT_IMAGE_SIZES}
         placeholder="blur"
         width={width}
@@ -185,6 +196,8 @@ export const ImageMedia = (props: ImageMediaProps) => {
         quality={100}
         loading={'lazy'}
         style={{ objectFit: 'contain' }}
+        onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
       />
       {captionPosition === 'below' && (
         <ImageCaption className={captionClassName} caption={caption}></ImageCaption>

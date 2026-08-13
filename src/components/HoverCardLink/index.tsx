@@ -7,12 +7,12 @@ import { getPostCoverMedia, getPostDescription } from '@/utilities/postsUtils'
 import { getProjectCoverMedia, getProjectDescription } from '@/utilities/projectUtils'
 import { getCreatorCoverMedia, getCreatorDescription } from '@/utilities/creatorUtils'
 import { isMedia } from '@/utilities/isMedia'
-import { MediaGallery } from '@/components/MediaGallery'
 import RichText from '@/components/RichText'
 import Link from 'next/link'
 import { AspectRatio } from '../ui/aspect-ratio'
 import { cn } from '@/utilities/ui'
 import React from 'react'
+import { ImageMedia } from '../Media/ImageMedia'
 
 type ValidCollections = Pick<Collections, 'pages' | 'creators' | 'posts' | 'projects'>
 export type HoverCardLinkReference<R extends keyof ValidCollections, V = ValidCollections[R]> = {
@@ -133,7 +133,7 @@ export default function HoverCardLink({
 
       <HoverCardContent
         side="top"
-        className="not-prose grid h-auto w-auto max-w-150 grid-cols-[auto_repeat(2,minmax(0,1fr))] flex-nowrap overflow-clip border border-border p-0"
+        className="not-prose pointer-events-none grid h-auto w-auto max-w-150 grid-cols-[auto_repeat(2,minmax(0,1fr))] flex-nowrap overflow-clip border border-border p-0 select-none"
       >
         <div className="pointer-events-none h-30 w-30 rounded-tl-lg rounded-tr-none rounded-br-none rounded-bl-lg border-r border-border">
           {showCoverImage && isMedia(coverImage) && (
@@ -143,7 +143,7 @@ export default function HoverCardLink({
                 'h-full w-full overflow-clip rounded-tl-lg rounded-tr-none rounded-br-none rounded-bl-lg',
               )}
             >
-              <MediaGallery items={[coverImage]} layout={'mediaBlock'} />
+              <ImageMedia src={coverImage}></ImageMedia>
             </AspectRatio>
           )}
         </div>

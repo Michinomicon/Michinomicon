@@ -6,9 +6,12 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL
   ? `${process.env.NEXT_PUBLIC_SERVER_URL}`
   : undefined || process.env.__NEXT_PRIVATE_ORIGIN || 'http://127.0.0.1:3000'
 
+const LOCAL_DEV_IP = process.env.LOCAL_DEV_IP
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    qualities: [75, 100],
     deviceSizes: [480, 640, 768, 1024, 1280, 1536, 1920, 3840],
     imageSizes: [64, 96, 128, 256, 400, 500],
     remotePatterns: [
@@ -63,7 +66,7 @@ const nextConfig = {
   },
   serverExternalPackages: ['pdf-img-convert', 'pdfjs-dist', 'canvas'],
   transpilePackages: ['react-pdf', 'flipbook-js'],
-  allowedDevOrigins: ['192.168.50.207'],
+  allowedDevOrigins: LOCAL_DEV_IP ? [LOCAL_DEV_IP] : undefined,
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

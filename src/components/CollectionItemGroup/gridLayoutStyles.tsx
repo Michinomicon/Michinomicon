@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority'
 export const GridItemVariant = cva('', {
   variants: {
     layout: {
-      vertical: '',
+      vertical: '[&_.item-image-wrapper]:w-[calc(100%-0px))]',
       horizontal: '',
     },
     height: {
@@ -19,45 +19,39 @@ export const GridItemVariant = cva('', {
     },
   },
   compoundVariants: [
+    // VERTICAL LAYOUT STYLES
     {
       layout: 'vertical',
       height: 'sm',
-      className: cn(
-        '[&_.item-image-wrapper]:h-50 [&_.item-image-wrapper]:w-50',
-        '[&_.item-text-container]:h-50',
-      ),
+      className: cn('[&_.item-image-container]:overflow-hidden', '[&_.item-text-container]:h-50'),
     },
     {
       layout: 'vertical',
       height: 'md',
-      className: cn(
-        '[&_.item-image-wrapper]:h-60 [&_.item-image-wrapper]:w-60',
-        '[&_.item-text-container]:h-80',
-      ),
+      className: cn('[&_.item-image-container]:overflow-hidden', '[&_.item-text-container]:h-80'),
     },
     {
       layout: 'vertical',
       height: 'lg',
-      className: cn(
-        '[&_.item-image-wrapper]:h-80 [&_.item-image-wrapper]:w-80',
-        '[&_.item-text-container]:h-100',
-      ),
+      className: cn('[&_.item-image-container]:overflow-hidden', '[&_.item-text-container]:h-100'),
     },
     {
       layout: 'vertical',
       width: 'sm',
-      className: '[&_.collection-grid-item]:w-[calc(25%-(--spacing(2)))]',
+      className: cn('[&_.collection-grid-item]:w-[calc(25%-(--spacing(2)))]'),
     },
     {
       layout: 'vertical',
       width: 'md',
-      className: '[&_.collection-grid-item]:w-[calc(33%-(--spacing(2)))]',
+      className: cn('[&_.collection-grid-item]:w-[calc(33%-(--spacing(2)))]'),
     },
     {
       layout: 'vertical',
       width: 'lg',
-      className: '[&_.collection-grid-item]:w-[calc(50%-(--spacing(2)))]',
+      className: cn('[&_.collection-grid-item]:w-[calc(50%-(--spacing(2)))]'),
     },
+
+    // HORIZONTAL LAYOUT STYLES
     {
       layout: 'horizontal',
       width: 'sm',
@@ -77,15 +71,15 @@ export const GridItemVariant = cva('', {
       layout: 'horizontal',
       height: 'sm',
       className: cn(
-        '[&_.item-text-container]:h-50',
-        '[&_.item-image-container]:w-50 [&_.item-image-wrapper]:w-50 [&_.item-image-wrapper]:h-50',
+        '[&_.item-text-container]:h-30',
+        '[&_.item-image-container]:w-30 [&_.item-image-container]:justify-center [&_.item-image-wrapper]:w-30 [&_.item-image-wrapper]:h-30',
       ),
     },
     {
       layout: 'horizontal',
       height: 'md',
       className: cn(
-        '[&_.item-text-container]:h-80',
+        '[&_.item-text-container]:h-60',
         '[&_.item-image-container]:w-60 [&_.item-image-wrapper]:w-60 [&_.item-image-wrapper]:h-60',
       ),
     },
@@ -94,7 +88,7 @@ export const GridItemVariant = cva('', {
       height: 'lg',
       className: cn(
         '[&_.item-text-container]:h-100',
-        '[&_.item-image-container]:w-80 [&_.item-image-wrapper]:w-80 [&_.item-image-wrapper]:h-80',
+        '[&_.item-image-container]:w-100 [&_.item-image-wrapper]:w-100 [&_.item-image-wrapper]:h-100',
       ),
     },
   ],

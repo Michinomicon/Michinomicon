@@ -14,8 +14,8 @@ function getSafeImageSource(media?: Media | string | null | undefined): string |
     if (typeof src === 'string' && src.startsWith('http')) {
       try {
         const urlObj = new URL(src)
-        // If the URL matches localhost, strip it down to just the relative path
-        if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+        const localHosts = ['localhost', '127.0.0.1', process.env.LOCAL_DEV_IP ?? '']
+        if (localHosts.includes(urlObj.hostname)) {
           src = urlObj.pathname + urlObj.search
         }
       } catch (_err) {
