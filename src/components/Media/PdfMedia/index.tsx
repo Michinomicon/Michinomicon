@@ -1072,6 +1072,8 @@ export const PdfMedia: React.FC<PdfMediaProps> = (props) => {
                 fill
                 sizes="128px"
                 className="mt-0 mb-0 aspect-square w-full rounded-none object-cover"
+                onContextMenu={(e) => e.preventDefault()}
+                onDragStart={(e) => e.preventDefault()}
               />
             ) : (
               <FileTextIcon />

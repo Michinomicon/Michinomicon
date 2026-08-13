@@ -185,6 +185,8 @@ export const ImageMedia = (props: ImageMediaProps) => {
         quality={100}
         loading={'lazy'}
         style={{ objectFit: 'contain' }}
+        onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
       />
       {captionPosition === 'below' && (
         <ImageCaption className={captionClassName} caption={caption}></ImageCaption>

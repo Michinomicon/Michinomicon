@@ -220,6 +220,8 @@ export const MediaGallery = ({
                     objectFit: 'cover',
                     objectPosition: '50% 50%',
                   }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
                 />
               </a>
             )
@@ -249,6 +251,8 @@ export const MediaGallery = ({
                     objectFit: 'cover',
                     objectPosition: '50% 50%',
                   }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
                 />
               </a>
             )
@@ -274,6 +278,8 @@ export const MediaGallery = ({
                   placeholder={'blur'}
                   blurDataURL={blurPlaceholder}
                   style={{ objectFit: 'cover', objectPosition: '50% 50%' }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onDragStart={(e) => e.preventDefault()}
                 />
               </a>
             )

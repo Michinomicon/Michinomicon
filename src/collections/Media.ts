@@ -9,7 +9,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { hasAccess } from '@/utilities/accessFunctions'
 import { processFileAndPopulateMetaData } from '@/hooks/mediaCollectionBeforeChange'
-import { renameYouTubeThumbnail } from '@/hooks/renameYouTubeThumbnail'
+import { mediaCollectionBeforeOperation } from '@/hooks/mediaCollectionBeforeOperation'
 import { Media as MediaType } from '@/payload-types'
 
 const filename = fileURLToPath(import.meta.url)
@@ -453,7 +453,7 @@ export const Media: CollectionConfig = {
     imageSizes: UploadImageSizes,
   },
   hooks: {
-    beforeOperation: [renameYouTubeThumbnail],
+    beforeOperation: [mediaCollectionBeforeOperation],
     beforeChange: [processFileAndPopulateMetaData],
   },
 }
