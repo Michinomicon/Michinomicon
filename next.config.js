@@ -24,17 +24,6 @@ const nextConfig = {
           port: url.port || '',
         }
       }),
-      ...[LOCAL_DEV_IP].map((item) => {
-        if (item) {
-          const url = new URL(item)
-          return {
-            protocol: 'http',
-            hostname: url.hostname,
-            port: '3000',
-            pathname: '/api/media/file/**',
-          }
-        }
-      }),
       {
         protocol: 'http',
         hostname: 'localhost',
