@@ -30,7 +30,8 @@ import { MediaCaption } from '../MediaCaption'
 import { MediaTooltip } from '../MediaTooltip'
 import { getMediaInfo, MediaInfo } from '@/utilities/mediaInfo'
 import { DEFAULT_IMAGE_SIZES } from '@/defaultImageSizes'
-import { getImageMediaMetaData } from '@/utilities/getMediaMetaData'
+import { getMediaSize } from '@/utilities/getMediaSize'
+import { getMediaType } from '@/utilities/getMediaType'
 
 type LightGallery = InitDetail['instance']
 
@@ -61,24 +62,6 @@ type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
   caption: MediaInfo
 }
 
-function getItemType(media: Media): 'image' | 'video' | 'youtube' {
-  if (media.youtubeId && media.youtubeId.length > 0) return 'youtube'
-  return typeof media.mimeType === 'string' && media.mimeType.includes('video') ? 'video' : 'image'
-}
-
-function getMediaSize(media: Media): Pick<ItemProperties, 'width' | 'height' | 'size'> {
-  const { width: metaDataWidth, height: metaDataHeight } = getImageMediaMetaData(media)
-  const mediaWidth: number = Math.max(Number(media.width ?? metaDataWidth), 0)
-  const mediaHeight: number = Math.max(Number(media.height ?? metaDataHeight), 0)
-  const width: number = mediaWidth > 0 ? mediaWidth : 1200
-  const height: number = mediaHeight > 0 ? mediaHeight : 630
-  return {
-    width: width,
-    height: height,
-    size: `${width}-${height}`,
-  }
-}
-
 function getItemPropertiesFromMedia(media: Media): ItemProperties | undefined {
   const { source, thumbnail } = getMediaDisplayImageSources(media)
   const { width, height, size } = getMediaSize(media)
@@ -90,7 +73,7 @@ function getItemPropertiesFromMedia(media: Media): ItemProperties | undefined {
     height: height,
     size: size,
     src: source,
-    type: getItemType(media),
+    type: getMediaType(media),
     thumb: thumbnail,
     caption: getMediaInfo(media),
   }
@@ -281,9 +264,9 @@ export const MediaGallery = ({
                   alt={item.alt}
                   className={cn(ItemThumbnailStyles, thumbnailClassNamesFromProps)}
                   src={item.src}
-                  loading={'eager'}
                   width={item.width}
                   height={item.height}
+                  loading={'eager'}
                   sizes={DEFAULT_IMAGE_SIZES}
                   placeholder={'blur'}
                   blurDataURL={blurPlaceholder}
