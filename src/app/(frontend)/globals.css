@@ -106,18 +106,6 @@
     font-size: unset;
     font-weight: unset;
   }
-
-  /* LightGallery */
-  .lg-image {
-    /* Prevent drag-and-drop actions */
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-    
-    /* Prevent users from highlighting the image */
-    user-select: none;
-  }
 }
 
 /** 

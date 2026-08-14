@@ -20,8 +20,18 @@
   .lg-container * {
     @apply rounded-none;
     border-radius: 0;
-    user-select: text !important;
     caret-color: transparent !important;
+    user-select: text !important;
+  }
+  .lg-image,
+  .lg-object {
+    /* Prevent drag-and-drop actions */
+    -webkit-user-drag: none !important;
+    -khtml-user-drag: none !important;
+    -moz-user-drag: none !important;
+    -o-user-drag: none !important;
+    /* Prevent users from highlighting the image */
+    user-select: none !important;
   }
 }
 

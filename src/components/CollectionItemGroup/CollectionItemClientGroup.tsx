@@ -83,11 +83,6 @@ export function CollectionItemClientGroup({
   const [cardStyle, setCardStyle] = useState<CollectionItemCardStyle>(intialCardStyle)
 
   if (layout === 'grid') {
-    console.debug(`isMobile: `, isMobile)
-    console.debug(`defaultGirdLayout: `, defaultGirdLayout)
-    console.debug(`cardStyleFromProps: `, cardStyleFromProps)
-    console.debug(`cardStyle: `, cardStyle)
-
     return (
       <React.Fragment>
         <div className="relative mx-auto mb-2 flex w-full flex-col items-center justify-center">
