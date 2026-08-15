@@ -3,7 +3,7 @@ import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { useRef } from 'react'
-import type { Media } from '@/payload-types'
+import type { Creator, Media, Project } from '@/payload-types'
 import { TypedCollection } from 'payload'
 import { Badge, BadgeStatus } from '../ui/badge'
 import { Item, ItemFooter } from '../ui/item'
@@ -11,6 +11,8 @@ import { AspectRatio } from '../ui/aspect-ratio'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import RichText from '../RichText'
 import { ImageMedia } from '../Media/ImageMedia'
+import { CreatorAvatarGroup } from '../CreatorAvatarGroup'
+import { cva } from 'class-variance-authority'
 
 type SupportedConfigs = Pick<TypedCollection, 'creators' | 'pages' | 'posts' | 'projects'>
 
@@ -18,12 +20,40 @@ type BaseItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfig
   collection: T
   status: BadgeStatus | null
   tags: string[] | null
-  images: Media[] | null
+  image: Media | null
   description: string | DefaultTypedEditorState | null | undefined
   title: string
   href: string
+  related: SupportedConfigs[keyof SupportedConfigs][] | null
 }
-export type CollectionItemProperties<T extends keyof SupportedConfigs> = BaseItemProperties<T>
+interface ProjectItemProperties extends BaseItemProperties<'projects'> {
+  related: Creator[] | null
+}
+interface CreatorItemProperties<
+  T extends keyof SupportedConfigs & 'creators' = 'creators',
+> extends BaseItemProperties<T> {
+  related: Project[] | null
+}
+interface PostItemProperties<
+  T extends keyof SupportedConfigs & 'posts' = 'posts',
+> extends BaseItemProperties<T> {
+  related: SupportedConfigs[keyof SupportedConfigs][] | null
+}
+interface PageItemProperties<
+  T extends keyof SupportedConfigs & 'pages' = 'pages',
+> extends BaseItemProperties<T> {
+  related: SupportedConfigs[keyof SupportedConfigs][] | null
+}
+
+export type CollectionItemProperties<T extends keyof SupportedConfigs> = T extends 'projects'
+  ? ProjectItemProperties
+  : T extends 'creators'
+    ? CreatorItemProperties
+    : T extends 'posts'
+      ? PostItemProperties
+      : T extends 'pages'
+        ? PageItemProperties
+        : never
 
 export type CollectionItemCardProps<T extends keyof SupportedConfigs> = Omit<
   React.ComponentPropsWithRef<typeof Item>,
@@ -39,6 +69,45 @@ export type CollectionItemCardProps<T extends keyof SupportedConfigs> = Omit<
   item: CollectionItemProperties<T>
 }
 
+const RelatedAvatarStyles = cva('flex flex-col w-full h-full', {
+  variants: {
+    layout: {
+      vertical: 'items-center rounded-none border-t border-t-border/30',
+      horizontal: 'items-center rounded-none border-t border-t-border/30',
+    },
+  },
+})
+
+function RelatedAvatars<T extends keyof SupportedConfigs>({
+  layout,
+  item,
+}: {
+  layout: CollectionItemCardProps<T>['layout']
+  item: CollectionItemProperties<T>
+}): React.ReactNode {
+  if (item.related && item.related.length) {
+    switch (item.collection) {
+      case 'creators':
+        return <React.Fragment></React.Fragment>
+      case 'projects':
+        return (
+          <div className={cn(RelatedAvatarStyles({ layout: layout }), 'select-none')}>
+            <div className="flex w-full items-start justify-start p-1 pb-0">
+              <div className={'text-xs text-muted-foreground uppercase'}>Contributors</div>
+            </div>
+            <div className={'flex w-full items-start justify-start p-1'}>
+              <CreatorAvatarGroup creators={item.related} className={''} />
+            </div>
+          </div>
+        )
+      case 'pages':
+        return <React.Fragment></React.Fragment>
+      case 'posts':
+        return <React.Fragment></React.Fragment>
+    }
+  }
+}
+
 export function CollectionItemCard<T extends keyof SupportedConfigs>({
   className,
   showTags = false,
@@ -46,14 +115,14 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
   showImages = true,
   layout: layoutFromProps,
   title: titleFromProps,
-  item: itemFromProps,
+  item,
   ...props
 }: CollectionItemCardProps<T>): React.ReactNode {
   const { card, link } = useClickableCard<HTMLDivElement>({})
   const linkCurrentRef = useRef(link.ref.current)
   const cardCurrentRef = useRef<HTMLDivElement>(card.ref.current)
 
-  const { tags, images, description, title: titleFromItemProps, href } = itemFromProps
+  const { tags, image, description, title: titleFromItemProps, href } = item
   const title = titleFromProps || titleFromItemProps
 
   const layout = layoutFromProps || 'horizontal'
@@ -77,7 +146,7 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
               >
                 <div className={cn('item-image-wrapper')}>
                   <AspectRatio ratio={1 / 1} className={cn('w-full')}>
-                    {images && images.length > 0 && <ImageMedia src={images[0]}></ImageMedia>}
+                    {image && <ImageMedia src={image}></ImageMedia>}
                   </AspectRatio>
                 </div>
               </div>
@@ -85,17 +154,24 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
 
             <div
               className={cn(
-                'item-text-container flex grow flex-col flex-nowrap items-start justify-start overflow-hidden',
+                'item-text-container flex w-full grow flex-col flex-nowrap items-start justify-between',
               )}
             >
-              <div className={'w-full grow-0 p-2'}>
+              <div
+                className={
+                  'flex w-full flex-row justify-between rounded-none border-b border-b-border/30 p-2'
+                }
+              >
                 <Link className="" href={href} ref={linkCurrentRef}>
                   <span className={'text-2xl'}>{title}</span>
                 </Link>
               </div>
+
               {showDescription && (
                 <div
-                  className={cn('item-description rounded-non h-full w-full overflow-hidden p-1')}
+                  className={cn(
+                    'item-description rounded-non h-full w-full overflow-hidden bg-foreground/5 p-1',
+                  )}
                 >
                   {description && typeof description === 'object' ? (
                     <RichText
@@ -108,12 +184,13 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
                   )}
                 </div>
               )}
+              <RelatedAvatars item={item} layout={layout} />
             </div>
           </div>
         )
       case 'horizontal':
         return (
-          <div className={cn('item-content flex w-full flex-nowrap overflow-hidden')}>
+          <div className={cn('item-content flex w-full flex-nowrap')}>
             {showImages && (
               <div
                 className={cn(
@@ -124,17 +201,17 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
               >
                 <div className={cn('item-image-wrapper')}>
                   <AspectRatio ratio={1 / 1} className={cn('w-full')}>
-                    {images && images.length > 0 && <ImageMedia src={images[0]}></ImageMedia>}
+                    {image && <ImageMedia src={image}></ImageMedia>}
                   </AspectRatio>
                 </div>
               </div>
             )}
             <div
               className={cn(
-                'item-text-container flex grow flex-col flex-nowrap items-start justify-center overflow-hidden',
+                'item-text-container flex grow flex-col flex-nowrap items-start justify-between overflow-hidden',
               )}
             >
-              <div className={'w-full grow-0 p-2'}>
+              <div className={'flex w-full flex-row gap-4 p-2'}>
                 <Link className="" href={href} ref={linkCurrentRef}>
                   <span className={'text-2xl hover:underline'}>{title}</span>
                 </Link>
@@ -142,7 +219,7 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
               {showDescription && (
                 <div
                   className={cn(
-                    'item-description h-full w-full overflow-hidden rounded-none border-t border-t-border/30 bg-foreground/5 p-2 pt-0',
+                    'item-description h-full w-full overflow-hidden rounded-none border-b border-b-border/30 bg-foreground/5 pt-0',
                   )}
                 >
                   {description && typeof description === 'object' ? (
@@ -156,6 +233,7 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
                   )}
                 </div>
               )}
+              <RelatedAvatars item={item} layout={layout} />
             </div>
           </div>
         )

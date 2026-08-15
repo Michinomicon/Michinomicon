@@ -11,6 +11,10 @@ import {
   CollectionItemGroupProperties,
   CollectionTypes,
 } from '@/components/CollectionItemGroup'
+import {
+  extractMediaCreditsByProjectId,
+  ProjectMediaCreators,
+} from './extractMediaCreditsByProjectId'
 
 async function creatorToCollectionItemProperties(
   creator: Creator,
@@ -18,7 +22,6 @@ async function creatorToCollectionItemProperties(
   const { title, slug, status, profileImage, id, content } = creator
   const coverImage = isMedia(profileImage) ? profileImage : null
   const creatorMedia = await getCachedMediaByCreatorCredit(id)()
-  const images = creatorMedia.length > 0 ? creatorMedia : coverImage ? [coverImage] : null
   const tags = creatorMedia
     ?.flatMap(({ credits }) => credits?.map(({ role }) => role))
     .filter((tag) => typeof tag === 'string')
@@ -26,8 +29,9 @@ async function creatorToCollectionItemProperties(
   return {
     collection: 'creators',
     status: status || null,
+    related: null,
     tags: tags.length > 0 ? tags : null,
-    images: images,
+    image: coverImage,
     description: description,
     title: title,
     href: `/creators/${slug}`,
@@ -41,13 +45,29 @@ async function projectToCollectionItemProperties(
   const { description } = content
   const coverImage = isMedia(profileImage) ? profileImage : null
   const projectMedia = await getCachedMediaByProjectId(id)()
-  const images = projectMedia.length > 0 ? projectMedia : coverImage ? [coverImage] : null
-  const tags = categories?.map((cat) => (typeof cat === 'object' ? cat.title : cat)) ?? []
+  const projectCreators: Creator[] = extractMediaCreditsByProjectId(projectMedia, id).flatMap<
+    Creator,
+    ProjectMediaCreators
+  >(({ credits }) => credits.map<Creator>(({ creator }) => creator))
+  const creditTags = projectMedia
+    ?.flatMap(({ credits }) =>
+      credits?.map(({ creator }) => (typeof creator === 'object' ? creator.title : creator)),
+    )
+    .filter((creator) => typeof creator === 'string')
+  const categoryTags = categories?.map((cat) => (typeof cat === 'object' ? cat.title : cat)) ?? []
+  /**
+   * TODO:
+   * - Update project collection items to include creator credit avatar groups (see project page summary table for example implementation)
+   *
+   * */
+
+  const useCategoryTags = true
   return {
     collection: 'projects',
     status: status,
-    tags: tags,
-    images: images,
+    related: projectCreators,
+    tags: useCategoryTags ? categoryTags : creditTags,
+    image: coverImage,
     description: description,
     title: title,
     href: `/projects/${slug}`,
@@ -65,8 +85,9 @@ export async function postToCollectionItemProperties(
   return {
     collection: 'posts',
     status: null,
+    related: null,
     tags: tags.length > 0 ? tags : null,
-    images: isMedia(image) ? [image] : null,
+    image: isMedia(image) ? image : null,
     description: description,
     title: title,
     href: `/posts/${slug}`,
@@ -76,13 +97,19 @@ export async function postToCollectionItemProperties(
 export async function pageToCollectionItemProperties(
   page: Page,
 ): Promise<CollectionItemProperties<'pages'>> {
-  const { title, slug, meta } = page
+  const { parentCategory, title, slug, meta } = page
   const { image, description } = meta ?? { image: null, description: null }
+  const pageCategory: string | null = parentCategory
+    ? typeof parentCategory === 'object'
+      ? parentCategory.title
+      : parentCategory
+    : null
   return {
     collection: 'pages',
     status: null,
-    tags: null,
-    images: isMedia(image) ? [image] : null,
+    related: null,
+    tags: pageCategory ? [pageCategory] : null,
+    image: isMedia(image) ? image : null,
     description: description,
     title: title,
     href: `/${slug}`,
