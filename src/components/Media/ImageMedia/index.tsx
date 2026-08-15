@@ -18,30 +18,10 @@ import { MediaTooltip } from '@/components/MediaTooltip'
 import { getMediaInfo } from '@/utilities/mediaInfo'
 import { getMediaDisplayImageSources } from '@/utilities/getMediaDisplayImageSource'
 import { getMediaSize } from '@/utilities/getMediaSize'
+import { getMediaType } from '@/utilities/getMediaType'
 
 export const blurPlaceholder =
   'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiCiAgICAgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiCiAgICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJibGFjayIgb3BhY2l0eT0iMC41IiAvPgo8L3N2Zz4='
-
-// function getMediaResourceUrl(resource: Media): string {
-//   let src: string = ''
-//   const { url } = resource
-//   if (url) {
-//     src = getMediaUrl(url)
-//     if (typeof src === 'string' && src.startsWith('http')) {
-//       try {
-//         const urlObj = new URL(src)
-//         // If the URL matches localhost, strip it down to just the relative path
-//         const localHosts = ['localhost', '127.0.0.1', process.env.LOCAL_DEV_IP ?? '']
-//         if (localHosts.includes(urlObj.hostname)) {
-//           src = urlObj.pathname + urlObj.search
-//         }
-//       } catch (_err) {
-//         // Silently ignore invalid URLs
-//       }
-//     }
-//   }
-//   return src
-// }
 
 type SelectedMediaProperties = Required<
   Pick<
@@ -76,24 +56,16 @@ function isPayloadMediaProps(
 }
 
 function mediaToImageMediaProps(media: Media): ImageMediaProps {
-  const { source } = getMediaDisplayImageSources(media)
+  const mediaType = getMediaType(media)
+  const { thumbnail, source } = getMediaDisplayImageSources(media)
   const { width, height } = getMediaSize(media)
   const imageProps: ImageMediaProps = {
     id: media.id,
     alt: media.alt,
     width: width,
     height: height,
-    src: source,
+    src: mediaType === 'image' ? source : thumbnail,
   }
-  // const mediaUrl = getMediaResourceUrl(media)
-  // const imageProps: ImageMediaProps = {
-  //   alt: media.alt,
-  //   height: media.height ? media.height : undefined,
-  //   src: mediaUrl,
-  //   width: media.width ? media.width : undefined,
-  //   id: media.id,
-  //   title: media.title,
-  // }
   return imageProps
 }
 
