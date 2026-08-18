@@ -91,11 +91,9 @@ export function CollectionItemClientGroup({
           )}
           <ItemGroup
             direction={'row'}
-            className={cn(
-              className,
-              'collection-grid w-full justify-center gap-4',
-              GridVariant(cardStyle),
-            )}
+            className={cn(className, 'collection-grid', GridVariant(cardStyle))}
+            data-card-height={cardStyle.height}
+            data-card-width={cardStyle.height}
           >
             {items?.map((item, index) => (
               <CollectionItemCard

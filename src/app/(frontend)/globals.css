@@ -88,7 +88,7 @@
 
 @layer base {
   * {
-    @apply rounded-(--radius) border-primary/30 outline-ring/50;
+    @apply rounded-none border-primary/30 outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
