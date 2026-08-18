@@ -1,11 +1,12 @@
 import { cn } from '@/utilities/ui'
 import { cva } from 'class-variance-authority'
 
-export const GridItemVariant = cva('', {
+export const GridItemVariant = cva('overflow-hidden', {
   variants: {
     layout: {
-      vertical: '[&_.item-image-wrapper]:w-[calc(100%-0px))]',
-      horizontal: '',
+      vertical:
+        '[&_.item-image-wrapper]:w-[calc(100%-0px))] [&_.item-title]:justify-center [&_.item-text-container]:p-2 [&_.item-avatars]:px-2',
+      horizontal: '[&_.item-text-container]:pl-0',
     },
     height: {
       sm: '',
@@ -23,17 +24,17 @@ export const GridItemVariant = cva('', {
     {
       layout: 'vertical',
       height: 'sm',
-      className: cn('[&_.item-image-container]:overflow-hidden', '[&_.item-text-container]:h-50'),
+      className: cn('', '[&_.item-content]:h-50'),
     },
     {
       layout: 'vertical',
       height: 'md',
-      className: cn('[&_.item-image-container]:overflow-hidden', '[&_.item-text-container]:h-80'),
+      className: cn('', '[&_.item-content]:h-80'),
     },
     {
       layout: 'vertical',
       height: 'lg',
-      className: cn('[&_.item-image-container]:overflow-hidden', '[&_.item-text-container]:h-100'),
+      className: cn('', '[&_.item-content]:h-100'),
     },
     {
       layout: 'vertical',
@@ -71,15 +72,15 @@ export const GridItemVariant = cva('', {
       layout: 'horizontal',
       height: 'sm',
       className: cn(
-        '[&_.item-text-container]:h-30',
-        '[&_.item-image-container]:w-30 [&_.item-image-container]:justify-center [&_.item-image-wrapper]:w-30 [&_.item-image-wrapper]:h-30',
+        '[&_.item-content]:h-30',
+        '[&_.item-image-container]:w-30 [&_.item-image-wrapper]:w-30 [&_.item-image-wrapper]:h-30',
       ),
     },
     {
       layout: 'horizontal',
       height: 'md',
       className: cn(
-        '[&_.item-text-container]:h-60',
+        '[&_.item-content]:h-60',
         '[&_.item-image-container]:w-60 [&_.item-image-wrapper]:w-60 [&_.item-image-wrapper]:h-60',
       ),
     },
@@ -87,17 +88,17 @@ export const GridItemVariant = cva('', {
       layout: 'horizontal',
       height: 'lg',
       className: cn(
-        '[&_.item-text-container]:h-100',
+        '[&_.item-content]:h-100',
         '[&_.item-image-container]:w-100 [&_.item-image-wrapper]:w-100 [&_.item-image-wrapper]:h-100',
       ),
     },
   ],
 })
 
-export const GridVariant = cva('max-w-full', {
+export const GridVariant = cva('max-w-full overflow-hidden w-full justify-center gap-4', {
   variants: {
     layout: {
-      vertical: '',
+      vertical: 'items-start',
       horizontal: '',
     },
     height: {

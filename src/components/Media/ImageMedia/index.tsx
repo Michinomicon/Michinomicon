@@ -2,7 +2,6 @@
 
 import { cn } from '@/utilities/ui'
 import NextImage from 'next/image'
-// import { getMediaUrl } from '@/utilities/getMediaUrl'
 import { Media } from '@/payload-types'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import { getImageMediaMetaData, ImageMediaMetaData } from '@/utilities/getMediaMetaData'
@@ -102,6 +101,7 @@ type ImageMediaComponentProps = {
   className?: string
   caption?: string
   captionPosition?: 'tooltip' | 'below'
+  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
 }
 
 type NextImageSourceProps = ImageMediaComponentProps &
@@ -131,6 +131,7 @@ export const ImageMedia = (props: ImageMediaProps) => {
     captionClassName,
     caption: propsCaption,
     captionPosition = 'tooltip',
+    objectFit = 'contain',
   } = props as ImageMediaComponentProps
 
   const caption = mediaProps.caption || propsCaption
@@ -142,8 +143,6 @@ export const ImageMedia = (props: ImageMediaProps) => {
   const onTooltipOpenChange = (isOpen: boolean) => {
     setTooltipOpen(isOpen)
   }
-
-  // const imageSrc = isPayloadMedia ? getMediaResourceUrl(props.src) : src
 
   return (
     <div id={`${id}-wrapper`} className={cn('relative h-auto w-full', className)}>
@@ -178,7 +177,7 @@ export const ImageMedia = (props: ImageMediaProps) => {
         blurDataURL={blurPlaceholder}
         quality={100}
         loading={'lazy'}
-        style={{ objectFit: 'contain' }}
+        style={{ objectFit: objectFit }}
         onContextMenu={(e) => e.preventDefault()}
         onDragStart={(e) => e.preventDefault()}
       />
