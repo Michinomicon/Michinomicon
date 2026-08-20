@@ -6,7 +6,7 @@ import { CollectionItemGroup, CollectionItemGroupProps } from '../../components/
 
 export const ItemGroupBlock: React.FC<
   ItemGroupProps & {
-    id?: string
+    id: string
   }
 > = async (props) => {
   const {
@@ -29,6 +29,7 @@ export const ItemGroupBlock: React.FC<
   if (populateBy) {
     if (populateBy === 'collection' && relationTo) {
       collectionItemGroupProps = {
+        id: id,
         layout: layout,
         populateBy: populateBy,
         collection: relationTo,
@@ -44,6 +45,7 @@ export const ItemGroupBlock: React.FC<
       }
     } else if (populateBy === 'selection') {
       collectionItemGroupProps = {
+        id: id,
         layout: layout,
         populateBy: populateBy,
         items: selectedDocs,

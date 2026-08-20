@@ -72,7 +72,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     <React.Fragment>
       <article
         id={id}
-        className="article-page relative min-h-screen w-full border-primary/30 bg-card px-6 pt-16 pb-12 md:mx-auto md:min-h-max md:w-auto md:border md:bg-background md:pt-6"
+        className="article-page relative min-h-screen w-full rounded border-primary/30 bg-card px-6 pt-16 pb-12 md:mx-auto md:min-h-max md:w-auto md:border md:bg-background md:pt-6"
       >
         <PageClient />
         {/* Allows redirects for valid pages too */}
@@ -94,7 +94,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
         <RenderHero {...hero} />
 
-        <RenderBlocks blocks={layout} />
+        <RenderBlocks pageSlug={slug} blocks={layout} />
       </article>
     </React.Fragment>
   )

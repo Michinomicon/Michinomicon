@@ -3,9 +3,9 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemTitle }
 import { CMSLink } from '../Link'
 import { ExternalLinkIcon } from 'lucide-react'
 import { Separator } from '../ui/separator'
-import { MediaGallery } from '../MediaGallery'
 import { StatusBadge, StatusBadgeProps } from '../StatusBadge'
 import { isMedia } from '@/utilities/isMedia'
+import { CollectionItemCardImage } from '../CollectionItemCard/CollectionItemCardImage'
 
 export type CollectionProfileSectionProps = {
   title: string
@@ -81,7 +81,7 @@ export const CollectionProfileHeader = ({
   return (
     <div className="grid grid-cols-6 items-center gap-4" {...props}>
       <div className="col-span-2 col-start-1">
-        {isMedia(image) && <MediaGallery items={[image]} layout={'default'} />}
+        {isMedia(image) && <CollectionItemCardImage image={image} className={'w-full rounded'} />}
       </div>
       <div className="col-span-4 col-start-3">
         <span className="prose">

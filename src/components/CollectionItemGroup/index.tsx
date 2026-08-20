@@ -73,12 +73,14 @@ export type CollectionItemGroupProperties<T extends keyof CollectionTypes> =
   | CollectionItemGroupPopulateByCollection<T>
 
 export type CollectionItemGroupProps = CollectionItemGroupProperties<keyof CollectionTypes> & {
+  id: string
   className?: string
   cardStyle?: CollectionItemCardStyle
   layout?: 'carousel' | 'grid'
 }
 
 export async function CollectionItemGroup({
+  id,
   className,
   layout = 'grid',
   cardStyle,
@@ -89,6 +91,7 @@ export async function CollectionItemGroup({
 
   return (
     <CollectionItemClientGroup
+      id={id}
       items={items}
       className={className}
       layout={layout}

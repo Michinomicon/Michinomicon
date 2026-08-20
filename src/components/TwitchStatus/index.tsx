@@ -36,7 +36,7 @@ function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
       <Tooltip delayDuration={800} disableHoverableContent={true}>
         <TooltipTrigger className="py-0" asChild>
           <Badge
-            variant="default"
+            variant={'destructive'}
             className="flex h-fit w-fit gap-0 rounded-[0.4rem] px-1 py-0 text-xs font-medium xl:text-base"
           >
             {isMobile && (
