@@ -51,7 +51,7 @@ export function GridLayoutToolbar({
   ...props
 }: {
   value: GridCardStyleName
-  onValueChange: (value: CollectionItemCardStyle) => void
+  onValueChange: (value: [GridCardStyleName, CollectionItemCardStyle]) => void
 } & React.ComponentPropsWithoutRef<'div'>): React.ReactNode {
   const [gridCardStyle, setGridCardStyle] = React.useState<GridCardStyleName>(value)
 
@@ -59,11 +59,11 @@ export function GridLayoutToolbar({
     getGridCardStyle(gridCardStyle),
   )
 
-  const handleSetCollectionLayout = (value: GridCardStyleName) => {
-    setGridCardStyle(value)
-    const newCardStyle = getGridCardStyle(value)
+  const handleSetCollectionLayout = (styleName: GridCardStyleName) => {
+    setGridCardStyle(styleName)
+    const newCardStyle = getGridCardStyle(styleName)
     setCardStyle(newCardStyle)
-    onValueChange(newCardStyle)
+    onValueChange([styleName, newCardStyle])
   }
 
   return (

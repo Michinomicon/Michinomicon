@@ -2,7 +2,7 @@ import { test, expect, Page } from '@playwright/test'
 
 test.describe('Frontend', () => {
   let _page: Page
-  const appName = process.env.APP_NAME
+  const appName = process.env.NEXT_PUBLIC_APP_NAME
 
   test.beforeAll(async ({ browser }, _testInfo) => {
     const context = await browser.newContext()

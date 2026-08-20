@@ -5,7 +5,7 @@ export const GridItemVariant = cva('overflow-hidden', {
   variants: {
     layout: {
       vertical:
-        '[&_.item-image-wrapper]:w-[calc(100%-0px))] [&_.item-title]:justify-center [&_.item-text-container]:p-2 [&_.item-avatars]:px-2',
+        '[&_.item-image-wrapper]:w-[calc(100%-0px))] [&_.item-title]:justify-center [&_.item-text-container]:px-2 [&_.item-text-container]:pb-2 [&_.item-avatars]:px-2',
       horizontal: '[&_.item-text-container]:pl-0',
     },
     height: {

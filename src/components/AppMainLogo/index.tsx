@@ -6,7 +6,7 @@ import { Logo, LogoProps } from '@/components/Logo/Logo'
 type AppMainLogoProps = LogoProps
 
 export const AppMainLogo = (props: AppMainLogoProps) => {
-  const appName = props.text || process.env.APP_NAME
+  const appName = props.text || process.env.NEXT_PUBLIC_APP_NAME
   return (
     <Link href="/home">
       <Logo {...props} text={appName} />

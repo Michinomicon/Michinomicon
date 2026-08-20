@@ -19,8 +19,41 @@ import { CollectionItemCardStyle, CollectionTypes } from '.'
 import { Separator } from '../ui/separator'
 import { VariantProps } from 'class-variance-authority'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useLocalStorage } from '@/providers/LocalStorageProvider'
+import { StorageData } from '@/lib/storage-utils'
+
+function initialiseLayoutAndStyle(
+  storageData: StorageData | null,
+  isMobile: boolean,
+  layout: CollectionItemClientGroupProps['layout'],
+  initialCardStyle?: CollectionItemClientGroupProps['cardStyle'],
+) {
+  let gridStyle: GridCardStyleName =
+    storageData &&
+    typeof storageData === `object` &&
+    !Array.isArray(storageData) &&
+    Object.hasOwn(storageData, 'gridStyle')
+      ? (storageData['gridStyle'] as GridCardStyleName)
+      : 'list'
+
+  let cardStyle: CollectionItemCardStyle = initialCardStyle || getGridCardStyle(gridStyle)
+
+  if (isMobile) {
+    layout = 'grid'
+    gridStyle = 'compact-list'
+    cardStyle = getGridCardStyle('compact-list')
+  } else if (layout === 'grid' && !cardStyle) {
+    cardStyle = getGridCardStyle(gridStyle)
+  }
+
+  return {
+    grid: gridStyle,
+    card: cardStyle,
+  }
+}
 
 export interface CollectionItemClientGroupProps {
+  id: string
   items: CollectionItemProperties<keyof CollectionTypes>[]
   className?: string
   layout: 'carousel' | 'grid'
@@ -37,78 +70,66 @@ const _defaultCardStyle: CollectionItemCardStyle = {
 }
 
 export function CollectionItemClientGroup({
+  id,
   items,
   className,
   layout,
   cardStyle: cardStyleFromProps,
-}: CollectionItemClientGroupProps) {
+}: CollectionItemClientGroupProps & React.ComponentPropsWithoutRef<'div'>): React.ReactNode {
   const isMobile = useIsMobile()
+  const { setLocalStorage, getLocalStorage, isHydrated } = useLocalStorage()
   const carouselScrollDirection: 'vertical' | 'horizontal' = 'horizontal'
   const alignment: CarouselOptions['align'] = 'center'
   const carouselOptions: Partial<CarouselOptions> = {
     loop: true,
     align: alignment,
-    // watchDrag: false,
-    // watchResize: false,
-    // watchSlides: false,
-    // watchFocus: false,
-    // container: null,
-    // slides: null,
-    // active: false,
-    // containScroll: false,
-    // direction: 'ltr',
-    // slidesToScroll: 0,
-    // dragFree: false,
-    // dragThreshold: 0,
-    // inViewThreshold: 0,
-    // axis: 'x',
-    // skipSnaps: false,
-    // duration: 0,
-    // startIndex: 0,
-    // breakpoints: {},
-  }
-  let defaultGirdLayout: GridCardStyleName = 'list'
-
-  if (isMobile) {
-    layout = 'grid'
-    defaultGirdLayout = 'compact-list'
-    cardStyleFromProps = getGridCardStyle('compact-list')
-  } else if (layout === 'grid' && !cardStyleFromProps) {
-    cardStyleFromProps = getGridCardStyle(defaultGirdLayout)
   }
 
-  const intialCardStyle: CollectionItemCardStyle =
-    cardStyleFromProps || getGridCardStyle(defaultGirdLayout)
+  const storedPageFeatures = getLocalStorage(`${id}`)
+  const { grid: initialGridStyle, card: initialCardStyle } = initialiseLayoutAndStyle(
+    storedPageFeatures,
+    isMobile,
+    layout,
+    cardStyleFromProps,
+  )
 
-  const [cardStyle, setCardStyle] = useState<CollectionItemCardStyle>(intialCardStyle)
+  const [cardStyle, setCardStyle] = useState<CollectionItemCardStyle>(initialCardStyle)
+
+  if (!isHydrated) {
+    return <></>
+  }
+
+  const onCardStyleChange = ([gridStyle, cardStyle]: [
+    GridCardStyleName,
+    CollectionItemCardStyle,
+  ]) => {
+    setCardStyle(cardStyle)
+    setLocalStorage(`${id}.gridStyle`, gridStyle)
+  }
 
   if (layout === 'grid') {
     return (
-      <React.Fragment>
-        <div className="relative mx-auto mb-2 flex w-full flex-col items-center justify-center">
-          {!isMobile && (
-            <GridLayoutToolbar value={defaultGirdLayout} onValueChange={setCardStyle} />
-          )}
-          <ItemGroup
-            direction={'row'}
-            className={cn(className, 'collection-grid', GridVariant(cardStyle))}
-            data-card-height={cardStyle.height}
-            data-card-width={cardStyle.height}
-          >
-            {items?.map((item, index) => (
-              <CollectionItemCard
-                key={index}
-                className={cn('collection-grid-item', '')}
-                showTags={false}
-                showDescription={cardStyle?.showDescription}
-                showImages={cardStyle?.showImages}
-                layout={cardStyle?.layout}
-                item={item}
-              />
-            ))}
-          </ItemGroup>
-        </div>
-      </React.Fragment>
+      <div className="relative mx-auto mb-2 flex w-full flex-col items-center justify-center">
+        {!isMobile && (
+          <GridLayoutToolbar value={initialGridStyle} onValueChange={onCardStyleChange} />
+        )}
+        <ItemGroup
+          direction={'row'}
+          className={cn(className, 'collection-grid', GridVariant(cardStyle))}
+        >
+          {items?.map((item, index) => (
+            <CollectionItemCard
+              key={index}
+              className={cn('collection-grid-item', '')}
+              showTags={false}
+              showDescription={cardStyle?.showDescription}
+              showImages={cardStyle?.showImages}
+              layout={cardStyle?.layout}
+              item={item}
+            />
+          ))}
+        </ItemGroup>
+      </div>
     )
   } else {
     return (

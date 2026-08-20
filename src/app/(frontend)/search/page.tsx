@@ -13,6 +13,7 @@ type Args = {
   }>
 }
 export default async function Page({ searchParams: searchParamsPromise }: Args) {
+  const pageId: string = 'searchResultsCollection'
   const { q: query } = await searchParamsPromise
   const payload = await getPayload({ config: configPromise })
 
@@ -74,7 +75,7 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       </div>
 
       {posts.totalDocs > 0 ? (
-        <CollectionItemGroup items={results} collection={'posts'} />
+        <CollectionItemGroup id={pageId} items={results} collection={'posts'} />
       ) : (
         <div className="container">No results found.</div>
       )}

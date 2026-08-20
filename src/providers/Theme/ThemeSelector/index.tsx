@@ -12,13 +12,13 @@ import React, { useState } from 'react'
 import type { Theme } from './types'
 
 import { useTheme } from '..'
-import { themeLocalStorageKey } from './types'
+import { ThemeModeLocalStorageKey } from './types'
 
 export const ThemeSelector: React.FC = () => {
   const { setTheme } = useTheme()
   const [value, setValue] = useState(() => {
     if (typeof window !== 'undefined') {
-      return window.localStorage.getItem(themeLocalStorageKey) ?? 'auto'
+      return window.localStorage.getItem(ThemeModeLocalStorageKey) ?? 'auto'
     }
     return 'auto'
   })

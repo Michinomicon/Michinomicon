@@ -17,6 +17,7 @@ type Args = {
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
+  const pageId: string = 'projectsCollection'
   const { pageNumber } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
 
@@ -58,7 +59,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         />
       </div>
 
-      <CollectionItemGroup items={projects.docs} collection={'projects'} />
+      <CollectionItemGroup id={pageId} items={projects.docs} collection={'projects'} />
 
       <div className="container">
         {projects?.page && projects?.totalPages > 1 && (

@@ -18,6 +18,7 @@ type Args = {
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { pageNumber } = await paramsPromise
+  const pageId: string = 'creatorsCollection'
   const payload = await getPayload({ config: configPromise })
 
   const sanitizedPageNumber = Number(pageNumber)
@@ -58,7 +59,7 @@ export default async function Page({ params: paramsPromise }: Args) {
         />
       </div>
 
-      <CollectionItemGroup items={creators.docs} collection={'creators'} />
+      <CollectionItemGroup id={pageId} items={creators.docs} collection={'creators'} />
 
       <div className="container">
         {creators?.page && creators?.totalPages > 1 && (

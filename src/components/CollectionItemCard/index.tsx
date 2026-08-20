@@ -7,12 +7,11 @@ import type { Creator, Media, Project } from '@/payload-types'
 import { TypedCollection } from 'payload'
 import { Badge, BadgeStatus } from '../ui/badge'
 import { Item, ItemFooter } from '../ui/item'
-import { AspectRatio } from '../ui/aspect-ratio'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import RichText from '../RichText'
-import { ImageMedia } from '../Media/ImageMedia'
 import { CreatorAvatarGroup } from '../CreatorAvatarGroup'
 import { cva } from 'class-variance-authority'
+import { CollectionItemCardImage } from './CollectionItemCardImage'
 
 type SupportedConfigs = Pick<TypedCollection, 'creators' | 'pages' | 'posts' | 'projects'>
 
@@ -72,6 +71,15 @@ const ItemContentClassName = cn(
   'item-content overflow-hidden flex grow flex-col flex-nowrap items-start justify-between',
 )
 
+const ItemContentUpperClassName = cva('item-content-upper', {
+  variants: {
+    layout: {
+      vertical: cn('flex w-full flex-col items-center justify-center'),
+      horizontal: cn('flex w-full flex-row items-center justify-between'),
+    },
+  },
+})
+
 const ItemContentContainerClassName = cva('item-content-container overflow-hidden', {
   variants: {
     layout: {
@@ -96,33 +104,6 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
 
   const { tags, image, title, href, description } = item
 
-  const innerContent = () => {
-    switch (layout) {
-      case 'vertical':
-        return (
-          <div className={ItemContentContainerClassName({ layout: layout })}>
-            {showImages && <ItemCardImage image={image} linkRef={linkCurrentRef} href={href} />}
-            <div className={cn(ItemContentClassName)}>
-              <ItemCardTitle title={title} linkRef={linkCurrentRef} href={href} />
-              {showDescription && <ItemCardDescription description={description} />}
-              <RelatedAvatars item={item} />
-            </div>
-          </div>
-        )
-      case 'horizontal':
-        return (
-          <div className={ItemContentContainerClassName({ layout: layout })}>
-            {showImages && <ItemCardImage image={image} linkRef={linkCurrentRef} href={href} />}
-            <div className={cn(ItemContentClassName)}>
-              <ItemCardTitle title={title} linkRef={linkCurrentRef} href={href} />
-              {showDescription && <ItemCardDescription description={description} />}
-              <RelatedAvatars item={item} />
-            </div>
-          </div>
-        )
-    }
-  }
-
   return (
     <Item
       ref={cardCurrentRef}
@@ -131,7 +112,19 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
       size="sm"
       {...props}
     >
-      {innerContent()}
+      {/* {innerContent()} */}
+      <div className={ItemContentContainerClassName({ layout })}>
+        {showImages && (
+          <CollectionItemCardImage image={image} linkRef={linkCurrentRef} href={href} />
+        )}
+        <div className={cn(ItemContentClassName)}>
+          <div className={ItemContentUpperClassName({ layout })}>
+            <ItemCardTitle title={title} linkRef={linkCurrentRef} href={href} />
+            <RelatedAvatars item={item} />
+          </div>
+          {showDescription && <ItemCardDescription description={description} />}
+        </div>
+      </div>
 
       {showTags && tags && (
         <ItemFooter className={cn('flex flex-col items-start justify-center rounded-none p-0')}>
@@ -150,50 +143,6 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
   )
 }
 
-function ItemCardImage({
-  className,
-  linkRef,
-  href,
-  image,
-  ...props
-}: {
-  image: Media | null
-  linkRef: React.RefObject<HTMLAnchorElement | null>
-  href: string
-} & React.ComponentPropsWithoutRef<'div'>): React.ReactNode {
-  return (
-    <div
-      className={cn(
-        className,
-        'item-image-container flex h-full shrink-0 grow-0 flex-col flex-nowrap items-center justify-center',
-      )}
-      {...props}
-    >
-      <div className={cn('item-image-wrapper')}>
-        <Link className="" href={href} ref={linkRef}>
-          <AspectRatio ratio={1 / 1} className={cn('flex w-full flex-col overflow-clip')}>
-            {image && (
-              <React.Fragment>
-                <ImageMedia
-                  src={image}
-                  objectFit={'cover'}
-                  className={'scale-300 opacity-50 blur-xs'}
-                ></ImageMedia>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ImageMedia
-                    src={image}
-                    className={'overflow-hidden border border-primary/30'}
-                  ></ImageMedia>
-                </div>
-              </React.Fragment>
-            )}
-          </AspectRatio>
-        </Link>
-      </div>
-    </div>
-  )
-}
-
 function ItemCardTitle({
   linkRef,
   href,
@@ -204,9 +153,9 @@ function ItemCardTitle({
   title: string
 }): React.ReactNode {
   return (
-    <div className={cn('item-title flex w-full flex-row py-1')}>
+    <div className={cn('item-title flex w-full flex-row py-1 text-center')}>
       <Link className="" href={href} ref={linkRef}>
-        <span className={'text-2xl hover:underline'}>{title}</span>
+        <span className={'text-2xl text-primary hover:underline'}>{title}</span>
       </Link>
     </div>
   )
@@ -221,13 +170,13 @@ function ItemCardDescription({
     <div
       className={cn(
         'item-text-container w-full grow pr-1 pb-1',
-        'overflow-hidden rounded-none inset-shadow-2xs shadow-primary/90',
+        'overflow-y-hidden rounded-none inset-shadow-2xs shadow-primary/90',
       )}
     >
       {description && typeof description === 'object' ? (
         <RichText
           className={
-            'h-full w-full overflow-scroll rounded border border-primary/10 bg-card/10 p-1 [&_p]:text-sm/6 [&_p]:not-first:hidden'
+            'h-full w-full overflow-y-auto rounded border border-primary/10 bg-card/10 p-1 [&_p]:text-sm/6 [&_p]:not-first:hidden'
           }
           data={description}
           enableGutter={false}
@@ -252,13 +201,10 @@ function RelatedAvatars<T extends keyof SupportedConfigs>({
         return (
           <div
             className={cn(
-              'item-avatars flex w-full items-center justify-start gap-x-1 p-1 pt-0 select-none',
+              'item-avatars flex grow flex-col items-center justify-center gap-x-1 p-1 select-none',
             )}
           >
-            <div className="flex items-center justify-start">
-              <div className={'text-xs text-primary uppercase'}>Contributors</div>
-            </div>
-            <div className={'flex w-full items-center justify-start'}>
+            <div className={'flex w-full items-center justify-center'}>
               <CreatorAvatarGroup creators={item.related} />
             </div>
           </div>

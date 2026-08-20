@@ -12,6 +12,7 @@ export const dynamic = 'force-static'
 export const revalidate = 600
 
 export default async function Page() {
+  const pageId: string = 'projectsCollection'
   const payload = await getPayload({ config: configPromise })
   const projects: PaginatedDocs<Project> = await payload.find({
     collection: 'projects',
@@ -38,7 +39,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionItemGroup items={projects.docs} collection={'projects'} />
+      <CollectionItemGroup id={pageId} items={projects.docs} collection={'projects'} />
 
       <div className="container">
         {projects.totalPages > 1 && projects.page && (

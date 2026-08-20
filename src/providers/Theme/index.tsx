@@ -2,6 +2,11 @@
 
 import * as React from 'react'
 import { ThemeProvider as NextThemesProvider, useTheme as useNextTheme } from 'next-themes'
+import { LocalStorageKey } from '../LocalStorageProvider'
+import { ThemeModeLocalStorageKey } from './ThemeSelector/types'
+
+const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME ?? 'default'
+export const ColorThemeStorageKey = `${LocalStorageKey}-theme`
 
 interface ColorThemeContextType {
   colorTheme: string
@@ -13,13 +18,9 @@ const ColorThemeContext = React.createContext<ColorThemeContextType>({
   setColorTheme: (_theme: string) => {},
 })
 
-const DefaultColorTheme = process.env.DEFAULT_COLOR_THEME ?? 'default'
-const ColorThemeStorageKey = 'michinomicon-theme'
-
 export function ColorThemeProvider({
   children,
   defaultColorTheme = DefaultColorTheme,
-  storageKey = ColorThemeStorageKey,
 }: {
   children: React.ReactNode
   defaultColorTheme?: string
@@ -27,7 +28,7 @@ export function ColorThemeProvider({
 }) {
   const [colorTheme, setColorThemeState] = React.useState<string>(() => {
     if (typeof window !== 'undefined') {
-      return window.localStorage.getItem(storageKey) ?? defaultColorTheme
+      return window.localStorage.getItem(ColorThemeStorageKey) ?? defaultColorTheme
     }
     return defaultColorTheme
   })
@@ -56,11 +57,11 @@ export function ColorThemeProvider({
     if (!isClient) return
 
     if (colorTheme) {
-      localStorage.setItem(storageKey, colorTheme)
+      localStorage.setItem(ColorThemeStorageKey, colorTheme)
     } else {
-      localStorage.removeItem(storageKey)
+      localStorage.removeItem(ColorThemeStorageKey)
     }
-  }, [colorTheme, storageKey, isClient])
+  }, [colorTheme, isClient])
 
   const setColorTheme = React.useCallback((theme: string) => {
     setColorThemeState(theme)
@@ -112,7 +113,7 @@ export function ThemeProvider({
   defaultColorTheme?: string
 }) {
   return (
-    <NextThemesProvider {...props}>
+    <NextThemesProvider {...props} storageKey={ThemeModeLocalStorageKey}>
       <ColorThemeProvider defaultColorTheme={defaultColorTheme}>{children}</ColorThemeProvider>
     </NextThemesProvider>
   )

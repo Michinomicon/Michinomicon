@@ -6,7 +6,7 @@ import { defineConfig, devices } from '@playwright/test'
  */
 import 'dotenv/config'
 
-process.env.APP_NAME = 'Test Application Name'
+process.env.NEXT_PUBLIC_APP_NAME = 'Test Application Name'
 
 /**
  * See https://playwright.dev/docs/test-configuration.

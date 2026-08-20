@@ -21,6 +21,7 @@ const blockComponents = {
 }
 
 export const RenderBlocks: React.FC<{
+  pageSlug: string
   blocks: Page['layout'][0][]
 }> = (props) => {
   const { blocks } = props
