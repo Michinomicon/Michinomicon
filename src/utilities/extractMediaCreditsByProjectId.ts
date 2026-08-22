@@ -1,11 +1,10 @@
 import { Creator, Media, Project } from '@/payload-types'
 import { groupCreditsByCreator } from './groupCreditsByCreator'
 
+export type ProjectCredit = { creator: Creator; roles: string[] }
+
 export type ProjectMediaCreators = {
-  credits: {
-    creator: Creator
-    roles: string[]
-  }[]
+  credits: ProjectCredit[]
   media: Media
 }
 export const extractMediaCreditsByProjectId = (

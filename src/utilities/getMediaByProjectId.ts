@@ -6,9 +6,10 @@ import { Media } from '@/payload-types'
 async function getMediaByProjectId(
   projectId: string,
   limit: number = 1000,
-  depth: number = 3,
+  depth: number = 4,
 ): Promise<Media[]> {
   const payload = await getPayload({ config: configPromise })
+
   const projectMedia = await payload.find({
     collection: 'media',
     limit: limit,

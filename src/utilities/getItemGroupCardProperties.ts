@@ -13,6 +13,7 @@ import {
 } from '@/components/CollectionItemGroup'
 import {
   extractMediaCreditsByProjectId,
+  ProjectCredit,
   ProjectMediaCreators,
 } from './extractMediaCreditsByProjectId'
 
@@ -43,29 +44,30 @@ async function projectToCollectionItemProperties(
 ): Promise<CollectionItemProperties<'projects'>> {
   const { slug, title, profileImage, status, categories, id, content } = project
   const { description } = content
-  const coverImage = isMedia(profileImage) ? profileImage : null
   const projectMedia = await getCachedMediaByProjectId(id)()
-  const projectCreators: Creator[] = extractMediaCreditsByProjectId(projectMedia, id).flatMap<
-    Creator,
+  const projectCredits: ProjectCredit[] = extractMediaCreditsByProjectId(projectMedia, id).flatMap<
+    ProjectCredit,
     ProjectMediaCreators
-  >(({ credits }) => credits.map<Creator>(({ creator }) => creator))
+  >(({ credits }) => credits)
+
+  const coverImage = isMedia(profileImage)
+    ? profileImage
+    : projectMedia?.length >= 1
+      ? projectMedia[0]
+      : null
+
   const creditTags = projectMedia
     ?.flatMap(({ credits }) =>
       credits?.map(({ creator }) => (typeof creator === 'object' ? creator.title : creator)),
     )
     .filter((creator) => typeof creator === 'string')
   const categoryTags = categories?.map((cat) => (typeof cat === 'object' ? cat.title : cat)) ?? []
-  /**
-   * TODO:
-   * - Update project collection items to include creator credit avatar groups (see project page summary table for example implementation)
-   *
-   * */
 
   const useCategoryTags = true
   return {
     collection: 'projects',
     status: status,
-    related: projectCreators,
+    related: projectCredits,
     tags: useCategoryTags ? categoryTags : creditTags,
     image: coverImage,
     description: description,

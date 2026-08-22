@@ -31,13 +31,13 @@ type BasicReference = {
     | string
 }
 
-type PageOrPostReference =
+type CollectionItemReference =
   | HoverCardLinkReference<'pages'>
   | HoverCardLinkReference<'posts'>
   | HoverCardLinkReference<'creators'>
   | HoverCardLinkReference<'projects'>
 
-type HoverCardLinkPropsReference = BasicReference | PageOrPostReference
+type HoverCardLinkPropsReference = BasicReference | CollectionItemReference
 
 type HoverCardLinkContent = {
   url: string

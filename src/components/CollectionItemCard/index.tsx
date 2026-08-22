@@ -3,7 +3,7 @@ import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React, { useRef } from 'react'
-import type { Creator, Media, Project } from '@/payload-types'
+import type { Media, Project } from '@/payload-types'
 import { TypedCollection } from 'payload'
 import { Badge, BadgeStatus } from '../ui/badge'
 import { Item, ItemFooter } from '../ui/item'
@@ -12,6 +12,7 @@ import RichText from '../RichText'
 import { CreatorAvatarGroup } from '../CreatorAvatarGroup'
 import { cva } from 'class-variance-authority'
 import { CollectionItemCardImage } from './CollectionItemCardImage'
+import { ProjectCredit } from '@/utilities/extractMediaCreditsByProjectId'
 
 type SupportedConfigs = Pick<TypedCollection, 'creators' | 'pages' | 'posts' | 'projects'>
 
@@ -23,10 +24,10 @@ type BaseItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfig
   description: string | DefaultTypedEditorState | null | undefined
   title: string
   href: string
-  related: SupportedConfigs[keyof SupportedConfigs][] | null
+  related: unknown[] | null
 }
 interface ProjectItemProperties extends BaseItemProperties<'projects'> {
-  related: Creator[] | null
+  related: ProjectCredit[] | null
 }
 interface CreatorItemProperties<
   T extends keyof SupportedConfigs & 'creators' = 'creators',
@@ -112,7 +113,6 @@ export function CollectionItemCard<T extends keyof SupportedConfigs>({
       size="sm"
       {...props}
     >
-      {/* {innerContent()} */}
       <div className={ItemContentContainerClassName({ layout })}>
         {showImages && (
           <CollectionItemCardImage image={image} linkRef={linkCurrentRef} href={href} />
@@ -205,7 +205,10 @@ function RelatedAvatars<T extends keyof SupportedConfigs>({
             )}
           >
             <div className={'flex w-full items-center justify-center'}>
-              <CreatorAvatarGroup creators={item.related} />
+              <CreatorAvatarGroup
+                credits={item.related}
+                hoverCardProps={{ align: 'center', sideOffset: 0 }}
+              />
             </div>
           </div>
         )

@@ -43,6 +43,7 @@ export type CMSLinkProps = {
   className?: string
   children?: React.ReactNode
   newTab?: boolean | null
+  disableTooltip?: boolean
   tooltipContent?: string | undefined
   tooltipProps?: TooltipProps
 }
@@ -106,6 +107,7 @@ export const CMSLink: React.FC<CMSLinkProps> = (props) => {
     label,
     newTab,
     size: sizeFromProps,
+    disableTooltip = false,
     tooltipContent,
     tooltipProps,
   } = props
@@ -115,36 +117,40 @@ export const CMSLink: React.FC<CMSLinkProps> = (props) => {
   const linkHref = getHref(props)
   const showLabel = size !== 'icon'
 
-  /* Ensure we don't break any styles set by richText */
-  if (appearance === 'link') {
+  const getLink = () => {
+    /* Ensure we don't break any styles set by richText */
+    if (appearance === 'link') {
+      return (
+        <Link className={cn(className)} href={linkHref} {...newTabProps}>
+          {showLabel && label}
+          {children}
+        </Link>
+      )
+    }
+    return (
+      <Button asChild className={className} size={size} variant={appearance}>
+        <Link className={cn(className)} href={linkHref} {...newTabProps}>
+          {showLabel && label}
+          {children}
+        </Link>
+      </Button>
+    )
+  }
+
+  const linkToUse = getLink()
+
+  if (disableTooltip) {
+    return linkToUse
+  } else {
     return (
       <Tooltip
         delayDuration={DEFAULT_TOOLTIP_DELAY}
         disableHoverableContent={true}
         {...tooltipProps}
       >
-        <TooltipTrigger asChild>
-          <Link className={cn(className)} href={linkHref} {...newTabProps}>
-            {showLabel && label}
-            {children}
-          </Link>
-        </TooltipTrigger>
+        <TooltipTrigger asChild>{linkToUse}</TooltipTrigger>
         <TooltipContent>{tooltipContent}</TooltipContent>
       </Tooltip>
     )
   }
-
-  return (
-    <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true} {...tooltipProps}>
-      <TooltipTrigger asChild>
-        <Button asChild className={className} size={size} variant={appearance}>
-          <Link className={cn(className)} href={linkHref} {...newTabProps}>
-            {showLabel && label}
-            {children}
-          </Link>
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>{tooltipContent}</TooltipContent>
-    </Tooltip>
-  )
 }
