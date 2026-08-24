@@ -1,13 +1,15 @@
 import { cn } from '@/utilities/ui'
 import { cva } from 'class-variance-authority'
+import { BaseCollectionItemCardVariant } from '.'
 
-export const CarouselItemVariant = cva('', {
+export const CarouselItemVariant = cva<BaseCollectionItemCardVariant>('', {
   variants: {
     layout: {
       vertical: '',
       horizontal: '',
     },
     height: {
+      xs: '',
       sm: '',
       md: '',
       lg: '',
@@ -100,13 +102,14 @@ export const CarouselItemVariant = cva('', {
   ],
 })
 
-export const CarouselVariant = cva('max-w-11/12', {
+export const CarouselVariant = cva<BaseCollectionItemCardVariant>('max-w-11/12', {
   variants: {
     layout: {
       vertical: '',
       horizontal: '',
     },
     height: {
+      xs: '',
       sm: '',
       md: '',
       lg: '',

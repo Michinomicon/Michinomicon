@@ -15,7 +15,7 @@ import {
 import { GridVariant } from './gridLayoutStyles'
 import { CarouselVariant } from './carouselLayoutStyles'
 import { getGridCardStyle, GridCardStyleName, GridLayoutToolbar } from './GridLayoutToolbar'
-import { CollectionItemCardStyle, CollectionTypes } from '.'
+import { CollectionItemCardConfig, CollectionTypes } from '.'
 import { Separator } from '../ui/separator'
 import { VariantProps } from 'class-variance-authority'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -34,9 +34,9 @@ function initialiseLayoutAndStyle(
     !Array.isArray(storageData) &&
     Object.hasOwn(storageData, 'gridStyle')
       ? (storageData['gridStyle'] as GridCardStyleName)
-      : 'list'
+      : 'grid'
 
-  let cardStyle: CollectionItemCardStyle = initialCardStyle || getGridCardStyle(gridStyle)
+  let cardStyle: CollectionItemCardConfig = initialCardStyle || getGridCardStyle(gridStyle)
 
   if (isMobile) {
     layout = 'grid'
@@ -57,10 +57,10 @@ export interface CollectionItemClientGroupProps {
   items: CollectionItemProperties<keyof CollectionTypes>[]
   className?: string
   layout: 'carousel' | 'grid'
-  cardStyle?: CollectionItemCardStyle
+  cardStyle?: CollectionItemCardConfig
 }
 
-const _defaultCardStyle: CollectionItemCardStyle = {
+const _defaultCardStyle: CollectionItemCardConfig = {
   showTags: false,
   showDescription: true,
   showImages: true,
@@ -93,7 +93,7 @@ export function CollectionItemClientGroup({
     cardStyleFromProps,
   )
 
-  const [cardStyle, setCardStyle] = useState<CollectionItemCardStyle>(initialCardStyle)
+  const [cardStyle, setCardStyle] = useState<CollectionItemCardConfig>(initialCardStyle)
 
   if (!isHydrated) {
     return <></>
@@ -101,7 +101,7 @@ export function CollectionItemClientGroup({
 
   const onCardStyleChange = ([gridStyle, cardStyle]: [
     GridCardStyleName,
-    CollectionItemCardStyle,
+    CollectionItemCardConfig,
   ]) => {
     setCardStyle(cardStyle)
     setLocalStorage(`${id}.gridStyle`, gridStyle)
@@ -165,7 +165,7 @@ export function CollectionItemClientGroup({
 
 export function gridDemo(
   className: string | undefined,
-  cardStyle: CollectionItemCardStyle,
+  cardStyle: CollectionItemCardConfig,
   items: CollectionItemProperties<keyof CollectionTypes>[],
 ) {
   const TestSizes: ('sm' | 'md' | 'lg')[] = ['sm', 'md', 'lg']
@@ -239,7 +239,7 @@ export function gridDemo(
 export function carouselDemo(
   className: string | undefined,
   carouselOptions: Partial<CarouselOptions>,
-  cardStyle: CollectionItemCardStyle,
+  cardStyle: CollectionItemCardConfig,
   items: CollectionItemProperties<keyof CollectionTypes>[],
 ) {
   const TestCarouselSizes: ('sm' | 'md' | 'lg')[] = ['sm', 'md', 'lg']

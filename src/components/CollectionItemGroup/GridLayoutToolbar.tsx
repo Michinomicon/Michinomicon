@@ -1,13 +1,13 @@
 'use client'
 import React from 'react'
-import { CollectionItemCardStyle } from '.'
+import { CollectionItemCardConfig } from '.'
 import { cn } from '@/utilities/ui'
 import { LayoutGrid, StretchHorizontal, LayoutList } from 'lucide-react'
 import { ToggleGroupItem, ToggleGroup } from '../ui/toggle-group'
 
 export type GridCardStyleName = (string & 'grid') | 'list' | 'compact-list'
 
-const GridLayoutProps: CollectionItemCardStyle = {
+const GridLayoutProps: CollectionItemCardConfig = {
   showTags: false,
   showDescription: true,
   showImages: true,
@@ -16,7 +16,7 @@ const GridLayoutProps: CollectionItemCardStyle = {
   layout: 'vertical',
 }
 
-const ListLayoutProps: CollectionItemCardStyle = {
+const ListLayoutProps: CollectionItemCardConfig = {
   showTags: false,
   showDescription: true,
   showImages: true,
@@ -25,16 +25,16 @@ const ListLayoutProps: CollectionItemCardStyle = {
   layout: 'horizontal',
 }
 
-const CompactListLayoutProps: CollectionItemCardStyle = {
+const CompactListLayoutProps: CollectionItemCardConfig = {
   showTags: false,
   showDescription: false,
   showImages: true,
   width: 'lg',
-  height: 'sm',
+  height: 'xs',
   layout: 'horizontal',
 }
 
-export const getGridCardStyle = (layout: GridCardStyleName): CollectionItemCardStyle => {
+export const getGridCardStyle = (layout: GridCardStyleName): CollectionItemCardConfig => {
   switch (layout) {
     case 'grid':
       return GridLayoutProps
@@ -51,11 +51,11 @@ export function GridLayoutToolbar({
   ...props
 }: {
   value: GridCardStyleName
-  onValueChange: (value: [GridCardStyleName, CollectionItemCardStyle]) => void
+  onValueChange: (value: [GridCardStyleName, CollectionItemCardConfig]) => void
 } & React.ComponentPropsWithoutRef<'div'>): React.ReactNode {
   const [gridCardStyle, setGridCardStyle] = React.useState<GridCardStyleName>(value)
 
-  const [_cardStyle, setCardStyle] = React.useState<CollectionItemCardStyle>(
+  const [_cardStyle, setCardStyle] = React.useState<CollectionItemCardConfig>(
     getGridCardStyle(gridCardStyle),
   )
 
