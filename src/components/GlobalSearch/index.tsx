@@ -17,10 +17,14 @@ import {
 import { Button, ButtonProps } from '../ui/button'
 import { SearchIcon } from 'lucide-react'
 import { Page } from '@/payload-types'
+import { cn } from '@/lib/utils'
+import { DEFAULT_TOOLTIP_DELAY, Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
+import { Kbd, KbdGroup } from '../ui/kbd'
 
 type GlobalSearchProps = {
   onSelectionCallback?: () => void
   buttonProps?: ButtonProps
+  showLabel?: boolean
 }
 
 export const getPageCategoryString = (page: Page): string => {
@@ -31,9 +35,22 @@ export const getPageCategoryString = (page: Page): string => {
   return 'Uncategorized'
 }
 
-export default function GlobalSearch({ onSelectionCallback, buttonProps }: GlobalSearchProps) {
+function getTotalResults(results: GlobalSearchResults): number {
+  let total = 0
+  for (const key in results) {
+    total += results[key as keyof GlobalSearchResults]?.length ?? 0
+  }
+  return total
+}
+
+export default function GlobalSearch({
+  onSelectionCallback,
+  buttonProps,
+  showLabel = false,
+}: GlobalSearchProps) {
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
+  const [tooltipOpen, setTooltipOpen] = React.useState(false)
   const [query, setQuery] = React.useState('')
   const debouncedValue = useDebounce(query)
 
@@ -45,6 +62,13 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
     creators: [],
     projects: [],
   })
+
+  const {
+    variant: buttonVariant = 'link',
+    size: buttonSize = 'lg',
+    className: buttonClassName,
+    ...restButtonProps
+  } = buttonProps || ({} as ButtonProps)
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -87,24 +111,69 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
     router.push(path)
   }
 
+  const totalResults = getTotalResults(results)
+
   return (
     <React.Fragment>
-      <Button
-        onClick={() => setOpen(true)}
-        variant={'link'}
-        size={'lg'}
-        className={'w-fit'}
-        {...buttonProps}
+      <Tooltip
+        open={tooltipOpen}
+        onOpenChange={setTooltipOpen}
+        delayDuration={DEFAULT_TOOLTIP_DELAY}
+        disableHoverableContent={true}
       >
-        <SearchIcon className="w-5" />
-        <span className="">Search</span>
-      </Button>
+        <TooltipTrigger asChild>
+          <Button
+            onClick={() => {
+              setTooltipOpen(false)
+              setOpen(true)
+            }}
+            variant={buttonVariant}
+            size={buttonSize}
+            className={cn(buttonClassName, 'w-fit')}
+            {...restButtonProps}
+          >
+            <SearchIcon className="w-5" />
+            {showLabel && <span className="">Search</span>}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          Search (
+          {
+            <KbdGroup>
+              <Kbd>Ctrl + K</Kbd>
+            </KbdGroup>
+          }
+          )
+        </TooltipContent>
+      </Tooltip>
+
       <CommandDialog title={'Search'} open={open} onOpenChange={setOpen}>
         <Command shouldFilter={false} label="" disablePointerSelection={true} vimBindings={false}>
+          <div className="w-full px-1 pb-4">
+            <div className={'ml-auto text-right text-[10px] text-muted-foreground'}>
+              Press{' '}
+              {
+                <KbdGroup>
+                  <Kbd>escape</Kbd>
+                </KbdGroup>
+              }{' '}
+              or click outside to close.
+            </div>
+          </div>
           {/* shouldFilter={false} required to bypass cmdk default text filtering */}
-          <CommandInput placeholder="Search..." value={query} onValueChange={setQuery} />
+          <CommandInput
+            placeholder="Start typing to search site content..."
+            value={query}
+            onValueChange={setQuery}
+          />
           <CommandList className={'p-1'}>
-            <CommandEmpty>{loading ? 'Searching...' : 'No results found.'}</CommandEmpty>
+            <CommandEmpty className={'h-20'}>
+              {loading ? 'Searching...' : query.length > 0 ? 'No results found.' : ''}
+            </CommandEmpty>
+
+            {totalResults > 0 && (
+              <div className="text-center text-sm">Found {totalResults} results.</div>
+            )}
 
             {/* --- CATEGORIES GROUP --- */}
             {/* {results.categories.length > 0 && (
@@ -131,7 +200,10 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
             {/* --- Projects GROUP --- */}
             {results.projects.length > 0 && (
               <>
-                <CommandGroup heading="Projects" className={'group p-0'}>
+                <CommandGroup
+                  heading={`Projects (${results.projects.length})`}
+                  className={'group p-0'}
+                >
                   {results.projects.map((project) => (
                     <CommandItem
                       key={project.id}
@@ -164,7 +236,10 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
             {/* --- Creators GROUP --- */}
             {results.creators.length > 0 && (
               <>
-                <CommandGroup heading="Creators" className={'group p-0'}>
+                <CommandGroup
+                  heading={`Creators (${results.creators.length})`}
+                  className={'group p-0'}
+                >
                   {results.creators.map((creator) => (
                     <CommandItem
                       key={creator.id}
@@ -197,7 +272,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
             {/* --- Pages GROUP --- */}
             {results.pages.length > 0 && (
               <>
-                <CommandGroup heading="Pages" className={'group p-0'}>
+                <CommandGroup heading={`Pages (${results.pages.length})`} className={'group p-0'}>
                   {results.pages.map((page) => (
                     <CommandItem
                       key={page.id}
@@ -229,7 +304,7 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
 
             {/* --- POSTS GROUP --- */}
             {results.posts.length > 0 && (
-              <CommandGroup heading="Posts" className={'group p-0'}>
+              <CommandGroup heading={`Posts (${results.posts.length})`} className={'group p-0'}>
                 {results.posts.map((post) => (
                   <CommandItem
                     key={post.id}
