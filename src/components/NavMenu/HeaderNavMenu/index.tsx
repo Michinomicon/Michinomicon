@@ -33,26 +33,28 @@ import GlobalSearch from '@/components/GlobalSearch'
 import { CMSLink } from '@/components/Link'
 
 const navigationMenuTabTriggerStyle = cn(
-  'h-9 items-center justify-center rounded-md bg-background text-sm font-medium transition-colors text-accent-foreground',
+  'h-9 items-center justify-center rounded-none bg-background text-sm font-medium transition-colors text-accent-foreground',
   'hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50',
   'data-[state=active]:text-accent-foreground data-[state=active]:bg-accent/50 data-[state=active]:hover:bg-accent data-[state=active]:focus:bg-accent',
 )
 
-const NavigationMenuItemClassName = cn('nav-menu-item [&_>button]:data-[state=open]:rounded-b-none')
-const NavigationMenuContentClassName = cn('animate-in animate-out slide-in-from-top delay-600')
+const NavigationMenuItemClassName = cn(
+  'nav-menu-item rounded-none [&_>a]:rounded-none [&_>button]:rounded-none border-transparent border border-t-0 border-b-0 not-last:border-r-border/20',
+)
+const NavigationMenuContentClassName = cn('inset-shadow-header rounded-none')
 const NavigationMenuContentInnerContainerClassName = cn(
-  'gap-x-1 gap-y-0 w-screen inset-shadow-header',
+  'border-border/30 border border-t-0 gap-x-1 gap-y-0 bg-card rounded-none rounded-b-md',
 )
 
 const RecursiveTabsTabsClassName = cn(
-  'nav-tabs flex w-screen flex-col items-center justify-center gap-0 rounded-none',
+  'nav-tabs w-full mx-auto flex flex-col items-center justify-center gap-0 rounded-none',
 )
 const RecursiveTabsTabsListClassName = cn(
-  'w-max flex items-center justify-center gap-0 m-0 rounded-none bg-card/10',
+  'py-0 flex items-center justify-center gap-0 m-0 rounded-none bg-card/10 border-transparent border [&_>button]:not-last:border-r-border/20',
 )
 const RecursiveTabsTabsTriggerClassName = cn(
   navigationMenuTabTriggerStyle,
-  'group flex shrink grow-0 flex-col rounded-t-md px-2 mx-1',
+  'border border-r bg-card group flex shrink grow-0 flex-col items-center justify-center rounded-none px-4 min-w-30 w-fit',
 )
 const RecursiveTabsTabsTriggerTitleClassName = cn(
   'text-accent-foreground dark:text-accent-foreground',
@@ -63,7 +65,7 @@ const RecursiveTabsTabsTriggerActiveStatusChevronClassName = cn(
 )
 const RecursiveTabsTabContentContainerClassName = cn(
   'nav-tab-content m-0 flex w-full min-w-max flex-1 items-center justify-center overflow-x-hidden overflow-y-auto rounded-none',
-  'border-0 border-t border-border bg-card/30 p-0 inset-shadow-header delay-600 animate-in animate-out slide-in-from-top',
+  'border-0 border-t border-border bg-card/30 p-0 inset-shadow-header ',
   'group-data-[state=active]:[&_>*]:opacity-1 opacity-0 transition-opacity',
 )
 const RecursiveTabsTabsContentClassName = cn(
@@ -206,7 +208,7 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.JSX.Element 
       value={activeTab}
       className={cn(RecursiveTabsTabsClassName)}
     >
-      <TabsList className={cn(RecursiveTabsTabsListClassName)} variant={'line'}>
+      <TabsList className={cn(RecursiveTabsTabsListClassName)} variant={'default'}>
         {items.map((menuItem) => (
           <MenuItemTabsTrigger
             key={menuItem.id}
@@ -348,7 +350,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
           <NavigationMenuContent className={cn(NavigationMenuContentClassName)}>
             <div className={cn(HeaderRowStyles, NavigationMenuContentInnerContainerClassName)}>
               <div className="col-span-8 col-start-3">
-                <div className={cn('flex flex-col items-center justify-center')}>
+                <div className={cn('flex w-full flex-col items-center justify-center')}>
                   <RecursiveTabs items={item.children} />
                 </div>
               </div>
@@ -361,7 +363,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
       return (
         <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
-            <NavigationMenuItem className={NavigationMenuItemClassName}>
+            <NavigationMenuItem className={cn(NavigationMenuItemClassName)}>
               <NavigationMenuLink
                 className={cn(navigationMenuTriggerStyle(), 'cursor-not-allowed opacity-50')}
                 onMouseOver={(event) => event.preventDefault()}
@@ -385,7 +387,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
           <NavigationMenuContent className={cn(NavigationMenuContentClassName)}>
             <div className={cn(HeaderRowStyles, NavigationMenuContentInnerContainerClassName)}>
               <div className="col-span-8 col-start-3">
-                <div className={cn('flex flex-col items-center justify-center')}>
+                <div className={cn('flex w-full flex-col items-center justify-center')}>
                   <PageContentPanel item={item} />
                 </div>
               </div>
@@ -488,35 +490,27 @@ function SearchNavigationMenuItem({
   ...props
 }: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>) {
   const useClassicSearch: boolean = false
-  const [tooltipOpen, setTooltipOpen] = React.useState(false)
-
   return (
-    <Tooltip
-      open={tooltipOpen}
-      onOpenChange={setTooltipOpen}
-      delayDuration={DEFAULT_TOOLTIP_DELAY}
-      disableHoverableContent={true}
-    >
-      <TooltipTrigger asChild>
-        <NavigationMenuItem
-          {...props}
-          className={NavigationMenuItemClassName}
-          onClick={() => setTooltipOpen(false)}
-        >
-          {useClassicSearch ? (
-            <ClassicSearchLink></ClassicSearchLink>
-          ) : (
-            <GlobalSearch buttonProps={{ variant: 'ghost', size: 'default' }} />
-          )}
-        </NavigationMenuItem>
-      </TooltipTrigger>
-      <TooltipContent>Search</TooltipContent>
-    </Tooltip>
+    <NavigationMenuItem {...props} className={NavigationMenuItemClassName}>
+      {useClassicSearch ? (
+        <ClassicSearchLink></ClassicSearchLink>
+      ) : (
+        <GlobalSearch
+          buttonProps={{
+            variant: 'clean',
+            size: 'sm',
+            className: navigationMenuTriggerStyle(),
+          }}
+        />
+      )}
+    </NavigationMenuItem>
   )
 }
 
 function NavigationMenuItems({ menuTree }: { menuTree: MenuTree }): React.JSX.Element[] {
-  return menuTree.map((item) => <NavigationMenuLevelZeroNode key={item.id} item={item} />)
+  return menuTree.map((item, index) => (
+    <NavigationMenuLevelZeroNode key={`${index}-${item.id}`} item={item} />
+  ))
 }
 
 export type NavMenuProps = {
@@ -530,7 +524,7 @@ export default function HeaderNavMenu({
   NavMenuProps): React.JSX.Element {
   return (
     <NavigationMenu {...props} orientation={'vertical'}>
-      <NavigationMenuList orientation={'vertical'}>
+      <NavigationMenuList orientation={'vertical'} className={'space-x-0'}>
         <HomeNavigationMenuItem />
         <NavigationMenuItems menuTree={menuTree} />
         <SearchNavigationMenuItem />

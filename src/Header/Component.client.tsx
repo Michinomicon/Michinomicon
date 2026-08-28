@@ -22,7 +22,7 @@ interface HeaderClientProps {
 
 export const HeaderRowStyles = 'grid grid-cols-12 grid-rows-1 gap-3 rounded-none px-3 '
 export const AltHeaderRowStyles =
-  'flex max-h-12 w-screen flex-row items-center rounded-none border-b px-3'
+  'flex max-h-12 w-screen flex-row items-center rounded-none px-3 py-1'
 
 export const HeaderClient: React.FC<HeaderClientProps> = ({
   appTitle,
@@ -107,7 +107,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         data-mode={themeMode}
       >
         {/* TOP ROW OF HEADER */}
-        <div className={cn(AltHeaderRowStyles, 'border-b py-1')}>
+        <div className={cn(AltHeaderRowStyles)}>
           <div className={cn('py-auto h-full min-w-[20vw] flex-0')}>{twitchStatusSlot}</div>
           <div className={cn('max-h-10 max-w-[60vw] grow content-center')}>
             <AppMainLogo text={appTitle} className={'mx-auto'} />
@@ -118,7 +118,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         </div>
 
         {/* BOTTOM ROW OF HEADER */}
-        <div className={cn(HeaderRowStyles, 'container py-1')}>
+        <div className={cn(HeaderRowStyles, 'container w-[80vw]')}>
           <div className="col-span-full flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 xl:col-span-10 xl:col-start-2">
             <HeaderNavMenu menuTree={menuTree} />
           </div>

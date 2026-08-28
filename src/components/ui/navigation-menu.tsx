@@ -100,15 +100,17 @@ const NavigationMenuViewport = React.forwardRef<
 >(({ orientation = 'vertical', className, ...props }, ref) => {
   const containerStyles = orientation === 'vertical' ? 'flex-col' : 'flex'
   return (
-    <div className={cn('absolute top-full isolate z-50 justify-center', containerStyles)}>
+    <div
+      className={cn('absolute top-full isolate z-50 items-center justify-center', containerStyles)}
+    >
       <NavigationMenuPrimitive.Viewport
         className={cn(
           'h-(--radix-navigation-menu-viewport-height)',
-          'md:w-screen md:min-w-(--radix-navigation-menu-viewport-width)',
+          'md:w-screen md:max-w-(--radix-navigation-menu-viewport-width)',
           'items-center justify-center',
-          'bg-background text-background',
-          'rounded-t-none rounded-b-md',
-          'border-0 border-t',
+          'text-background',
+          'rounded-t-none rounded-b-sm',
+          'border-0',
           'origin-top-center relative overflow-hidden shadow data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:zoom-in-90',
           className,
         )}
