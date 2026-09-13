@@ -279,7 +279,9 @@ function PageContentsHeadingList({ tableOfContents }: { tableOfContents: TOCItem
   )
 }
 
-type PageTOCProps = Omit<ButtonProps & React.RefAttributes<HTMLButtonElement>, 'onClick'>
+type PageTOCProps = Omit<ButtonProps & React.RefAttributes<HTMLButtonElement>, 'onClick'> & {
+  showLabel?: boolean
+}
 export function PageTableOfContentsTrigger(props: PageTOCProps) {
   const { variant: variantFromProps, onMouseLeave, ...restProps } = props
   const { toggleSidebar, open } = useSidebar()
@@ -346,7 +348,7 @@ export function PageTableOfContentsTrigger(props: PageTOCProps) {
   )
 }
 
-export function PageTOCTriggerButton(props: PageTOCProps) {
+export function PageTOCTriggerButton({ showLabel = false, ...props }: PageTOCProps) {
   const { toggleSidebar, open } = useSidebar()
 
   const handleClick = () => {
@@ -364,6 +366,7 @@ export function PageTOCTriggerButton(props: PageTOCProps) {
           aria-label={`${open ? 'Collapse Table of Contents' : 'Show Table of Contents'}`}
         >
           <ListTree />
+          {showLabel && <span className="">Page</span>}
         </Button>
       </TooltipTrigger>
       <TooltipContent>

@@ -26,7 +26,7 @@ import GlobalSearch from '@/components/GlobalSearch'
 
 export type MobileMenuProps = {
   appTitle?: string
-  menuTree: MenuTreeItem[]
+  menuItems: MenuTreeItem[]
   twitchStatusSlot?: React.ReactNode
   triggerButtonProps?: ComponentPropsWithoutRef<typeof Button>
   triggerButtonIconProps?: ComponentPropsWithoutRef<typeof Icon>
@@ -34,19 +34,31 @@ export type MobileMenuProps = {
 
 function MobileMenuItem({
   item,
+  index,
   menuDepth = 0,
+  isOpen = false,
   onNavigateHandler,
+  onOpenChange,
 }: {
   item: MenuTreeItem
+  index: number
   menuDepth?: number
+  isOpen?: boolean
   onNavigateHandler: OnNavigateHandler
-}): React.JSX.Element {
+  onOpenChange?: () => void
+}): React.ReactNode {
   const hasChildren = item.children && item.children.length > 0
+  const isOddIndex = Math.abs(index % 2) == 1
 
   // Empty Category -> Disabled Item
   if (item.type === 'category' && !hasChildren) {
     return (
-      <div className="rounded-none">
+      <div
+        className={cn(
+          'rounded-none border-b border-b-border/10 py-2',
+          isOddIndex ? 'bg-black/5' : '',
+        )}
+      >
         <Button
           disabled
           variant="ghost"
@@ -64,7 +76,12 @@ function MobileMenuItem({
   // PAGE with children (Posts)
   if (item.type === 'page' || !hasChildren) {
     return (
-      <div className="rounded-none">
+      <div
+        className={cn(
+          'rounded-none border-b border-b-border/10 py-2',
+          isOddIndex ? 'bg-black/5' : '',
+        )}
+      >
         <Button
           asChild
           variant="ghost"
@@ -84,41 +101,38 @@ function MobileMenuItem({
   // CATEGORY with children
   if (item.type === 'category') {
     return (
-      <Collapsible className={cn('w-full rounded-none')}>
+      <Collapsible
+        className={cn(
+          'w-full rounded-none border-b border-b-border/10 py-2',
+          isOddIndex ? 'bg-black/5' : '',
+        )}
+        defaultOpen={false}
+        open={isOpen}
+        onOpenChange={onOpenChange}
+      >
         <CollapsibleTrigger asChild>
           <Button
             variant="ghost"
             size="lg"
             className={cn(
-              'group w-full justify-start rounded-none px-0 pl-1 text-lg text-foreground transition-none',
-              'data-[state=open]:font-bold',
-              'data-[state=open]:pl-0',
-              'data-[state=open]:ml-0',
-              'data-[state=open]:border-l-4 data-[state=open]:border-l-primary/50',
+              'group w-full justify-start rounded-none px-0 pl-2 text-lg text-foreground transition-none data-[state=open]:ml-0 data-[state=open]:border-l-4 data-[state=open]:border-l-primary/50 data-[state=open]:pl-0 data-[state=open]:font-bold',
             )}
           >
-            <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
+            <ChevronRightIcon className={cn('transition-transform', isOpen ? 'rotate-90' : '')} />
             {item.title}
           </Button>
         </CollapsibleTrigger>
         <CollapsibleContent className={cn('group rounded-none')}>
           <div
             className={cn(
-              'bg-card/40',
-              'flex flex-col gap-x-1',
-              'ml-0 rounded-none',
-              'pl-2',
-              'group-data-[state=open]:border-l-4 group-data-[state=open]:border-l-primary/50',
+              'ml-0 flex flex-col gap-x-1 rounded-none bg-card/40 pl-1 group-data-[state=open]:border-l-4 group-data-[state=open]:border-l-primary/50',
             )}
           >
-            {item.children?.map((child) => (
-              <MobileMenuItem
-                key={child.id}
-                item={child}
-                menuDepth={menuDepth + 1}
-                onNavigateHandler={onNavigateHandler}
-              />
-            ))}
+            <MenuLevel
+              items={item.children!}
+              level={menuDepth + 1}
+              onNavigateHandler={onNavigateHandler}
+            />
           </div>
         </CollapsibleContent>
       </Collapsible>
@@ -128,10 +142,40 @@ function MobileMenuItem({
   return <></>
 }
 
+interface MenuLevelProps {
+  items: MenuTreeItem[]
+  level?: number
+  onNavigateHandler: OnNavigateHandler
+}
+const MenuLevel: React.FC<MenuLevelProps> = ({ items, level = 0, onNavigateHandler }) => {
+  const [openItemId, setOpenItemId] = useState<string | null>(null)
+  return (
+    <React.Fragment>
+      {items.map((item, index) => {
+        const itemKey: string = `${item.id}-${level}-${index}`
+        return (
+          <MobileMenuItem
+            key={`${item.id}-${index}`}
+            index={index}
+            item={item}
+            menuDepth={level}
+            isOpen={openItemId === itemKey}
+            onNavigateHandler={onNavigateHandler}
+            onOpenChange={() =>
+              // If open, close it. Otherwise, open it.
+              setOpenItemId(openItemId === itemKey ? null : itemKey)
+            }
+          />
+        )
+      })}
+    </React.Fragment>
+  )
+}
+
 type OnNavigateHandler = (event?: { preventDefault: () => void }) => void
 
 export default function MobileNavMenu({
-  menuTree: navTree,
+  menuItems,
   appTitle,
   twitchStatusSlot,
   triggerButtonProps = {},
@@ -145,9 +189,9 @@ export default function MobileNavMenu({
     ...restTriggerButtonProps
   } = triggerButtonProps
   const triggerButtonVariant = variantFromProps ?? 'ghost'
-  const triggerButtonSize = sizeFromProps ?? 'icon'
+  const triggerButtonSize = sizeFromProps ?? 'lg'
 
-  const handleOnNavigate: OnNavigateHandler = () => {
+  const onNavigateHandler: OnNavigateHandler = () => {
     console.log(`closing mobile nav menu after link navigation`)
     setIsOpen(false)
   }
@@ -163,6 +207,7 @@ export default function MobileNavMenu({
           {...restTriggerButtonProps}
         >
           <Menu className="transition-transform" size={48} />
+          <span className="">Menu</span>
         </Button>
       </DrawerTrigger>
 
@@ -183,17 +228,18 @@ export default function MobileNavMenu({
           <DrawerDescription></DrawerDescription>
         </DrawerHeader>
 
-        <div className={cn('flex h-full w-full flex-col overflow-hidden')}>
+        <div
+          className={cn(
+            'mt-auto flex h-full max-h-2/3 w-full flex-col justify-end overflow-hidden',
+          )}
+        >
           <div
             className={cn(
               MobileDrawerContentListCLassName,
-              // 'items-center ',
-              'flex h-full flex-col justify-stretch gap-y-0 overflow-x-hidden overflow-y-auto',
+              'flex max-h-full min-h-fit flex-col justify-end overflow-x-hidden overflow-y-auto',
             )}
           >
-            {navTree.map((item) => (
-              <MobileMenuItem key={item.id} item={item} onNavigateHandler={handleOnNavigate} />
-            ))}
+            <MenuLevel items={menuItems} level={0} onNavigateHandler={onNavigateHandler} />
           </div>
         </div>
 
@@ -203,7 +249,7 @@ export default function MobileNavMenu({
               <Link
                 href="/home"
                 passHref
-                onNavigate={handleOnNavigate}
+                onNavigate={onNavigateHandler}
                 className="no-underline decoration-0"
               >
                 <House className="w-5" />
@@ -211,16 +257,10 @@ export default function MobileNavMenu({
               </Link>
             </Button>
             <GlobalSearch
-              onSelectionCallback={handleOnNavigate}
+              onSelectionCallback={onNavigateHandler}
               buttonProps={{ className: 'text-primary' }}
             />
             <SettingsDrawer />
-            {/* <Button variant={'link'} size={'lg'} className={'text-primary'} asChild>
-                <Link href="/searchresults" passHref onNavigate={handleOnNavigate}>
-                  <SearchIcon className="w-5" />
-                  <span>Search</span>
-                </Link>
-              </Button> */}
           </div>
           <DrawerClose asChild>
             <Button variant="ghost" className="w-fit">
@@ -300,15 +340,19 @@ function AppearanceSettingsDrawer() {
 }
 
 const MobileDrawerMainMenuContentClassName = cn(
-  'rounded-none bg-blend-darken',
-  'data-[vaul-drawer-direction=bottom]:h-screen data-[vaul-drawer-direction=bottom]:min-h-90vh',
+  'rounded-md bg-background',
+  'data-[vaul-drawer-direction=bottom]:h-screen',
+  'data-[vaul-drawer-direction=bottom]:max-h-[90vh]',
+  'data-[vaul-drawer-direction=bottom]:min-h-1/2',
   'data-[vaul-drawer-direction=bottom]:rounded-t-none',
 )
 const MobileDrawerSubMenuContentClassName = cn(
-  'rounded-none bg-blend-darken',
-  'data-[vaul-drawer-direction=bottom]:max-h-90vh data-[vaul-drawer-direction=bottom]:min-h-1/2',
+  'rounded-md bg-background',
+  'data-[vaul-drawer-direction=bottom]:max-h-2/3',
+  'data-[vaul-drawer-direction=bottom]:min-h-1/2',
   'data-[vaul-drawer-direction=bottom]:rounded-t-none',
 )
 const MobileDrawerContentListCLassName =
-  'mx-2 flex flex-col justify-center gap-y-4 overflow-auto border border-primary/30 bg-background pb-2' //items-center
+  'mx-2 flex flex-col justify-center overflow-auto border border-primary/30 bg-background rounded-md'
+
 const MobileDrawerFooterClassName = 'flex flex-col items-center justify-center rounded-none'
