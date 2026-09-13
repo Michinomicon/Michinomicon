@@ -9,7 +9,6 @@ import React from 'react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { StreamTimer } from './StreamTimer'
 import { cn } from '@/lib/utils'
-import { useIsMobile } from '@/hooks/use-mobile'
 
 type TwitchStatusData = {
   live: boolean
@@ -30,24 +29,16 @@ type StreamStatusBadgeProps = { data: TwitchStatusData; options: TwitchStatusLiv
 function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
   const { live, gameName, startedAt, title } = data
   const { showTitle, showGameName, showLiveDuration } = options
-  const isMobile = useIsMobile()
   if (live) {
     return (
       <Tooltip delayDuration={800} disableHoverableContent={true}>
         <TooltipTrigger className="py-0" asChild>
           <Badge
-            variant={'destructive'}
-            className="flex h-fit w-fit gap-0 rounded-[0.4rem] px-1 py-0 text-xs font-medium xl:text-base"
+            variant={'status'}
+            status={'live'}
+            className="flex h-fit w-fit rounded-[4px] px-1 py-0 text-center text-xs xl:text-base"
           >
-            {isMobile && (
-              <Image
-                src={TwitchGlitchIcon}
-                alt="twitch logo"
-                className="h-3 w-3 rounded-none"
-                loading="eager"
-              />
-            )}
-            <span className="ml-1">LIVE</span>
+            <span className="">LIVE</span>
           </Badge>
         </TooltipTrigger>
         <TooltipContent>
@@ -76,18 +67,11 @@ function StreamStatusBadge({ data, options }: StreamStatusBadgeProps) {
   } else {
     return (
       <Badge
-        variant="outline"
-        className="border-text-muted-foreground rounded-[0.4rem] text-xs font-medium text-muted-foreground capitalize no-underline! xl:text-base"
+        variant={'status'}
+        status={'offline'}
+        className="border-text-muted-foreground rounded-[4px] px-1 py-0 text-center text-xs font-medium capitalize no-underline! xl:text-base"
       >
-        {isMobile && (
-          <Image
-            src={TwitchGlitchIcon}
-            alt="twitch logo"
-            className="h-3 w-3 rounded-none"
-            loading="eager"
-          />
-        )}
-        <span className="ml-1">OFFLINE</span>
+        <span className="">OFFLINE</span>
       </Badge>
     )
   }

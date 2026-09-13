@@ -12,6 +12,9 @@ import { useIsMobile } from '@/hooks/use-mobile'
 import MobileNavMenu from '@/components/NavMenu/MobileNavMenu'
 import HeaderNavMenu from '@/components/NavMenu/HeaderNavMenu'
 import { PageTOCTriggerButton } from '@/components/PageTableOfContents'
+import { useBreakpoint } from '@/hooks/use-breakpoint'
+import MainNavMenu from '@/components/NavMenu/HeaderNavMenu'
+import GlobalSearch from '@/components/GlobalSearch'
 
 interface HeaderClientProps {
   data: Header
@@ -31,6 +34,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
 }) => {
   const pathname = usePathname()
   const isMobile = useIsMobile()
+  const isLGBreakpoint = useBreakpoint('lg')
 
   const [themeMode, setThemeMode] = useState<string | null>(null)
   const { headerThemeMode, setHeaderThemeMode, headerThemeColor, setHeaderThemeColor } =
@@ -62,44 +66,77 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
 
   if (isMobile) {
     return (
-      <header
-        className={`fixed top-0 z-20 w-screen max-w-screen rounded-none bg-background shadow-md`}
-        data-theme={themeColor}
-        data-mode={themeMode}
-      >
-        <div
-          className={cn('flex max-h-12 w-screen flex-row items-center rounded-none border-b px-3')}
+      <React.Fragment>
+        <header
+          className={cn(
+            `fixed z-20 w-screen max-w-screen rounded-none bg-background shadow-md`,
+            'top-0',
+          )}
+          data-theme={themeColor}
+          data-mode={themeMode}
         >
-          {/* Left group */}
-          <div className="flex h-full flex-1 items-center justify-start gap-2">
-            <div className="py-auto h-full min-w-fit flex-0">
-              <MobileNavMenu
-                appTitle={appTitle}
-                menuTree={menuTree}
-                twitchStatusSlot={twitchStatusSlot}
-              />
-            </div>
-            <div className="py-auto h-full min-w-fit flex-0 max-sm:hidden">{twitchStatusSlot}</div>
-          </div>
-
-          {/* center group */}
           <div
             className={cn(
-              'min-w-60 shrink-0 content-center',
-              'mx-auto h-full items-center justify-center text-center',
+              'flex max-h-12 w-screen flex-row items-center rounded-none border-b px-3',
             )}
           >
-            <AppMainLogo text={appTitle} variant={'default'} />
-          </div>
+            {/* Left group */}
+            <div className={cn('h-full items-center justify-start gap-2', 'min-w-60 shrink-0')}>
+              <AppMainLogo text={appTitle} variant={'default'} />
+            </div>
 
-          {/* right group */}
-          <div className="flex h-full min-w-fit flex-1 items-center justify-end gap-2">
-            <PageTOCTriggerButton size={'icon'} />
+            {/* right group */}
+            <div className="flex h-full min-w-fit flex-1 items-center justify-end gap-2">
+              <div className="py-auto h-full min-w-fit flex-0">{twitchStatusSlot}</div>
+            </div>
           </div>
-        </div>
-      </header>
+        </header>
+
+        <header
+          className={cn(
+            `fixed z-20 w-screen rounded-none bg-background shadow-md`,
+            'bottom-0 flex flex-col items-center justify-center',
+          )}
+          data-theme={themeColor}
+          data-mode={themeMode}
+        >
+          <div
+            className={cn(
+              'flex h-16 w-full flex-row flex-nowrap items-center justify-evenly rounded-none border-b px-3',
+            )}
+          >
+            <div className="">
+              <MobileNavMenu
+                appTitle={appTitle}
+                menuItems={menuTree}
+                twitchStatusSlot={twitchStatusSlot}
+                triggerButtonProps={{ size: 'lg', className: cn('text-xl px-1') }}
+              />
+            </div>
+
+            <div className="">
+              <GlobalSearch
+                showLabel={true}
+                buttonProps={{
+                  variant: 'clean',
+                  size: 'lg',
+                  className: cn('text-xl px-1'),
+                }}
+              />
+            </div>
+
+            <div className="">
+              <PageTOCTriggerButton size={'lg'} showLabel={true} className={'px-1 text-xl'} />
+            </div>
+          </div>
+        </header>
+      </React.Fragment>
     )
   } else {
+    const BottomRowClassName = cn(
+      'col-span-full flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 xl:col-span-10 xl:col-start-2',
+    )
+
     return (
       <header
         className={`fixed top-0 z-20 w-screen rounded-none bg-background shadow-md`}
@@ -118,11 +155,27 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         </div>
 
         {/* BOTTOM ROW OF HEADER */}
-        <div className={cn(HeaderRowStyles, 'container w-[80vw]')}>
-          <div className="col-span-full flex flex-row flex-nowrap justify-center rounded-none bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 xl:col-span-10 xl:col-start-2">
-            <HeaderNavMenu menuTree={menuTree} />
+        {isLGBreakpoint ? (
+          <React.Fragment>
+            <div className={cn(HeaderRowStyles, 'container w-[80vw]')}>
+              <div className={cn(BottomRowClassName)}>
+                <MainNavMenu />
+              </div>
+            </div>
+
+            <div className={cn(HeaderRowStyles, 'container w-[80vw]')}>
+              <div className={cn(BottomRowClassName)}>
+                <MainNavMenu showSearch={false} showHome={false} menuItems={menuTree} />
+              </div>
+            </div>
+          </React.Fragment>
+        ) : (
+          <div className={cn(HeaderRowStyles, 'container w-[80vw]')}>
+            <div className={cn(BottomRowClassName)}>
+              <HeaderNavMenu menuItems={menuTree} />
+            </div>
           </div>
-        </div>
+        )}
       </header>
     )
   }

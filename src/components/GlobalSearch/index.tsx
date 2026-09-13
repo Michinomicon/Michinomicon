@@ -20,6 +20,7 @@ import { Page } from '@/payload-types'
 import { cn } from '@/lib/utils'
 import { DEFAULT_TOOLTIP_DELAY, Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { Kbd, KbdGroup } from '../ui/kbd'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 type GlobalSearchProps = {
   onSelectionCallback?: () => void
@@ -47,7 +48,8 @@ export default function GlobalSearch({
   onSelectionCallback,
   buttonProps,
   showLabel = false,
-}: GlobalSearchProps) {
+}: GlobalSearchProps): React.ReactNode {
+  const isMobile = useIsMobile()
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
   const [tooltipOpen, setTooltipOpen] = React.useState(false)
@@ -147,20 +149,27 @@ export default function GlobalSearch({
         </TooltipContent>
       </Tooltip>
 
-      <CommandDialog title={'Search'} open={open} onOpenChange={setOpen}>
+      <CommandDialog title={'Search'} open={open} onOpenChange={setOpen} className={cn('w-90/100')}>
+        {/* shouldFilter={false} required to bypass cmdk default text filtering */}
         <Command shouldFilter={false} label="" disablePointerSelection={true} vimBindings={false}>
-          <div className="w-full px-1 pb-4">
+          <div className="mx-auto px-1 pb-4">
             <div className={'ml-auto text-right text-[10px] text-muted-foreground'}>
-              Press{' '}
-              {
-                <KbdGroup>
-                  <Kbd>escape</Kbd>
-                </KbdGroup>
-              }{' '}
-              or click outside to close.
+              {isMobile ? (
+                <span className="">tap outside to close.</span>
+              ) : (
+                <span className="">
+                  Press{' '}
+                  {
+                    <KbdGroup>
+                      <Kbd>escape</Kbd>
+                    </KbdGroup>
+                  }{' '}
+                  or click outside to close.
+                </span>
+              )}
             </div>
           </div>
-          {/* shouldFilter={false} required to bypass cmdk default text filtering */}
+
           <CommandInput
             placeholder="Start typing to search site content..."
             value={query}

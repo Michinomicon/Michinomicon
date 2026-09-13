@@ -32,47 +32,29 @@ import { HeaderRowStyles } from '@/Header/Component.client'
 import GlobalSearch from '@/components/GlobalSearch'
 import { CMSLink } from '@/components/Link'
 
-const navigationMenuTabTriggerStyle = cn(
-  'h-9 items-center justify-center rounded-none bg-background text-sm font-medium transition-colors text-accent-foreground',
-  'hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50',
-  'data-[state=active]:text-accent-foreground data-[state=active]:bg-accent/50 data-[state=active]:hover:bg-accent data-[state=active]:focus:bg-accent',
+const NavigationMenuItemClassName = cn(
+  'group-has-[[data-state=open]]:[&:not([data-state=open]):not(:has([data-state=open]))]:[&_>*]:opacity-60!',
+  'w-[160px] [&_>*]:w-[160px] text-center',
+  'nav-menu-item rounded-none [&_>*]:rounded-none border-transparent ',
 )
 
-const NavigationMenuItemClassName = cn(
-  'nav-menu-item rounded-none [&_>a]:rounded-none [&_>button]:rounded-none border-transparent border border-t-0 border-b-0 not-last:border-r-border/20',
+const NavigationMenuContentClassName = cn(
+  'nav-menu-item-content md:w-7xl max-w-screen inset-shadow-header rounded-none',
 )
-const NavigationMenuContentClassName = cn('inset-shadow-header rounded-none')
 const NavigationMenuContentInnerContainerClassName = cn(
+  'mav-menu-item-content-inner w-full max-w-7xl px-0',
   'border-border/30 border border-t-0 gap-x-1 gap-y-0 bg-card rounded-none rounded-b-md',
 )
 
-const RecursiveTabsTabsClassName = cn(
-  'nav-tabs w-full mx-auto flex flex-col items-center justify-center gap-0 rounded-none',
-)
-const RecursiveTabsTabsListClassName = cn(
-  'py-0 flex items-center justify-center gap-0 m-0 rounded-none bg-card/10 border-transparent border [&_>button]:not-last:border-r-border/20',
-)
 const RecursiveTabsTabsTriggerClassName = cn(
-  navigationMenuTabTriggerStyle,
-  'border border-r bg-card group flex shrink grow-0 flex-col items-center justify-center rounded-none px-4 min-w-30 w-fit',
+  'h-9 items-center w-full justify-center rounded-none bg-background text-sm font-medium transition-colors text-accent-foreground',
+  'hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-60',
+  'data-[state=active]:text-accent-foreground data-[state=active]:bg-accent/50 data-[state=active]:hover:bg-accent data-[state=active]:focus:bg-accent data-[state=active]:[&_>*]:font-bold',
+  'nav-tabs-trigger bg-transparent group flex flex-col items-center justify-center min-w-fit max-w-[160px]',
 )
-const RecursiveTabsTabsTriggerTitleClassName = cn(
-  'text-accent-foreground dark:text-accent-foreground',
-)
-const RecursiveTabsTabsTriggerAsLinkClassName = cn('text-sm text-primary hover:underline')
-const RecursiveTabsTabsTriggerActiveStatusChevronClassName = cn(
-  'relative top-px ml-1 h-3 w-3 transition duration-300 group-data-[state=active]:rotate-180',
-)
-const RecursiveTabsTabContentContainerClassName = cn(
-  'nav-tab-content m-0 flex w-full min-w-max flex-1 items-center justify-center overflow-x-hidden overflow-y-auto rounded-none',
-  'border-0 border-t border-border bg-card/30 p-0 inset-shadow-header ',
-  'group-data-[state=active]:[&_>*]:opacity-1 opacity-0 transition-opacity',
-)
-const RecursiveTabsTabsContentClassName = cn(
-  'm-0 flex w-max flex-col items-center justify-center rounded-none focus-visible:ring-0 focus-visible:outline-none',
-)
-const RecursiveTabsCategoryNoContentPanelClassName = cn(
-  'flex h-full w-full items-center justify-center text-center text-sm text-muted-foreground',
+
+const RecursiveTabsTabsTriggerAsLinkClassName = cn(
+  'nav-tabs-trigger text-sm text-primary-foreground hover:underline px-1',
 )
 
 function isDisabledCategoryOrPageTabTrigger(
@@ -119,7 +101,7 @@ function isCategoryOrPageWithTabContent(
 
 function MenuItemTooltipContent(
   item: MenuTreePageItem | MenuTreePostItem | MenuTreeLinkItem,
-): React.JSX.Element {
+): React.ReactNode {
   const destinationTitle: string =
     isLinkItem(item) && item.link.label ? item.link.label : item.title
   const newTabMsg: string = isLinkItem(item) && item.link.newTab ? 'in a new tab' : ''
@@ -136,7 +118,7 @@ function MenuItemTabsTrigger({
 }: {
   menuTreeItem: MenuTreeItem
   onMouseEnterTriggerHandler: React.MouseEventHandler<HTMLButtonElement>
-}): React.JSX.Element {
+}): React.ReactNode {
   if (isPostItem(item) || isLinkItem(item) || isPageWithContentPanelDisabled(item)) {
     return (
       <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
@@ -145,7 +127,11 @@ function MenuItemTabsTrigger({
             onMouseEnter={onMouseEnterTriggerHandler}
             key={item.id}
             value={item.id}
-            className={cn(RecursiveTabsTabsTriggerClassName)}
+            className={cn(
+              RecursiveTabsTabsTriggerClassName,
+              'transition duration-300 ease-out',
+              'group-has-data-[state=active]:[&:not(data-[state=active])]:opacity-60!',
+            )}
             {...(isLinkItem(item) ? {} : { asChild: true })}
           >
             {isLinkItem(item) ? (
@@ -153,11 +139,11 @@ function MenuItemTabsTrigger({
                 {...item.link}
                 disableTooltip={true}
                 appearance={'link'}
-                className={cn(RecursiveTabsTabsTriggerTitleClassName)}
+                className={cn(RecursiveTabsTabsTriggerClassName)}
               />
             ) : (
               <Link href={`${item.url}`} className={cn(RecursiveTabsTabsTriggerAsLinkClassName)}>
-                <span className={cn(RecursiveTabsTabsTriggerTitleClassName)}>{item.title}</span>
+                <span className={cn(RecursiveTabsTabsTriggerClassName)}>{item.title}</span>
               </Link>
             )}
           </TabsTrigger>
@@ -177,11 +163,12 @@ function MenuItemTabsTrigger({
         disabled={isDisabledCategoryOrPageTabTrigger(item)}
         className={cn(RecursiveTabsTabsTriggerClassName)}
       >
-        <div className={cn('flex px-1')}>
-          <span className={cn(RecursiveTabsTabsTriggerTitleClassName)}>{item.title}</span>{' '}
+        <div className={cn('flex items-center gap-x-1')}>
+          <span className={cn(RecursiveTabsTabsTriggerClassName)}>{item.title}</span>{' '}
           <ChevronDown
-            size={0.5}
-            className={cn(RecursiveTabsTabsTriggerActiveStatusChevronClassName)}
+            className={cn(
+              'relative top-px left-px m-0 h-[1em]! w-[1em]! p-0 text-[12px]! transition duration-300 group-data-[state=active]:rotate-180',
+            )}
             aria-hidden="true"
           />
         </div>
@@ -190,13 +177,17 @@ function MenuItemTabsTrigger({
   }
 }
 
-function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.JSX.Element | null {
+function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.ReactNode | null {
   const [activeTab, setActiveTab] = React.useState<string>()
 
   const onMouseEnterTriggerHandler = (
     categoryOrPageId: string,
   ): React.MouseEventHandler<HTMLButtonElement> => {
     return () => setActiveTab(categoryOrPageId)
+  }
+
+  const isActiveContent = (itemId: string): boolean => {
+    return activeTab === itemId
   }
 
   if (!items || items.length === 0) return null
@@ -206,9 +197,16 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.JSX.Element 
       onValueChange={(value) => setActiveTab(value)}
       orientation={'vertical'}
       value={activeTab}
-      className={cn(RecursiveTabsTabsClassName)}
+      className={cn(
+        'nav-tabs mx-auto flex w-full flex-col items-center justify-center gap-0 rounded-none',
+      )}
     >
-      <TabsList className={cn(RecursiveTabsTabsListClassName)} variant={'default'}>
+      <TabsList
+        className={cn(
+          'nav-tabs-list group m-0 flex w-full items-center justify-center gap-0 rounded-none border-0 border-t-border/40 bg-background/95 py-0 backdrop-blur group-data-[active=true]:border-t supports-backdrop-filter:bg-background/60 [&_>a]:not-last:border-r-border/20 [&_>button]:not-last:border-r-border/20',
+        )}
+        variant={'default'}
+      >
         {items.map((menuItem) => (
           <MenuItemTabsTrigger
             key={menuItem.id}
@@ -218,7 +216,11 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.JSX.Element 
         ))}
       </TabsList>
 
-      <div className={cn(RecursiveTabsTabContentContainerClassName)}>
+      <div
+        className={cn(
+          'nav-tab-content-container m-0 flex w-full min-w-max flex-1 items-center justify-center overflow-x-hidden overflow-y-auto rounded-none bg-black/40 p-0 inset-shadow-header',
+        )}
+      >
         {items
           .filter((item) => isCategoryOrPageWithTabContent(item))
           .map((item) => {
@@ -226,7 +228,10 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.JSX.Element 
               <TabsContent
                 key={item.id}
                 value={item.id}
-                className={cn(RecursiveTabsTabsContentClassName)}
+                data-active={isActiveContent(item.id)}
+                className={cn(
+                  'nav-tab-content group m-0 flex w-max flex-col items-center justify-center rounded-none focus-visible:ring-0 focus-visible:outline-none',
+                )}
               >
                 <TabContentNode item={item} />
               </TabsContent>
@@ -237,7 +242,7 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.JSX.Element 
   )
 }
 
-function TabContentNode({ item }: { item: MenuTreeItem }): React.JSX.Element {
+function TabContentNode({ item }: { item: MenuTreeItem }): React.ReactNode {
   if (isPageItem(item)) {
     if (item.siteMenuShowContentPanel) {
       return <PageContentPanel item={item} />
@@ -245,7 +250,10 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.JSX.Element {
       return (
         <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
-            <Link href={item.url} className={cn(RecursiveTabsTabsTriggerAsLinkClassName)}>
+            <Link
+              href={item.url}
+              className={cn(RecursiveTabsTabsTriggerAsLinkClassName, 'hover:underline')}
+            >
               {item.title}
             </Link>
           </TooltipTrigger>
@@ -260,7 +268,11 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.JSX.Element {
       return <RecursiveTabs items={item.children} />
     } else {
       return (
-        <div className={cn(RecursiveTabsCategoryNoContentPanelClassName)}>
+        <div
+          className={cn(
+            'flex h-full w-full items-center justify-center text-center text-sm text-muted-foreground',
+          )}
+        >
           No content available.
         </div>
       )
@@ -270,7 +282,10 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.JSX.Element {
     return (
       <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
-          <Link href={item.url} className={cn(RecursiveTabsTabsTriggerAsLinkClassName)}>
+          <Link
+            href={item.url}
+            className={cn(RecursiveTabsTabsTriggerAsLinkClassName, 'hover:underline')}
+          >
             {item.title}
           </Link>
         </TooltipTrigger>
@@ -282,7 +297,7 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.JSX.Element {
   }
 }
 
-function PageContentPanel({ item }: { item: MenuTreePageItem }): React.JSX.Element {
+function PageContentPanel({ item }: { item: MenuTreePageItem }): React.ReactNode {
   const isMobile = useIsMobile()
   return (
     <div className="flex h-full w-full flex-col justify-center p-1">
@@ -339,17 +354,18 @@ function PageContentPanel({ item }: { item: MenuTreePageItem }): React.JSX.Eleme
   )
 }
 
-function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JSX.Element | null {
-  // Empty Category -> Disabled Item
+const NavigationMenuLinkClassName = cn(navigationMenuTriggerStyle(), 'w-full whitespace-nowrap')
+
+function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.ReactNode | null {
   if (isCategoryItem(item)) {
     if (Array.isArray(item.children) && item.children.length > 0) {
       // CATEGORY with children
       return (
-        <NavigationMenuItem className={NavigationMenuItemClassName}>
+        <NavigationMenuItem className={cn(NavigationMenuItemClassName)}>
           <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
           <NavigationMenuContent className={cn(NavigationMenuContentClassName)}>
             <div className={cn(HeaderRowStyles, NavigationMenuContentInnerContainerClassName)}>
-              <div className="col-span-8 col-start-3">
+              <div className={cn('col-span-12')}>
                 <div className={cn('flex w-full flex-col items-center justify-center')}>
                   <RecursiveTabs items={item.children} />
                 </div>
@@ -360,12 +376,13 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
       )
     } else {
       // CATEGORY without children
+      // Empty Category -> Disabled Item
       return (
         <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
             <NavigationMenuItem className={cn(NavigationMenuItemClassName)}>
               <NavigationMenuLink
-                className={cn(navigationMenuTriggerStyle(), 'cursor-not-allowed opacity-50')}
+                className={cn(NavigationMenuLinkClassName, 'cursor-not-allowed opacity-50')}
                 onMouseOver={(event) => event.preventDefault()}
                 aria-disabled="true"
               >
@@ -386,7 +403,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
           <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
           <NavigationMenuContent className={cn(NavigationMenuContentClassName)}>
             <div className={cn(HeaderRowStyles, NavigationMenuContentInnerContainerClassName)}>
-              <div className="col-span-8 col-start-3">
+              <div className={cn('col-span-12')}>
                 <div className={cn('flex w-full flex-col items-center justify-center')}>
                   <PageContentPanel item={item} />
                 </div>
@@ -396,11 +413,12 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
         </NavigationMenuItem>
       )
     } else {
+      // PAGE (without children)
       return (
         <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
           <TooltipTrigger asChild>
-            <NavigationMenuItem className={NavigationMenuItemClassName}>
-              <NavigationMenuLink href={item.url} className={cn(navigationMenuTriggerStyle())}>
+            <NavigationMenuItem className={cn(NavigationMenuItemClassName, 'hover:underline')}>
+              <NavigationMenuLink href={item.url} className={cn(NavigationMenuLinkClassName)}>
                 {item.title}
               </NavigationMenuLink>
             </NavigationMenuItem>
@@ -416,8 +434,8 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
     return (
       <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
-          <NavigationMenuItem className={NavigationMenuItemClassName}>
-            <NavigationMenuLink className={cn(navigationMenuTriggerStyle())} asChild>
+          <NavigationMenuItem className={cn(NavigationMenuItemClassName, 'hover:underline')}>
+            <NavigationMenuLink className={cn(NavigationMenuLinkClassName)} asChild>
               <CMSLink {...item.link} appearance="link" className={'cms-link'} />
             </NavigationMenuLink>
           </NavigationMenuItem>
@@ -434,7 +452,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
     return (
       <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
-          <NavigationMenuItem className={NavigationMenuItemClassName}>
+          <NavigationMenuItem className={cn(NavigationMenuItemClassName, 'hover:underline')}>
             <Link href={item.url} passHref>
               <NavigationMenuLink className={cn(navigationMenuTriggerStyle())}>
                 {item.title}
@@ -451,17 +469,22 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.JS
   return null
 }
 
-function HomeNavigationMenuItem({
+export function HomeNavigationMenuItem({
+  className,
   ...props
-}: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>) {
+}: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>): React.ReactNode {
   return (
     <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
       <TooltipTrigger asChild>
-        <NavigationMenuItem {...props} className={NavigationMenuItemClassName}>
+        <NavigationMenuItem {...props} className={cn(NavigationMenuItemClassName, className)}>
           <Link href="/home" passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
+            <NavigationMenuLink
+              className={cn(NavigationMenuLinkClassName, 'hover:underline')}
+              asChild
+            >
               <span>
                 <House className="w-5" />
+                <span className="ml-3">Home</span>
                 <span className="md:sr-only">Home</span>
               </span>
             </NavigationMenuLink>
@@ -473,33 +496,31 @@ function HomeNavigationMenuItem({
   )
 }
 
-function ClassicSearchLink(): React.JSX.Element {
-  return (
-    <Link href="/search" passHref>
-      <NavigationMenuLink className={navigationMenuTriggerStyle()} asChild>
-        <span>
-          <SearchIcon className="w-5 text-primary" />
-          <span className="md:sr-only">Search</span>
-        </span>
-      </NavigationMenuLink>
-    </Link>
-  )
-}
-
-function SearchNavigationMenuItem({
+export const SearchNavigationMenuItem = ({
   ...props
-}: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>) {
+}: React.ComponentPropsWithoutRef<typeof NavigationMenuItem>): React.ReactNode => {
   const useClassicSearch: boolean = false
   return (
     <NavigationMenuItem {...props} className={NavigationMenuItemClassName}>
       {useClassicSearch ? (
-        <ClassicSearchLink></ClassicSearchLink>
+        <Link href="/search" passHref>
+          <NavigationMenuLink
+            className={cn(navigationMenuTriggerStyle(), 'hover:underline')}
+            asChild
+          >
+            <span>
+              <SearchIcon className="w-5 text-primary" />
+              <span className="md:sr-only">Search</span>
+            </span>
+          </NavigationMenuLink>
+        </Link>
       ) : (
         <GlobalSearch
+          showLabel={true}
           buttonProps={{
             variant: 'clean',
-            size: 'sm',
-            className: navigationMenuTriggerStyle(),
+            size: 'default',
+            className: cn(navigationMenuTriggerStyle(), 'hover:underline'),
           }}
         />
       )}
@@ -507,27 +528,30 @@ function SearchNavigationMenuItem({
   )
 }
 
-function NavigationMenuItems({ menuTree }: { menuTree: MenuTree }): React.JSX.Element[] {
+export function NavigationMenuItems({ menuTree }: { menuTree: MenuTree }): React.ReactNode[] {
   return menuTree.map((item, index) => (
     <NavigationMenuLevelZeroNode key={`${index}-${item.id}`} item={item} />
   ))
 }
 
 export type NavMenuProps = {
-  menuTree: MenuTree
+  showSearch?: boolean
+  showHome?: boolean
+  menuItems?: MenuTree
 }
-
 export default function HeaderNavMenu({
-  menuTree,
+  showSearch = true,
+  showHome = true,
+  menuItems,
   ...props
 }: Omit<React.ComponentPropsWithoutRef<typeof NavigationMenu>, 'orientation'> &
-  NavMenuProps): React.JSX.Element {
+  NavMenuProps): React.ReactNode {
   return (
     <NavigationMenu {...props} orientation={'vertical'}>
       <NavigationMenuList orientation={'vertical'} className={'space-x-0'}>
-        <HomeNavigationMenuItem />
-        <NavigationMenuItems menuTree={menuTree} />
-        <SearchNavigationMenuItem />
+        {showHome && <HomeNavigationMenuItem />}
+        {menuItems && <NavigationMenuItems menuTree={menuItems} />}
+        {showSearch && <SearchNavigationMenuItem />}
       </NavigationMenuList>
       <NavigationMenuViewport orientation={'vertical'}></NavigationMenuViewport>
     </NavigationMenu>

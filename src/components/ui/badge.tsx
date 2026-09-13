@@ -22,6 +22,8 @@ const badgeVariants = cva(
         caption: `bg-transparent text-white [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [a&]:hover:border-border underline-offset-4 [a&]:hover:underline`,
       },
       status: {
+        live: '',
+        offline: '',
         planned: '',
         active: '',
         completed: '',
@@ -30,6 +32,18 @@ const badgeVariants = cva(
       },
     },
     compoundVariants: [
+      {
+        variant: 'status',
+        status: 'offline',
+        className:
+          'bg-offline-background text-offline-foreground font-bold focus-visible:ring-offline-background/20 dark:bg-offline-background dark:focus-visible:ring-offline-background [a&]:hover:bg-offline-background',
+      },
+      {
+        variant: 'status',
+        status: 'live',
+        className:
+          'bg-live-background text-live-foreground font-bold focus-visible:ring-live-background/20 dark:bg-live-background dark:focus-visible:ring-live-background [a&]:hover:bg-live-background',
+      },
       {
         variant: 'status',
         status: 'planned',
