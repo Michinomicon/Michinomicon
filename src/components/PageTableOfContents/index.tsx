@@ -8,7 +8,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { MenuTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeEntry } from '@/utilities/buildNavTree'
 import {
   ArrowLeftFromLine,
   ArrowRightToLine,
@@ -33,8 +33,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { TOCItem } from '@/providers/PageTOC'
 
 type PageTableOfContentsProps = {
-  // pageTOC:TOCItem[],
-  navTree: MenuTreeItem[]
+  navTree: MenuTreeEntry[]
 }
 
 export enum HeadingTagDepth {
@@ -55,7 +54,7 @@ function generateHeadingTagSlug(textContent: string): string {
 }
 
 function collectHeadingTagReferences(
-  pageSlug: string,
+  pageSlug: string = '',
   node?: Element | null,
   parentSlug?: string | null,
   headings: Array<TOCItem> = [],
@@ -184,15 +183,17 @@ function useActiveTocItem(tocContent: TOCItem[]) {
 }
 
 function findPagePathByUrl(
-  tree: MenuTreeItem[],
+  tree: MenuTreeEntry[],
   targetUrl: string,
-  progress: MenuTreeItem[] = [],
-): MenuTreeItem[] | false {
+  progress: MenuTreeEntry[] = [],
+): MenuTreeEntry[] | false {
   for (const treeItem of tree) {
-    if (treeItem.type === 'page' && `/${treeItem.url}` === targetUrl) {
-      return [...progress, treeItem]
-    }
-    if (treeItem.type === 'category' && treeItem.children) {
+    if (treeItem.type === 'item') {
+      const treeItemUrl = `/${treeItem.url}`
+      if (treeItemUrl === targetUrl) {
+        return [...progress, treeItem]
+      }
+    } else if (treeItem.type === 'group' && treeItem.children) {
       const result = findPagePathByUrl(treeItem.children, targetUrl, [...progress, treeItem])
       if (result) {
         return result
@@ -202,7 +203,7 @@ function findPagePathByUrl(
   return false
 }
 
-function PathPathBreadcrumbs({ pathToPage }: { pathToPage: MenuTreeItem[] | false }) {
+function PathPathBreadcrumbs({ pathToPage }: { pathToPage: MenuTreeEntry[] | false }) {
   if (!pathToPage) {
     return <></>
   }

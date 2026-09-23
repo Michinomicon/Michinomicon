@@ -11,21 +11,16 @@ export const RowLabel: React.FC<RowLabelProps> = () => {
   let displayTitle = defaultTitle
 
   if (data.type) {
-    if (data.type === 'link' && data.link) {
+    if (data.type === 'item' && data.link) {
       const { label, url } = data.link
       displayTitle = `${rowNumberText} ( Link ) ${label || url}`
-    } else if (data.type === 'categories') {
-      if (data.categoryReference && data.referenceLabel) {
+    } else if (data.type === 'group') {
+      if (data.label) {
         // - Try to use server-fetched human-readable label
         // - Fall back to the raw ID if it hasn't been saved yet
         // - Fall back to 'New Item' if the row was just created
-        const titleText = data.referenceLabel || defaultTitle
-        displayTitle = `${rowNumberText} ( Category ) ${titleText}`
-      }
-    } else if (data.type === 'pages') {
-      if (data.pageReference && data.referenceLabel) {
-        const titleText = data.referenceLabel || defaultTitle
-        displayTitle = `${rowNumberText} ( Page ) ${titleText}`
+        const titleText = data.label || defaultTitle
+        displayTitle = `${rowNumberText} ( Group ) ${titleText}`
       }
     }
   }

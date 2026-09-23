@@ -5,8 +5,6 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
-// import { homeStatic } from '@/endpoints/seed/home-static'
-
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generatePageOrPostMeta } from '@/utilities/generatePageOrPostMeta'
@@ -51,16 +49,10 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
-  // const page: RequiredDataFromCollectionSlug<'pages'> | null
 
   const page = await queryPageBySlug({
     slug: decodedSlug,
   })
-
-  // Remove this code once your website is seeded
-  // if (!page && slug === 'home') {
-  //   page = homeStatic
-  // }
 
   if (!page) {
     return <PayloadRedirects url={url} />
