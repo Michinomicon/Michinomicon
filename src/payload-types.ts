@@ -2407,9 +2407,8 @@ export interface Header {
   id: string;
   menuItems?:
     | {
-        type?: ('link' | 'categories' | 'pages') | null;
-        pageReference?: (string | null) | Page;
-        categoryReference?: (string | null) | Category;
+        type?: ('item' | 'group') | null;
+        label?: string | null;
         referenceLabel?: string | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -2436,9 +2435,8 @@ export interface Header {
         };
         children?:
           | {
-              type?: ('link' | 'categories' | 'pages') | null;
-              pageReference?: (string | null) | Page;
-              categoryReference?: (string | null) | Category;
+              type?: ('item' | 'group') | null;
+              label?: string | null;
               referenceLabel?: string | null;
               link?: {
                 type?: ('reference' | 'custom') | null;
@@ -2465,9 +2463,8 @@ export interface Header {
               };
               children?:
                 | {
-                    type?: ('link' | 'categories' | 'pages') | null;
-                    pageReference?: (string | null) | Page;
-                    categoryReference?: (string | null) | Category;
+                    type?: ('item' | 'group') | null;
+                    label?: string | null;
                     referenceLabel?: string | null;
                     link?: {
                       type?: ('reference' | 'custom') | null;
@@ -2494,9 +2491,8 @@ export interface Header {
                     };
                     children?:
                       | {
-                          type?: ('link' | 'categories' | 'pages') | null;
-                          pageReference?: (string | null) | Page;
-                          categoryReference?: (string | null) | Category;
+                          type?: ('item' | 'group') | null;
+                          label?: string | null;
                           referenceLabel?: string | null;
                           link?: {
                             type?: ('reference' | 'custom') | null;
@@ -2523,9 +2519,8 @@ export interface Header {
                           };
                           children?:
                             | {
-                                type?: ('link' | 'categories' | 'pages') | null;
-                                pageReference?: (string | null) | Page;
-                                categoryReference?: (string | null) | Category;
+                                type?: ('item' | 'group') | null;
+                                label?: string | null;
                                 referenceLabel?: string | null;
                                 link?: {
                                   type?: ('reference' | 'custom') | null;
@@ -2552,9 +2547,8 @@ export interface Header {
                                 };
                                 children?:
                                   | {
-                                      type?: ('link' | 'categories' | 'pages') | null;
-                                      pageReference?: (string | null) | Page;
-                                      categoryReference?: (string | null) | Category;
+                                      type?: ('item' | 'group') | null;
+                                      label?: string | null;
                                       referenceLabel?: string | null;
                                       link?: {
                                         type?: ('reference' | 'custom') | null;
@@ -2646,8 +2640,7 @@ export interface HeaderSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        pageReference?: T;
-        categoryReference?: T;
+        label?: T;
         referenceLabel?: T;
         link?:
           | T
@@ -2662,8 +2655,7 @@ export interface HeaderSelect<T extends boolean = true> {
           | T
           | {
               type?: T;
-              pageReference?: T;
-              categoryReference?: T;
+              label?: T;
               referenceLabel?: T;
               link?:
                 | T
@@ -2678,8 +2670,7 @@ export interface HeaderSelect<T extends boolean = true> {
                 | T
                 | {
                     type?: T;
-                    pageReference?: T;
-                    categoryReference?: T;
+                    label?: T;
                     referenceLabel?: T;
                     link?:
                       | T
@@ -2694,8 +2685,7 @@ export interface HeaderSelect<T extends boolean = true> {
                       | T
                       | {
                           type?: T;
-                          pageReference?: T;
-                          categoryReference?: T;
+                          label?: T;
                           referenceLabel?: T;
                           link?:
                             | T
@@ -2710,8 +2700,7 @@ export interface HeaderSelect<T extends boolean = true> {
                             | T
                             | {
                                 type?: T;
-                                pageReference?: T;
-                                categoryReference?: T;
+                                label?: T;
                                 referenceLabel?: T;
                                 link?:
                                   | T
@@ -2726,8 +2715,7 @@ export interface HeaderSelect<T extends boolean = true> {
                                   | T
                                   | {
                                       type?: T;
-                                      pageReference?: T;
-                                      categoryReference?: T;
+                                      label?: T;
                                       referenceLabel?: T;
                                       link?:
                                         | T

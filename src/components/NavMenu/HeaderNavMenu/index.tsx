@@ -12,14 +12,7 @@ import {
   navigationMenuTriggerStyle,
   NavigationMenuViewport,
 } from '@/components/ui/navigation-menu'
-import {
-  MenuTreeCategoryItem,
-  MenuTreeItem,
-  MenuTreePageItem,
-  MenuTreeLinkItem,
-  MenuTreePostItem,
-  MenuTree,
-} from '@/utilities/buildNavTree'
+import { MenuTreeEntry, MenuTreeItemGroup, MenuTreeItem, MenuTree } from '@/utilities/buildNavTree'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   DEFAULT_TOOLTIP_DELAY,
@@ -27,7 +20,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip'
-import { useIsMobile } from '@/hooks/use-mobile'
 import { HeaderRowStyles } from '@/Header/Component.client'
 import GlobalSearch from '@/components/GlobalSearch'
 import { CMSLink } from '@/components/Link'
@@ -57,54 +49,24 @@ const RecursiveTabsTabsTriggerAsLinkClassName = cn(
   'nav-tabs-trigger text-sm text-primary-foreground hover:underline px-1',
 )
 
-function isDisabledCategoryOrPageTabTrigger(
-  categoryOrPage: MenuTreeCategoryItem | MenuTreePageItem,
-): boolean {
+function isDisabledGroupOrItemTabTrigger(groupOrItem: MenuTreeItemGroup | MenuTreeItem): boolean {
   return (
-    categoryOrPage.type === 'category' &&
-    (!categoryOrPage.children || categoryOrPage.children.length === 0)
+    groupOrItem.type === 'group' && (!groupOrItem.children || groupOrItem.children.length === 0)
   )
 }
 
-type PageWithContentPanelDisabled = MenuTreePageItem & { siteMenuShowContentPanel: false }
-
-function isPageWithContentPanelDisabled(
-  menuTreeItem: MenuTreeItem,
-): menuTreeItem is PageWithContentPanelDisabled {
-  return menuTreeItem.type === 'page' && menuTreeItem.siteMenuShowContentPanel === false
+function isMenuItem(menuTreeItem: MenuTreeEntry): menuTreeItem is MenuTreeItem {
+  return menuTreeItem.type === 'item'
 }
 
-function isCategoryItem(menuTreeItem: MenuTreeItem): menuTreeItem is MenuTreeCategoryItem {
-  return menuTreeItem.type === 'category'
+function isMenuItemGroup(menuTreeItem: MenuTreeEntry): menuTreeItem is MenuTreeItemGroup {
+  return menuTreeItem.type === 'group'
 }
 
-function isPageItem(menuTreeItem: MenuTreeItem): menuTreeItem is MenuTreePageItem {
-  return menuTreeItem.type === 'page'
-}
-
-function isPostItem(menuTreeItem: MenuTreeItem): menuTreeItem is MenuTreePostItem {
-  return menuTreeItem.type === 'post'
-}
-
-function isLinkItem(menuTreeItem: MenuTreeItem): menuTreeItem is MenuTreeLinkItem {
-  return menuTreeItem.type === 'link'
-}
-
-function isCategoryOrPageWithTabContent(
-  menuTreeItem: MenuTreeItem,
-): menuTreeItem is (MenuTreePageItem & { siteMenuShowContentPanel: true }) | MenuTreeCategoryItem {
-  return (
-    menuTreeItem.type === 'category' ||
-    (menuTreeItem.type === 'page' && menuTreeItem.siteMenuShowContentPanel === true)
-  )
-}
-
-function MenuItemTooltipContent(
-  item: MenuTreePageItem | MenuTreePostItem | MenuTreeLinkItem,
-): React.ReactNode {
+function MenuItemTooltipContent(item: MenuTreeItem): React.ReactNode {
   const destinationTitle: string =
-    isLinkItem(item) && item.link.label ? item.link.label : item.title
-  const newTabMsg: string = isLinkItem(item) && item.link.newTab ? 'in a new tab' : ''
+    isMenuItem(item) && item.link.label ? item.link.label : item.title
+  const newTabMsg: string = isMenuItem(item) && item.link.newTab ? 'in a new tab' : ''
   return (
     <span>
       Open <span className="font-semibold">{destinationTitle}</span> {newTabMsg}
@@ -113,13 +75,13 @@ function MenuItemTooltipContent(
 }
 
 function MenuItemTabsTrigger({
-  menuTreeItem: item,
+  item,
   onMouseEnterTriggerHandler,
 }: {
-  menuTreeItem: MenuTreeItem
+  item: MenuTreeEntry
   onMouseEnterTriggerHandler: React.MouseEventHandler<HTMLButtonElement>
 }): React.ReactNode {
-  if (isPostItem(item) || isLinkItem(item) || isPageWithContentPanelDisabled(item)) {
+  if (isMenuItem(item)) {
     return (
       <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
@@ -132,9 +94,9 @@ function MenuItemTabsTrigger({
               'transition duration-300 ease-out',
               'group-has-data-[state=active]:[&:not(data-[state=active])]:opacity-60!',
             )}
-            {...(isLinkItem(item) ? {} : { asChild: true })}
+            {...(isMenuItem(item) ? {} : { asChild: true })}
           >
-            {isLinkItem(item) ? (
+            {item.link.url ? (
               <CMSLink
                 {...item.link}
                 disableTooltip={true}
@@ -160,7 +122,7 @@ function MenuItemTabsTrigger({
         onMouseEnter={onMouseEnterTriggerHandler}
         key={item.id}
         value={item.id}
-        disabled={isDisabledCategoryOrPageTabTrigger(item)}
+        disabled={isDisabledGroupOrItemTabTrigger(item)}
         className={cn(RecursiveTabsTabsTriggerClassName)}
       >
         <div className={cn('flex items-center gap-x-1')}>
@@ -177,7 +139,7 @@ function MenuItemTabsTrigger({
   }
 }
 
-function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.ReactNode | null {
+function RecursiveTabs({ items }: { items: MenuTreeEntry[] }): React.ReactNode | null {
   const [activeTab, setActiveTab] = React.useState<string>()
 
   const onMouseEnterTriggerHandler = (
@@ -210,7 +172,7 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.ReactNode | 
         {items.map((menuItem) => (
           <MenuItemTabsTrigger
             key={menuItem.id}
-            menuTreeItem={menuItem}
+            item={menuItem}
             onMouseEnterTriggerHandler={onMouseEnterTriggerHandler(menuItem.id)}
           />
         ))}
@@ -222,7 +184,7 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.ReactNode | 
         )}
       >
         {items
-          .filter((item) => isCategoryOrPageWithTabContent(item))
+          .filter((item) => isMenuItemGroup(item))
           .map((item) => {
             return (
               <TabsContent
@@ -242,28 +204,8 @@ function RecursiveTabs({ items }: { items: MenuTreeItem[] }): React.ReactNode | 
   )
 }
 
-function TabContentNode({ item }: { item: MenuTreeItem }): React.ReactNode {
-  if (isPageItem(item)) {
-    if (item.siteMenuShowContentPanel) {
-      return <PageContentPanel item={item} />
-    } else {
-      return (
-        <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
-          <TooltipTrigger asChild>
-            <Link
-              href={item.url}
-              className={cn(RecursiveTabsTabsTriggerAsLinkClassName, 'hover:underline')}
-            >
-              {item.title}
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>
-            <MenuItemTooltipContent {...item} />
-          </TooltipContent>
-        </Tooltip>
-      )
-    }
-  } else if (isCategoryItem(item)) {
+function TabContentNode({ item }: { item: MenuTreeEntry }): React.ReactNode {
+  if (isMenuItemGroup(item)) {
     if (item.children && item.children.length > 0) {
       return <RecursiveTabs items={item.children} />
     } else {
@@ -278,7 +220,6 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.ReactNode {
       )
     }
   } else {
-    // Fallback for Posts
     return (
       <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
@@ -297,67 +238,10 @@ function TabContentNode({ item }: { item: MenuTreeItem }): React.ReactNode {
   }
 }
 
-function PageContentPanel({ item }: { item: MenuTreePageItem }): React.ReactNode {
-  const isMobile = useIsMobile()
-  return (
-    <div className="flex h-full w-full flex-col justify-center p-1">
-      <div className={cn('w-full', isMobile ? 'text-left' : 'text-center')}>
-        <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
-          <TooltipTrigger asChild>
-            <Link
-              href={item.url}
-              className="mb-6 block rounded-none pb-1 text-2xl font-bold tracking-tight text-foreground hover:text-primary hover:underline"
-            >
-              {item.title}
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent>
-            <MenuItemTooltipContent {...item} />
-          </TooltipContent>
-        </Tooltip>
-      </div>
-
-      {Array.isArray(item.children) && item.children.length > 0 ? (
-        <div
-          className={cn(
-            'mx-auto grid grid-flow-col-dense gap-2',
-            isMobile ? 'auto-cols-max grid-cols-2' : 'auto-cols-max',
-          )}
-        >
-          {item.children?.map((child) => (
-            <Tooltip
-              key={child.id}
-              delayDuration={DEFAULT_TOOLTIP_DELAY}
-              disableHoverableContent={true}
-            >
-              <TooltipTrigger asChild>
-                <Link
-                  href={`${item.url}#${child.url}`}
-                  className="block rounded-md border p-2 text-foreground transition-colors hover:bg-muted"
-                >
-                  <div className="text-sm font-medium">{child.title}</div>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>
-                Go to section <span className="font-semibold">{child.title}</span> on page{' '}
-                <span className="font-semibold">{item.title}</span>
-              </TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
-      ) : (
-        <span className="text-center text-sm text-muted-foreground">
-          No posts available under this page.
-        </span>
-      )}
-    </div>
-  )
-}
-
 const NavigationMenuLinkClassName = cn(navigationMenuTriggerStyle(), 'w-full whitespace-nowrap')
 
-function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.ReactNode | null {
-  if (isCategoryItem(item)) {
+function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeEntry }): React.ReactNode | null {
+  if (isMenuItemGroup(item)) {
     if (Array.isArray(item.children) && item.children.length > 0) {
       // CATEGORY with children
       return (
@@ -394,43 +278,7 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.Re
         </Tooltip>
       )
     }
-  }
-  if (isPageItem(item)) {
-    if (item.siteMenuShowContentPanel && Array.isArray(item.children) && item.children.length > 0) {
-      // PAGE (with children)
-      return (
-        <NavigationMenuItem className={NavigationMenuItemClassName}>
-          <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
-          <NavigationMenuContent className={cn(NavigationMenuContentClassName)}>
-            <div className={cn(HeaderRowStyles, NavigationMenuContentInnerContainerClassName)}>
-              <div className={cn('col-span-12')}>
-                <div className={cn('flex w-full flex-col items-center justify-center')}>
-                  <PageContentPanel item={item} />
-                </div>
-              </div>
-            </div>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-      )
-    } else {
-      // PAGE (without children)
-      return (
-        <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
-          <TooltipTrigger asChild>
-            <NavigationMenuItem className={cn(NavigationMenuItemClassName, 'hover:underline')}>
-              <NavigationMenuLink href={item.url} className={cn(NavigationMenuLinkClassName)}>
-                {item.title}
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </TooltipTrigger>
-          <TooltipContent>
-            <MenuItemTooltipContent {...item} />
-          </TooltipContent>
-        </Tooltip>
-      )
-    }
-  }
-  if (isLinkItem(item)) {
+  } else if (isMenuItem(item)) {
     return (
       <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
         <TooltipTrigger asChild>
@@ -438,26 +286,6 @@ function NavigationMenuLevelZeroNode({ item }: { item: MenuTreeItem }): React.Re
             <NavigationMenuLink className={cn(NavigationMenuLinkClassName)} asChild>
               <CMSLink {...item.link} appearance="link" className={'cms-link'} />
             </NavigationMenuLink>
-          </NavigationMenuItem>
-        </TooltipTrigger>
-        <TooltipContent>
-          <MenuItemTooltipContent {...item} />
-        </TooltipContent>
-      </Tooltip>
-    )
-  }
-
-  if (isPostItem(item)) {
-    // Any Item without children (Post)
-    return (
-      <Tooltip delayDuration={DEFAULT_TOOLTIP_DELAY} disableHoverableContent={true}>
-        <TooltipTrigger asChild>
-          <NavigationMenuItem className={cn(NavigationMenuItemClassName, 'hover:underline')}>
-            <Link href={item.url} passHref>
-              <NavigationMenuLink className={cn(navigationMenuTriggerStyle())}>
-                {item.title}
-              </NavigationMenuLink>
-            </Link>
           </NavigationMenuItem>
         </TooltipTrigger>
         <TooltipContent>

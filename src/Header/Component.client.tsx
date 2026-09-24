@@ -5,7 +5,7 @@ import { ColorThemeToggle } from '@/providers/Theme/color-theme-toggle'
 import type { Header } from '@/payload-types'
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import { usePathname } from 'next/navigation'
-import { MenuTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeEntry } from '@/utilities/buildNavTree'
 import { cn } from '@/lib/utils'
 import { AppMainLogo } from '@/components/AppMainLogo'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -19,7 +19,7 @@ import GlobalSearch from '@/components/GlobalSearch'
 interface HeaderClientProps {
   data: Header
   appTitle?: string | undefined
-  menuTree: MenuTreeItem[]
+  menuTree: MenuTreeEntry[]
   twitchStatusSlot?: React.ReactNode
 }
 
