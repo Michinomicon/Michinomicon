@@ -94,7 +94,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
 
         <header
           className={cn(
-            `fixed z-20 w-screen rounded-none bg-background shadow-md`,
+            `fixed z-20 h-10.5 w-screen rounded-none bg-background shadow-md`,
             'bottom-0 flex flex-col items-center justify-center',
           )}
           data-theme={themeColor}
@@ -102,32 +102,35 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({
         >
           <div
             className={cn(
-              'flex h-16 w-full flex-row flex-nowrap items-center justify-evenly rounded-none border-b px-3',
+              'flex h-full w-full flex-row flex-nowrap items-center justify-between gap-x-2 rounded-none',
             )}
           >
-            <div className="">
-              <MobileNavMenu
-                appTitle={appTitle}
-                menuItems={menuTree}
-                twitchStatusSlot={twitchStatusSlot}
-                triggerButtonProps={{ size: 'lg', className: cn('text-xl px-1') }}
-              />
-            </div>
+            <MobileNavMenu
+              appTitle={appTitle}
+              menuItems={menuTree}
+              twitchStatusSlot={twitchStatusSlot}
+              triggerButtonProps={{
+                size: 'lg',
+                variant: 'ghost',
+                className: cn('text-xl px-1 rounded-none grow w-auto'),
+              }}
+            />
 
-            <div className="">
-              <GlobalSearch
-                showLabel={true}
-                buttonProps={{
-                  variant: 'clean',
-                  size: 'lg',
-                  className: cn('text-xl px-1'),
-                }}
-              />
-            </div>
+            <GlobalSearch
+              showLabel={true}
+              buttonProps={{
+                variant: 'ghost',
+                size: 'lg',
+                className: cn('text-xl px-1 rounded-none grow w-auto'),
+              }}
+            />
 
-            <div className="">
-              <PageTOCTriggerButton size={'lg'} showLabel={true} className={'px-1 text-xl'} />
-            </div>
+            <PageTOCTriggerButton
+              size={'lg'}
+              variant={'ghost'}
+              showLabel={true}
+              className={'w-auto grow rounded-none px-1 text-xl'}
+            />
           </div>
         </header>
       </React.Fragment>
