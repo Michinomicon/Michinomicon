@@ -1,5 +1,4 @@
 import { AppMainLogo } from '@/components/AppMainLogo'
-import { CollapsibleTrigger, CollapsibleContent, Collapsible } from '@/components/ui/collapsible'
 import {
   Drawer,
   DrawerTrigger,
@@ -13,9 +12,17 @@ import {
 import { cn } from '@/lib/utils'
 import { MenuTreeEntry } from '@/utilities/buildNavTree'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ChevronRightIcon, House, Icon, Menu, PaletteIcon, Settings } from 'lucide-react'
+import {
+  ChevronDownIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  House,
+  Icon,
+  Menu,
+  Settings,
+} from 'lucide-react'
 import Link from 'next/link'
-import { ComponentPropsWithoutRef, useState } from 'react'
+import { ComponentPropsWithoutRef, createContext, useContext, useState } from 'react'
 import React from 'react'
 import {
   MobileColorThemeFieldGroup,
@@ -23,9 +30,8 @@ import {
   MobileWallpaperSettingsFieldGroup,
 } from '@/providers/Theme/color-theme-toggle'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import GlobalSearch from '@/components/GlobalSearch'
 
-export type MobileMenuProps = {
+export type MobileNavMenuProps = {
   appTitle?: string
   menuItems: MenuTreeEntry[]
   twitchStatusSlot?: React.ReactNode
@@ -33,39 +39,106 @@ export type MobileMenuProps = {
   triggerButtonIconProps?: ComponentPropsWithoutRef<typeof Icon>
 }
 
-type MobileMenuItemProps = {
+export type MenuItemProps = {
   item: MenuTreeEntry
   index: number
   menuDepth?: number
   isOpen?: boolean
   onNavigateHandler: OnNavigateHandler
   onOpenChange?: () => void
+  onDrillDown?: (item: MenuTreeEntry) => void
 }
-function MobileMenuItem({
-  item,
-  index,
-  menuDepth = 0,
-  isOpen = false,
-  onNavigateHandler,
-  onOpenChange,
-}: MobileMenuItemProps): React.ReactNode {
-  const hasChildren = item.children && item.children.length > 0
-  const isOddIndex = Math.abs(index % 2) == 1
+
+export interface MenuLevelProps {
+  items: MenuTreeEntry[]
+  level?: number
+  onNavigateHandler: OnNavigateHandler
+}
+
+interface DrillDownContextType {
+  stack: MenuTreeEntry[]
+  pushGroup: (group: MenuTreeEntry) => void
+  popGroup: () => void
+  navigateToIndex: (index: number) => void
+  onNavigateHandler: OnNavigateHandler
+}
+
+type OnNavigateHandler = (event?: { preventDefault: () => void }) => void
+
+const DrillDownContext = createContext<DrillDownContextType | null>(null)
+
+const DEFAULT_TOP_LEVEL_MENU_LABEL = 'Menu'
+
+interface MenuBreadcrumbsProps {
+  stack: MenuTreeEntry[]
+  navigateToIndex: (index: number) => void
+  rootLabel?: string
+}
+
+function MenuBreadcrumbs({
+  stack,
+  navigateToIndex,
+  rootLabel = DEFAULT_TOP_LEVEL_MENU_LABEL,
+}: MenuBreadcrumbsProps): React.ReactNode {
+  return (
+    <nav
+      aria-label="Breadcrumb navigation"
+      className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b border-border/10 bg-background/95 px-3 py-2 text-sm text-muted-foreground backdrop-blur"
+    >
+      <Button
+        variant="clean"
+        size="sm"
+        onClick={() => navigateToIndex(-1)}
+        className={cn(
+          'h-auto p-1 text-sm',
+          stack.length === 0 ? 'cursor-default' : 'text-muted-foreground',
+        )}
+      >
+        <span>{rootLabel}</span>
+      </Button>
+
+      {stack.map((group, idx) => {
+        const isLast = idx === stack.length - 1
+
+        return (
+          <React.Fragment key={`${group.id}-${idx}`}>
+            <ChevronRightIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
+            <Button
+              variant="clean"
+              size="sm"
+              onClick={() => navigateToIndex(idx)}
+              disabled={isLast}
+              className={cn(
+                'h-auto max-w-30 truncate p-1 text-sm',
+                isLast
+                  ? 'cursor-default text-primary disabled:opacity-100'
+                  : 'text-muted-foreground',
+              )}
+            >
+              {group.title}
+            </Button>
+          </React.Fragment>
+        )
+      })}
+    </nav>
+  )
+}
+
+export function MenuItem({ item, onNavigateHandler, onDrillDown }: MenuItemProps): React.ReactNode {
+  const context = useContext(DrillDownContext)
+  const hasChildren = Boolean(item.children && item.children.length > 0)
 
   // Empty Category -> Disabled Item
   if (item.type === 'group' && !hasChildren) {
     return (
-      <div
-        className={cn(
-          'rounded-none border-b border-b-border/10 py-2',
-          isOddIndex ? 'bg-black/5' : '',
-        )}
-      >
+      <div className={cn('rounded-none border-b border-b-border/10')}>
         <Button
           disabled
           variant="ghost"
           size="lg"
-          className={cn('w-full justify-start gap-2 rounded-none text-lg text-primary')}
+          className={cn(
+            'w-full justify-start gap-2 rounded-none py-2 pl-4 text-lg text-muted-foreground',
+          )}
         >
           <span>{item.title}</span>
         </Button>
@@ -73,21 +146,16 @@ function MobileMenuItem({
     )
   }
 
-  // Item without children
+  // Item without children (Navigation Link)
   if (item.type === 'item') {
     return (
-      <div
-        className={cn(
-          'rounded-none border-b border-b-border/10 py-2',
-          isOddIndex ? 'bg-black/5' : '',
-        )}
-      >
+      <div className={cn('rounded-none border-b border-b-border/10')}>
         <Button
           asChild
           variant="ghost"
           size="lg"
           className={cn(
-            'group ml-3 w-full justify-start rounded-none rounded-tl-none pl-4 text-lg text-foreground transition-none',
+            'group w-full justify-start rounded-none py-2.5 pl-4 text-lg text-foreground transition-none',
           )}
         >
           <Link href={item.url} passHref onNavigate={onNavigateHandler}>
@@ -98,89 +166,143 @@ function MobileMenuItem({
     )
   }
 
-  // Item Group with children
+  // Item Group with children (Drill-Down Action)
   if (item.type === 'group') {
+    const handleDrillDown = () => {
+      if (onDrillDown) {
+        onDrillDown(item)
+      } else if (context?.pushGroup) {
+        context.pushGroup(item)
+      }
+    }
+
     return (
-      <Collapsible
-        className={cn(
-          'w-full rounded-none border-b border-b-border/10 py-2',
-          isOddIndex ? 'bg-black/5' : '',
-        )}
-        defaultOpen={false}
-        open={isOpen}
-        onOpenChange={onOpenChange}
-      >
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="lg"
-            className={cn(
-              'group w-full justify-start rounded-none px-0 pl-2 text-lg text-foreground transition-none data-[state=open]:ml-0 data-[state=open]:border-l-4 data-[state=open]:border-l-primary/50 data-[state=open]:pl-0 data-[state=open]:font-bold',
-            )}
-          >
-            <ChevronRightIcon className={cn('transition-transform', isOpen ? 'rotate-90' : '')} />
-            {item.title}
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className={cn('group rounded-none')}>
-          <div
-            className={cn(
-              'ml-0 flex flex-col gap-x-1 rounded-none bg-card/40 pl-1 group-data-[state=open]:border-l-4 group-data-[state=open]:border-l-primary/50',
-            )}
-          >
-            <MenuLevel
-              items={item.children!}
-              level={menuDepth + 1}
-              onNavigateHandler={onNavigateHandler}
-            />
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
+      <div className={cn('rounded-none border-b border-b-border/10')}>
+        <Button
+          variant="ghost"
+          size="lg"
+          onClick={handleDrillDown}
+          className={cn(
+            'group flex w-full items-center justify-between rounded-none px-4 py-3 text-lg font-medium text-foreground transition-colors',
+          )}
+        >
+          <span className="truncate">{item.title}</span>
+          <ChevronRightIcon className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+        </Button>
+      </div>
     )
   }
 
-  return <></>
+  return null
 }
 
-interface MenuLevelProps {
-  items: MenuTreeEntry[]
-  level?: number
-  onNavigateHandler: OnNavigateHandler
-}
-const MenuLevel: React.FC<MenuLevelProps> = ({ items, level = 0, onNavigateHandler }) => {
-  const [openItemId, setOpenItemId] = useState<string | null>(null)
+export const MenuLevel: React.FC<MenuLevelProps> = ({ items, onNavigateHandler }) => {
+  const [stack, setStack] = useState<MenuTreeEntry[]>([])
+  const [direction, setDirection] = useState<'forward' | 'backward' | 'none'>('none')
+
+  const pushGroup = (group: MenuTreeEntry) => {
+    setDirection('forward')
+    setStack((prev) => [...prev, group])
+  }
+
+  const popGroup = () => {
+    if (stack.length === 0) return
+    setDirection('backward')
+    setStack((prev) => prev.slice(0, -1))
+  }
+
+  const navigateToIndex = (index: number) => {
+    setDirection('backward')
+    if (index === -1) {
+      setStack([])
+    } else {
+      setStack((prev) => prev.slice(0, index + 1))
+    }
+  }
+
+  // Active item list based on the drill-down stack
+  const currentItems = stack.length > 0 ? stack[stack.length - 1].children || [] : items
+  const currentDepth = stack.length
+
+  // Transition key forces state/animation re-trigger on view updates
+  const transitionKey = stack.map((item) => item.id).join('-') || 'root'
+
   return (
-    <React.Fragment>
-      {items.map((item, index) => {
-        const itemKey: string = `${item.id}-${level}-${index}`
-        return (
-          <MobileMenuItem
-            key={`${item.id}-${index}`}
-            index={index}
-            item={item}
-            menuDepth={level}
-            isOpen={openItemId === itemKey}
-            onNavigateHandler={onNavigateHandler}
-            onOpenChange={() =>
-              // If open, close it. Otherwise, open it.
-              setOpenItemId(openItemId === itemKey ? null : itemKey)
-            }
-          />
-        )
-      })}
-    </React.Fragment>
+    <DrillDownContext.Provider
+      value={{
+        stack,
+        pushGroup,
+        popGroup,
+        navigateToIndex,
+        onNavigateHandler,
+      }}
+    >
+      <div className="flex h-full w-full flex-col overflow-hidden">
+        {/* Top Breadcrumb Path */}
+        <MenuBreadcrumbs
+          stack={stack}
+          navigateToIndex={navigateToIndex}
+          rootLabel={DEFAULT_TOP_LEVEL_MENU_LABEL}
+        />
+
+        {/* Sliding View Container */}
+        <div
+          key={transitionKey}
+          className={cn(
+            'mt-6 flex h-full w-full grow flex-col transition-all duration-200 ease-in-out',
+            direction === 'forward' && 'duration-200 animate-in fade-in-50 slide-in-from-right-6',
+            direction === 'backward' && 'duration-200 animate-in fade-in-50 slide-in-from-left-6',
+          )}
+        >
+          {currentItems.length > 0 ? (
+            currentItems.map((item, index) => {
+              const itemKey = `${item.id}-${currentDepth}-${index}`
+              return (
+                <MenuItem
+                  key={itemKey}
+                  index={index}
+                  item={item}
+                  menuDepth={currentDepth}
+                  onNavigateHandler={onNavigateHandler}
+                  onDrillDown={pushGroup}
+                />
+              )
+            })
+          ) : (
+            <div className="p-6 text-center text-sm text-muted-foreground">
+              No items available in this section.
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Back Button */}
+        {stack.length > 0 && (
+          <div className="p-2 text-right">
+            <Button
+              variant="ghost"
+              size="lg"
+              onClick={popGroup}
+              className="w-fit gap-2 px-2 text-primary"
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+              <span>
+                Back to{' '}
+                {stack.length > 1 ? stack[stack.length - 2].title : DEFAULT_TOP_LEVEL_MENU_LABEL}
+              </span>
+            </Button>
+          </div>
+        )}
+      </div>
+    </DrillDownContext.Provider>
   )
 }
-
-type OnNavigateHandler = (event?: { preventDefault: () => void }) => void
 
 export default function MobileNavMenu({
   menuItems,
   appTitle,
-  twitchStatusSlot,
   triggerButtonProps = {},
   ...props
-}: React.ComponentPropsWithoutRef<typeof Drawer> & MobileMenuProps): React.JSX.Element {
+}: React.ComponentPropsWithoutRef<typeof Drawer> & MobileNavMenuProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   const {
@@ -212,47 +334,49 @@ export default function MobileNavMenu({
       </DrawerTrigger>
 
       <DrawerContent className={cn(MobileMenuDrawerContentClassName)}>
-        <DrawerHeader className={cn(MobileMenuDrawerHeaderClassName)}>
-          <DrawerTitle className="text-center">
-            <div className="grid w-full grid-cols-2 gap-2 align-middle">
-              <AppMainLogo
-                variant={'default'}
-                text={appTitle}
-                className={'items-center justify-center'}
-              />
-              <div className="mx-auto flex h-full w-full flex-col items-end justify-center">
-                {twitchStatusSlot}
-              </div>
-            </div>
+        <DrawerHeader className={cn('rounded-none')}>
+          <DrawerTitle className="py-0">
+            <AppMainLogo
+              variant={'default'}
+              text={appTitle}
+              className={'mx-auto items-center justify-center'}
+            />
           </DrawerTitle>
-          <DrawerDescription></DrawerDescription>
         </DrawerHeader>
 
         <ScrollArea className={cn(MobileMenuItemScrollList)}>
           <MenuLevel items={menuItems} level={0} onNavigateHandler={onNavigateHandler} />
         </ScrollArea>
+        <div className="flex flex-col border-b border-b-primary/40">
+          <Button
+            variant={'ghost'}
+            size={'lg'}
+            className={'w-full rounded-none border-b border-border/10 px-4 py-5 text-xl'}
+            asChild
+          >
+            <Link
+              href="/home"
+              passHref
+              onNavigate={onNavigateHandler}
+              className="justify-start px-0 no-underline decoration-0"
+            >
+              <House className="w-6" />
+              <span className="no-underline">Home</span>
+            </Link>
+          </Button>
+          <SettingsDrawer />
+        </div>
 
-        <DrawerFooter className={cn(MobileDrawerFooterClassName)}>
-          <div className="mb-2 flex w-full flex-row items-center justify-center gap-x-1 rounded-none border-t border-b border-t-primary border-b-primary">
-            <Button variant={'link'} size={'lg'} className={'text-primary'} asChild>
-              <Link
-                href="/home"
-                passHref
-                onNavigate={onNavigateHandler}
-                className="no-underline decoration-0"
-              >
-                <House className="w-5" />
-                <span className="no-underline">Home</span>
-              </Link>
-            </Button>
-            <GlobalSearch
-              onSelectionCallback={onNavigateHandler}
-              buttonProps={{ className: 'text-primary' }}
-            />
-            <SettingsDrawer />
-          </div>
+        <DrawerFooter
+          className={cn('m-0 flex w-full flex-row items-center justify-between rounded-none p-0')}
+        >
           <DrawerClose asChild>
-            <Button variant="ghost" className="w-fit">
+            <Button
+              variant={'ghost'}
+              size={'lg'}
+              className={'h-10.25 w-full justify-end rounded-none px-4 text-xl'}
+            >
+              <ChevronDownIcon className="h-6 w-6" />
               Close
             </Button>
           </DrawerClose>
@@ -266,26 +390,40 @@ function SettingsDrawer() {
   return (
     <Drawer direction={'bottom'}>
       <DrawerTrigger asChild>
-        <Button variant={'link'} size={'lg'} className={'text-primary'}>
-          <Settings />
+        <Button
+          variant={'ghost'}
+          size={'lg'}
+          className={
+            'w-full justify-start rounded-none border-b border-border/10 px-4 py-5 text-left text-xl'
+          }
+        >
+          <Settings className="w-6" />
           Settings
         </Button>
       </DrawerTrigger>
       <DrawerContent className={cn(MobileMenuDrawerContentClassName)}>
-        <DrawerHeader className={cn(MobileMenuDrawerHeaderClassName)}>
+        <DrawerHeader className={cn('')}>
           <DrawerTitle>Settings</DrawerTitle>
           <DrawerDescription></DrawerDescription>
         </DrawerHeader>
         <ScrollArea className={cn(MobileMenuItemScrollList)}>
-          <div className={cn(MobileMenuItemScrollListContent)}>
-            <AppearanceSettingsDrawer />
+          <div className={cn('flex h-full w-full flex-col justify-center gap-y-4 p-4')}>
+            <MobileWallpaperSettingsFieldGroup className={ListItemClassName} />
+            <MobileColorThemeFieldGroup className={ListItemClassName} />
+            <MobileThemeModeFieldGroup className={ListItemClassName} />
           </div>
         </ScrollArea>
-        <DrawerFooter className={cn(MobileDrawerFooterClassName)}>
+        <DrawerFooter
+          className={cn('mt-0 flex items-center justify-between rounded-none px-0 py-0')}
+        >
           <DrawerClose asChild>
-            <Button variant="ghost" className="w-fit">
-              <ArrowLeft className={'mr-2'} />
-              Back
+            <Button
+              variant={'ghost'}
+              size={'lg'}
+              className={'h-10.25 w-full justify-end rounded-none px-4 text-xl'}
+            >
+              <ChevronLeftIcon className="h-6 w-6" />
+              Main Menu
             </Button>
           </DrawerClose>
         </DrawerFooter>
@@ -294,50 +432,17 @@ function SettingsDrawer() {
   )
 }
 
-function AppearanceSettingsDrawer() {
-  return (
-    <Drawer direction={'bottom'}>
-      <DrawerTrigger asChild>
-        <Button variant="outline">
-          <PaletteIcon className={'mr-1'} />
-          Appearance
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className={cn(MobileMenuDrawerContentClassName)}>
-        <DrawerHeader className={cn(MobileMenuDrawerHeaderClassName)}>
-          <DrawerTitle>Appearance</DrawerTitle>
-          <DrawerDescription>Change the look and feel of the website.</DrawerDescription>
-        </DrawerHeader>
-        <ScrollArea className={cn(MobileMenuItemScrollList)}>
-          <div className={cn(MobileMenuItemScrollListContent)}>
-            <MobileWallpaperSettingsFieldGroup />
-            <MobileColorThemeFieldGroup />
-            <MobileThemeModeFieldGroup />
-          </div>
-        </ScrollArea>
-        <DrawerFooter className={cn(MobileDrawerFooterClassName)}>
-          <DrawerClose asChild>
-            <Button variant="ghost" className="w-fit">
-              <ArrowLeft className={'mr-2'} />
-              Back
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  )
-}
+const ListItemClassName = 'w-full rounded-none border-b border-border/10 pb-5 pt-0 text-xl'
 
 const MobileMenuDrawerContentClassName = cn(
   'mobile-menu-primary-menu-content rounded-md bg-background',
-  'data-[vaul-drawer-direction=bottom]:h-[90vh]',
+  'data-[vaul-drawer-direction=bottom]:h-[98vh]',
   'data-[vaul-drawer-direction=bottom]:rounded-t-none',
+  // 'shadow-(--shadow-scrollable)',
 )
 
-const MobileMenuDrawerHeaderClassName = cn('rounded-none ')
-
-const MobileMenuItemScrollList = cn('flex flex-col justify-end mt-auto')
-
-const MobileMenuItemScrollListContent = cn('flex h-full flex-col justify-end')
-
-const MobileDrawerFooterClassName = 'flex flex-col items-center justify-center rounded-none mt-0'
+const MobileMenuItemScrollList = cn(
+  '[&_>div_>div]:flex! [&_>div_>div]:h-full! [&_>div_>div]:flex-col!',
+  'mobile-menu-scroll-list',
+  'flex flex-col h-full border-t border-b border-t-primary/40 border-b-primary/40 ',
+)

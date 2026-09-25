@@ -58,6 +58,7 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-shadow: var(--shadow-color);
 
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -69,14 +70,53 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  --shadow-2xs: var(--shadow-2xs);
-  --shadow-xs: var(--shadow-xs);
-  --shadow-sm: var(--shadow-sm);
-  --shadow: var(--shadow);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-2xl: var(--shadow-2xl);
+  --shadow-color: var(--shadow-color);
+  --shadow-x: var(--shadow-x);
+  --shadow-y: var(--shadow-y);
+  --shadow-blur: var(--shadow-blur);
+  --shadow-spread: var(--shadow-spread);
+  --shadow-opacity: var(--shadow-opacity);
+
+  --shadow-scrollable: inset 0 10px 10px -10px  oklch(from var(--shadow-color) l c h / 0.5), inset 0 -10px 10px -10px  oklch(from var(--shadow-color) l c h / 0.5);
+
+    --shadow-2xs: var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / calc(var(--shadow-opacity) / 2));
+  --shadow-xs: var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / calc(var(--shadow-opacity) / 2));
+  --shadow-sm: 
+    var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    var(--shadow-x) var(--shadow-y) calc(var(--shadow-blur) - 1px) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow: 
+    var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)), 
+    0 1px 2px -1px oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-md: 
+    var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    var(--shadow-x) calc(var(--shadow-y) * 2) calc(var(--shadow-blur) + 1px) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-lg: 
+    var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    var(--shadow-x) calc(var(--shadow-y) * 4) calc(var(--shadow-blur) * 2) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-xl: 
+    var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    var(--shadow-x) calc(var(--shadow-y) * 8) calc(var(--shadow-blur) + 7px) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-2xl: var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / calc(var(--shadow-opacity) * 2.5));
+
+
+  --shadow-inset-2xs: inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / calc(var(--shadow-opacity) / 2));
+  --shadow-inset-xs: inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / calc(var(--shadow-opacity) / 2));
+  --shadow-inset-sm: 
+    inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    inset var(--shadow-x) var(--shadow-y) calc(var(--shadow-blur) - 1px) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-inset: 
+    inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)), 
+    inset 0 1px 2px -1px oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-inset-md: 
+    inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    inset var(--shadow-x) calc(var(--shadow-y) * 2) calc(var(--shadow-blur) + 1px) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-inset-lg: 
+    inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    inset var(--shadow-x) calc(var(--shadow-y) * 4) calc(var(--shadow-blur) * 2) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-inset-xl: 
+    inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / var(--shadow-opacity)),
+    inset var(--shadow-x) calc(var(--shadow-y) * 8) calc(var(--shadow-blur) + 7px) calc(var(--shadow-spread) - 1px) oklch(from var(--shadow-color) l c h / var(--shadow-opacity));
+  --shadow-inset-2xl: inset var(--shadow-x) var(--shadow-y) var(--shadow-blur) var(--shadow-spread) oklch(from var(--shadow-color) l c h / calc(var(--shadow-opacity) * 2.5));
 
   --tracking-tighter: calc(var(--tracking-normal) - 0.05em);
   --tracking-tight: calc(var(--tracking-normal) - 0.025em);
