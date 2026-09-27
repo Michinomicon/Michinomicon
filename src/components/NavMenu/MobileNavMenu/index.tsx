@@ -21,7 +21,7 @@ import {
   Menu,
   Settings,
 } from 'lucide-react'
-import Link from 'next/link'
+import Link, { LinkProps } from 'next/link'
 import { ComponentPropsWithoutRef, createContext, useContext, useState } from 'react'
 import React from 'react'
 import {
@@ -347,42 +347,82 @@ export default function MobileNavMenu({
         <ScrollArea className={cn(MobileMenuItemScrollList)}>
           <MenuLevel items={menuItems} level={0} onNavigateHandler={onNavigateHandler} />
         </ScrollArea>
-        <div className="flex flex-col border-b border-b-primary/40">
-          <Button
-            variant={'ghost'}
-            size={'lg'}
-            className={'w-full rounded-none border-b border-border/10 px-4 py-5 text-xl'}
-            asChild
-          >
-            <Link
-              href="/home"
-              passHref
-              onNavigate={onNavigateHandler}
-              className="justify-start px-0 no-underline decoration-0"
-            >
-              <House className="w-6" />
-              <span className="no-underline">Home</span>
-            </Link>
-          </Button>
+        <div className="flex flex-col">
+          <MobileMenuListItem
+            label={'Home'}
+            icon={<House className="" />}
+            href={'/home'}
+            onNavigate={onNavigateHandler}
+          />
           <SettingsDrawer />
         </div>
-
-        <DrawerFooter
-          className={cn('m-0 flex w-full flex-row items-center justify-between rounded-none p-0')}
-        >
-          <DrawerClose asChild>
-            <Button
-              variant={'ghost'}
-              size={'lg'}
-              className={'h-10.25 w-full justify-end rounded-none px-4 text-xl'}
-            >
-              <ChevronDownIcon className="h-6 w-6" />
-              Close
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <MobileMenuDrawerFooter />
       </DrawerContent>
     </Drawer>
+  )
+}
+
+export function MobileMenuListItem({
+  label,
+  href,
+  onNavigate,
+  icon,
+  className,
+  ...buttonProps
+}: {
+  label: string
+  href: LinkProps['href']
+  onNavigate?: LinkProps['onNavigate']
+  icon?: React.ReactNode | undefined
+  className?: string
+} & Omit<React.ComponentPropsWithoutRef<typeof Button>, 'className'>) {
+  return (
+    <Button
+      variant={'ghost'}
+      size={'lg'}
+      className={cn('w-full rounded-none border-b border-border/10 px-4 py-5 text-xl', className)}
+      {...buttonProps}
+      asChild
+    >
+      <Link
+        href={href}
+        passHref
+        onNavigate={onNavigate}
+        className="justify-start px-0 no-underline decoration-0"
+      >
+        {icon && icon}
+        <span className="no-underline">{label}</span>
+      </Link>
+    </Button>
+  )
+}
+
+export function MobileMenuDrawerFooter({
+  className,
+  ...props
+}: Omit<React.ComponentPropsWithoutRef<typeof DrawerFooter>, 'className'> & {
+  className?: string
+}) {
+  return (
+    <DrawerFooter
+      className={cn(
+        'm-0 flex w-full flex-row items-center justify-between rounded-none border-t border-t-primary/40 p-0',
+        className,
+      )}
+      {...props}
+    >
+      <DrawerClose asChild>
+        <Button
+          variant={'ghost'}
+          size={'lg'}
+          className={'h-10.25 w-full justify-center rounded-none px-4 text-xl'}
+        >
+          <ChevronDownIcon className="h-6 w-6" />
+          Close
+          <ChevronDownIcon className="h-6 w-6" />
+        </Button>
+      </DrawerClose>
+    </DrawerFooter>
   )
 }
 
@@ -402,10 +442,13 @@ function SettingsDrawer() {
         </Button>
       </DrawerTrigger>
       <DrawerContent className={cn(MobileMenuDrawerContentClassName)}>
-        <DrawerHeader className={cn('')}>
+        <DrawerHeader className={cn('sr-only')}>
           <DrawerTitle>Settings</DrawerTitle>
           <DrawerDescription></DrawerDescription>
         </DrawerHeader>
+        <div className={'my-3 flex w-full flex-col items-center justify-center'}>
+          <h2 className="text-3xl">Settings</h2>
+        </div>
         <ScrollArea className={cn(MobileMenuItemScrollList)}>
           <div className={cn('flex h-full w-full flex-col justify-center gap-y-4 p-4')}>
             <MobileWallpaperSettingsFieldGroup className={ListItemClassName} />
@@ -413,20 +456,7 @@ function SettingsDrawer() {
             <MobileThemeModeFieldGroup className={ListItemClassName} />
           </div>
         </ScrollArea>
-        <DrawerFooter
-          className={cn('mt-0 flex items-center justify-between rounded-none px-0 py-0')}
-        >
-          <DrawerClose asChild>
-            <Button
-              variant={'ghost'}
-              size={'lg'}
-              className={'h-10.25 w-full justify-end rounded-none px-4 text-xl'}
-            >
-              <ChevronLeftIcon className="h-6 w-6" />
-              Main Menu
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <MobileMenuDrawerFooter />
       </DrawerContent>
     </Drawer>
   )
@@ -434,9 +464,10 @@ function SettingsDrawer() {
 
 const ListItemClassName = 'w-full rounded-none border-b border-border/10 pb-5 pt-0 text-xl'
 
-const MobileMenuDrawerContentClassName = cn(
+export const MobileMenuDrawerContentClassName = cn(
   'mobile-menu-primary-menu-content rounded-md bg-background',
-  'data-[vaul-drawer-direction=bottom]:h-[98vh]',
+  'data-[vaul-drawer-direction=bottom]:h-[100lvh]',
+  'data-[vaul-drawer-direction=bottom]:min-h-[100lvh]',
   'data-[vaul-drawer-direction=bottom]:rounded-t-none',
   // 'shadow-(--shadow-scrollable)',
 )
