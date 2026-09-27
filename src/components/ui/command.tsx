@@ -19,7 +19,8 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
     <CommandPrimitive
       data-slot="command"
       className={cn(
-        'flex size-full flex-col overflow-hidden rounded-xl! bg-popover p-1 text-popover-foreground',
+        // 'max-md:rounded-none! rounded-md',
+        'flex size-full flex-col overflow-hidden bg-popover p-0 text-popover-foreground',
         className,
       )}
       {...props}
@@ -43,7 +44,11 @@ function CommandDialog({
   return (
     <Dialog {...props}>
       <DialogContent
-        className={cn('top-1/3 translate-y-0 overflow-hidden rounded-xl! p-0', className)}
+        className={cn(
+          'rounded-md!',
+          'top-1/3 min-h-[33vh] translate-y-0 overflow-hidden p-0',
+          className,
+        )}
         showCloseButton={showCloseButton}
       >
         <DialogHeader className="sr-only">
@@ -59,11 +64,23 @@ function CommandDialog({
 
 function CommandInput({
   className,
+  wrapperClassName,
+  inputGroupClassName,
+  addonInlineEnd,
   ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input>) {
+}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+  wrapperClassName?: string
+  inputGroupClassName?: string
+  addonInlineEnd?: React.ReactNode
+}) {
   return (
-    <div data-slot="command-input-wrapper" className="p-1 pb-0">
-      <InputGroup className="h-8! rounded-lg! border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!">
+    <div data-slot="command-input-wrapper" className={cn('p-1 pb-0', wrapperClassName)}>
+      <InputGroup
+        className={cn(
+          'h-8! rounded-md border-input/30 bg-input/30 shadow-none! *:data-[slot=input-group-addon]:pl-2!',
+          inputGroupClassName,
+        )}
+      >
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn(
@@ -75,6 +92,9 @@ function CommandInput({
         <InputGroupAddon>
           <SearchIcon className="size-4 shrink-0 opacity-50" />
         </InputGroupAddon>
+        <InputGroupAddon align="inline-end" className={''}>
+          {addonInlineEnd}
+        </InputGroupAddon>
       </InputGroup>
     </div>
   )
@@ -85,7 +105,7 @@ function CommandList({ className, ...props }: React.ComponentProps<typeof Comman
     <CommandPrimitive.List
       data-slot="command-list"
       className={cn(
-        'no-scrollbar max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none',
+        'no-scrollbar h-full max-h-[60vh] grow scroll-py-1 overflow-x-hidden overflow-y-auto outline-none max-md:max-h-screen',
         className,
       )}
       {...props}
@@ -144,7 +164,8 @@ function CommandItem({
     <CommandPrimitive.Item
       data-slot="command-item"
       className={cn(
-        'group/command-item relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none in-data-[slot=dialog-content]:rounded-lg!',
+        // 'rounded-sm in-data-[slot=dialog-content]:rounded-md!',
+        'group/command-item relative flex cursor-default items-center gap-2 px-2 py-1.5 text-sm outline-hidden select-none',
         'bg-card data-selected:bg-primary/30 data-selected:text-foreground',
         "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-selected:*:[svg]:text-foreground",
         className,
