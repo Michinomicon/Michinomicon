@@ -49,7 +49,7 @@ const ItemThumbnailStyles = cn('relative block rounded-none size-full object-cov
 export const blurPlaceholder =
   'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiCiAgICAgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiCiAgICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJibGFjayIgb3BhY2l0eT0iMC41IiAvPgo8L3N2Zz4='
 
-type ItemProperties = Omit<LightGalleryItem, 'width' | 'width'> & {
+type ItemProperties = Omit<LightGalleryItem, 'height' | 'width'> & {
   width: number | `${number}`
   height: number | `${number}`
 } & {
@@ -100,6 +100,8 @@ export type MediaGalleryProps = {
   settings?: MediaGallerySettings
 }
 
+/** @deprecated # USE `<LightBoxGallery/>` instead.
+ * This is Kept as backup for now while testing the new LightBoxGallery component  */
 export const MediaGallery = ({
   layout = 'inline',
   items,

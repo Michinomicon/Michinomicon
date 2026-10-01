@@ -7,8 +7,8 @@ import TrackLoader from './AudioTrackLoader'
 import { Track } from '@/lib/html-audio'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
 import { getFileMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
-import { MediaGallery } from '../MediaGallery'
 import { ImageMedia, ImageMediaProps } from './ImageMedia'
+import LightBoxGallery from '../Lightbox'
 
 const MESSAGE_FAILED_TO_RENDER = 'Failed to render media.'
 const MESSAGE_RESOURCE_MISSING = 'Resource was missing or invalid.'
@@ -64,24 +64,9 @@ export const Media = (props: MediaProps) => {
         }
         return <ImageMedia {...imageProps} />
       } else {
-        const {
-          settings,
-          layout,
-          galleryItemClassNames,
-          thumbnailClassNames,
-          containerClassNames,
-        } = baseProps
         return (
           <React.Fragment>
-            <MediaGallery
-              items={[resource]}
-              galleryClassNames={'media-component'}
-              galleryItemClassNames={galleryItemClassNames}
-              thumbnailClassNames={thumbnailClassNames}
-              layout={layout}
-              settings={settings}
-              containerClassNames={containerClassNames}
-            />
+            <LightBoxGallery items={[resource]} className={'media-component'} />
           </React.Fragment>
         )
       }
@@ -105,14 +90,9 @@ export const Media = (props: MediaProps) => {
           </React.Fragment>
         )
       } else {
-        const { settings: lightGalleryProps, layout } = baseProps
         return (
           <React.Fragment>
-            <MediaGallery
-              items={[resource]}
-              settings={lightGalleryProps}
-              layout={layout ?? 'default'}
-            />
+            <LightBoxGallery items={[resource]} className={'media-component'} />
           </React.Fragment>
         )
       }
