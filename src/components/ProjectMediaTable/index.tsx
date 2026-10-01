@@ -11,12 +11,12 @@ import { ProjectMediaCreators } from '@/utilities/extractMediaCreditsByProjectId
 import { Collapsible } from '../ui/collapsible'
 import { cn } from '@/lib/utils'
 import { CMSLink } from '../Link'
-import { MediaGallery } from '../MediaGallery'
 import { ExternalLink } from 'lucide-react'
 import React from 'react'
 import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
 import { getMediaFileExtension } from '@/utilities/mediaInfo'
 import { CreatorAvatarGroup } from '../CreatorAvatarGroup'
+import LightBoxGallery from '../Lightbox'
 
 export function ProjectMediaTableBody({
   data,
@@ -32,7 +32,7 @@ export function ProjectMediaTableBody({
         <TableRow className={''}>
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
-            <MediaGallery items={[media]} layout={'default'} thumbnailTooltip={false} />
+            <LightBoxGallery items={[media]} className={'project-media-table'} />
           </TableCell>
 
           {/* Title */}

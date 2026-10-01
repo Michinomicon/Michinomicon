@@ -130,12 +130,12 @@ export type GalleryLayout = `${keyof typeof LayoutVariantSettings}`
 
 export function applyLayoutSettings(
   layout: GalleryLayout,
-  setings?: MediaGallerySettings | null | undefined,
+  settings?: MediaGallerySettings | null | undefined,
 ): MediaGallerySettings {
   const layoutSettings: MediaGallerySettings = LayoutVariantSettings[layout]
-  if (setings) {
+  if (settings) {
     const updatedSettings: MediaGallerySettings = {
-      ...setings,
+      ...settings,
       ...layoutSettings,
     }
     return updatedSettings

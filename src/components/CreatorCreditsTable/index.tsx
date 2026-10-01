@@ -21,11 +21,11 @@ import {
 } from '@/components/ui/tooltip'
 import { formatDateTime } from '@/utilities/formatDateTime'
 import { cn } from '@/lib/utils'
-import { MediaGallery } from '../MediaGallery'
 import { StatusBadge } from '../StatusBadge'
 import { getFileMediaMetaData } from '@/utilities/getMediaMetaData'
 import { isMedia } from '@/utilities/isMedia'
 import { getMediaFileExtension } from '@/utilities/mediaInfo'
+import LightBoxGallery from '../Lightbox'
 
 export function CreatorCreditsTableBody({
   data,
@@ -43,7 +43,10 @@ export function CreatorCreditsTableBody({
           {/* Asset */}
           <TableCell className={'p-0 text-center'}>
             {profileImage && (
-              <MediaGallery items={[profileImage]} layout={'default'} thumbnailTooltip={false} />
+              <LightBoxGallery
+                items={[profileImage]}
+                className={'creator-credits-table-project-image'}
+              />
             )}
           </TableCell>
           <TableCell>{project.title}</TableCell>
@@ -131,10 +134,9 @@ export function CreatorCreditsTableBody({
                       return (
                         <TableRow key={index}>
                           <TableCell className={'p-0'}>
-                            <MediaGallery
+                            <LightBoxGallery
                               items={[credit.media]}
-                              layout={'default'}
-                              thumbnailTooltip={false}
+                              className={'creator-credits-table'}
                             />
                           </TableCell>
                           <TableCell className="text-center text-lg">

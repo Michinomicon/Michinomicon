@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { cn } from '@/utilities/ui'
 import type { Media, MediaGalleryBlock as MediaGalleryBlockProps } from '@/payload-types'
-import { MediaGallery } from '@/components/MediaGallery'
+import LightBoxGallery from '@/components/Lightbox'
 
 type Props = MediaGalleryBlockProps & {
   className?: string
@@ -45,18 +45,14 @@ export const MediaGalleryBlock: React.FC<Props> = async (props) => {
   return (
     <div
       className={cn(
-        'media-gallery-block my-8 min-w-160',
+        'media-gallery-block my-8 flex w-full flex-col',
         {
           container: enableGutter,
         },
         className,
       )}
     >
-      <MediaGallery
-        items={galleryItems}
-        galleryClassNames={'media-gallery-block'}
-        layout={'inline'}
-      />
+      <LightBoxGallery items={galleryItems} className={'media-gallery-block'} />
     </div>
   )
 }
