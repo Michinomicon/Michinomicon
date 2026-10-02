@@ -4,9 +4,12 @@ import { Media } from '@/payload-types'
 import React from 'react'
 import Lightbox, {
   ClickCallbackProps,
+  ControllerRef,
   ImageFit,
+  LightboxExternalProps,
   Plugin as LightboxPlugin,
   SlideshowRef,
+  ThumbnailsRef,
   ViewCallbackProps,
 } from 'yet-another-react-lightbox'
 import Thumbnails from 'yet-another-react-lightbox/plugins/thumbnails'
@@ -16,8 +19,8 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom'
 import Counter from 'yet-another-react-lightbox/plugins/counter'
 import Slideshow from 'yet-another-react-lightbox/plugins/slideshow'
 import Video from 'yet-another-react-lightbox/plugins/video'
-import { ClickHandlerProps, Photo, RowsPhotoAlbum } from 'react-photo-album'
-import 'react-photo-album/rows.css'
+import PhotoAlbum, { ClickHandlerProps, Photo } from 'react-photo-album'
+import 'react-photo-album/styles.css'
 import 'yet-another-react-lightbox/styles.css'
 import 'yet-another-react-lightbox/plugins/thumbnails.css'
 import 'yet-another-react-lightbox/plugins/counter.css'
@@ -33,69 +36,123 @@ const InlineStyles = {
   },
 }
 
-type AvailablePlugin = string &
-  ('inline' | 'fullscreen' | 'zoom' | 'thumbnails' | 'counter' | 'slideshow')
-type PluginIndex = { [pluginName in AvailablePlugin]: LightboxPlugin }
+type AlbumLayout = 'columns' | 'rows' | 'masonry'
+type DisplayType = 'carousel' | 'album' | 'inline'
 
-const AvailablePluginIndex: PluginIndex = {
-  inline: Inline,
-  fullscreen: Fullscreen,
-  zoom: Zoom,
-  thumbnails: Thumbnails,
-  counter: Counter,
-  slideshow: Slideshow,
+type FeatureProps<
+  FeatureName extends string & keyof Required<LightboxExternalProps>,
+  PickList extends keyof Feature = keyof Omit<Required<LightboxExternalProps>[FeatureName], 'ref'>,
+  Feature extends Omit<Required<LightboxExternalProps>[FeatureName], 'ref'> = Omit<
+    Required<LightboxExternalProps>[FeatureName],
+    'ref'
+  >,
+> = {
+  [Property in keyof Required<
+    Pick<Feature, PickList>
+  > as `${FeatureName}${Capitalize<string & Property>}`]: Feature[Property]
 }
 
-type PluginEnabledState = {
-  [pluginName in AvailablePlugin]?: boolean
+type ThumbnailFeatureProps = FeatureProps<'thumbnails', 'position' | 'hidden' | 'showToggle'>
+type SlideshowFeatureProps = FeatureProps<'slideshow'> & { slideshowEnable: boolean | undefined }
+
+interface DisplayProps {
+  display: DisplayType | undefined
+  carouselImageFit: ImageFit | undefined
+  albumLayout: AlbumLayout | undefined
 }
 
-interface BaseFeatureProps extends PluginEnabledState {
-  carousel?: boolean
-  imageFit?: ImageFit | undefined
+interface ToolbarControls {
+  toolbarFullscreen: boolean | undefined
+  toolbarZoom: boolean | undefined
+  toolbarCounter: boolean | undefined
 }
 
-type LightBoxFeatureProps = BaseFeatureProps
+type LightBoxFeatureProps = DisplayProps &
+  ThumbnailFeatureProps &
+  SlideshowFeatureProps &
+  ToolbarControls
 
-const DefaultFeatures: LightBoxFeatureProps = {
-  inline: false,
-  fullscreen: true,
-  zoom: true,
-  thumbnails: false,
-  carousel: true,
-  counter: true,
-  slideshow: false,
-  imageFit: 'cover',
-}
-
-function getEnabledPlugins(features: BaseFeatureProps): LightboxPlugin[] {
+function getEnabledPlugins({
+  display,
+  slideshowEnable,
+  toolbarZoom,
+  toolbarCounter,
+  toolbarFullscreen,
+  thumbnailsHidden,
+}: Pick<
+  LightBoxFeatureProps,
+  | 'display'
+  | 'slideshowEnable'
+  | 'toolbarZoom'
+  | 'toolbarCounter'
+  | 'toolbarFullscreen'
+  | 'thumbnailsHidden'
+>): LightboxPlugin[] {
   const plugins: LightboxPlugin[] = []
 
-  for (const feature of Object.keys(features) as AvailablePlugin[]) {
-    if (Object.keys(AvailablePluginIndex).includes(feature) && features[feature] === true) {
-      plugins.push(AvailablePluginIndex[feature as AvailablePlugin])
-    }
+  switch (display) {
+    case 'carousel':
+      plugins.push(Inline)
+      break
+    case 'album':
+      break
+    case 'inline':
+      plugins.push(Inline)
+      break
   }
+
+  if (slideshowEnable) {
+    plugins.push(Slideshow)
+  }
+
+  if (!!toolbarZoom) {
+    plugins.push(Zoom)
+  }
+
+  if (!!toolbarCounter) {
+    plugins.push(Counter)
+  }
+
+  if (!!toolbarFullscreen) {
+    plugins.push(Fullscreen)
+  }
+
+  if (thumbnailsHidden === false) {
+    plugins.push(Thumbnails)
+  }
+
+  plugins.push(...[Video])
 
   return plugins
 }
 
-export type LightBoxGalleryProps = {
+export type LightBoxGalleryProps = Partial<LightBoxFeatureProps> & {
   className?: string
   items: Media[]
-  features?: Partial<LightBoxFeatureProps>
 }
 
 export default function LightBoxGallery({
   className,
   items,
-  features = DefaultFeatures,
+  display: displayFromProps, // = 'carousel',
+  carouselImageFit: carouselImageFitFromProps, // = 'cover',
+  albumLayout: albumLayoutFromProps, // = 'masonry',
+  thumbnailsPosition: thumbnailsPositionFromProps, // = 'bottom',
+  thumbnailsHidden: thumbnailsHiddenFromProps, // = false,
+  thumbnailsShowToggle: thumbnailsShowToggleFromProps, // = false,
+  slideshowAutoplay: slideshowAutoplayFromProps, // = false,
+  slideshowDelay: slideshowDelayFromProps, // = 3000,
+  slideshowEnable: slideshowEnableFromProps, // = false,
+  toolbarFullscreen: toolbarFullscreenFromProps, // = true,
+  toolbarZoom: toolbarZoomFromProps, // = true,
+  toolbarCounter: toolbarCounterFromProps, // = true,
 }: LightBoxGalleryProps): React.ReactNode {
   const slideshowRef = React.useRef<SlideshowRef | null>(null)
+  const thumbnailsRef = React.useRef<ThumbnailsRef | null>(null)
+  const controllerRef = React.useRef<ControllerRef | null>(null)
 
   const [index, setIndex] = React.useState(-1)
-  const [autoplay, _setAutoplay] = React.useState(false)
-  const [delay, _setDelay] = React.useState(3000)
+
   const [controls, _setControls] = React.useState(true)
   const [playsInline, _setPlaysInline] = React.useState(true)
   const [autoPlay, _setAutoPlay] = React.useState(false)
@@ -109,15 +166,63 @@ export default function LightBoxGallery({
   const [crossOrigin, _setCrossOrigin] = React.useState('')
   const [preload, _setPreload] = React.useState('')
 
-  //   const slideProperties =
+  const [display, _setDisplay] = React.useState(displayFromProps)
+  const [albumLayout, _setAlbumLayout] = React.useState(albumLayoutFromProps)
+  const [carouselImageFit, _setCarouselImageFit] = React.useState(carouselImageFitFromProps)
+
+  const [thumbnailsPosition, _setThumbnailsPosition] = React.useState(thumbnailsPositionFromProps)
+  const [thumbnailsHidden, _setThumbnailsHidden] = React.useState(thumbnailsHiddenFromProps)
+  const [thumbnailsShowToggle, _setThumbnailsShowToggle] = React.useState(
+    thumbnailsShowToggleFromProps,
+  )
+  const [slideshowEnable, _setSlideshowEnable] = React.useState(slideshowEnableFromProps)
+  const [slideshowAutoplay, _setSlideshowAutoplay] = React.useState(slideshowAutoplayFromProps)
+  const [slideshowDelay, _setSlideshowDelay] = React.useState(slideshowDelayFromProps)
+  const [toolbarFullscreen, _setToolbarFullscreen] = React.useState(toolbarFullscreenFromProps)
+  const [toolbarZoom, _setToolbarZoom] = React.useState(toolbarZoomFromProps)
+  const [toolbarCounter, _setToolbarCounter] = React.useState(toolbarCounterFromProps)
+
+  const isDisplayAlbum = display === 'album'
+  const isDisplayCarousel = display === 'carousel'
+  const isDisplayInline = display === 'inline'
+
   const slides = mapMediaToSlides(items)
 
-  const useInline = features?.inline === true
-  const useCarousel = useInline && features?.carousel === true
-  const useThumbnails = features?.thumbnails === true
-  const useSlideShow = features?.slideshow === true
+  const toolbarButtons: ('close' | 'thumbnails' | 'fullscreen' | 'zoom' | 'slideshow')[] = []
+  if (slideshowEnable) {
+    toolbarButtons.push('slideshow')
+  }
+  if (toolbarZoom) {
+    toolbarButtons.push('zoom')
+  }
+  if (toolbarFullscreen) {
+    toolbarButtons.push('fullscreen')
+  }
+  toolbarButtons.push('close')
 
-  const plugins = getEnabledPlugins(features)
+  console.log(`Lightbox Gallery '${className}' Features:`, {
+    display: display,
+    carouselImageFit: carouselImageFit,
+    albumLayout: albumLayout,
+    thumbnailsPosition: thumbnailsPosition,
+    thumbnailsHidden: thumbnailsHidden,
+    thumbnailsShowToggle: thumbnailsShowToggle,
+    slideshowAutoplay: slideshowAutoplay,
+    slideshowDelay: slideshowDelay,
+    slideshowEnable: slideshowEnable,
+    toolbarFullscreen: toolbarFullscreen,
+    toolbarZoom: toolbarZoom,
+    toolbarCounter: toolbarCounter,
+  })
+
+  const plugins = getEnabledPlugins({
+    display,
+    toolbarFullscreen,
+    toolbarZoom,
+    toolbarCounter,
+    slideshowEnable,
+    thumbnailsHidden,
+  })
 
   const handleLightboxClose = () => {
     setIndex(-1)
@@ -125,7 +230,7 @@ export default function LightBoxGallery({
 
   const handleSlideClick = ({ index: _clickedSlideIndex }: ClickCallbackProps) => {
     const currentSlideshow = slideshowRef.current
-    if (useSlideShow && currentSlideshow) {
+    if (slideshowEnable && currentSlideshow) {
       const { playing } = currentSlideshow
       if (playing) {
         currentSlideshow.pause()
@@ -137,12 +242,12 @@ export default function LightBoxGallery({
 
   const isSlideshow = () => {
     const currentSlideshow = slideshowRef.current
-    return useSlideShow && currentSlideshow
+    return slideshowEnable && currentSlideshow
   }
 
   const toggleSlideshowPlayPause = () => {
     const currentSlideshow = slideshowRef.current
-    if (useSlideShow && currentSlideshow) {
+    if (slideshowEnable && currentSlideshow) {
       const { playing } = currentSlideshow
       if (playing) {
         currentSlideshow.pause()
@@ -157,7 +262,7 @@ export default function LightBoxGallery({
     event.preventDefault()
     switch (code) {
       case 'Space': //Space
-        if (!useInline && isSlideshow()) {
+        if (!isDisplayInline && isSlideshow()) {
           console.log(`Pressed 32 (SPACE) with Slideshow Active.`)
           toggleSlideshowPlayPause()
         }
@@ -171,9 +276,13 @@ export default function LightBoxGallery({
   const handleView = ({ index: _currentIndex }: ViewCallbackProps) => {}
 
   return (
-    <div onKeyDown={handleKeyDownEvents} className={cn('relative h-auto w-full')}>
-      {!useInline && (
-        <RowsPhotoAlbum
+    <div
+      onKeyDown={handleKeyDownEvents}
+      className={cn('relative h-auto w-full', `gallery-layout-${display}`)}
+    >
+      {isDisplayAlbum && (
+        <PhotoAlbum
+          layout={albumLayout ?? 'masonry'}
           photos={slides as Photo[]}
           targetRowHeight={150}
           padding={1}
@@ -182,7 +291,9 @@ export default function LightBoxGallery({
           componentsProps={{
             button: {
               className: cn(
-                'hover:-mt-1 hover:ring-3 hover:ring-primary hover:shadow-[0px_0px_30px_2px] hover:shadow-primary/40 hover:rounded-md overflow-hidden',
+                slides.length <= 1
+                  ? ''
+                  : 'hover:ring-3 hover:ring-secondary/70 hover:shadow-[0px_0px_30px_2px] hover:shadow-primary/40 hover:rounded-md overflow-hidden',
               ),
             },
           }}
@@ -191,27 +302,42 @@ export default function LightBoxGallery({
       <Lightbox
         index={index}
         className={cn(className)}
-        {...(useInline
-          ? {
-              inline: InlineStyles,
-              carousel: useCarousel
-                ? {
-                    padding: 0,
-                    spacing: 0,
-                    imageFit: features?.imageFit,
-                  }
-                : undefined,
-            }
-          : {})}
+        inline={isDisplayInline || isDisplayCarousel ? InlineStyles : undefined}
         open={index >= 0}
         close={handleLightboxClose}
         slides={slides}
-        slideshow={useSlideShow ? { ref: slideshowRef, autoplay, delay } : undefined}
+        controller={{ ref: controllerRef }}
+        toolbar={{
+          buttons: toolbarButtons,
+        }}
+        carousel={
+          isDisplayCarousel
+            ? {
+                finite: slides.length <= 1,
+                padding: 0,
+                spacing: 0,
+                imageFit: carouselImageFit ?? undefined,
+              }
+            : undefined
+        }
+        slideshow={
+          slideshowEnable
+            ? {
+                ref: slideshowRef,
+                autoplay: slideshowAutoplay,
+                delay: slideshowDelay,
+              }
+            : undefined
+        }
         on={{
           click: handleSlideClick,
           view: handleView,
         }}
         render={{
+          // buttonClose
+          // slideFooter
+          buttonPrev: slides.length <= 1 ? () => null : undefined,
+          buttonNext: slides.length <= 1 ? () => null : undefined,
           slide: ({ slide }) => {
             if (slide.type === 'youtube') {
               return (
@@ -243,13 +369,29 @@ export default function LightBoxGallery({
             if (args.slide.type === 'youtube') {
               return <LightBoxSlide {...args} />
             }
-            if (useThumbnails) {
+            if (thumbnailsHidden === false) {
               return <LightBoxSlide {...args} />
             }
             return undefined
           },
         }}
-        plugins={[Video, ...plugins]}
+        plugins={plugins}
+        thumbnails={{
+          ref: thumbnailsRef,
+          position: thumbnailsPosition,
+          hidden: thumbnailsHidden || slides.length <= 1,
+          showToggle: thumbnailsShowToggle,
+          // width: ,
+          // height: ,
+          // border: ,
+          // borderStyle: ,
+          // borderColor: ,
+          // borderRadius: ,
+          // padding: ,
+          // gap: ,
+          // imageFit: ,
+          // vignette: ,
+        }}
         video={{
           controls,
           playsInline,

@@ -31,8 +31,13 @@ export function ProjectMediaTableBody({
         {/* (Always Visible)Media Summary Row */}
         <TableRow className={''}>
           {/* Asset */}
-          <TableCell className={'p-0 text-center'}>
-            <LightBoxGallery items={[media]} className={'project-media-table'} />
+          <TableCell className={'max-w-25 p-0 text-center'}>
+            <LightBoxGallery
+              items={[media]}
+              className={'project-media-table'}
+              display={'album'}
+              albumLayout={'rows'}
+            />
           </TableCell>
 
           {/* Title */}

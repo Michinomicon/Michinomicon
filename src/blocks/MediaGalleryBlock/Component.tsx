@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import configPromise from '@payload-config'
 import { cn } from '@/utilities/ui'
 import type { Media, MediaGalleryBlock as MediaGalleryBlockProps } from '@/payload-types'
-import LightBoxGallery from '@/components/Lightbox'
+import LightBoxGallery, { LightBoxGalleryProps } from '@/components/Lightbox'
 
 type Props = MediaGalleryBlockProps & {
   className?: string
@@ -12,7 +12,14 @@ type Props = MediaGalleryBlockProps & {
 }
 
 export const MediaGalleryBlock: React.FC<Props> = async (props) => {
-  const { selectionMethod, individualMedia, mediaCategory, className, enableGutter = true } = props
+  const {
+    selectionMethod,
+    individualMedia,
+    mediaCategory,
+    className,
+    enableGutter = true,
+    ...otherProps
+  } = props
 
   let galleryItems: Media[] = []
 
@@ -42,6 +49,18 @@ export const MediaGalleryBlock: React.FC<Props> = async (props) => {
 
   if (galleryItems.length === 0) return null
 
+  const lightBoxProps: LightBoxGalleryProps = {
+    ...otherProps,
+    items: galleryItems,
+    display: otherProps.display || 'album',
+    albumLayout: otherProps.albumLayout || 'masonry',
+    carouselImageFit: otherProps.carouselImageFit || undefined,
+    thumbnailsPosition:
+      otherProps.thumbnailsPosition === null ? undefined : otherProps.thumbnailsPosition,
+    thumbnailsShowToggle:
+      otherProps.thumbnailsShowToggle === null ? undefined : otherProps.thumbnailsShowToggle,
+  }
+
   return (
     <div
       className={cn(
@@ -52,7 +71,7 @@ export const MediaGalleryBlock: React.FC<Props> = async (props) => {
         className,
       )}
     >
-      <LightBoxGallery items={galleryItems} className={'media-gallery-block'} />
+      <LightBoxGallery className={'media-gallery-block'} {...lightBoxProps} />
     </div>
   )
 }

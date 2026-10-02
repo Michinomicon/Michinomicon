@@ -46,6 +46,8 @@ export function CreatorCreditsTableBody({
               <LightBoxGallery
                 items={[profileImage]}
                 className={'creator-credits-table-project-image'}
+                display={'album'}
+                albumLayout={'rows'}
               />
             )}
           </TableCell>
@@ -137,6 +139,8 @@ export function CreatorCreditsTableBody({
                             <LightBoxGallery
                               items={[credit.media]}
                               className={'creator-credits-table'}
+                              display={'album'}
+                              albumLayout={'rows'}
                             />
                           </TableCell>
                           <TableCell className="text-center text-lg">

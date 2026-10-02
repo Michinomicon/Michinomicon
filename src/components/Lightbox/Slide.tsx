@@ -153,6 +153,7 @@ export default function LightBoxSlide({
       src = slide.poster || slide.thumbnail
     } else if (slide.type === 'youtube') {
       src = slide.src
+      console.log(`youtube slide src:`, src)
     } else {
       src = slide.src
     }
