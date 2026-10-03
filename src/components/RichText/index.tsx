@@ -82,7 +82,7 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
     <MediaBlock
       className={'rich-text-upload'}
       blockType="mediaBlock"
-      mediaProps={{ containerClassNames: 'rich-text-upload', hideCaption: true }}
+      mediaProps={{ className: 'rich-text-upload' }}
       enableGutter={false}
       disableInnerContainer={true}
       media={
@@ -102,7 +102,7 @@ const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) 
         captionClassName="mx-auto max-w-3xl"
         enableGutter={false}
         disableInnerContainer={true}
-        mediaProps={{ containerClassNames: 'rich-text-block-media', hideCaption: true }}
+        mediaProps={{ className: 'rich-text-block-media' }}
         {...node.fields}
       />
     ),

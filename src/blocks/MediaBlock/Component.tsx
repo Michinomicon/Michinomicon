@@ -52,7 +52,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
           resource={media}
           // src={staticImage}
           {...mediaProps}
-          layout={'mediaBlock'}
+          // layout={'mediaBlock'}
         />
       )}
       {caption && (

@@ -1,8 +1,8 @@
-import { Media } from '@/payload-types'
+import { Media, Project } from '@/payload-types'
 import { isMedia } from './isMedia'
 import { formatDateTime } from './formatDateTime'
-import { groupCreditsByCreator } from './groupCreditsByCreator'
 import path from 'path'
+import { groupCreditsByCreator, MediaCredit } from './groupCreditsByCreator'
 
 export function getMediaFileName(media: Media): string | undefined {
   const { filename } = media
@@ -27,6 +27,7 @@ export function getMediaFileExtension(media: Media): string | undefined {
 }
 
 export type MediaProjectInfo = {
+  project: Project
   href: string
   slug: string
   title: string
@@ -41,6 +42,7 @@ export function getMediaProjectInfo(media: Media): MediaProjectInfo | undefined 
   if (project && typeof project === 'object') {
     const { slug, title, profileImage, categories, status, startDate, endDate } = project
     return {
+      project,
       slug,
       title,
       status,
@@ -55,32 +57,15 @@ export function getMediaProjectInfo(media: Media): MediaProjectInfo | undefined 
   }
 }
 
-export type MediaCreditInfo = {
-  href: string
-  title: string
-  roles: string[]
-  image: Media | null
-}
-export function getMediaCreditInfo(media: Media): MediaCreditInfo[] | undefined {
-  if (media.credits) {
-    return groupCreditsByCreator(media.credits).map(({ creator, roles }) => ({
-      href: `/creators/${creator.slug}`,
-      title: creator.title,
-      roles: roles,
-      image: isMedia(creator.profileImage) ? creator.profileImage : null,
-    }))
-  }
-}
-
 export type MediaInfo = {
   title: string
-  credits?: MediaCreditInfo[]
+  credits?: MediaCredit[]
   project?: MediaProjectInfo
 }
 export function getMediaInfo(media: Media): MediaInfo {
   return {
     title: media.title,
-    credits: getMediaCreditInfo(media),
+    credits: groupCreditsByCreator(media),
     project: getMediaProjectInfo(media),
   }
 }

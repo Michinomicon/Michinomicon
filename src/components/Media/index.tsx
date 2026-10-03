@@ -8,7 +8,7 @@ import { Track } from '@/lib/html-audio'
 import { PdfMediaWrapper } from './PdfMediaWrapper'
 import { getFileMediaMetaData, getVideoMediaMetaData } from '@/utilities/getMediaMetaData'
 import { ImageMedia, ImageMediaProps } from './ImageMedia'
-import LightBoxGallery from '../Lightbox'
+import LightBoxGallery, { LightBoxGalleryProps } from '@/components/Lightbox'
 
 const MESSAGE_FAILED_TO_RENDER = 'Failed to render media.'
 const MESSAGE_RESOURCE_MISSING = 'Resource was missing or invalid.'
@@ -64,9 +64,15 @@ export const Media = (props: MediaProps) => {
         }
         return <ImageMedia {...imageProps} />
       } else {
+        const galleryProps: LightBoxGalleryProps = {
+          ...baseProps,
+          display: 'album',
+          albumLayout: 'rows',
+          items: [resource],
+        }
         return (
           <React.Fragment>
-            <LightBoxGallery items={[resource]} className={'media-component'} />
+            <LightBoxGallery className={'media-component media-single-image'} {...galleryProps} />
           </React.Fragment>
         )
       }
@@ -90,9 +96,16 @@ export const Media = (props: MediaProps) => {
           </React.Fragment>
         )
       } else {
+        const galleryProps: LightBoxGalleryProps = {
+          ...baseProps,
+          display: 'album',
+          albumLayout: 'rows',
+
+          items: [resource],
+        }
         return (
           <React.Fragment>
-            <LightBoxGallery items={[resource]} className={'media-component'} />
+            <LightBoxGallery className={'media-component'} {...galleryProps} />
           </React.Fragment>
         )
       }

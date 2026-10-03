@@ -852,6 +852,54 @@ export interface MediaGalleryBlock {
       }[]
     | null;
   mediaCategory?: (string | null) | Category;
+  /**
+   * How the gallery should be presented visually. ( default: "album" )
+   */
+  display: 'album' | 'carousel' | 'inline';
+  /**
+   * How the Album tiles should be presented visually. ( default: "masonry" )
+   */
+  albumLayout?: ('masonry' | 'rows' | 'columns') | null;
+  /**
+   * `object-fit` property for images in the carousel. ( default: "cover" )
+   */
+  carouselImageFit?: ('cover' | 'contain') | null;
+  /**
+   * Hides the Image Thumbnails in the gallery.
+   */
+  thumbnailsHidden: boolean;
+  /**
+   * Show the Thumbnails Show/Hide button in the toolbar. ( default: `false` )
+   */
+  thumbnailsShowToggle?: boolean | null;
+  /**
+   * Select the position of the thumbnail images relative to the active image. ( default = `bottom` )
+   */
+  thumbnailsPosition?: ('start' | 'end' | 'bottom' | 'top') | null;
+  /**
+   * Display the "Fullscreen" button in the toolbar. ( default: `true` )
+   */
+  toolbarFullscreen: boolean;
+  /**
+   * Show the progress counter in toolbar (e.g. `3 / 10` ). ( default: `true` )
+   */
+  toolbarCounter: boolean;
+  /**
+   * Show the zoom in/out controls in toolbar ( default: `true` )
+   */
+  toolbarZoom: boolean;
+  /**
+   * Enable the Slideshow feature for this gallery. ( default: `false` )
+   */
+  slideshowEnable: boolean;
+  /**
+   * Should the slideshow start automatically. ( default: `false` )
+   */
+  slideshowAutoplay: boolean;
+  /**
+   * How long to display each image before in milliseconds. ( default: `3000` )
+   */
+  slideshowDelay: number;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaGalleryBlock';
@@ -1679,6 +1727,18 @@ export interface MediaGalleryBlockSelect<T extends boolean = true> {
         id?: T;
       };
   mediaCategory?: T;
+  display?: T;
+  albumLayout?: T;
+  carouselImageFit?: T;
+  thumbnailsHidden?: T;
+  thumbnailsShowToggle?: T;
+  thumbnailsPosition?: T;
+  toolbarFullscreen?: T;
+  toolbarCounter?: T;
+  toolbarZoom?: T;
+  slideshowEnable?: T;
+  slideshowAutoplay?: T;
+  slideshowDelay?: T;
   id?: T;
   blockName?: T;
 }

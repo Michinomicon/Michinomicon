@@ -18,14 +18,15 @@ import {
 } from '../ui/item'
 import { ExternalLinkIcon } from 'lucide-react'
 import Link from 'next/link'
-import { ProjectCredit } from '@/utilities/extractMediaCreditsByProjectId'
+import { MediaCredit } from '@/utilities/groupCreditsByCreator'
+import { isMedia } from '@/utilities/isMedia'
 
 export function CreatorAvatarGroup({
   credits,
   hoverCardProps,
   ...props
 }: React.ComponentPropsWithoutRef<typeof AvatarGroup> & {
-  credits?: ProjectCredit[] | null | undefined
+  credits?: MediaCredit[] | null | undefined
   hoverCardProps?: HoverCardContentProps
 }): React.ReactNode {
   return (
@@ -33,10 +34,11 @@ export function CreatorAvatarGroup({
       <HoverCardTrigger asChild>
         <AvatarGroup {...props} className={cn('')}>
           {credits?.map(({ creator }, index) => {
+            const profileImage = isMedia(creator.profileImage) ? creator.profileImage : null
             return (
               <MediaAvatar
                 key={index}
-                media={creator.profileImage}
+                media={profileImage}
                 size={'lg'}
                 title={creator.title}
                 disableTooltip={true}
@@ -48,10 +50,14 @@ export function CreatorAvatarGroup({
       <HoverCardContent
         side="top"
         {...hoverCardProps}
-        className="mx-8 border border-border/30 p-2 select-none"
+        className="mx-8 border border-primary/70 p-2 select-none"
       >
         <ItemGroup className="max-w-sm gap-1">
+          <div className={'w-full text-center'}>
+            <span className="text-3xl">Credits</span>
+          </div>
           {credits?.map(({ creator, roles }, index) => {
+            const profileImage = isMedia(creator.profileImage) ? creator.profileImage : null
             return (
               <Item size="sm" variant="muted" className="w-full py-1" key={index} asChild>
                 <Link
@@ -59,11 +65,7 @@ export function CreatorAvatarGroup({
                   className="hover:[&_.creator-title]:underline hover:[&_.lucide]:opacity-100"
                 >
                   <ItemMedia>
-                    <MediaAvatar
-                      media={creator.profileImage}
-                      size={'default'}
-                      title={creator.title}
-                    />
+                    <MediaAvatar media={profileImage} size={'default'} title={creator.title} />
                   </ItemMedia>
                   <ItemContent className="gap-0">
                     <ItemTitle className="creator-title">{creator.title}</ItemTitle>
