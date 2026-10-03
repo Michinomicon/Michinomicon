@@ -63,12 +63,12 @@ export function getFallbackSourceByMIMEType(MIMEType?: string | null | undefined
           return FolderArchivePNG.src
       }
     default:
-      console.log(`Failed to determine fallback image for media with mimeType: "${mimeType}". `)
       if (typeof mimeType === 'string' && mimeType.length > 0) {
         // There IS a MIMEType, but there is no icon here for it yet
         // So just return a generic file icon
         return FilePNG.src
       } else {
+        console.log(`Failed to determine fallback image for media with mimeType: "${mimeType}". `)
         // it's a mystery
         return FileQuestionMarkPNG.src
       }

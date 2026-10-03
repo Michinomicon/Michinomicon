@@ -12,7 +12,7 @@ import RichText from '../RichText'
 import { CreatorAvatarGroup } from '../CreatorAvatarGroup'
 import { cva } from 'class-variance-authority'
 import { CollectionItemCardImage } from './CollectionItemCardImage'
-import { ProjectCredit } from '@/utilities/extractMediaCreditsByProjectId'
+import { MediaCredit } from '@/utilities/groupCreditsByCreator'
 
 type SupportedConfigs = Pick<TypedCollection, 'creators' | 'pages' | 'posts' | 'projects'>
 
@@ -27,7 +27,7 @@ type BaseItemProperties<T extends keyof SupportedConfigs = keyof SupportedConfig
   related: unknown[] | null
 }
 interface ProjectItemProperties extends BaseItemProperties<'projects'> {
-  related: ProjectCredit[] | null
+  related: MediaCredit[] | null
 }
 interface CreatorItemProperties<
   T extends keyof SupportedConfigs & 'creators' = 'creators',

@@ -29,10 +29,10 @@ export const slideBlurUrl =
 declare module 'yet-another-react-lightbox' {
   interface SlideVideo {
     alt: string
-    caption: MediaInfo
+    info: MediaInfo
   }
   interface SlideImage {
-    caption: MediaInfo
+    info: MediaInfo
     imageFit?: ImageFit | undefined
     srcSet?: readonly ImageSource[] | undefined
   }
@@ -43,7 +43,7 @@ declare module 'yet-another-react-lightbox' {
     height: number
     src: string
     url: string
-    caption: MediaInfo
+    info: MediaInfo
   }
   interface SlideTypes {
     youtube: SlideYouTube
@@ -53,7 +53,9 @@ declare module 'yet-another-react-lightbox' {
 function getSlidePropertiesFromMedia(media: Media): Slide | undefined {
   const { source, thumbnail } = getMediaDisplayImageSources(media)
   const { width, height } = getMediaSize(media)
+  const mediaInfo = getMediaInfo(media)
   const mediaType = getMediaType(media)
+
   if (mediaType === 'image') {
     return {
       alt: media.alt,
@@ -61,7 +63,7 @@ function getSlidePropertiesFromMedia(media: Media): Slide | undefined {
       height: Number(height),
       src: source,
       type: mediaType,
-      caption: getMediaInfo(media),
+      info: mediaInfo,
     }
   } else if (mediaType === 'youtube') {
     return {
@@ -71,7 +73,7 @@ function getSlidePropertiesFromMedia(media: Media): Slide | undefined {
       url: `https://www.youtube-nocookie.com/embed/${media.youtubeId}?enablejsapi=1&modestbranding=1&playsinline=1`,
       type: mediaType,
       src: thumbnail,
-      caption: getMediaInfo(media),
+      info: mediaInfo,
     }
   } else if (mediaType === 'video') {
     return {
@@ -82,7 +84,7 @@ function getSlidePropertiesFromMedia(media: Media): Slide | undefined {
       poster: thumbnail,
       autoPlay: false,
       controls: true,
-      caption: getMediaInfo(media),
+      info: mediaInfo,
       sources: [
         {
           src: source,
@@ -153,7 +155,6 @@ export default function LightBoxSlide({
       src = slide.poster || slide.thumbnail
     } else if (slide.type === 'youtube') {
       src = slide.src
-      console.log(`youtube slide src:`, src)
     } else {
       src = slide.src
     }

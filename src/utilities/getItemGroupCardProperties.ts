@@ -13,9 +13,9 @@ import {
 } from '@/components/CollectionItemGroup'
 import {
   extractMediaCreditsByProjectId,
-  ProjectCredit,
   ProjectMediaCreators,
 } from './extractMediaCreditsByProjectId'
+import { MediaCredit } from './groupCreditsByCreator'
 
 async function creatorToCollectionItemProperties(
   creator: Creator,
@@ -45,8 +45,8 @@ async function projectToCollectionItemProperties(
   const { slug, title, profileImage, status, categories, id, content } = project
   const { description } = content
   const projectMedia = await getCachedMediaByProjectId(id)()
-  const projectCredits: ProjectCredit[] = extractMediaCreditsByProjectId(projectMedia, id).flatMap<
-    ProjectCredit,
+  const projectCredits: MediaCredit[] = extractMediaCreditsByProjectId(projectMedia, id).flatMap<
+    MediaCredit,
     ProjectMediaCreators
   >(({ credits }) => credits)
 

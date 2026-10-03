@@ -8,6 +8,7 @@ import Lightbox, {
   ImageFit,
   LightboxExternalProps,
   Plugin as LightboxPlugin,
+  Slide,
   SlideshowRef,
   ThumbnailsRef,
   ViewCallbackProps,
@@ -26,6 +27,7 @@ import 'yet-another-react-lightbox/plugins/thumbnails.css'
 import 'yet-another-react-lightbox/plugins/counter.css'
 import LightBoxSlide, { mapMediaToSlides } from './Slide'
 import { cn } from '@/utilities/ui'
+import { MediaCaption } from '../MediaCaption'
 
 const InlineStyles = {
   style: {
@@ -188,6 +190,8 @@ export default function LightBoxGallery({
 
   const slides = mapMediaToSlides(items)
 
+  const isSingleSlide = slides.length <= 1
+
   const toolbarButtons: ('close' | 'thumbnails' | 'fullscreen' | 'zoom' | 'slideshow')[] = []
   if (slideshowEnable) {
     toolbarButtons.push('slideshow')
@@ -200,20 +204,20 @@ export default function LightBoxGallery({
   }
   toolbarButtons.push('close')
 
-  console.log(`Lightbox Gallery '${className}' Features:`, {
-    display: display,
-    carouselImageFit: carouselImageFit,
-    albumLayout: albumLayout,
-    thumbnailsPosition: thumbnailsPosition,
-    thumbnailsHidden: thumbnailsHidden,
-    thumbnailsShowToggle: thumbnailsShowToggle,
-    slideshowAutoplay: slideshowAutoplay,
-    slideshowDelay: slideshowDelay,
-    slideshowEnable: slideshowEnable,
-    toolbarFullscreen: toolbarFullscreen,
-    toolbarZoom: toolbarZoom,
-    toolbarCounter: toolbarCounter,
-  })
+  // console.log(`Lightbox Gallery '${className}' Features:`, {
+  //   display: display,
+  //   carouselImageFit: carouselImageFit,
+  //   albumLayout: albumLayout,
+  //   thumbnailsPosition: thumbnailsPosition,
+  //   thumbnailsHidden: thumbnailsHidden,
+  //   thumbnailsShowToggle: thumbnailsShowToggle,
+  //   slideshowAutoplay: slideshowAutoplay,
+  //   slideshowDelay: slideshowDelay,
+  //   slideshowEnable: slideshowEnable,
+  //   toolbarFullscreen: toolbarFullscreen,
+  //   toolbarZoom: toolbarZoom,
+  //   toolbarCounter: toolbarCounter,
+  // })
 
   const plugins = getEnabledPlugins({
     display,
@@ -289,11 +293,21 @@ export default function LightBoxGallery({
           spacing={1}
           onClick={handleClickAlbumPhoto}
           componentsProps={{
+            image: {
+              className: cn(
+                isSingleSlide
+                  ? ''
+                  : 'rounded-none transition-[transform,border-radius] ease-in-out duration-300 delay-[250ms,0ms] hover:scale-110 hover:rounded-md hover:duration-[300ms,0ms] hover:delay-0 hover:ring-primary hover:ring-1',
+              ),
+            },
             button: {
               className: cn(
-                slides.length <= 1
+                isSingleSlide
                   ? ''
-                  : 'hover:ring-3 hover:ring-secondary/70 hover:shadow-[0px_0px_30px_2px] hover:shadow-primary/40 hover:rounded-md overflow-hidden',
+                  : cn(
+                      '!p-0 hover:shadow-black hover:shadow-[0px_0px_30px_2px] ',
+                      'z-0 transition-[transform,z-index] ease-in-out hover:duration-[300ms,0ms] hover:delay-0 delay-[250ms,0ms] transition-discrete hover:z-10',
+                    ),
               ),
             },
           }}
@@ -313,7 +327,7 @@ export default function LightBoxGallery({
         carousel={
           isDisplayCarousel
             ? {
-                finite: slides.length <= 1,
+                finite: isSingleSlide,
                 padding: 0,
                 spacing: 0,
                 imageFit: carouselImageFit ?? undefined,
@@ -335,9 +349,14 @@ export default function LightBoxGallery({
         }}
         render={{
           // buttonClose
-          // slideFooter
-          buttonPrev: slides.length <= 1 ? () => null : undefined,
-          buttonNext: slides.length <= 1 ? () => null : undefined,
+          slideFooter: ({ slide }: { slide: Slide }) => (
+            <MediaCaption
+              className={`lightbox-slide-caption absolute bottom-0 z-0`}
+              info={slide.info}
+            />
+          ),
+          buttonPrev: isSingleSlide ? () => null : undefined,
+          buttonNext: isSingleSlide ? () => null : undefined,
           slide: ({ slide }) => {
             if (slide.type === 'youtube') {
               return (
@@ -379,7 +398,7 @@ export default function LightBoxGallery({
         thumbnails={{
           ref: thumbnailsRef,
           position: thumbnailsPosition,
-          hidden: thumbnailsHidden || slides.length <= 1,
+          hidden: thumbnailsHidden || isSingleSlide,
           showToggle: thumbnailsShowToggle,
           // width: ,
           // height: ,
