@@ -108,10 +108,12 @@ const NavigationMenuViewport = React.forwardRef<
           'h-(--radix-navigation-menu-viewport-height)',
           'md:w-screen md:max-w-(--radix-navigation-menu-viewport-width)',
           'items-center justify-center',
-          'text-background',
-          'rounded-t-none rounded-b-sm',
-          'border-0',
-          'origin-top-center relative overflow-hidden shadow data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:zoom-in-90',
+          // 'text-background',
+          // 'rounded-none rounded-t-none',
+          // 'rounded-t-none rounded-b-sm',
+          // 'border-0',
+          'overflow-hidden',
+          'origin-top-center relative shadow data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:zoom-in-90',
           className,
         )}
         ref={ref}

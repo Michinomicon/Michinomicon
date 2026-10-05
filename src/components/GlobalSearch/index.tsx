@@ -26,7 +26,7 @@ import {
 import { Kbd, KbdGroup } from '@/components/ui/kbd'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
-import { MobileMenuDrawerFooter, MobileMenuListItem } from '../NavMenu/MobileNavMenu'
+import { MobileMenuDrawerFooter } from '../NavMenu/MobileNavMenu'
 import { InputGroupButton } from '../ui/input-group'
 import {
   DropdownMenu,
@@ -41,6 +41,7 @@ import {
 import { DialogClose, DialogFooter } from '../ui/dialog'
 import { useIsKeyboardOpen } from '@/hooks/use-mobileKeyboardOpen'
 import { ButtonGroup } from '../ui/button-group'
+import { MenuListItem } from '../NavMenu/MenuListItem'
 
 const SearchResultsCommandItemClassName =
   'rounded-none bg-transparent p-0 data-selected:bg-transparent'
@@ -486,7 +487,7 @@ function SearchCommand({
                         }
                         className={cn(SearchResultsCommandItemClassName)}
                       >
-                        <MobileMenuListItem
+                        <MenuListItem
                           label={item.title}
                           href={key === 'pages' ? `/${item.slug}` : `${key}/${item.slug}`}
                           className={cn(
