@@ -1,96 +1,189 @@
 'use client'
 
-import type { StaticImageData } from 'next/image'
-
 import { cn } from '@/utilities/ui'
 import NextImage from 'next/image'
+import { Media } from '@/payload-types'
+import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import { getImageMediaMetaData, ImageMediaMetaData } from '@/utilities/getMediaMetaData'
+import { ImageProps, StaticImport } from 'next/dist/shared/lib/get-img-props'
+import RichText from '@/components/RichText'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
+import { Info } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
 import React from 'react'
 
-import type { ImageMediaProps } from '../types'
+import { DEFAULT_IMAGE_SIZES } from '@/defaultImageSizes'
+import { MediaTooltip } from '@/components/MediaTooltip'
+import { getMediaInfo } from '@/utilities/mediaInfo'
+import { getMediaDisplayImageSources } from '@/utilities/getMediaDisplayImageSource'
+import { getMediaSize } from '@/utilities/getMediaSize'
+import { getMediaType } from '@/utilities/getMediaType'
 
-import { cssVariables } from '@/cssVariables'
-import { getMediaUrl } from '@/utilities/getMediaUrl'
+export const blurPlaceholder =
+  'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiCiAgICAgd2lkdGg9IjMwMCIgaGVpZ2h0PSIyMDAiCiAgICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJibGFjayIgb3BhY2l0eT0iMC41IiAvPgo8L3N2Zz4='
 
-const { breakpoints } = cssVariables
+type SelectedMediaProperties = Required<
+  Pick<
+    Media,
+    'project' | 'credits' | 'createdAt' | 'filesize' | 'filename' | 'mimeType' | 'updatedAt'
+  > & { caption: DefaultTypedEditorState | null }
+>
+interface MediaProperties extends SelectedMediaProperties {
+  metadata: ImageMediaMetaData
+}
 
-// A base64 encoded image to use as a placeholder while the image is loading
-const placeholderBlur =
-  'data:image/png;base64,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'
+function getMediaProperties(props: ImageMediaProps): MediaProperties {
+  const { src } = props
+  if (isPayloadMediaSrc(src)) {
+    return { ...(src as SelectedMediaProperties), metadata: getImageMediaMetaData(src) }
+  }
+  return {} as MediaProperties
+}
 
-export const ImageMedia: React.FC<ImageMediaProps> = (props) => {
-  const {
-    alt: altFromProps,
-    fill,
-    pictureClassName,
-    imgClassName,
-    priority,
-    resource,
-    size: sizeFromProps,
-    src: srcFromProps,
-    loading: loadingFromProps,
-  } = props
+function isPayloadMediaSrc(src: string | StaticImport | Media): src is Media {
+  const propSrc = src
+  if (typeof propSrc === 'object' && 'updatedAt' in propSrc) {
+    return true
+  }
+  return false
+}
 
-  let width: number | undefined
-  let height: number | undefined
-  let alt = altFromProps
-  let src: StaticImageData | string | null = srcFromProps || null
+function isPayloadMediaProps(
+  props: NextImageSourceProps | PayloadMediaSourceProps,
+): props is PayloadMediaSourceProps {
+  return isPayloadMediaSrc(props.src)
+}
 
-  if (src === null && resource && typeof resource === 'object') {
-    const { alt: altFromResource, height: fullHeight, url, width: fullWidth } = resource
-    width = fullWidth!
-    height = fullHeight!
-    alt = altFromResource || ''
+function mediaToImageMediaProps(media: Media): ImageMediaProps {
+  const mediaType = getMediaType(media)
+  const { thumbnail, source } = getMediaDisplayImageSources(media)
+  const { width, height } = getMediaSize(media)
+  const imageProps: ImageMediaProps = {
+    id: media.id,
+    alt: media.alt,
+    width: width,
+    height: height,
+    src: mediaType === 'image' ? source : thumbnail,
+  }
+  return imageProps
+}
 
-    const cacheTag = resource.updatedAt
+function getNextImageProps(props: NextImageSourceProps | PayloadMediaSourceProps): ImageProps {
+  if (isPayloadMediaProps(props)) {
+    const mediaProps = mediaToImageMediaProps(props.src)
+    const nextImageProps = getNextImageProps(mediaProps)
+    return nextImageProps
+  } else {
+    return { ...props }
+  }
+}
 
-    src = getMediaUrl(url, cacheTag)
-
-    if (typeof src === 'string' && src.startsWith('http')) {
-      try {
-        const urlObj = new URL(src)
-        // If the URL matches localhost, strip it down to just the relative path
-        if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
-          src = urlObj.pathname + urlObj.search
-        }
-      } catch (_err) {
-        // Silently ignore invalid URLs
-      }
-    }
+type ImageCaptionProps = { className?: string; caption?: DefaultTypedEditorState | string }
+const ImageCaption = ({ caption, className }: ImageCaptionProps): React.ReactNode => {
+  if (!caption) {
+    return
   }
 
-  if (src && src.toString().length < 0) {
-    src = null
-  }
-
-  const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
-
-  // NOTE: this is used by the browser to determine which image to download at different screen sizes
-  const sizes = sizeFromProps
-    ? sizeFromProps
-    : Object.entries(breakpoints)
-        .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
-        .join(', ')
-
-  if (!src) {
-    return <></>
+  if (typeof caption === 'string') {
+    return <div className={cn('prose', className)}>{caption}</div>
   } else {
     return (
-      <picture className={cn(pictureClassName)}>
-        <NextImage
-          alt={alt || ''}
-          className={cn(imgClassName)}
-          fill={fill ?? false}
-          height={!fill ? height : undefined}
-          placeholder="blur"
-          blurDataURL={placeholderBlur}
-          priority={priority}
-          quality={100}
-          loading={loading}
-          sizes={sizes}
-          src={src}
-          width={!fill ? width : undefined}
-        />
-      </picture>
+      <div className={cn(className)}>
+        <RichText data={caption} enableGutter={false} />
+      </div>
     )
   }
+}
+
+type ImageMediaComponentProps = {
+  captionClassName?: string
+  imgClassName?: string
+  className?: string
+  caption?: string
+  captionPosition?: 'tooltip' | 'below'
+  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
+}
+
+type NextImageSourceProps = ImageMediaComponentProps &
+  Omit<ImageProps, 'resource' | 'sizes' | 'placeholder' | 'blurDataURL' | 'quality'> & {
+    src: ImageProps['src']
+  }
+
+type PayloadMediaSourceProps = ImageMediaComponentProps &
+  Omit<
+    ImageProps,
+    'resource' | 'src' | 'sizes' | 'placeholder' | 'blurDataURL' | 'quality' | 'alt'
+  > & {
+    src: Media
+  }
+
+export type ImageMediaProps = NextImageSourceProps | PayloadMediaSourceProps
+
+export const ImageMedia = (props: ImageMediaProps) => {
+  const isPayloadMedia = isPayloadMediaProps(props)
+  const mediaProps = getMediaProperties(props)
+
+  const [tooltipOpen, setTooltipOpen] = React.useState<boolean>(false)
+
+  const {
+    className,
+    imgClassName,
+    captionClassName,
+    caption: propsCaption,
+    captionPosition = 'tooltip',
+    objectFit = 'contain',
+  } = props as ImageMediaComponentProps
+
+  const caption = mediaProps.caption || propsCaption
+
+  const nextImageProps = getNextImageProps(props)
+
+  const { id, alt, src, width, height } = nextImageProps
+
+  const onTooltipOpenChange = (isOpen: boolean) => {
+    setTooltipOpen(isOpen)
+  }
+
+  return (
+    <div id={`${id}-wrapper`} className={cn('relative h-auto w-full', className)}>
+      {captionPosition === 'tooltip' &&
+        (isPayloadMedia ? (
+          <MediaTooltip info={getMediaInfo(props.src)} />
+        ) : (
+          <Tooltip onOpenChange={onTooltipOpenChange} delayDuration={900}>
+            <TooltipTrigger asChild className="group">
+              <Badge
+                variant={tooltipOpen === true ? 'default' : 'outline'}
+                className="absolute top-1 right-1"
+              >
+                <Info data-icon="inline-start" />
+                Info
+              </Badge>
+            </TooltipTrigger>
+            <TooltipContent>
+              <ImageCaption className={captionClassName} caption={caption}></ImageCaption>
+            </TooltipContent>
+          </Tooltip>
+        ))}
+      <NextImage
+        id={id}
+        className={cn('rounded-none', imgClassName)}
+        alt={alt}
+        src={src}
+        sizes={DEFAULT_IMAGE_SIZES}
+        placeholder="blur"
+        width={width}
+        height={height}
+        blurDataURL={blurPlaceholder}
+        quality={100}
+        loading={'lazy'}
+        style={{ objectFit: objectFit }}
+        onContextMenu={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
+      />
+      {captionPosition === 'below' && (
+        <ImageCaption className={captionClassName} caption={caption}></ImageCaption>
+      )}
+    </div>
+  )
 }

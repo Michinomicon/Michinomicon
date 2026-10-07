@@ -1,19 +1,21 @@
 # version: '3'
 
 services:
-  mongo:
-    container_name: mongo
-    image: mongo:latest
+  mongodb:
+    image: mongo:8.0
+    container_name: mongodb-dev
     ports:
       - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
+    command: ["--replSet", "rs0", "--bind_ip_all", "--port", "27017"]
     volumes:
-      - data:/data/db
+      - mongodb_data:/data/db
+    environment:
+    - GLIBC_TUNABLES=glibc.pthread.rseq=1
     env_file:
       - .env
-    logging:
-      driver: none
+    # logging:
+    #   driver: none
+    restart: unless-stopped
   
   payload:
     container_name: payload
@@ -31,8 +33,8 @@ services:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - mongo
+      - mongodb
 
 volumes:
-  data:
+  mongodb_data:
   node_modules:

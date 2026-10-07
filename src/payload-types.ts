@@ -69,6 +69,8 @@ export interface Config {
   collections: {
     pages: Page;
     posts: Post;
+    projects: Project;
+    creators: Creator;
     media: Media;
     categories: Category;
     users: User;
@@ -78,6 +80,8 @@ export interface Config {
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
+    exports: Export;
+    imports: Import;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
@@ -93,6 +97,8 @@ export interface Config {
   collectionsSelect: {
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
+    projects: ProjectsSelect<false> | ProjectsSelect<true>;
+    creators: CreatorsSelect<false> | CreatorsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -102,6 +108,8 @@ export interface Config {
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    exports: ExportsSelect<false> | ExportsSelect<true>;
+    imports: ImportsSelect<false> | ImportsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -125,6 +133,8 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      createCollectionExport: TaskCreateCollectionExport;
+      createCollectionImport: TaskCreateCollectionImport;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -159,7 +169,7 @@ export interface UserAuthOperations {
 export interface Page {
   id: string;
   title: string;
-  parentCategory: string | Category;
+  parentCategory?: (string | null) | Category;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {
@@ -190,6 +200,14 @@ export interface Page {
               | ({
                   relationTo: 'posts';
                   value: string | Post;
+                } | null)
+              | ({
+                  relationTo: 'creators';
+                  value: string | Creator;
+                } | null)
+              | ({
+                  relationTo: 'projects';
+                  value: string | Project;
                 } | null);
             url?: string | null;
             label: string;
@@ -208,7 +226,7 @@ export interface Page {
     | ContentBlock
     | MediaBlock
     | MediaGalleryBlock
-    | ArchiveBlock
+    | ItemGroup
     | FormBlock
     | PostContentBlock
   )[];
@@ -312,13 +330,44 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  youtubeId?: string | null;
+  /**
+   * Youtube Video URL
+   */
+  youtubeUrl?: string | null;
+  /**
+   * Paste this thumbnail URL in the remote file input above
+   */
+  youtubeThumbnailUrl?: string | null;
   title: string;
+  alt: string;
+  /**
+   * Select an image or video that will be used as a preview for this upload.
+   */
+  coverImage?: (string | null) | Media;
+  /**
+   * Check this box if this asset belongs to a specific community project to assign attribution.
+   */
+  isForProject?: boolean | null;
+  /**
+   * The project this asset belongs to.
+   */
+  project?: (string | null) | Project;
+  /**
+   * Assign community members and their specific roles for this asset.
+   */
+  credits?:
+    | {
+        creator: string | Creator;
+        role: string;
+        id?: string | null;
+      }[]
+    | null;
   /**
    * Select Category.
    */
   category?: (string | null) | Category;
   sortPriority?: number | null;
-  alt?: string | null;
   caption?: {
     root: {
       type: string;
@@ -381,7 +430,7 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    small?: {
+    sm?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -389,7 +438,7 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    medium?: {
+    md?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -397,7 +446,7 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    large?: {
+    lg?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -405,7 +454,23 @@ export interface Media {
       filesize?: number | null;
       filename?: string | null;
     };
-    xlarge?: {
+    xl?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    '2xl'?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    '3xl'?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -422,6 +487,130 @@ export interface Media {
       filename?: string | null;
     };
   };
+}
+/**
+ * Community initiatives, games, mods, or collaborative efforts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects".
+ */
+export interface Project {
+  id: string;
+  title: string;
+  /**
+   * Optional profile picture or avatar
+   */
+  profileImage?: (string | null) | Media;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  content: {
+    /**
+     * Detailed overview of the project and its goals.
+     */
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Categories this project falls under. (Useful for grouping projects together}
+   */
+  categories?: (string | Category)[] | null;
+  status: 'planned' | 'active' | 'completed' | 'archived';
+  startDate?: string | null;
+  /**
+   * Leave blank if the project is ongoing.
+   */
+  endDate?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Community members, artists, and contributors.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "creators".
+ */
+export interface Creator {
+  id: string;
+  /**
+   * Artists name or username
+   */
+  title: string;
+  /**
+   * Optional profile picture or avatar
+   */
+  profileImage?: (string | null) | Media;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  content: {
+    /**
+     * Links to portfolios, social media, or personal websites.
+     */
+    socialLinks?:
+      | {
+          platform: string;
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+    /**
+     * Short biography or introduction
+     */
+    description: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+  };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  status: 'active' | 'inactive' | 'archived';
+  publishedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -559,6 +748,14 @@ export interface CallToActionBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -609,6 +806,14 @@ export interface ContentBlock {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -647,15 +852,66 @@ export interface MediaGalleryBlock {
       }[]
     | null;
   mediaCategory?: (string | null) | Category;
+  /**
+   * How the gallery should be presented visually. ( default: "album" )
+   */
+  display: 'album' | 'carousel' | 'inline';
+  /**
+   * How the Album tiles should be presented visually. ( default: "masonry" )
+   */
+  albumLayout?: ('masonry' | 'rows' | 'columns') | null;
+  /**
+   * `object-fit` property for images in the carousel. ( default: "cover" )
+   */
+  carouselImageFit?: ('cover' | 'contain') | null;
+  /**
+   * Hides the Image Thumbnails in the gallery.
+   */
+  thumbnailsHidden: boolean;
+  /**
+   * Show the Thumbnails Show/Hide button in the toolbar. ( default: `false` )
+   */
+  thumbnailsShowToggle?: boolean | null;
+  /**
+   * Select the position of the thumbnail images relative to the active image. ( default = `bottom` )
+   */
+  thumbnailsPosition?: ('start' | 'end' | 'bottom' | 'top') | null;
+  /**
+   * Display the "Fullscreen" button in the toolbar. ( default: `true` )
+   */
+  toolbarFullscreen: boolean;
+  /**
+   * Show the progress counter in toolbar (e.g. `3 / 10` ). ( default: `true` )
+   */
+  toolbarCounter: boolean;
+  /**
+   * Show the zoom in/out controls in toolbar ( default: `true` )
+   */
+  toolbarZoom: boolean;
+  /**
+   * Enable the Slideshow feature for this gallery. ( default: `false` )
+   */
+  slideshowEnable: boolean;
+  /**
+   * Should the slideshow start automatically. ( default: `false` )
+   */
+  slideshowAutoplay: boolean;
+  /**
+   * How long to display each image before in milliseconds. ( default: `3000` )
+   */
+  slideshowDelay: number;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaGalleryBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock".
+ * via the `definition` "ItemGroup".
  */
-export interface ArchiveBlock {
+export interface ItemGroup {
+  /**
+   * Text content to display above the the card group.
+   */
   introContent?: {
     root: {
       type: string;
@@ -671,19 +927,69 @@ export interface ArchiveBlock {
     };
     [k: string]: unknown;
   } | null;
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
+  /**
+   * The source of the items that will be displayed as cards. "Collection" Displays all items from one of the Posts, Pages, Projects or Creators collections with options to filter by Category and set a maximum limit of items. "Manual Selection" Individually select the items to display from any of the Posts, Projects or Creators collections.
+   */
+  populateBy: 'collection' | 'selection';
+  relationTo?: ('pages' | 'posts' | 'projects' | 'creators') | null;
+  /**
+   * Only items belonging to these categories will be included.
+   */
   categories?: (string | Category)[] | null;
+  /**
+   * The maximum number of items to display. [Default: 10]
+   */
   limit?: number | null;
+  /**
+   * Individually select one or more Post, Project or Creator items to include.
+   */
   selectedDocs?:
-    | {
-        relationTo: 'posts';
-        value: string | Post;
-      }[]
+    | (
+        | {
+            relationTo: 'pages';
+            value: string | Page;
+          }
+        | {
+            relationTo: 'posts';
+            value: string | Post;
+          }
+        | {
+            relationTo: 'creators';
+            value: string | Creator;
+          }
+        | {
+            relationTo: 'projects';
+            value: string | Project;
+          }
+      )[]
     | null;
+  /**
+   * How the collection group items should be presented visually
+   */
+  layout: 'carousel' | 'grid';
+  /**
+   * If the card description should be displayed or not. When disabled the title (if enabled) will be vertically centered. [Default: true]
+   */
+  showDescription?: boolean | null;
+  /**
+   * If the card image panel should be displayed or not. When disabled the title and description will use the full width of the card. [Default: true]
+   */
+  showImages?: boolean | null;
+  /**
+   * The horizontal size of the item card
+   */
+  cardWidth: 'sm' | 'md' | 'lg';
+  /**
+   * The vertical size of the item card
+   */
+  cardHeight: 'sm' | 'md' | 'lg';
+  /**
+   * The orientation of the card content
+   */
+  cardLayout: 'horizontal' | 'vertical';
   id?: string | null;
   blockName?: string | null;
-  blockType: 'archive';
+  blockType: 'itemGroup';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -931,6 +1237,14 @@ export interface Redirect {
       | ({
           relationTo: 'posts';
           value: string | Post;
+        } | null)
+      | ({
+          relationTo: 'projects';
+          value: string | Project;
+        } | null)
+      | ({
+          relationTo: 'creators';
+          value: string | Creator;
         } | null);
     url?: string | null;
   };
@@ -972,6 +1286,14 @@ export interface Search {
     | {
         relationTo: 'pages';
         value: string | Page;
+      }
+    | {
+        relationTo: 'projects';
+        value: string | Project;
+      }
+    | {
+        relationTo: 'creators';
+        value: string | Creator;
       };
   slug?: string | null;
   meta?: {
@@ -989,6 +1311,80 @@ export interface Search {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exports".
+ */
+export interface Export {
+  id: string;
+  name?: string | null;
+  format: 'csv' | 'json';
+  limit?: number | null;
+  page?: number | null;
+  sort?: string | null;
+  sortOrder?: ('asc' | 'desc') | null;
+  drafts?: ('yes' | 'no') | null;
+  selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+  fields?: string[] | null;
+  collectionSlug: string;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imports".
+ */
+export interface Import {
+  id: string;
+  collectionSlug: 'pages' | 'posts' | 'projects' | 'creators';
+  importMode?: ('create' | 'update' | 'upsert') | null;
+  matchField?: string | null;
+  status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
+  summary?: {
+    imported?: number | null;
+    updated?: number | null;
+    total?: number | null;
+    issues?: number | null;
+    issueDetails?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1059,7 +1455,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1092,7 +1488,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -1113,6 +1509,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
+      } | null)
+    | ({
+        relationTo: 'projects';
+        value: string | Project;
+      } | null)
+    | ({
+        relationTo: 'creators';
+        value: string | Creator;
       } | null)
     | ({
         relationTo: 'media';
@@ -1232,7 +1636,7 @@ export interface PagesSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         mediaGalleryBlock?: T | MediaGalleryBlockSelect<T>;
-        archive?: T | ArchiveBlockSelect<T>;
+        itemGroup?: T | ItemGroupSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         postContent?: T | PostContentBlockSelect<T>;
       };
@@ -1323,20 +1727,38 @@ export interface MediaGalleryBlockSelect<T extends boolean = true> {
         id?: T;
       };
   mediaCategory?: T;
+  display?: T;
+  albumLayout?: T;
+  carouselImageFit?: T;
+  thumbnailsHidden?: T;
+  thumbnailsShowToggle?: T;
+  thumbnailsPosition?: T;
+  toolbarFullscreen?: T;
+  toolbarCounter?: T;
+  toolbarZoom?: T;
+  slideshowEnable?: T;
+  slideshowAutoplay?: T;
+  slideshowDelay?: T;
   id?: T;
   blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveBlock_select".
+ * via the `definition` "ItemGroup_select".
  */
-export interface ArchiveBlockSelect<T extends boolean = true> {
+export interface ItemGroupSelect<T extends boolean = true> {
   introContent?: T;
   populateBy?: T;
   relationTo?: T;
   categories?: T;
   limit?: T;
   selectedDocs?: T;
+  layout?: T;
+  showDescription?: T;
+  showImages?: T;
+  cardWidth?: T;
+  cardHeight?: T;
+  cardLayout?: T;
   id?: T;
   blockName?: T;
 }
@@ -1404,13 +1826,88 @@ export interface PostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "projects_select".
+ */
+export interface ProjectsSelect<T extends boolean = true> {
+  title?: T;
+  profileImage?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  content?:
+    | T
+    | {
+        description?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  categories?: T;
+  status?: T;
+  startDate?: T;
+  endDate?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "creators_select".
+ */
+export interface CreatorsSelect<T extends boolean = true> {
+  title?: T;
+  profileImage?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        image?: T;
+        description?: T;
+      };
+  content?:
+    | T
+    | {
+        socialLinks?:
+          | T
+          | {
+              platform?: T;
+              url?: T;
+              id?: T;
+            };
+        description?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  status?: T;
+  publishedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  youtubeId?: T;
+  youtubeUrl?: T;
+  youtubeThumbnailUrl?: T;
   title?: T;
+  alt?: T;
+  coverImage?: T;
+  isForProject?: T;
+  project?: T;
+  credits?:
+    | T
+    | {
+        creator?: T;
+        role?: T;
+        id?: T;
+      };
   category?: T;
   sortPriority?: T;
-  alt?: T;
   caption?: T;
   width?: T;
   height?: T;
@@ -1462,7 +1959,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        small?:
+        sm?:
           | T
           | {
               url?: T;
@@ -1472,7 +1969,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        medium?:
+        md?:
           | T
           | {
               url?: T;
@@ -1482,7 +1979,7 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        large?:
+        lg?:
           | T
           | {
               url?: T;
@@ -1492,7 +1989,27 @@ export interface MediaSelect<T extends boolean = true> {
               filesize?: T;
               filename?: T;
             };
-        xlarge?:
+        xl?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        '2xl'?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        '3xl'?:
           | T
           | {
               url?: T;
@@ -1801,6 +2318,64 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exports_select".
+ */
+export interface ExportsSelect<T extends boolean = true> {
+  name?: T;
+  format?: T;
+  limit?: T;
+  page?: T;
+  sort?: T;
+  sortOrder?: T;
+  drafts?: T;
+  selectionToUse?: T;
+  fields?: T;
+  collectionSlug?: T;
+  where?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "imports_select".
+ */
+export interface ImportsSelect<T extends boolean = true> {
+  collectionSlug?: T;
+  importMode?: T;
+  matchField?: T;
+  status?: T;
+  summary?:
+    | T
+    | {
+        imported?: T;
+        updated?: T;
+        total?: T;
+        issues?: T;
+        issueDetails?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1892,9 +2467,8 @@ export interface Header {
   id: string;
   menuItems?:
     | {
-        type?: ('link' | 'categories' | 'pages') | null;
-        pageReference?: (string | null) | Page;
-        categoryReference?: (string | null) | Category;
+        type?: ('item' | 'group') | null;
+        label?: string | null;
         referenceLabel?: string | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -1907,15 +2481,22 @@ export interface Header {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
         };
         children?:
           | {
-              type?: ('link' | 'categories' | 'pages') | null;
-              pageReference?: (string | null) | Page;
-              categoryReference?: (string | null) | Category;
+              type?: ('item' | 'group') | null;
+              label?: string | null;
               referenceLabel?: string | null;
               link?: {
                 type?: ('reference' | 'custom') | null;
@@ -1928,15 +2509,22 @@ export interface Header {
                   | ({
                       relationTo: 'posts';
                       value: string | Post;
+                    } | null)
+                  | ({
+                      relationTo: 'creators';
+                      value: string | Creator;
+                    } | null)
+                  | ({
+                      relationTo: 'projects';
+                      value: string | Project;
                     } | null);
                 url?: string | null;
                 label: string;
               };
               children?:
                 | {
-                    type?: ('link' | 'categories' | 'pages') | null;
-                    pageReference?: (string | null) | Page;
-                    categoryReference?: (string | null) | Category;
+                    type?: ('item' | 'group') | null;
+                    label?: string | null;
                     referenceLabel?: string | null;
                     link?: {
                       type?: ('reference' | 'custom') | null;
@@ -1949,15 +2537,22 @@ export interface Header {
                         | ({
                             relationTo: 'posts';
                             value: string | Post;
+                          } | null)
+                        | ({
+                            relationTo: 'creators';
+                            value: string | Creator;
+                          } | null)
+                        | ({
+                            relationTo: 'projects';
+                            value: string | Project;
                           } | null);
                       url?: string | null;
                       label: string;
                     };
                     children?:
                       | {
-                          type?: ('link' | 'categories' | 'pages') | null;
-                          pageReference?: (string | null) | Page;
-                          categoryReference?: (string | null) | Category;
+                          type?: ('item' | 'group') | null;
+                          label?: string | null;
                           referenceLabel?: string | null;
                           link?: {
                             type?: ('reference' | 'custom') | null;
@@ -1970,15 +2565,22 @@ export interface Header {
                               | ({
                                   relationTo: 'posts';
                                   value: string | Post;
+                                } | null)
+                              | ({
+                                  relationTo: 'creators';
+                                  value: string | Creator;
+                                } | null)
+                              | ({
+                                  relationTo: 'projects';
+                                  value: string | Project;
                                 } | null);
                             url?: string | null;
                             label: string;
                           };
                           children?:
                             | {
-                                type?: ('link' | 'categories' | 'pages') | null;
-                                pageReference?: (string | null) | Page;
-                                categoryReference?: (string | null) | Category;
+                                type?: ('item' | 'group') | null;
+                                label?: string | null;
                                 referenceLabel?: string | null;
                                 link?: {
                                   type?: ('reference' | 'custom') | null;
@@ -1991,15 +2593,22 @@ export interface Header {
                                     | ({
                                         relationTo: 'posts';
                                         value: string | Post;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'creators';
+                                        value: string | Creator;
+                                      } | null)
+                                    | ({
+                                        relationTo: 'projects';
+                                        value: string | Project;
                                       } | null);
                                   url?: string | null;
                                   label: string;
                                 };
                                 children?:
                                   | {
-                                      type?: ('link' | 'categories' | 'pages') | null;
-                                      pageReference?: (string | null) | Page;
-                                      categoryReference?: (string | null) | Category;
+                                      type?: ('item' | 'group') | null;
+                                      label?: string | null;
                                       referenceLabel?: string | null;
                                       link?: {
                                         type?: ('reference' | 'custom') | null;
@@ -2012,6 +2621,14 @@ export interface Header {
                                           | ({
                                               relationTo: 'posts';
                                               value: string | Post;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'creators';
+                                              value: string | Creator;
+                                            } | null)
+                                          | ({
+                                              relationTo: 'projects';
+                                              value: string | Project;
                                             } | null);
                                         url?: string | null;
                                         label: string;
@@ -2056,6 +2673,14 @@ export interface Footer {
             | ({
                 relationTo: 'posts';
                 value: string | Post;
+              } | null)
+            | ({
+                relationTo: 'creators';
+                value: string | Creator;
+              } | null)
+            | ({
+                relationTo: 'projects';
+                value: string | Project;
               } | null);
           url?: string | null;
           label: string;
@@ -2075,8 +2700,7 @@ export interface HeaderSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        pageReference?: T;
-        categoryReference?: T;
+        label?: T;
         referenceLabel?: T;
         link?:
           | T
@@ -2091,8 +2715,7 @@ export interface HeaderSelect<T extends boolean = true> {
           | T
           | {
               type?: T;
-              pageReference?: T;
-              categoryReference?: T;
+              label?: T;
               referenceLabel?: T;
               link?:
                 | T
@@ -2107,8 +2730,7 @@ export interface HeaderSelect<T extends boolean = true> {
                 | T
                 | {
                     type?: T;
-                    pageReference?: T;
-                    categoryReference?: T;
+                    label?: T;
                     referenceLabel?: T;
                     link?:
                       | T
@@ -2123,8 +2745,7 @@ export interface HeaderSelect<T extends boolean = true> {
                       | T
                       | {
                           type?: T;
-                          pageReference?: T;
-                          categoryReference?: T;
+                          label?: T;
                           referenceLabel?: T;
                           link?:
                             | T
@@ -2139,8 +2760,7 @@ export interface HeaderSelect<T extends boolean = true> {
                             | T
                             | {
                                 type?: T;
-                                pageReference?: T;
-                                categoryReference?: T;
+                                label?: T;
                                 referenceLabel?: T;
                                 link?:
                                   | T
@@ -2155,8 +2775,7 @@ export interface HeaderSelect<T extends boolean = true> {
                                   | T
                                   | {
                                       type?: T;
-                                      pageReference?: T;
-                                      categoryReference?: T;
+                                      label?: T;
                                       referenceLabel?: T;
                                       link?:
                                         | T
@@ -2205,6 +2824,55 @@ export interface FooterSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateCollectionExport".
+ */
+export interface TaskCreateCollectionExport {
+  input: {
+    name?: string | null;
+    format: 'csv' | 'json';
+    limit?: number | null;
+    page?: number | null;
+    sort?: string | null;
+    sortOrder?: ('asc' | 'desc') | null;
+    drafts?: ('yes' | 'no') | null;
+    selectionToUse?: ('currentSelection' | 'currentFilters' | 'all') | null;
+    fields?: string[] | null;
+    collectionSlug: string;
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    userID?: string | null;
+    userCollection?: string | null;
+    exportCollection?: string | null;
+    maxLimit?: number | null;
+  };
+  output?: unknown;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskCreateCollectionImport".
+ */
+export interface TaskCreateCollectionImport {
+  input: {
+    importId: string;
+    importCollection: string;
+    userID?: string | null;
+    userCollection?: string | null;
+    batchSize?: number | null;
+    debug?: boolean | null;
+    defaultVersionStatus?: ('draft' | 'published') | null;
+    maxLimit?: number | null;
+  };
+  output?: unknown;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

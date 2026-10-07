@@ -1,27 +1,28 @@
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import { AccessResult, Plugin } from 'payload'
+import { AccessResult, CollectionSlug, Plugin } from 'payload'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 
-import { Page, Post } from '@/payload-types'
+import { Creator, Page, Post, Project } from '@/payload-types'
 import { getServerSideURL } from '@/utilities/getURL'
 import { hasAccess } from '@/utilities/accessFunctions'
 import { getAppName } from '@/utilities/getAppName'
 
-const generateTitle: GenerateTitle<Post | Page> = ({ doc }) => {
+const generateTitle: GenerateTitle<Post | Page | Creator | Project> = ({ doc }) => {
   const appName = getAppName()
   const title = doc?.meta?.title ? doc?.meta?.title + ' | ' + appName : ''
   return title
 }
 
-const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
+const generateURL: GenerateURL<Post | Page | Creator | Project> = ({ doc }) => {
   const url = getServerSideURL()
 
   return doc?.slug ? `${url}/${doc.slug}` : url
@@ -29,7 +30,7 @@ const generateURL: GenerateURL<Post | Page> = ({ doc }) => {
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
-    collections: ['pages', 'posts'],
+    collections: ['pages', 'posts', 'projects', 'creators'],
     overrides: {
       admin: {
         group: 'Plugins',
@@ -115,7 +116,7 @@ export const plugins: Plugin[] = [
     },
   }),
   searchPlugin({
-    collections: ['posts', 'pages'],
+    collections: ['posts', 'pages', 'projects', 'creators'],
     beforeSync: beforeSyncWithSearch,
     searchOverrides: {
       admin: {
@@ -131,5 +132,58 @@ export const plugins: Plugin[] = [
         return [...defaultFields, ...searchFields]
       },
     },
+  }),
+  importExportPlugin({
+    debug: true,
+    // Global limits (0 = unlimited = default)
+    exportLimit: 10000,
+    importLimit: 5000,
+    overrideExportCollection: ({ collection }) => {
+      collection.access = {
+        ...collection.access,
+        read: hasAccess('exports', 'read'),
+        create: hasAccess('exports', 'create'),
+        update: hasAccess('exports', 'upd'),
+        delete: hasAccess('exports', 'del'),
+      }
+      collection.admin = {
+        ...collection.admin,
+        group: 'System',
+        hidden: !hasAccess('exports', 'read'), // Hide from sidebar if not admin
+      }
+      return collection
+    },
+    // Configure the Imports collection
+    overrideImportCollection: ({ collection }) => {
+      collection.access = {
+        ...collection.access,
+        read: hasAccess('imports', 'read'),
+        create: hasAccess('imports', 'create'),
+        update: hasAccess('imports', 'upd'),
+        delete: hasAccess('imports', 'del'),
+      }
+
+      // Inject Admin UI settings
+      collection.admin = {
+        ...collection.admin,
+        group: 'System',
+        hidden: !hasAccess('imports', 'read'), // Hide from sidebar if not admin
+      }
+
+      return collection
+    },
+
+    // Per-collection settings
+    collections: ['pages', 'posts', 'projects', 'creators'].map((slug) => ({
+      slug: slug as CollectionSlug,
+      export: {
+        format: 'json',
+        limit: 1000,
+      },
+      import: {
+        defaultVersionStatus: 'draft',
+        limit: 500,
+      },
+    })),
   }),
 ]

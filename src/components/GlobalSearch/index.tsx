@@ -12,29 +12,129 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  CommandSeparator,
 } from '@/components/ui/command'
-import { Button, ButtonProps } from '../ui/button'
-import { SearchIcon } from 'lucide-react'
+import { Button, ButtonProps } from '@/components/ui/button'
+import { Funnel, SearchIcon, X } from 'lucide-react'
 import { Page } from '@/payload-types'
+import { cn } from '@/lib/utils'
+import {
+  DEFAULT_TOOLTIP_DELAY,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Kbd, KbdGroup } from '@/components/ui/kbd'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer'
+import { MobileMenuDrawerFooter } from '../NavMenu/MobileNavMenu'
+import { InputGroupButton } from '../ui/input-group'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../ui/dropdown-menu'
+import { DialogClose, DialogFooter } from '../ui/dialog'
+import { useIsKeyboardOpen } from '@/hooks/use-mobileKeyboardOpen'
+import { ButtonGroup } from '../ui/button-group'
+import { MenuListItem } from '../NavMenu/MenuListItem'
+
+const SearchResultsCommandItemClassName =
+  'rounded-none bg-transparent p-0 data-selected:bg-transparent'
+
+export const getPageCategoryString = (page: Page): string => {
+  const { parentCategory } = page
+  if (parentCategory && typeof parentCategory === 'object' && parentCategory.breadcrumbs) {
+    return parentCategory.breadcrumbs.map(({ label }) => label ?? '').join(' / ')
+  }
+  return 'Uncategorized'
+}
+
+function getTotalResults(results: GlobalSearchResults): number {
+  let total = 0
+  for (const key in results) {
+    total += results[key as keyof GlobalSearchResults]?.length ?? 0
+  }
+  return total
+}
+
+type GlobalSearchTriggerProps = {
+  triggerButtonProps: ButtonProps | undefined
+  showTriggerLabel: boolean
+  onTriggerClickCallback: ((open: boolean) => void) | undefined
+}
+
+function GlobalSearchTrigger({
+  triggerButtonProps,
+  showTriggerLabel = false,
+  onTriggerClickCallback,
+}: GlobalSearchTriggerProps) {
+  const [tooltipOpen, setTooltipOpen] = React.useState(false)
+
+  const {
+    variant: buttonVariant = 'link',
+    size: buttonSize = 'lg',
+    className: buttonClassName,
+    ...restButtonProps
+  } = triggerButtonProps || ({} as ButtonProps)
+
+  const onTriggerClick: React.MouseEventHandler<HTMLButtonElement> = () => {
+    setTooltipOpen(false)
+    if (onTriggerClickCallback) {
+      onTriggerClickCallback(true)
+    }
+  }
+
+  return (
+    <Tooltip
+      open={tooltipOpen}
+      onOpenChange={setTooltipOpen}
+      delayDuration={DEFAULT_TOOLTIP_DELAY}
+      disableHoverableContent={true}
+    >
+      <TooltipTrigger asChild>
+        <Button
+          onClick={onTriggerClick}
+          variant={buttonVariant}
+          size={buttonSize}
+          className={cn(buttonClassName, 'w-fit')}
+          {...restButtonProps}
+        >
+          <SearchIcon className="w-5" />
+          {showTriggerLabel && <span className="">Search</span>}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        Search (
+        {
+          <KbdGroup>
+            <Kbd>Ctrl + K</Kbd>
+          </KbdGroup>
+        }
+        )
+      </TooltipContent>
+    </Tooltip>
+  )
+}
 
 type GlobalSearchProps = {
   onSelectionCallback?: () => void
   buttonProps?: ButtonProps
+  showLabel?: boolean
 }
 
-export default function GlobalSearch({ onSelectionCallback, buttonProps }: GlobalSearchProps) {
+export default function GlobalSearch({
+  onSelectionCallback,
+  buttonProps,
+  showLabel = false,
+}: GlobalSearchProps): React.ReactNode {
+  const isMobile = useIsMobile()
   const router = useRouter()
   const [open, setOpen] = React.useState(false)
-  const [query, setQuery] = React.useState('')
-  const debouncedValue = useDebounce(query)
-
-  const [loading, setLoading] = React.useState(false)
-  const [results, setResults] = React.useState<GlobalSearchResults>({
-    posts: [],
-    categories: [],
-    pages: [],
-  })
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
@@ -47,11 +147,255 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
     return () => document.removeEventListener('keydown', down)
   }, [])
 
+  const handleResultSelection = (path: string) => {
+    setOpen(false)
+    if (onSelectionCallback) {
+      onSelectionCallback()
+    }
+    router.push(path)
+  }
+
+  return (
+    <React.Fragment>
+      {isMobile ? (
+        <SearchCommandDrawer
+          onOpenChange={setOpen}
+          open={open}
+          onSelectResult={handleResultSelection}
+          triggerProps={{
+            triggerButtonProps: buttonProps,
+            showTriggerLabel: showLabel,
+          }}
+        />
+      ) : (
+        <SearchCommandDialog
+          triggerProps={{
+            triggerButtonProps: buttonProps,
+            showTriggerLabel: showLabel,
+          }}
+          dialogProps={{}}
+          setOpen={setOpen}
+          open={open}
+          onSelectResult={handleResultSelection}
+        />
+      )}
+    </React.Fragment>
+  )
+}
+
+type SearchCommandDrawerProps = {
+  onSelectResult: (path: string) => void
+  open?: boolean | undefined
+  onOpenChange?: ((open: boolean) => void) | undefined
+  triggerProps: Omit<
+    React.ComponentPropsWithoutRef<typeof GlobalSearchTrigger>,
+    'onTriggerClickCallback'
+  >
+} & React.ComponentPropsWithoutRef<typeof Drawer>
+function SearchCommandDrawer({
+  onSelectResult,
+  open,
+  onOpenChange,
+  triggerProps,
+  ...drawerProps
+}: SearchCommandDrawerProps) {
+  const isMobile = useIsMobile()
+  const isKeyboardOpen = useIsKeyboardOpen()
+  return (
+    <Drawer
+      direction={'bottom'}
+      open={open}
+      onOpenChange={onOpenChange}
+      dismissible={!isKeyboardOpen}
+      repositionInputs={false}
+      {...drawerProps}
+    >
+      <DrawerTrigger asChild>
+        <GlobalSearchTrigger onTriggerClickCallback={onOpenChange} {...triggerProps} />
+      </DrawerTrigger>
+      <DrawerContent
+        className={cn(
+          'mobile-menu-primary-menu-content rounded-md bg-background',
+          'data-[vaul-drawer-direction=bottom]:h-lvh',
+          'data-[vaul-drawer-direction=bottom]:rounded-t-none',
+        )}
+      >
+        <SearchCommand onSelectResult={onSelectResult} className={'h-full'} />
+        <MobileMenuDrawerFooter
+          className={isMobile && isKeyboardOpen ? 'hidden' : 'bottom-0 h-fit p-0'}
+        />
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+type SearchCommandDialogProps = {
+  onSelectResult: (path: string) => void
+  open: boolean
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  dialogProps: Omit<React.ComponentPropsWithoutRef<typeof CommandDialog>, 'setOpen' | 'open'>
+  triggerProps: Omit<
+    React.ComponentPropsWithoutRef<typeof GlobalSearchTrigger>,
+    'onTriggerClickCallback'
+  >
+}
+function SearchCommandDialog({
+  onSelectResult,
+  open,
+  setOpen,
+  triggerProps,
+  dialogProps,
+}: SearchCommandDialogProps) {
+  return (
+    <React.Fragment>
+      <GlobalSearchTrigger onTriggerClickCallback={setOpen} {...triggerProps} />
+      <CommandDialog
+        title={'Search'}
+        showCloseButton={true}
+        open={open}
+        onOpenChange={setOpen}
+        className={cn('w-90/100')}
+        {...dialogProps}
+      >
+        <SearchCommand onSelectResult={onSelectResult} />
+      </CommandDialog>
+    </React.Fragment>
+  )
+}
+
+function SearchResultsFilter({
+  data,
+  onSelectedChange,
+}: {
+  data: GlobalSearchResults
+  onSelectedChange?: (selected: string[]) => void
+}): React.ReactNode {
+  const [selectedResultTypes, setSelectedResultTypes] = React.useState<Set<string>>(
+    new Set(Object.keys(data)),
+  )
+  const [isOpen, setIsOpen] = React.useState(false)
+  const selectAll = selectedResultTypes.size === Object.keys(data).length
+
+  const handleSelectAll = (checked: boolean) => {
+    let newSet: Set<string> = new Set()
+    if (checked) {
+      newSet = new Set(Object.keys(data))
+    }
+    setSelectedResultTypes(newSet)
+    if (onSelectedChange) {
+      onSelectedChange([...newSet.values()])
+    }
+  }
+
+  const handleSelectItemType = (itemType: string, checked: boolean) => {
+    const newSelected = new Set(selectedResultTypes)
+    if (checked) {
+      newSelected.add(itemType)
+    } else {
+      newSelected.delete(itemType)
+    }
+    setSelectedResultTypes(newSelected)
+    if (onSelectedChange) {
+      onSelectedChange([...newSelected.values()])
+    }
+  }
+
+  return (
+    <DropdownMenu
+      modal={false}
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open)
+      }}
+    >
+      <DropdownMenuTrigger
+        className={'select-none'}
+        onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) => {
+          if (event.key === 'escape') {
+            event.stopPropagation()
+          }
+        }}
+        asChild
+      >
+        <Button variant="outline" aria-label="Filters" size="sm" className="border-input/30">
+          <span>Filter</span>
+          <Funnel />
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align="end" className={'w-50 select-none!'}>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <span className="select-none!">Results to Show</span>
+          </DropdownMenuLabel>
+          {Object.keys(data).map((itemType, index) => {
+            if (itemType === 'categories') {
+              return
+            }
+            const itemCount = data[itemType as keyof GlobalSearchResults].length
+            const isDisabled = itemCount <= 0
+
+            return (
+              <DropdownMenuCheckboxItem
+                key={index}
+                id={`filter-${itemType}-checkbox`}
+                disabled={isDisabled}
+                checked={!isDisabled && selectedResultTypes.has(itemType)}
+                defaultChecked={true}
+                onCheckedChange={(checked) => handleSelectItemType(itemType, checked === true)}
+              >
+                <span className="ml-3 capitalize">
+                  {itemType}
+                  {` (${itemCount})`}
+                </span>
+              </DropdownMenuCheckboxItem>
+            )
+          })}
+        </DropdownMenuGroup>
+        <DropdownMenuSeparator />
+        <DropdownMenuGroup>
+          <DropdownMenuItem asChild>
+            <Button
+              variant={'ghost'}
+              disabled={selectAll}
+              className={'w-full cursor-none select-none'}
+              onClick={() => handleSelectAll(true)}
+            >
+              <span className="cursor-none select-none">Reset</span>
+            </Button>
+          </DropdownMenuItem>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+function SearchCommand({
+  onSelectResult,
+}: React.ComponentPropsWithoutRef<typeof Command> & {
+  onSelectResult: (path: string) => void
+}) {
+  const isMobile = useIsMobile()
+  const [query, setQuery] = React.useState('')
+  const debouncedValue = useDebounce(query)
+
+  const [loading, setLoading] = React.useState(false)
+  const [results, setResults] = React.useState<GlobalSearchResults>({
+    posts: [],
+    categories: [],
+    pages: [],
+    creators: [],
+    projects: [],
+  })
+  const [selectedTypeFilters, setSelectedTypeFilters] = React.useState<string[]>(
+    Object.keys(results),
+  )
+
   // Fetch results when debounced query changes
   React.useEffect(() => {
     async function fetchResults() {
       if (debouncedValue.length < 2) {
-        setResults({ posts: [], categories: [], pages: [] })
+        setResults({ posts: [], categories: [], pages: [], projects: [], creators: [] })
         return
       }
 
@@ -69,137 +413,106 @@ export default function GlobalSearch({ onSelectionCallback, buttonProps }: Globa
     fetchResults()
   }, [debouncedValue])
 
-  const handleSelect = (path: string) => {
-    setOpen(false)
-    if (onSelectionCallback) {
-      onSelectionCallback()
-    }
-    router.push(path)
-  }
+  const totalResults = getTotalResults(results)
 
-  const getPageCategoryString = (page: Page): string => {
-    const { parentCategory } = page
-    if (typeof parentCategory === 'object' && parentCategory.breadcrumbs) {
-      return parentCategory.breadcrumbs.map(({ label }) => label ?? '').join(' / ')
-    }
-    return 'Uncategorized'
-  }
-
+  /* shouldFilter={false} required to bypass cmdk default text filtering */
   return (
-    <React.Fragment>
-      <Button
-        onClick={() => setOpen(true)}
-        variant={'link'}
-        size={'lg'}
-        className={'w-fit'}
-        {...buttonProps}
-      >
-        <SearchIcon className="w-5" />
-        <span className="">Search</span>
-      </Button>
-      <CommandDialog title={'Search'} open={open} onOpenChange={setOpen}>
-        <Command shouldFilter={false} label="" disablePointerSelection={true} vimBindings={false}>
-          {/* shouldFilter={false} required to bypass cmdk default text filtering */}
-          <CommandInput placeholder="Search..." value={query} onValueChange={setQuery} />
-          <CommandList className={'p-1'}>
-            <CommandEmpty>{loading ? 'Searching...' : 'No results found.'}</CommandEmpty>
+    <Command
+      shouldFilter={false}
+      label=""
+      disablePointerSelection={true}
+      vimBindings={false}
+      className={cn(isMobile ? 'bg-background text-foreground' : '')}
+    >
+      <div className={'my-3 flex w-full flex-col items-center justify-center'}>
+        <h2 className="text-3xl">Search</h2>
+      </div>
 
-            {/* --- CATEGORIES GROUP --- */}
-            {/* {results.categories.length > 0 && (
-              <>
-                <CommandGroup heading="Categories" className={'group p-0'}>
-                  {results.categories.map((category) => (
-                    <CommandItem
-                      key={category.id}
-                      value={`category-${category.id}`}
-                      onSelect={() => {
-                        console.debug(`selected category item "${category.slug}"`, category)
-                        handleSelect(`/${category.slug}`)
-                      }}
-                      className={'data-[selected=true]:bg-primary-40 mb-1 bg-primary/20'}
-                    >
-                      <span>{category.title}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-                <CommandSeparator className="mx-0 my-1" alwaysRender={true} />
-              </>
-            )} */}
+      <ButtonGroup className={cn('w-full px-6')}>
+        <CommandInput
+          className={'h-full w-full border-0 bg-transparent'}
+          wrapperClassName={'p-0 w-full'}
+          inputGroupClassName={'rounded-tr-none! rounded-br-none! bg-transparent'}
+          autoFocus={true}
+          placeholder="Start typing to search..."
+          value={query}
+          onValueChange={setQuery}
+          addonInlineEnd={
+            query.length > 0 && (
+              <InputGroupButton variant="ghost" size={'xs'} onClick={() => setQuery('')}>
+                <X />
+                <span className="sr-only">Clear</span>
+              </InputGroupButton>
+            )
+          }
+        />
 
-            {/* --- Pages GROUP --- */}
-            {results.pages.length > 0 && (
-              <>
-                <CommandGroup heading="Pages" className={'group p-0'}>
-                  {results.pages.map((page) => (
-                    <CommandItem
-                      key={page.id}
-                      value={`page-${page.id}`}
-                      onSelect={() => {
-                        console.debug(`selected page item "${page.slug}"`, page)
-                        handleSelect(`/${page.slug}`)
-                      }}
-                      className={'mb-1 flex flex-col'}
-                    >
-                      <div className="flex w-full items-center justify-between">
-                        <span className="font-medium">{page.title}</span>
-                        <span className="text-xs text-muted-foreground">
-                          Updated: {new Date(page.updatedAt).toLocaleDateString()}
-                        </span>
-                      </div>
+        <SearchResultsFilter data={results} onSelectedChange={setSelectedTypeFilters} />
+      </ButtonGroup>
 
-                      <div className="w-full text-right">
-                        <span className="text-xs text-muted-foreground">
-                          {getPageCategoryString(page)}
-                        </span>
-                      </div>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-                <CommandSeparator className="mx-0 my-1" alwaysRender={true} />
-              </>
-            )}
+      {query.length > 0 && totalResults > 0 && (
+        <div className="py-1 text-center text-sm text-primary">Found {totalResults} results.</div>
+      )}
 
-            {/* --- POSTS GROUP --- */}
-            {results.posts.length > 0 && (
-              <CommandGroup heading="Posts" className={'group p-0'}>
-                {results.posts.map((post) => (
-                  <CommandItem
-                    key={post.id}
-                    value={`post-${post.id}`}
-                    onSelect={() => {
-                      console.debug(`selected post item "${post.slug}"`, post)
-                      handleSelect(`/posts/${post.slug}`)
-                    }}
-                    className={'mb-1'}
-                  >
-                    <div className="flex w-full items-center justify-between">
-                      <span className="font-medium">{post.title}</span>
-                      {/* Post Attribute: Category Name */}
-                      <span className="text-xs text-muted-foreground">
-                        {post.categories
-                          ? post.categories
-                              .map((cat) => {
-                                if (typeof cat === 'object') {
-                                  return cat.title
-                                } else {
-                                  return cat
-                                }
-                              })
-                              .join(', ')
-                          : 'Uncategorized'}
+      <CommandList className={cn('mx-6 p-0')}>
+        <CommandEmpty className={'h-20'}>
+          {loading ? 'Searching...' : query.length > 0 ? 'No results found.' : ''}
+        </CommandEmpty>
+
+        {Object.entries(results).map(([key, values], groupIndex) => {
+          if (key !== 'categories' && selectedTypeFilters.includes(key) && values.length > 0) {
+            return (
+              <React.Fragment key={groupIndex}>
+                <CommandGroup
+                  key={groupIndex}
+                  heading={
+                    <div className="w-full pt-2">
+                      <span className={'text-primary'}>
+                        <span className={'capitalize'}>{key}</span>
+                        {` (${values.length})`}
                       </span>
                     </div>
-                    {/* Post Attribute: Last Updated */}
-                    <span className="text-xs text-muted-foreground">
-                      Updated: {new Date(post.updatedAt).toLocaleDateString()}
-                    </span>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-          </CommandList>
-        </Command>
-      </CommandDialog>
-    </React.Fragment>
+                  }
+                  className={'group border-t border-border/30 p-0'}
+                >
+                  {values.map((item, itemIndex) => {
+                    const isLast = itemIndex === values.length - 1
+
+                    return (
+                      <CommandItem
+                        key={item.id}
+                        value={`${key}-${item.id}`}
+                        onSelect={() =>
+                          onSelectResult(key === 'pages' ? `/${item.slug}` : `${key}/${item.slug}`)
+                        }
+                        className={cn(SearchResultsCommandItemClassName)}
+                      >
+                        <MenuListItem
+                          label={item.title}
+                          href={key === 'pages' ? `/${item.slug}` : `${key}/${item.slug}`}
+                          className={cn(
+                            `item-index-${itemIndex}`,
+                            isLast ? 'border-0 border-none' : '',
+                          )}
+                        />
+                      </CommandItem>
+                    )
+                  })}
+                </CommandGroup>
+              </React.Fragment>
+            )
+          }
+        })}
+      </CommandList>
+      {!isMobile && (
+        <DialogFooter className="bottom-0 h-fit w-full">
+          <div className="flex w-full justify-end border-t border-border/30 px-2 py-1">
+            <DialogClose asChild>
+              <Button variant="ghost">Close</Button>
+            </DialogClose>
+          </div>
+        </DialogFooter>
+      )}
+    </Command>
   )
 }

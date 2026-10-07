@@ -5,6 +5,10 @@
    Accurately replicates default styling and sizing of streamer name in the twitch.tv live stream UI (browser/100%)
 */
 @theme inline {
+    --color-offline-background: #efeff1;
+    --color-offline-foreground: #18181b;
+    --color-live-background: oklch(0.5911 0.2415 29.38);
+    --color-live-foreground: #fff;
     --color-accent-twitch: #bf94ff;
     --color-twitch-viewer-count-red:#ff8280;
     --font-twitch--font-family:"Roobert","Tajawal","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;

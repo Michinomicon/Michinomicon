@@ -1,4 +1,9 @@
-// Keep these in sync with the CSS variables in your tailwind configuration
+/**
+ * This config is the 'source of truth' for the following configs:
+ * `src/collections/Media.ts`: UploadImageSizes
+ * `src/defaultImageSizes.js`: DEFAULT_IMAGE_SIZES
+ * `next.config.js`: nextConfig.images.deviceSizes, nextConfig.images.imageSizes
+ */
 
 export const cssVariables = {
   breakpoints: {

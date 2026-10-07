@@ -8,7 +8,7 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
-import { MenuTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeEntry } from '@/utilities/buildNavTree'
 import {
   ArrowLeftFromLine,
   ArrowRightToLine,
@@ -33,8 +33,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
 import { TOCItem } from '@/providers/PageTOC'
 
 type PageTableOfContentsProps = {
-  // pageTOC:TOCItem[],
-  navTree: MenuTreeItem[]
+  navTree: MenuTreeEntry[]
 }
 
 export enum HeadingTagDepth {
@@ -55,7 +54,7 @@ function generateHeadingTagSlug(textContent: string): string {
 }
 
 function collectHeadingTagReferences(
-  pageSlug: string,
+  pageSlug: string = '',
   node?: Element | null,
   parentSlug?: string | null,
   headings: Array<TOCItem> = [],
@@ -184,15 +183,17 @@ function useActiveTocItem(tocContent: TOCItem[]) {
 }
 
 function findPagePathByUrl(
-  tree: MenuTreeItem[],
+  tree: MenuTreeEntry[],
   targetUrl: string,
-  progress: MenuTreeItem[] = [],
-): MenuTreeItem[] | false {
+  progress: MenuTreeEntry[] = [],
+): MenuTreeEntry[] | false {
   for (const treeItem of tree) {
-    if (treeItem.type === 'page' && `/${treeItem.url}` === targetUrl) {
-      return [...progress, treeItem]
-    }
-    if (treeItem.type === 'category' && treeItem.children) {
+    if (treeItem.type === 'item') {
+      const treeItemUrl = `/${treeItem.url}`
+      if (treeItemUrl === targetUrl) {
+        return [...progress, treeItem]
+      }
+    } else if (treeItem.type === 'group' && treeItem.children) {
       const result = findPagePathByUrl(treeItem.children, targetUrl, [...progress, treeItem])
       if (result) {
         return result
@@ -202,7 +203,7 @@ function findPagePathByUrl(
   return false
 }
 
-function PathPathBreadcrumbs({ pathToPage }: { pathToPage: MenuTreeItem[] | false }) {
+function PathPathBreadcrumbs({ pathToPage }: { pathToPage: MenuTreeEntry[] | false }) {
   if (!pathToPage) {
     return <></>
   }
@@ -279,7 +280,9 @@ function PageContentsHeadingList({ tableOfContents }: { tableOfContents: TOCItem
   )
 }
 
-type PageTOCProps = Omit<ButtonProps & React.RefAttributes<HTMLButtonElement>, 'onClick'>
+type PageTOCProps = Omit<ButtonProps & React.RefAttributes<HTMLButtonElement>, 'onClick'> & {
+  showLabel?: boolean
+}
 export function PageTableOfContentsTrigger(props: PageTOCProps) {
   const { variant: variantFromProps, onMouseLeave, ...restProps } = props
   const { toggleSidebar, open } = useSidebar()
@@ -340,13 +343,13 @@ export function PageTableOfContentsTrigger(props: PageTOCProps) {
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}</p>
+        {open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}
       </TooltipContent>
     </Tooltip>
   )
 }
 
-export function PageTOCTriggerButton(props: PageTOCProps) {
+export function PageTOCTriggerButton({ showLabel = false, ...props }: PageTOCProps) {
   const { toggleSidebar, open } = useSidebar()
 
   const handleClick = () => {
@@ -364,10 +367,11 @@ export function PageTOCTriggerButton(props: PageTOCProps) {
           aria-label={`${open ? 'Collapse Table of Contents' : 'Show Table of Contents'}`}
         >
           <ListTree />
+          {showLabel && <span className="">Page</span>}
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>{open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}</p>
+        {open ? 'Collapse Page Table of Contents' : 'Show Page Table of Contents'}
       </TooltipContent>
     </Tooltip>
   )

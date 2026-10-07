@@ -12,7 +12,6 @@ import {
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
-import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
 import { revalidateDelete, revalidatePost } from './hooks/revalidatePost'
@@ -49,6 +48,8 @@ export const Posts: CollectionConfig<'posts'> = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    enableRichTextRelationship: true,
+    enableRichTextLink: true,
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -88,22 +89,10 @@ export const Posts: CollectionConfig<'posts'> = {
                 features: ({ rootFeatures }) => {
                   return [
                     ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-                    // SuperscriptFeature(),
-                    // SubscriptFeature(),
-                    // ParagraphFeature(),
-                    // AlignFeature(),
-                    // IndentFeature(),
-                    // UnorderedListFeature(),
-                    // OrderedListFeature(),
-                    // ChecklistFeature(),
-                    // RelationshipFeature(),
-                    // LinkFeature(),
-                    // BlockquoteFeature(),
-                    // UploadFeature(),
-                    // TreeViewFeature(),
-                    // TextStateFeature(),
-                    BlocksFeature({ blocks: [Banner, Code, MediaBlock, MediaGalleryBlock] }),
+                    HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+                    BlocksFeature({
+                      blocks: [Banner, Code, MediaBlock],
+                    }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
                     HorizontalRuleFeature(),

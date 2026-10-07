@@ -15,6 +15,7 @@ export const Categories: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     group: 'Globals',
+    defaultColumns: ['title', 'slug', 'parent'],
   },
   fields: [
     {
@@ -31,37 +32,5 @@ export const Categories: CollectionConfig = {
     slugField({
       position: undefined,
     }),
-    // {
-    //   type: 'group',
-    //   label: 'Navigation Menu Options',
-    //   admin: {
-    //     position: 'sidebar',
-    //   },
-    //   fields: [
-    //     {
-    //       name: 'isNav',
-    //       type: 'checkbox',
-    //       defaultValue: false,
-    //       label: 'Include in Site Navigation',
-    //     },
-    //     // {
-    //     //   name: 'sortPriority',
-    //     //   type: 'number',
-    //     //   min: 1,
-    //     //   max: 100,
-    //     //   admin: {
-    //     //     description: 'Select Order Priority',
-    //     //   },
-    //     // },
-    //   ],
-    // },
-    // {
-    //   name: 'sortPriority',
-    //   type: 'number',
-    //   admin: {
-    //     hidden: true, // Hides from the document view; controlled by the Global
-    //   },
-    //   defaultValue: 999, // Push unsorted items to the bottom
-    // },
   ],
 }

@@ -1,33 +1,23 @@
-import type { StaticImageData } from 'next/image'
 import type { ElementType, Ref } from 'react'
 
 import type { Media as MediaType } from '@/payload-types'
+import { Nullable } from '@/utilities/types'
+import { ImageMediaProps } from './ImageMedia'
+import { LightBoxGalleryProps } from '../Lightbox'
 
 export type MediaMetaData = { [key: string]: string }
 
 export interface BaseMediaProps {
-  url?: string
+  url?: string | null
   title?: string
   className?: string
   description?: string
   htmlElement?: ElementType | null
   onClick?: () => void
   onLoad?: () => void
-  resource?: MediaType | string | number | null
   metadata?: MediaMetaData
-  sortPriority?:number
-}
-
-export interface ImageMediaProps extends BaseMediaProps {
-  alt?: string
-  fill?: boolean
-  imgClassName?: string
-  loading?: 'lazy' | 'eager'
-  pictureClassName?: string
-  priority?: boolean
-  ref?: Ref<HTMLImageElement | null>
-  size?: string
-  src?: StaticImageData | string
+  sortPriority?: Nullable<number>
+  resource?: MediaType | string | number
 }
 
 export interface AudioMediaProps extends BaseMediaProps {
@@ -45,6 +35,7 @@ export interface PdfMediaProps extends BaseMediaProps {
 }
 
 export type MediaProps = BaseMediaProps &
+  Partial<Omit<LightBoxGalleryProps, keyof BaseMediaProps>> &
   Partial<Omit<ImageMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<VideoMediaProps, keyof BaseMediaProps>> &
   Partial<Omit<AudioMediaProps, keyof BaseMediaProps>> &

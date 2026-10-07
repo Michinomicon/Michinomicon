@@ -1,12 +1,11 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import React from 'react'
 import { Search } from '@/search/Component'
 import PageClient from './page.client'
-import { CardPostData } from '@/components/Card'
+import { Post } from '@/payload-types'
 
 type Args = {
   searchParams: Promise<{
@@ -14,6 +13,7 @@ type Args = {
   }>
 }
 export default async function Page({ searchParams: searchParamsPromise }: Args) {
+  const pageId: string = 'searchResultsCollection'
   const { q: query } = await searchParamsPromise
   const payload = await getPayload({ config: configPromise })
 
@@ -59,6 +59,8 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       : {}),
   })
 
+  const results = posts.docs as Post[]
+
   return (
     <div className="pt-24 pb-24">
       <PageClient />
@@ -73,7 +75,7 @@ export default async function Page({ searchParams: searchParamsPromise }: Args) 
       </div>
 
       {posts.totalDocs > 0 ? (
-        <CollectionArchive posts={posts.docs as CardPostData[]} />
+        <CollectionItemGroup id={pageId} items={results} collection={'posts'} />
       ) : (
         <div className="container">No results found.</div>
       )}

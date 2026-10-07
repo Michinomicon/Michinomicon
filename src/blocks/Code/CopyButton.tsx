@@ -25,7 +25,7 @@ export function CopyButton({ code }: { code: string }) {
           updateCopyStatus()
         }}
       >
-        <p>{text}</p>
+        <span>{text}</span>
         <CopyIcon />
       </Button>
     </div>

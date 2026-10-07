@@ -1,17 +1,18 @@
 import type { Metadata } from 'next/types'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
+import { CollectionItemGroup } from '@/components/CollectionItemGroup'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import React from 'react'
 import PageClient from './page.client'
+import { Post } from '@/payload-types'
 
 export const dynamic = 'force-static'
 export const revalidate = 600
 
 export default async function Page() {
+  const pageId: string = 'postsCollection'
   const payload = await getPayload({ config: configPromise })
 
   const posts = await payload.find({
@@ -31,7 +32,7 @@ export default async function Page() {
     <div className="pt-24 pb-24">
       <PageClient />
       <div className="container mb-16">
-        <div className="prose dark:prose-invert max-w-none">
+        <div className="prose max-w-none dark:prose-invert">
           <h1>Posts</h1>
         </div>
       </div>
@@ -45,7 +46,7 @@ export default async function Page() {
         />
       </div>
 
-      <CollectionArchive posts={posts.docs} />
+      <CollectionItemGroup id={pageId} items={posts.docs as Post[]} collection={'posts'} />
 
       <div className="container">
         {posts.totalPages > 1 && posts.page && (

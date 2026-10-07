@@ -152,7 +152,7 @@ export const Rights: CollectionConfig = {
               fields: [
                 {
                   name: 'fields',
-                  type: 'text', // Changed from 'text' to 'select'
+                  type: 'text',
                   hasMany: true,
                   admin: {
                     width: '50%',

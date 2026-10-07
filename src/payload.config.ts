@@ -19,6 +19,9 @@ import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { Slugs } from './collections/Slugs'
 import { Rights } from './collections/Rights'
+import { Projects } from './collections/Projects'
+import { Creators } from './collections/Creators'
+import { hasAccess } from './utilities/accessFunctions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -34,7 +37,7 @@ export default buildConfig({
     // autoLogin:
     //   process.env.NODE_ENV === 'development'
     //     ? {
-    //         email: 'test@michinomicon.com',
+    //         email: 'test@domain.com',
     //         password: 'test',
     //         prefillOnly: true,
     //       }
@@ -75,8 +78,8 @@ export default buildConfig({
     },
   },
   email: nodemailerAdapter({
-    defaultFromAddress: 'system@michinomicon.com',
-    defaultFromName: 'Michinomicon',
+    defaultFromAddress: 'system@domain.com',
+    defaultFromName: 'AppName',
     // streamTransport skips all network requests entirely
     transportOptions: {
       streamTransport: true,
@@ -93,7 +96,7 @@ export default buildConfig({
   }),
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  collections: [Pages, Posts, Media, Categories, Users, Slugs, Rights],
+  collections: [Pages, Posts, Projects, Creators, Media, Categories, Users, Slugs, Rights],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -106,6 +109,21 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   jobs: {
+    jobsCollectionOverrides: ({ defaultJobsCollection }) => {
+      if (!defaultJobsCollection.admin) {
+        defaultJobsCollection.admin = {}
+      }
+
+      defaultJobsCollection.admin.hidden =
+        !hasAccess('exports', 'read') || !hasAccess('exports', 'read')
+      return defaultJobsCollection
+    },
+    autoRun: [
+      {
+        cron: '*/5 * * * *', // Check every 5 minutes
+        queue: 'default',
+      },
+    ],
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
         // Allow logged in users to execute this endpoint (default)

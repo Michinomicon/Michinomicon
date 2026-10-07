@@ -1,5 +1,6 @@
 import * as React from 'react'
-import { cva, type VariantProps } from 'class-variance-authority'
+import type { VariantProps } from 'class-variance-authority'
+import { cva } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
 
 import { cn } from '@/lib/utils'
@@ -17,27 +18,81 @@ const badgeVariants = cva(
           'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
+        status: '',
+        caption: `bg-transparent text-white [a&]:hover:bg-accent [a&]:hover:text-accent-foreground [a&]:hover:border-border underline-offset-4 [a&]:hover:underline`,
+      },
+      status: {
+        live: '',
+        offline: '',
+        planned: '',
+        active: '',
+        completed: '',
+        archived: '',
+        inactive: '',
       },
     },
+    compoundVariants: [
+      {
+        variant: 'status',
+        status: 'offline',
+        className:
+          'bg-offline-background text-offline-foreground font-bold focus-visible:ring-offline-background/20 dark:bg-offline-background dark:focus-visible:ring-offline-background [a&]:hover:bg-offline-background',
+      },
+      {
+        variant: 'status',
+        status: 'live',
+        className:
+          'bg-live-background text-live-foreground font-bold focus-visible:ring-live-background/20 dark:bg-live-background dark:focus-visible:ring-live-background [a&]:hover:bg-live-background',
+      },
+      {
+        variant: 'status',
+        status: 'planned',
+        className:
+          'bg-purple-50 text-purple-700 [a&]:hover:bg-purple-50/90 dark:bg-purple-950 dark:text-purple-300',
+      },
+      {
+        variant: 'status',
+        status: 'active',
+        className:
+          'bg-green-700 text-green-50 [a&]:hover:bg-green-700/90 dark:bg-green-850 dark:text-green-100',
+      },
+      {
+        variant: 'status',
+        status: 'completed',
+        className: 'bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90',
+      },
+      {
+        variant: 'status',
+        status: 'archived',
+        className:
+          'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+      },
+      {
+        variant: 'status',
+        status: 'inactive',
+        className: 'bg-muted/50 text-foreground-muted [a&]:hover:bg-muted/70',
+      },
+    ],
     defaultVariants: {
       variant: 'default',
     },
   },
 )
 
-function Badge({
-  className,
-  variant = 'default',
-  asChild = false,
-  ...props
-}: React.ComponentProps<'span'> & VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
+export type BadgeProps = React.ComponentProps<'span'> &
+  VariantProps<typeof badgeVariants> & { asChild?: boolean }
+
+export type BadgeStatus = string & VariantProps<typeof badgeVariants>['status']
+
+function Badge({ className, variant = 'default', status, asChild = false, ...props }: BadgeProps) {
   const Comp = asChild ? Slot.Root : 'span'
 
   return (
     <Comp
       data-slot="badge"
       data-variant={variant}
-      className={cn(badgeVariants({ variant }), className)}
+      data-status={status}
+      className={cn(badgeVariants({ variant, status }), className)}
       {...props}
     />
   )

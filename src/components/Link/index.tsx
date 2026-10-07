@@ -2,19 +2,40 @@ import { Button, ButtonProps } from '@/components/ui/button'
 import { cn } from '@/utilities/ui'
 import Link from 'next/link'
 import React from 'react'
-import { CollectionSlug } from 'payload'
 import { Collections } from '@/utilities/collectionTypes'
+import {
+  DEFAULT_TOOLTIP_DELAY,
+  Tooltip,
+  TooltipProps,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 
-export type CMSLinkReference<R extends CollectionSlug, V = Collections[R]> = {
-  relationTo: string & R
+type ValidCollections = Pick<Collections, 'pages' | 'creators' | 'posts' | 'projects'>
+export type CMSLinkReference<R extends keyof ValidCollections, V = ValidCollections[R]> = {
+  relationTo: R
   value: Partial<V> | string
 }
-export type CMSLinkPageReference = CMSLinkReference<'pages'>
-export type CMSLinkPostReference = CMSLinkReference<'posts'>
+
+export type CMSLinkPropsReference =
+  | {
+      relationTo: string
+      value:
+        | {
+            [key: string]: unknown
+            slug?: string | undefined
+            id: string
+          }
+        | string
+    }
+  | CMSLinkReference<'pages'>
+  | CMSLinkReference<'posts'>
+  | CMSLinkReference<'creators'>
+  | CMSLinkReference<'projects'>
 
 export type CMSLinkProps = {
   type?: 'reference' | 'custom' | null
-  reference?: CMSLinkReference<'pages'> | CMSLinkReference<'posts'> | null
+  reference?: CMSLinkPropsReference | null
   url?: string | null
   label?: string | undefined
   appearance?: ButtonProps['variant'] | null
@@ -22,64 +43,114 @@ export type CMSLinkProps = {
   className?: string
   children?: React.ReactNode
   newTab?: boolean | null
+  disableTooltip?: boolean
+  tooltipContent?: string | undefined
+  tooltipProps?: TooltipProps
 }
 
-export const CMSLink: React.FC<CMSLinkProps> = ({
-  type,
-  appearance = 'link',
-  children,
-  className,
-  label,
-  newTab,
-  reference,
-  size: sizeFromProps,
-  url,
-}) => {
-  let href: string | null | undefined = null
+/**
+ * @description Takes a 'relationTo' reference from Payload and return the approriate href value for a link
+ *
+ * @export
+ * @param {(CMSLinkPropsReference | null | undefined)} [reference]
+ * @return {*}  {string}
+ */
+export function parseCMSLinkReferenceHref(
+  reference?: CMSLinkPropsReference | null | undefined,
+): string | null {
+  if (reference) {
+    const { value, relationTo } = reference as CMSLinkPropsReference
+    if (typeof value === 'object' && value.slug) {
+      switch (relationTo) {
+        case 'posts':
+          return `/posts/${value.slug}`
+        case 'creators':
+          return `/creators/${value.slug}`
+        case 'projects':
+          return `/projects/${value.slug}`
+        case 'pages':
+        default:
+          return `/${value.slug}`
+      }
+    }
+  }
+  return null
+}
+
+export function getHref({ type = 'reference', reference, url }: CMSLinkProps) {
+  const initialUrl: string = url && url.length > 0 ? url : ''
+  let parsedUrl = initialUrl
 
   if (type === 'reference') {
-    href =
-      type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-        ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
-            reference.value.slug
-          }`
-        : url
-  }
-
-  if (!href) return null
-
-  if (type === 'custom') {
+    parsedUrl = parseCMSLinkReferenceHref(reference) || initialUrl
+  } else if (type === 'custom') {
     if (
-      !href.startsWith('http') &&
-      !href.startsWith('//') &&
-      !href.startsWith('/') &&
-      !href.startsWith('#') &&
-      !href.startsWith('mailto:') &&
-      !href.startsWith('tel:')
+      !initialUrl.startsWith('http') &&
+      !initialUrl.startsWith('//') &&
+      !initialUrl.startsWith('/') &&
+      !initialUrl.startsWith('#') &&
+      !initialUrl.startsWith('mailto:') &&
+      !initialUrl.startsWith('tel:')
     ) {
-      href = `https://${href}`
+      parsedUrl = `https://${initialUrl}`
     }
   }
 
+  return parsedUrl
+}
+
+export const CMSLink: React.FC<CMSLinkProps> = (props) => {
+  const {
+    appearance = 'link',
+    children,
+    className,
+    label,
+    newTab,
+    size: sizeFromProps,
+    disableTooltip = false,
+    tooltipContent,
+    tooltipProps,
+  } = props
+
   const size = appearance === 'link' ? 'default' : sizeFromProps
   const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}
+  const linkHref = getHref(props)
+  const showLabel = size !== 'icon'
 
-  /* Ensure we don't break any styles set by richText */
-  if (appearance === 'link') {
+  const getLink = () => {
+    /* Ensure we don't break any styles set by richText */
+    if (appearance === 'link') {
+      return (
+        <Link className={cn(className)} href={linkHref} {...newTabProps}>
+          {showLabel && label}
+          {children}
+        </Link>
+      )
+    }
     return (
-      <Link className={cn(className)} href={href} {...newTabProps}>
-        {label}
-        {children}
-      </Link>
+      <Button asChild className={className} size={size} variant={appearance}>
+        <Link className={cn(className)} href={linkHref} {...newTabProps}>
+          {showLabel && label}
+          {children}
+        </Link>
+      </Button>
     )
   }
 
-  return (
-    <Button asChild className={className} size={size} variant={appearance}>
-      <Link className={cn(className)} href={href} {...newTabProps}>
-        {label}
-        {children}
-      </Link>
-    </Button>
-  )
+  const linkToUse = getLink()
+
+  if (disableTooltip) {
+    return linkToUse
+  } else {
+    return (
+      <Tooltip
+        delayDuration={DEFAULT_TOOLTIP_DELAY}
+        disableHoverableContent={true}
+        {...tooltipProps}
+      >
+        <TooltipTrigger asChild>{linkToUse}</TooltipTrigger>
+        <TooltipContent>{tooltipContent}</TooltipContent>
+      </Tooltip>
+    )
+  }
 }

@@ -51,7 +51,7 @@ export type VideoMediaMetaData = {
   >]: string
 }
 
-export type PdfMediaMetaData = {
+export type FileMediaMetaData = {
   [Prop in keyof Required<
     Pick<
       Media,
@@ -105,8 +105,8 @@ const getMetaDataValue = (prop: keyof Required<Media>, resource: Media): string 
   }
 }
 
-export const getPDFMediaMetaData = (resource: Media): PdfMediaMetaData => {
-  const info: PdfMediaMetaData = {
+export const getFileMediaMetaData = (resource: Media): FileMediaMetaData => {
+  const info: FileMediaMetaData = {
     title: '',
     updatedAt: '',
     createdAt: '',
@@ -116,7 +116,7 @@ export const getPDFMediaMetaData = (resource: Media): PdfMediaMetaData => {
     mimeType: '',
     filesize: '',
   }
-  for (const prop of Object.keys(info) as Array<keyof PdfMediaMetaData>) {
+  for (const prop of Object.keys(info) as Array<keyof FileMediaMetaData>) {
     info[prop] = getMetaDataValue(prop, resource)
   }
 

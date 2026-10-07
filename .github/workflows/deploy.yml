@@ -41,7 +41,7 @@ jobs:
           echo "Creating .env file for ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}..."
           
           echo "NODE_ENV=production" > .env
-          echo "APP_NAME=${{vars.APP_NAME}}" >> .env
+          echo "NEXT_PUBLIC_APP_NAME=${{vars.APP_NAME}}" >> .env
           echo "TARGET_DIR=${{vars.TARGET_DIR}}" >> .env
           echo "PAYLOAD_MEDIA_DIR=${{vars.PAYLOAD_MEDIA_DIR}}" >> .env
           echo "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY=${{ secrets.NEXT_SERVER_ACTIONS_ENCRYPTION_KEY }}" >> .env

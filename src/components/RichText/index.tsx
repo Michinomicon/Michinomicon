@@ -3,11 +3,11 @@ import {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedLinkNode,
+  SerializedUploadNode,
   type DefaultTypedEditorState,
 } from '@payloadcms/richtext-lexical'
 import {
   JSXConvertersFunction,
-  LinkJSXConverter,
   RichText as ConvertRichText,
 } from '@payloadcms/richtext-lexical/react'
 
@@ -21,33 +21,89 @@ import type {
 import { BannerBlock } from '@/blocks/Banner/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
+import { parseCMSLinkReferenceHref } from '@/components/Link'
+import HoverCardLink from '@/components/HoverCardLink'
+import Link from 'next/link'
 
 type NodeTypes =
   | DefaultNodeTypes
   | SerializedBlockNode<CTABlockProps | MediaBlockProps | BannerBlockProps | CodeBlockProps>
 
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  const { value, relationTo } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
-  }
-  const slug = value.slug
-  return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
+const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }): string => {
+  const href = parseCMSLinkReferenceHref(linkNode.fields.doc) || ''
+  return href
 }
 
 const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
   ...defaultConverters,
-  ...LinkJSXConverter({ internalDocToHref }),
+  link: ({ node, nodesToJSX }) => {
+    const children = nodesToJSX({ nodes: node.children })
+    const fields = node.fields
+
+    if (fields.linkType === 'internal' && fields.enableHoverCard && fields.doc) {
+      const showCoverImage = fields.showCoverImage === true
+      const showDescription = fields.showDescription === true
+      const pageData = fields.doc
+      const url = internalDocToHref({ linkNode: node })
+      return (
+        <HoverCardLink
+          url={url}
+          reference={pageData}
+          key={node.format}
+          showDescription={showDescription}
+          showCoverImage={showCoverImage}
+        >
+          {children}
+        </HoverCardLink>
+      )
+    }
+    // Fallback: Standard Link Rendering
+    let href = fields.url || '#'
+    if (
+      fields.linkType === 'internal' &&
+      typeof fields.doc?.value === 'object' &&
+      fields.doc?.value?.slug
+    ) {
+      href = internalDocToHref({ linkNode: node })
+    }
+    const newTabProps = fields.newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {}
+    return (
+      <Link
+        href={href}
+        key={node.format}
+        {...newTabProps}
+        className="non-hover text-primary underline"
+      >
+        {children}
+      </Link>
+    )
+  },
+  upload: ({ node }: { node: SerializedUploadNode }) => (
+    <MediaBlock
+      className={'rich-text-upload'}
+      blockType="mediaBlock"
+      mediaProps={{ className: 'rich-text-upload' }}
+      enableGutter={false}
+      disableInnerContainer={true}
+      media={
+        node.type === 'upload' && node.relationTo === 'media' && typeof node.value === 'object'
+          ? node.value
+          : ''
+      }
+      {...node.fields}
+    />
+  ),
   blocks: {
     banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} />,
-    mediaBlock: ({ node }) => (
+    mediaBlock: ({ node }: { node: SerializedBlockNode<MediaBlockProps> }) => (
       <MediaBlock
-        className="col-start-1 col-span-3"
+        className="rich-text-block-media col-span-3 col-start-1"
         imgClassName="m-0"
-        {...node.fields}
         captionClassName="mx-auto max-w-3xl"
         enableGutter={false}
         disableInnerContainer={true}
+        mediaProps={{ className: 'rich-text-block-media' }}
+        {...node.fields}
       />
     ),
     code: ({ node }) => <CodeBlock className="col-start-2" {...node.fields} />,
@@ -67,7 +123,7 @@ export default function RichText(props: Props) {
     <ConvertRichText
       converters={jsxConverters}
       className={cn(
-        'payload-richtext',
+        'payload-richtext rounded-none',
         {
           container: enableGutter,
           'max-w-none': !enableGutter,

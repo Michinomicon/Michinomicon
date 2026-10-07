@@ -1,5 +1,4 @@
 import { AppMainLogo } from '@/components/AppMainLogo'
-import { CollapsibleTrigger, CollapsibleContent, Collapsible } from '@/components/ui/collapsible'
 import {
   Drawer,
   DrawerTrigger,
@@ -11,10 +10,9 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer'
 import { cn } from '@/lib/utils'
-import { MenuTreeItem } from '@/utilities/buildNavTree'
+import { MenuTreeEntry } from '@/utilities/buildNavTree'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, ChevronRightIcon, House, Icon, Menu, PaletteIcon, Settings } from 'lucide-react'
-import Link from 'next/link'
+import { ChevronDownIcon, House, Icon, Menu, Settings } from 'lucide-react'
 import { ComponentPropsWithoutRef, useState } from 'react'
 import React from 'react'
 import {
@@ -22,121 +20,106 @@ import {
   MobileThemeModeFieldGroup,
   MobileWallpaperSettingsFieldGroup,
 } from '@/providers/Theme/color-theme-toggle'
-import GlobalSearch from '@/components/GlobalSearch'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { OnNavigateHandler } from '../MenuItem'
+import { MenuLevel } from '../MenuLevel'
+import { MenuListItem } from '../MenuListItem'
 
-export type MobileMenuProps = {
+const ListItemClassName = 'w-full rounded-none border-b border-border/10 pb-5 pt-0 text-xl'
+
+export const MobileMenuDrawerContentClassName = cn(
+  'mobile-menu-primary-menu-content rounded-md bg-background',
+  'data-[vaul-drawer-direction=bottom]:h-[100lvh]',
+  'data-[vaul-drawer-direction=bottom]:min-h-[100lvh]',
+  'data-[vaul-drawer-direction=bottom]:rounded-t-none',
+  // 'shadow-(--shadow-scrollable)',
+)
+
+const MobileMenuItemScrollList = cn(
+  '[&_>div_>div]:flex! [&_>div_>div]:h-full! [&_>div_>div]:flex-col!',
+  'mobile-menu-scroll-list',
+  'flex flex-col h-full border-t border-b border-t-primary/40 border-b-primary/40 ',
+)
+
+export type MobileNavMenuProps = {
   appTitle?: string
-  menuTree: MenuTreeItem[]
+  menuItems: MenuTreeEntry[]
   twitchStatusSlot?: React.ReactNode
   triggerButtonProps?: ComponentPropsWithoutRef<typeof Button>
   triggerButtonIconProps?: ComponentPropsWithoutRef<typeof Icon>
 }
 
-function MobileMenuItem({
-  item,
-  menuDepth = 0,
-  onNavigateHandler,
-}: {
-  item: MenuTreeItem
-  menuDepth?: number
-  onNavigateHandler: OnNavigateHandler
-}): React.JSX.Element {
-  const hasChildren = item.children && item.children.length > 0
-
-  // Empty Category -> Disabled Item
-  if (item.type === 'category' && !hasChildren) {
-    return (
-      <div className="rounded-none">
+export function MobileMenuDrawerFooter({
+  className,
+  ...props
+}: Omit<React.ComponentPropsWithoutRef<typeof DrawerFooter>, 'className'> & {
+  className?: string
+}) {
+  return (
+    <DrawerFooter
+      className={cn(
+        'm-0 flex w-full flex-row items-center justify-between rounded-none border-t border-t-primary/40 p-0',
+        className,
+      )}
+      {...props}
+    >
+      <DrawerClose asChild>
         <Button
-          disabled
-          variant="ghost"
-          size="lg"
-          className={cn('w-full justify-start gap-2 rounded-none text-lg text-primary')}
+          variant={'ghost'}
+          size={'lg'}
+          className={'h-10.25 w-full justify-center rounded-none px-4 text-xl'}
         >
-          <span>{item.title}</span>
+          <ChevronDownIcon className="h-6 w-6" />
+          Close
+          <ChevronDownIcon className="h-6 w-6" />
         </Button>
-      </div>
-    )
-  }
-
-  // Any Item without children (Page/Post)
-  // OR
-  // PAGE with children (Posts)
-  if (item.type === 'page' || !hasChildren) {
-    return (
-      <div className="rounded-none">
-        <Button
-          asChild
-          variant="ghost"
-          size="lg"
-          className={cn(
-            'group ml-3 w-full justify-start rounded-none rounded-tl-none pl-4 text-lg text-foreground transition-none',
-          )}
-        >
-          <Link href={item.url} passHref onNavigate={onNavigateHandler}>
-            {item.title}
-          </Link>
-        </Button>
-      </div>
-    )
-  }
-
-  // CATEGORY with children
-  if (item.type === 'category') {
-    return (
-      <Collapsible className={cn('w-full rounded-none')}>
-        <CollapsibleTrigger asChild>
-          <Button
-            variant="ghost"
-            size="lg"
-            className={cn(
-              'group w-full justify-start rounded-none px-0 pl-1 text-lg text-foreground transition-none',
-              'data-[state=open]:font-bold',
-              'data-[state=open]:pl-0',
-              'data-[state=open]:ml-0',
-              'data-[state=open]:border-l-4 data-[state=open]:border-l-primary/50',
-            )}
-          >
-            <ChevronRightIcon className="transition-transform group-data-[state=open]:rotate-90" />
-            {item.title}
-          </Button>
-        </CollapsibleTrigger>
-        <CollapsibleContent className={cn('group rounded-none')}>
-          <div
-            className={cn(
-              'bg-card/40',
-              'flex flex-col gap-x-1',
-              'ml-0 rounded-none',
-              'pl-2',
-              'group-data-[state=open]:border-l-4 group-data-[state=open]:border-l-primary/50',
-            )}
-          >
-            {item.children?.map((child) => (
-              <MobileMenuItem
-                key={child.id}
-                item={child}
-                menuDepth={menuDepth + 1}
-                onNavigateHandler={onNavigateHandler}
-              />
-            ))}
-          </div>
-        </CollapsibleContent>
-      </Collapsible>
-    )
-  }
-
-  return <></>
+      </DrawerClose>
+    </DrawerFooter>
+  )
 }
 
-type OnNavigateHandler = (event?: { preventDefault: () => void }) => void
+function SettingsDrawer() {
+  return (
+    <Drawer direction={'bottom'}>
+      <DrawerTrigger asChild>
+        <Button
+          variant={'ghost'}
+          size={'lg'}
+          className={
+            'w-full justify-start rounded-none border-b border-border/10 px-4 py-5 text-left text-xl'
+          }
+        >
+          <Settings className="w-6" />
+          Settings
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent className={cn(MobileMenuDrawerContentClassName)}>
+        <DrawerHeader className={cn('sr-only')}>
+          <DrawerTitle>Settings</DrawerTitle>
+          <DrawerDescription></DrawerDescription>
+        </DrawerHeader>
+        <div className={'my-3 flex w-full flex-col items-center justify-center'}>
+          <h2 className="text-3xl">Settings</h2>
+        </div>
+        <ScrollArea className={cn(MobileMenuItemScrollList)}>
+          <div className={cn('flex h-full w-full flex-col justify-center gap-y-4 p-4')}>
+            <MobileWallpaperSettingsFieldGroup className={ListItemClassName} />
+            <MobileColorThemeFieldGroup className={ListItemClassName} />
+            <MobileThemeModeFieldGroup className={ListItemClassName} />
+          </div>
+        </ScrollArea>
+        <MobileMenuDrawerFooter />
+      </DrawerContent>
+    </Drawer>
+  )
+}
 
 export default function MobileNavMenu({
-  menuTree: navTree,
+  menuItems,
   appTitle,
-  twitchStatusSlot,
   triggerButtonProps = {},
   ...props
-}: React.ComponentPropsWithoutRef<typeof Drawer> & MobileMenuProps): React.JSX.Element {
+}: React.ComponentPropsWithoutRef<typeof Drawer> & MobileNavMenuProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   const {
@@ -145,9 +128,9 @@ export default function MobileNavMenu({
     ...restTriggerButtonProps
   } = triggerButtonProps
   const triggerButtonVariant = variantFromProps ?? 'ghost'
-  const triggerButtonSize = sizeFromProps ?? 'icon'
+  const triggerButtonSize = sizeFromProps ?? 'lg'
 
-  const handleOnNavigate: OnNavigateHandler = () => {
+  const onNavigateHandler: OnNavigateHandler = () => {
     console.log(`closing mobile nav menu after link navigation`)
     setIsOpen(false)
   }
@@ -163,152 +146,40 @@ export default function MobileNavMenu({
           {...restTriggerButtonProps}
         >
           <Menu className="transition-transform" size={48} />
+          <span className="">Menu</span>
         </Button>
       </DrawerTrigger>
 
-      <DrawerContent className={cn(MobileDrawerMainMenuContentClassName)}>
-        <DrawerHeader>
-          <DrawerTitle className="text-center">
-            <div className="grid w-full grid-cols-2 gap-2 align-middle">
-              <AppMainLogo
-                variant={'default'}
-                text={appTitle}
-                className={'items-center justify-center'}
-              />
-              <div className="mx-auto flex h-full w-full flex-col items-end justify-center">
-                {twitchStatusSlot}
-              </div>
-            </div>
-          </DrawerTitle>
-          <DrawerDescription></DrawerDescription>
-        </DrawerHeader>
-
-        <div className={cn('flex h-full w-full flex-col overflow-hidden')}>
-          <div
-            className={cn(
-              MobileDrawerContentListCLassName,
-              // 'items-center ',
-              'flex h-full flex-col justify-stretch gap-y-0 overflow-x-hidden overflow-y-auto',
-            )}
-          >
-            {navTree.map((item) => (
-              <MobileMenuItem key={item.id} item={item} onNavigateHandler={handleOnNavigate} />
-            ))}
-          </div>
-        </div>
-
-        <DrawerFooter className={cn(MobileDrawerFooterClassName)}>
-          <div className="mb-2 flex w-full flex-row items-center justify-center gap-x-1 rounded-none border-t border-b border-t-primary border-b-primary">
-            <Button variant={'link'} size={'lg'} className={'text-primary'} asChild>
-              <Link
-                href="/home"
-                passHref
-                onNavigate={handleOnNavigate}
-                className="no-underline decoration-0"
-              >
-                <House className="w-5" />
-                <span className="no-underline">Home</span>
-              </Link>
-            </Button>
-            <GlobalSearch
-              onSelectionCallback={handleOnNavigate}
-              buttonProps={{ className: 'text-primary' }}
+      <DrawerContent className={cn(MobileMenuDrawerContentClassName)}>
+        <DrawerHeader className={cn('rounded-none')}>
+          <DrawerTitle className="py-0">
+            <AppMainLogo
+              variant={'default'}
+              text={appTitle}
+              className={'mx-auto items-center justify-center'}
             />
-            <SettingsDrawer />
-            {/* <Button variant={'link'} size={'lg'} className={'text-primary'} asChild>
-                <Link href="/searchresults" passHref onNavigate={handleOnNavigate}>
-                  <SearchIcon className="w-5" />
-                  <span>Search</span>
-                </Link>
-              </Button> */}
-          </div>
-          <DrawerClose asChild>
-            <Button variant="ghost" className="w-fit">
-              Close
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  )
-}
-
-function SettingsDrawer() {
-  return (
-    <Drawer direction={'bottom'}>
-      <DrawerTrigger asChild>
-        <Button variant={'link'} size={'lg'} className={'text-primary'}>
-          <Settings />
-          Settings
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className={cn(MobileDrawerSubMenuContentClassName)}>
-        <DrawerHeader>
-          <DrawerTitle>Settings</DrawerTitle>
-          <DrawerDescription></DrawerDescription>
+          </DrawerTitle>
         </DrawerHeader>
 
-        <div className={cn(MobileDrawerContentListCLassName)}>
-          <AppearanceSettingsDrawer />
+        <ScrollArea className={cn(MobileMenuItemScrollList)}>
+          <MenuLevel
+            items={menuItems}
+            level={0}
+            onNavigateHandler={onNavigateHandler}
+            rootLabel={'Menu'}
+          />
+        </ScrollArea>
+        <div className="flex flex-col">
+          <MenuListItem
+            label={'Home'}
+            icon={<House className="" />}
+            href={'/home'}
+            onNavigate={onNavigateHandler}
+          />
+          <SettingsDrawer />
         </div>
-
-        <DrawerFooter className={cn(MobileDrawerFooterClassName)}>
-          <DrawerClose asChild>
-            <Button variant="ghost" className="w-fit">
-              <ArrowLeft className={'mr-2'} />
-              Back
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
+        <MobileMenuDrawerFooter />
       </DrawerContent>
     </Drawer>
   )
 }
-
-function AppearanceSettingsDrawer() {
-  return (
-    <Drawer direction={'bottom'}>
-      <DrawerTrigger asChild>
-        <Button variant="ghost">
-          <PaletteIcon className={'mr-1'} />
-          Appearance
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className={cn(MobileDrawerSubMenuContentClassName)}>
-        <DrawerHeader className="rounded-none">
-          <DrawerTitle>Appearance</DrawerTitle>
-          <DrawerDescription>Change the look and feel of the website.</DrawerDescription>
-        </DrawerHeader>
-
-        <div className={cn(MobileDrawerContentListCLassName)}>
-          <MobileWallpaperSettingsFieldGroup />
-          <MobileColorThemeFieldGroup />
-          <MobileThemeModeFieldGroup />
-        </div>
-
-        <DrawerFooter className={cn(MobileDrawerFooterClassName)}>
-          <DrawerClose asChild>
-            <Button variant="ghost" className="w-fit">
-              <ArrowLeft className={'mr-2'} />
-              Back
-            </Button>
-          </DrawerClose>
-        </DrawerFooter>
-      </DrawerContent>
-    </Drawer>
-  )
-}
-
-const MobileDrawerMainMenuContentClassName = cn(
-  'rounded-none bg-blend-darken',
-  'data-[vaul-drawer-direction=bottom]:h-screen data-[vaul-drawer-direction=bottom]:min-h-90vh',
-  'data-[vaul-drawer-direction=bottom]:rounded-t-none',
-)
-const MobileDrawerSubMenuContentClassName = cn(
-  'rounded-none bg-blend-darken',
-  'data-[vaul-drawer-direction=bottom]:max-h-90vh data-[vaul-drawer-direction=bottom]:min-h-1/2',
-  'data-[vaul-drawer-direction=bottom]:rounded-t-none',
-)
-const MobileDrawerContentListCLassName =
-  'mx-2 flex flex-col justify-center gap-y-4 overflow-auto border border-primary/30 bg-background pb-2' //items-center
-const MobileDrawerFooterClassName = 'flex flex-col items-center justify-center rounded-none'

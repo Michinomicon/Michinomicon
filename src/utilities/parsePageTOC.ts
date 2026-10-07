@@ -163,7 +163,7 @@ export default async function buildPageTOC(
         break
       case 'mediaGalleryBlock':
         break
-      case 'archive':
+      case 'itemGroup':
         break
       case 'formBlock':
         break

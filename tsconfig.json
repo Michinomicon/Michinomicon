@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
     "strict": true,
+    "noImplicitAny": true,
+    "allowUnreachableCode": false,
     "esModuleInterop": true,
-    "target": "ES2022",
+    "target": "ES2024",
     "lib": [
       "DOM",
       "DOM.Iterable",
-      "ES2022"
+      "ES2024"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -49,7 +51,8 @@
     "next-env.d.ts",
     "next.config.js",
     "next-sitemap.config.cjs",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    ".next/dev/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

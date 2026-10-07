@@ -16,9 +16,9 @@ export const PostHero: React.FC<{
 
   return (
     <div className="relative mt-[3.1rem] flex items-start">
-      <div className="container z-10 relative lg:grid lg:grid-cols-[1fr_48rem_1fr] text-white pb-8">
-        <div className="col-start-1 col-span-1 md:col-start-2 md:col-span-2">
-          <div className="uppercase text-sm mb-6">
+      <div className="relative z-10 container pb-8 text-white lg:grid lg:grid-cols-[1fr_48rem_1fr]">
+        <div className="col-span-1 col-start-1 md:col-span-2 md:col-start-2">
+          <div className="mb-6 text-sm uppercase">
             {categories?.map((category, index) => {
               if (typeof category === 'object' && category !== null) {
                 const { title: categoryTitle } = category
@@ -42,19 +42,19 @@ export const PostHero: React.FC<{
             <h1 className="mb-6 text-3xl md:text-5xl lg:text-6xl">{title}</h1>
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4 md:gap-16">
+          <div className="flex flex-col gap-4 md:flex-row md:gap-16">
             {hasAuthors && (
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">
-                  <p className="text-sm">Author</p>
+                  <div className="text-sm">Author</div>
 
-                  <p>{formatAuthors(populatedAuthors)}</p>
+                  <div>{formatAuthors(populatedAuthors)}</div>
                 </div>
               </div>
             )}
             {publishedAt && (
               <div className="flex flex-col gap-1">
-                <p className="text-sm">Date Published</p>
+                <span className="text-sm">Date Published</span>
 
                 <time dateTime={publishedAt}>{formatDateTime(publishedAt)}</time>
               </div>
@@ -64,8 +64,8 @@ export const PostHero: React.FC<{
       </div>
       {heroImage && typeof heroImage !== 'string' && (
         <div className="select-none">
-          <Media fill priority imgClassName="-z-1 object-cover" resource={heroImage} />
-          <div className="absolute pointer-events-none left-0 bottom-0 w-full h-1/2 bg-linear-to-t from-black to-transparent" />
+          <Media fill imgClassName="-z-1 object-cover" resource={heroImage} />
+          <div className="pointer-events-none absolute bottom-0 left-0 h-1/2 w-full bg-linear-to-t from-black to-transparent" />
         </div>
       )}
     </div>

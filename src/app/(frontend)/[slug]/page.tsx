@@ -5,11 +5,9 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
 import React, { cache } from 'react'
-// import { homeStatic } from '@/endpoints/seed/home-static'
-
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
-import { generateMeta } from '@/utilities/generateMeta'
+import { generatePageOrPostMeta } from '@/utilities/generatePageOrPostMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import { ButtonGroup } from '@/components/ui/button-group'
@@ -51,16 +49,10 @@ export default async function Page({ params: paramsPromise }: Args) {
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
-  // const page: RequiredDataFromCollectionSlug<'pages'> | null
 
   const page = await queryPageBySlug({
     slug: decodedSlug,
   })
-
-  // Remove this code once your website is seeded
-  // if (!page && slug === 'home') {
-  //   page = homeStatic
-  // }
 
   if (!page) {
     return <PayloadRedirects url={url} />
@@ -72,7 +64,7 @@ export default async function Page({ params: paramsPromise }: Args) {
     <React.Fragment>
       <article
         id={id}
-        className="article-page relative min-h-screen w-full border-primary/30 bg-card px-6 pt-16 pb-12 md:mx-auto md:min-h-max md:w-auto md:border md:bg-background md:pt-6"
+        className="article-page relative min-h-screen w-full rounded border-primary/30 bg-card px-6 pt-16 pb-12 md:mx-auto md:min-h-max md:w-auto md:border md:bg-background md:pt-6"
       >
         <PageClient />
         {/* Allows redirects for valid pages too */}
@@ -94,7 +86,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
         <RenderHero {...hero} />
 
-        <RenderBlocks blocks={layout} />
+        <RenderBlocks pageSlug={slug} blocks={layout} />
       </article>
     </React.Fragment>
   )
@@ -108,7 +100,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
     slug: decodedSlug,
   })
 
-  return generateMeta({ doc: page })
+  return generatePageOrPostMeta({ pageOrPost: page })
 }
 
 const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {

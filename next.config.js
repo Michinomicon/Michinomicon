@@ -6,12 +6,14 @@ const NEXT_PUBLIC_SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL
   ? `${process.env.NEXT_PUBLIC_SERVER_URL}`
   : undefined || process.env.__NEXT_PRIVATE_ORIGIN || 'http://127.0.0.1:3000'
 
+const LOCAL_DEV_IP = process.env.LOCAL_DEV_IP
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    deviceSizes: [640, 768, 1024, 1280, 1536, 1920, 2048, 3840],
-    imageSizes: [32, 48, 64, 96, 128, 256, 384],
     qualities: [75, 100],
+    deviceSizes: [480, 640, 768, 1024, 1280, 1536, 1920, 3840],
+    imageSizes: [64, 96, 128, 256, 400, 500],
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL].map((item) => {
         const url = new URL(item)
@@ -33,6 +35,12 @@ const nextConfig = {
         hostname: '127.0.0.1',
         port: '3000',
         pathname: '/api/media/file/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        port: '',
+        pathname: '/vi/**',
       },
     ],
   },
@@ -58,7 +66,7 @@ const nextConfig = {
   },
   serverExternalPackages: ['pdf-img-convert', 'pdfjs-dist', 'canvas'],
   transpilePackages: ['react-pdf', 'flipbook-js'],
-  allowedDevOrigins: ['192.168.50.207'],
+  allowedDevOrigins: LOCAL_DEV_IP ? [LOCAL_DEV_IP, '127.0.0.1'] : ['127.0.0.1'],
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

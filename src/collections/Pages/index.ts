@@ -1,12 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
-import { Archive } from '../../blocks/ArchiveBlock/config'
+import { ItemGroup } from '../../blocks/ItemGroup/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
-import { MediaGalleryBlock } from '@/blocks/MediaGalleryBlock/config'
-import { hero } from '@/heros/config'
+import { MediaGalleryBlock } from '../../blocks/MediaGalleryBlock/config'
+import { hero } from '../../heros/config'
 import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
@@ -20,7 +20,7 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { hasAccess } from '@/utilities/accessFunctions'
+import { hasAccess } from '../../utilities/accessFunctions'
 
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
@@ -36,6 +36,15 @@ export const Pages: CollectionConfig<'pages'> = {
   defaultPopulate: {
     title: true,
     slug: true,
+    meta: {
+      title: true,
+      image: true,
+      description: true,
+    },
+    hero: {
+      richText: true,
+      media: true,
+    },
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
@@ -65,7 +74,6 @@ export const Pages: CollectionConfig<'pages'> = {
       name: 'parentCategory',
       type: 'relationship',
       relationTo: 'categories',
-      required: true,
       admin: {
         position: 'sidebar',
       },
@@ -87,7 +95,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 Content,
                 MediaBlock,
                 MediaGalleryBlock,
-                Archive,
+                ItemGroup,
                 FormBlock,
                 PostContent,
               ],

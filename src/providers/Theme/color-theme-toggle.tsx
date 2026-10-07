@@ -25,7 +25,6 @@ import {
   FieldGroup,
   FieldLabel,
   FieldLegend,
-  FieldSeparator,
   FieldSet,
   FieldTitle,
 } from '@/components/ui/field'
@@ -211,16 +210,18 @@ export function ColorThemeToggle() {
   )
 }
 
-export function MobileThemeModeFieldGroup() {
+export function MobileThemeModeFieldGroup(
+  props: React.ComponentPropsWithoutRef<typeof FieldGroup>,
+): React.ReactNode {
   const { setTheme, theme } = useTheme()
 
   return (
-    <FieldGroup className="w-full px-8">
+    <FieldGroup className="w-full" {...props}>
       <FieldSet>
-        <FieldLegend variant="label" className="text-center">
+        <FieldLegend variant="label" className="text-primary">
           Dark or Light Appearance
         </FieldLegend>
-        <RadioGroup value={theme} onValueChange={setTheme} className="pl-5">
+        <RadioGroup value={theme} onValueChange={setTheme} className="px-4">
           <FieldLabel
             htmlFor={'lightModeRadioItem'}
             data-active={theme === 'light'}
@@ -287,7 +288,9 @@ export function MobileThemeModeFieldGroup() {
   )
 }
 
-export function MobileColorThemeFieldGroup() {
+export function MobileColorThemeFieldGroup(
+  props: React.ComponentPropsWithoutRef<typeof FieldGroup>,
+): React.ReactNode {
   const { colorTheme, setColorTheme, theme: currentThemeMode } = useTheme()
   const [activeColorTheme, setActiveColorTheme] = React.useState<string>(colorTheme)
 
@@ -312,86 +315,82 @@ export function MobileColorThemeFieldGroup() {
   }
 
   return (
-    <div className="flex w-full items-center justify-center gap-y-4">
-      <FieldGroup className="w-full px-8">
-        <FieldSet>
-          <FieldLegend variant="label" className="text-center">
-            Color Pallette
-          </FieldLegend>
-          <RadioGroup
-            value={activeColorTheme}
-            onValueChange={onChangeActiveColorTheme}
-            className="pl-5"
-          >
-            {colorThemes.map((theme, index) => {
-              const isActiveTheme = activeColorTheme === theme.id
-              return (
-                <FieldLabel
-                  htmlFor={theme.id}
-                  data-active={isActiveTheme}
-                  key={index}
-                  onMouseEnter={() => {
-                    handleThemeItemMouseEnter(theme.id)
-                  }}
-                  onMouseLeave={() => {
-                    handleThemeItemMouseLeave(theme.id)
-                  }}
-                  className={cn(
-                    'group',
-                    'data-[active="true"]:border data-[active="true"]:border-primary',
+    <FieldGroup className="w-full" {...props}>
+      <FieldSet>
+        <FieldLegend variant="label" className="text-primary">
+          Color Palette
+        </FieldLegend>
+        <RadioGroup
+          value={activeColorTheme}
+          onValueChange={onChangeActiveColorTheme}
+          className="px-4"
+        >
+          {colorThemes.map((theme, index) => {
+            const isActiveTheme = activeColorTheme === theme.id
+            return (
+              <FieldLabel
+                htmlFor={theme.id}
+                data-active={isActiveTheme}
+                key={index}
+                onMouseEnter={() => {
+                  handleThemeItemMouseEnter(theme.id)
+                }}
+                onMouseLeave={() => {
+                  handleThemeItemMouseLeave(theme.id)
+                }}
+                className={cn(
+                  'group',
+                  'data-[active="true"]:border data-[active="true"]:border-primary',
 
-                    isActiveTheme ? `` : ``,
-                  )}
+                  isActiveTheme ? `` : ``,
+                )}
+              >
+                <Field
+                  orientation="horizontal"
+                  className={`group-data-[active="true"]:bg-primary/10`}
                 >
-                  <Field
-                    orientation="horizontal"
-                    className={`group-data-[active="true"]:bg-primary/10`}
-                  >
-                    <FieldContent data-theme={theme.id} data-mode={currentThemeMode}>
-                      <FieldTitle>
-                        <div className="p-x-2 flex items-center gap-x-2">
-                          <div className="flex items-center justify-center space-x-0 rounded-full border-2 border-accent outline-0">
-                            <div className="rounded-r-0 h-6 w-3 rounded-l-full bg-primary outline-0"></div>
-                            <div className="rounded-l-0 h-6 w-3 rounded-r-full bg-secondary outline-0"></div>
-                          </div>
-                          <span className={cn('group-data-[active="true"]:font-semibold')}>
-                            {theme.label}
-                          </span>
+                  <FieldContent data-theme={theme.id} data-mode={currentThemeMode}>
+                    <FieldTitle>
+                      <div className="p-x-2 flex items-center gap-x-2">
+                        <div className="flex items-center justify-center space-x-0 rounded-full border-2 border-accent outline-0">
+                          <div className="rounded-r-0 h-6 w-3 rounded-l-full bg-primary outline-0"></div>
+                          <div className="rounded-l-0 h-6 w-3 rounded-r-full bg-secondary outline-0"></div>
                         </div>
-                      </FieldTitle>
-                    </FieldContent>
-                    <div className="flex h-full flex-col items-center justify-center">
-                      <RadioGroupItem value={theme.id} id={theme.id}></RadioGroupItem>
-                    </div>
-                  </Field>
-                </FieldLabel>
-              )
-            })}
-          </RadioGroup>
-          <FieldSeparator className="opacity-50" />
-        </FieldSet>
-      </FieldGroup>
-    </div>
+                        <span className={cn('group-data-[active="true"]:font-semibold')}>
+                          {theme.label}
+                        </span>
+                      </div>
+                    </FieldTitle>
+                  </FieldContent>
+                  <div className="flex h-full flex-col items-center justify-center">
+                    <RadioGroupItem value={theme.id} id={theme.id}></RadioGroupItem>
+                  </div>
+                </Field>
+              </FieldLabel>
+            )
+          })}
+        </RadioGroup>
+      </FieldSet>
+    </FieldGroup>
   )
 }
 
-export function MobileWallpaperSettingsFieldGroup() {
+export function MobileWallpaperSettingsFieldGroup(
+  props: React.ComponentPropsWithoutRef<typeof FieldGroup>,
+): React.ReactNode {
   const { globalSpotlight, globalReactiveTile, setSpotlight, setReactiveTile } = useWallpaper()
 
   return (
-    <FieldGroup className="w-full px-8">
+    <FieldGroup className="w-full" {...props}>
       <FieldSet>
-        <FieldLabel>Wallpaper Features</FieldLabel>
-        <FieldGroup data-slot="checkbox-group" className="pl-5">
-          <Field orientation="horizontal">
+        <FieldLabel className="text-primary">Wallpaper Features</FieldLabel>
+        <FieldGroup data-slot="checkbox-group" className="px-4">
+          <Field orientation="horizontal" className="pb-1">
             <FieldLabel htmlFor="checkbox-wallpaper-spotlight">
               Spotlight Effect
               <Popover>
                 <PopoverTrigger className="">
                   <TriangleAlertIcon size={24} className="mx-auto text-destructive" />
-                  {/* <Button variant="link" size="sm" className="text-destructive">
-                        
-                      </Button> */}
                 </PopoverTrigger>
                 <PopoverContent className="w-80 border border-destructive" side={'top'}>
                   <PopoverHeader>
@@ -403,6 +402,7 @@ export function MobileWallpaperSettingsFieldGroup() {
             </FieldLabel>
             <Checkbox
               id="checkbox-wallpaper-spotlight"
+              className=""
               checked={globalSpotlight}
               onCheckedChange={setSpotlight}
             />

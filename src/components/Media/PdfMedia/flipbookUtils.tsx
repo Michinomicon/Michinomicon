@@ -97,15 +97,15 @@ export const getFlipbookPageState = (flipbookPageElement: HTMLElement | null) =>
   return state
 }
 
-export function asFlipbookSlelector(
+export function asFlipbookSelector(
   element: BookElementType,
   classes?: FlipbookStateSelector,
 ): string
-export function asFlipbookSlelector(
+export function asFlipbookSelector(
   element: PageElementType,
   classes?: FlipbookPageStateSelector,
 ): string
-export function asFlipbookSlelector(
+export function asFlipbookSelector(
   element: BookElementType | PageElementType,
   classes: FlipbookPageStateSelector | FlipbookStateSelector = [],
 ): string {
@@ -116,11 +116,11 @@ export function asFlipbookSlelector(
   }
 }
 
-export const FirstPageActiveSelector = asFlipbookSlelector('page', [
+export const FirstPageActiveSelector = asFlipbookSelector('page', [
   FlipbookPageStateClassIndex.firstPage,
   FlipbookPageStateClassIndex.isActive,
 ])
-export const LastPageActiveSelector = asFlipbookSlelector('page', [
+export const LastPageActiveSelector = asFlipbookSelector('page', [
   FlipbookPageStateClassIndex.lastPage,
   FlipbookPageStateClassIndex.isActive,
 ])
@@ -135,7 +135,7 @@ export function clearFlipbookPageIsActiveClasses(flipbookElementId: string) {
   }
 
   // Clear current DOM state
-  const pages = flipbookContainer.querySelectorAll(asFlipbookSlelector('page'))
+  const pages = flipbookContainer.querySelectorAll(asFlipbookSelector('page'))
   pages.forEach((page) => {
     if (page.classList.contains('is-active')) {
       const pageNumber = page.querySelector('.react-pdf__Page')?.getAttribute('data-page-number')

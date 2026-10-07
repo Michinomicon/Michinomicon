@@ -4,28 +4,28 @@ import RichText from '@/components/RichText'
 
 import type { Post } from '@/payload-types'
 
-import { Card } from '../../components/Card'
+import { CollectionItemCard } from '../../components/CollectionItemCard'
 import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import { postToCollectionItemProperties } from '@/utilities/getItemGroupCardProperties'
 
 export type RelatedPostsProps = {
   className?: string
   docs?: Post[]
   introContent?: DefaultTypedEditorState
 }
-
-export const RelatedPosts: React.FC<RelatedPostsProps> = (props) => {
+export const RelatedPosts: React.FC<RelatedPostsProps> = async (props) => {
   const { className, docs, introContent } = props
+  const items = docs ? await Promise.all(docs.map(postToCollectionItemProperties)) : []
 
   return (
     <div className={clsx('lg:container', className, 'related-posts-block')}>
       {introContent && <RichText data={introContent} enableGutter={false} />}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8 items-stretch">
-        {docs?.map((doc, index) => {
-          if (typeof doc === 'string') return null
-
-          return <Card key={index} doc={doc} relationTo="posts" showCategories />
-        })}
+      <div className="grid grid-cols-1 items-stretch gap-4 md:grid-cols-2 md:gap-8">
+        {items &&
+          items.map((item, index) => {
+            return <CollectionItemCard key={index} item={item} showTags />
+          })}
       </div>
     </div>
   )

@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Condition, FieldHook, ImageSize } from 'payload'
 
 import {
   FixedToolbarFeature,
@@ -8,10 +8,95 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { hasAccess } from '@/utilities/accessFunctions'
-import { mediaCollectionBeforeChange } from '@/hooks/mediaCollectionBeforeChange'
+import { processFileAndPopulateMetaData } from '@/hooks/mediaCollectionBeforeChange'
+import { mediaCollectionBeforeOperation } from '@/hooks/mediaCollectionBeforeOperation'
+import { Media as MediaType } from '@/payload-types'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+type StringFieldHook = FieldHook<MediaType, string | undefined, MediaType>
+
+const adoptFilenameIfEmptyBeforeChange: StringFieldHook = ({ value, siblingData }) => {
+  // If the filename exists, and the field value is empty, adopt the filename
+  const { filename } = siblingData
+  if (filename && (!value || value.length <= 0)) {
+    return filename.replace(/\.[^/.]+$/, '')
+  }
+  // else, keep existing
+  return value
+}
+
+const afterReadYoutubeThumbnailUrl: StringFieldHook = ({ value, siblingData }) => {
+  // If there is a YouTube video ID, set the thumbnailUrl
+  const { youtubeId } = siblingData
+  if (typeof youtubeId === 'string' && youtubeId.length > 0) {
+    const thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`
+    return thumbnailUrl
+  }
+  return value
+}
+
+const afterReadYoutubeVideoUrl: StringFieldHook = ({ value, siblingData }) => {
+  // If there is a YouTube video ID, set the url
+  const { youtubeId } = siblingData
+  if (typeof youtubeId === 'string' && youtubeId.length > 0) {
+    const videoUrl = `https://youtube-nocookie.com/watch?v=${youtubeId}`
+    return videoUrl
+  }
+  return value
+}
+
+const hasYouTubeIdCondition = (data: Partial<MediaType>) => {
+  const { youtubeId } = data
+  if (typeof youtubeId === 'string' && youtubeId.length > 0) {
+    return true
+  }
+  return false
+}
+
+export const UploadImageSizes: ImageSize[] = [
+  {
+    name: 'thumbnail',
+    width: 400,
+  },
+  {
+    name: 'square',
+    width: 500,
+    height: 500,
+    crop: 'center',
+  },
+  {
+    name: 'sm',
+    width: 640,
+  },
+  {
+    name: 'md',
+    width: 768,
+  },
+  {
+    name: 'lg',
+    width: 1024,
+  },
+  {
+    name: 'xl',
+    width: 1280,
+  },
+  {
+    name: '2xl',
+    width: 1536,
+  },
+  {
+    name: '3xl',
+    width: 1920,
+  },
+  {
+    name: 'og',
+    width: 1200,
+    height: 630,
+    crop: 'center',
+  },
+]
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -19,6 +104,8 @@ export const Media: CollectionConfig = {
   admin: {
     group: 'Globals',
     useAsTitle: 'title',
+    enableRichTextRelationship: true,
+    enableRichTextLink: true,
   },
   disableDuplicate: true,
   access: {
@@ -29,28 +116,150 @@ export const Media: CollectionConfig = {
   },
   fields: [
     {
+      name: 'youtubeId',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '@/components/MediaUploadYoutubeRemoteURListener',
+        },
+      },
+    },
+    {
+      name: 'youtubeUrl',
+      label: 'YouTube Video Url',
+      type: 'text',
+      hooks: {
+        afterRead: [afterReadYoutubeVideoUrl],
+      },
+      admin: {
+        description: 'Youtube Video URL',
+        readOnly: true,
+        condition: hasYouTubeIdCondition,
+      },
+    },
+    {
+      name: 'youtubeThumbnailUrl',
+      label: 'YouTube Video Thumbnail Url',
+      type: 'text',
+      virtual: true,
+      hooks: {
+        afterRead: [afterReadYoutubeThumbnailUrl],
+      },
+      admin: {
+        description: 'Paste this thumbnail URL in the remote file input above',
+        readOnly: true,
+        condition: hasYouTubeIdCondition,
+      },
+    },
+    {
       name: 'title',
       type: 'text',
       required: true,
       hooks: {
-        beforeValidate: [
-          ({ value, req, data }) => {
-            if (value) return value
-            // new upload ? grab the filename from the request.
-            if (req?.file?.name) {
-              // Strip file extension
-              return req.file.name.replace(/\.[^/.]+$/, '')
-            }
-            // use the existing filename if no title is present.
-            if (data?.filename) {
-              return data.filename.replace(/\.[^/.]+$/, '')
-            }
-            return value
+        beforeValidate: [adoptFilenameIfEmptyBeforeChange],
+      },
+    },
+    {
+      name: 'alt',
+      type: 'text',
+      required: true,
+      hooks: {
+        beforeValidate: [adoptFilenameIfEmptyBeforeChange],
+      },
+    },
+    {
+      name: 'coverImage',
+      type: 'relationship',
+      relationTo: 'media',
+      hasMany: false,
+      filterOptions: {
+        or: [
+          {
+            mimeType: {
+              contains: 'image/',
+            },
+          },
+          {
+            mimeType: {
+              contains: 'video/',
+            },
           },
         ],
       },
+      admin: {
+        description: 'Select an image or video that will be used as a preview for this upload.',
+        condition: (data: Partial<MediaType>) =>
+          !data?.mimeType?.startsWith('image/') &&
+          !data?.mimeType?.startsWith('video/') &&
+          (!data?.youtubeId || data?.youtubeId.length < 1),
+      },
     },
-    { 
+    {
+      name: 'isForProject',
+      type: 'checkbox',
+      label: 'Is for Project',
+      defaultValue: false,
+      admin: {
+        description:
+          'Check this box if this asset belongs to a specific community project to assign attribution.',
+      },
+    },
+    // --- PROJECT RELATIONSHIP ---
+    {
+      name: 'project',
+      type: 'relationship',
+      relationTo: 'projects',
+      hasMany: false,
+      admin: {
+        condition: (data) => Boolean(data?.isForProject),
+        description: 'The project this asset belongs to.',
+      },
+      validate: (value, { siblingData }: { siblingData: { isForProject?: boolean } }) => {
+        if (siblingData?.isForProject && !value) {
+          return 'A project must be selected if "Is for Project" is checked.'
+        }
+        return true
+      },
+    },
+    {
+      name: 'credits',
+      type: 'array',
+      labels: {
+        singular: 'Credit',
+        plural: 'Credits',
+      },
+      admin: {
+        condition: (data) => Boolean(data?.isForProject),
+        description: 'Assign community members and their specific roles for this asset.',
+      },
+      fields: [
+        {
+          type: 'row',
+          fields: [
+            {
+              name: 'creator',
+              type: 'relationship',
+              relationTo: 'creators',
+              hasMany: false,
+              required: true,
+              admin: {
+                width: '50%',
+              },
+            },
+            {
+              name: 'role',
+              type: 'text',
+              required: true,
+              admin: {
+                width: '50%',
+                placeholder: 'e.g., Lead Artist, 3D Modeler, Videographer',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'category',
       type: 'relationship',
       relationTo: 'categories',
@@ -65,26 +274,7 @@ export const Media: CollectionConfig = {
       admin: {
         position: 'sidebar',
       },
-      defaultValue:0
-    },
-    {
-      name: 'alt',
-      type: 'text',
-      admin: {
-        condition: (data) => data?.mimeType?.startsWith('image/'),
-      },
-      hooks: {
-        beforeChange: [
-          ({ value, siblingData }) => {
-            // If the alt field is empty, but a title exists, adopt the title
-            if (!value && siblingData?.title) {
-              return siblingData.title
-            }
-            // else, keep existing
-            return value
-          },
-        ],
-      },
+      defaultValue: 0,
     },
     {
       name: 'caption',
@@ -94,9 +284,6 @@ export const Media: CollectionConfig = {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
       }),
-      admin: {
-        condition: (data) => data?.mimeType?.startsWith('image/'),
-      },
     },
     // --- SHARED IMAGE/VIDEO METADATA FIELDS ---
     {
@@ -223,54 +410,53 @@ export const Media: CollectionConfig = {
       type: 'text',
       admin: {
         readOnly: true,
-        condition: (data) => data?.mimeType?.startsWith('video/'),
+        condition: ((data: MediaType) => data?.mimeType?.startsWith('video/')) as Condition<
+          MediaType,
+          MediaType
+        >,
       },
     },
   ],
   upload: {
+    pasteURL: {
+      allowList: [
+        {
+          hostname: 'img.youtube.com', // required
+          pathname: '/vi/*',
+          port: '',
+          protocol: 'https',
+          search: '',
+        },
+        {
+          hostname: 'youtube.com', // required
+          pathname: '',
+          port: '',
+          protocol: 'https',
+          search: 'watch?v=',
+        },
+      ],
+    },
     staticDir: process.env.PAYLOAD_MEDIA_DIR || path.resolve(dirname, `../../shared-media`),
-    mimeTypes: ['image/*', 'video/*', 'audio/*', 'application/pdf'],
+    mimeTypes: [
+      'image/*',
+      'video/*',
+      'audio/*',
+      'application/pdf',
+      'application/x-zip-compressed', // .zip (windows)
+      'application/zip', // .zip
+      'application/x-7z-compressed', // .7z
+      'application/gzip', // .tar.gz
+    ],
     adminThumbnail: 'thumbnail',
     focalPoint: true,
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 300,
-      },
-      {
-        name: 'square',
-        width: 500,
-        height: 500,
-      },
-      {
-        name: 'small',
-        width: 600,
-      },
-      {
-        name: 'medium',
-        width: 900,
-      },
-      {
-        name: 'large',
-        width: 1400,
-      },
-      {
-        name: 'xlarge',
-        width: 1920,
-      },
-      {
-        name: 'og',
-        width: 1200,
-        height: 630,
-        crop: 'center',
-      },
-    ],
+    displayPreview: true,
+    imageSizes: UploadImageSizes,
   },
   hooks: {
-    beforeChange: [mediaCollectionBeforeChange],
+    beforeOperation: [mediaCollectionBeforeOperation],
+    beforeChange: [processFileAndPopulateMetaData],
   },
 }
-
 /* -------------------------- IMAGE METADATA TYPES --------------------------
 sharp.Metadata  = {
   orientation: 0,

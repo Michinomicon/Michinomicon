@@ -1,5 +1,4 @@
 import { Field } from 'payload'
-import { populateReferenceLabel } from './hooks/populateReferenceLabel'
 import { link } from '@/fields/link'
 
 /**
@@ -14,37 +13,19 @@ export const generateMenuFields = (maxDepth: number = 3, currentDepth: number = 
           label: 'Item Type',
           name: 'type',
           type: 'select',
-          defaultValue: 'pages',
+          defaultValue: 'item',
           options: [
-            { label: 'Link', value: 'link' },
-            { label: 'Category', value: 'categories' },
-            { label: 'Page', value: 'pages' },
+            { label: 'Item', value: 'item' },
+            { label: 'Item Group', value: 'group' },
           ],
         },
         {
-          label: 'Page',
-          name: 'pageReference',
-          type: 'relationship',
-          relationTo: 'pages',
-          hooks: {
-            beforeChange: [populateReferenceLabel],
-          },
+          label: 'Group Label',
+          name: 'label',
+          type: 'text',
+          required: true,
           admin: {
-            condition: (_, siblingData) => siblingData?.type === 'pages',
-            allowCreate: false,
-          },
-        },
-        {
-          label: 'Category',
-          name: 'categoryReference',
-          type: 'relationship',
-          relationTo: 'categories',
-          hooks: {
-            beforeChange: [populateReferenceLabel],
-          },
-          admin: {
-            condition: (_, siblingData) => siblingData?.type === 'categories',
-            allowCreate: false,
+            condition: (_, siblingData) => siblingData?.type === 'group',
           },
         },
         {
@@ -57,8 +38,9 @@ export const generateMenuFields = (maxDepth: number = 3, currentDepth: number = 
     link({
       appearances: false,
       overrides: {
+        label: 'Item',
         admin: {
-          condition: (_, siblingData) => siblingData?.type === 'link',
+          condition: (_, siblingData) => siblingData?.type === 'item',
         },
       },
     }),
@@ -70,7 +52,7 @@ export const generateMenuFields = (maxDepth: number = 3, currentDepth: number = 
       type: 'array',
       label: 'Sub-Menu Items',
       admin: {
-        condition: (_, siblingData) => siblingData?.type === 'categories',
+        condition: (_, siblingData) => siblingData?.type === 'group',
         components: {
           RowLabel: '@/Header/RowLabel#RowLabel',
         },

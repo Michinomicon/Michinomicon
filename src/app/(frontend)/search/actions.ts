@@ -1,7 +1,7 @@
 'use server'
 
 import { type NextRequest } from 'next/server'
-import { Category, Page, Post } from '@/payload-types'
+import { Category, Creator, Page, Post, Project } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
@@ -9,15 +9,23 @@ export type GlobalSearchResults = {
   posts: Post[]
   categories: Category[]
   pages: Page[]
+  creators: Creator[]
+  projects: Project[]
 }
 
 export async function globalSearch(query: string | null): Promise<GlobalSearchResults> {
-  if (!query) return { posts: [], categories: [], pages: [] }
+  if (!query) return { posts: [], categories: [], pages: [], projects: [], creators: [] }
 
   const payload = await getPayload({ config: configPromise })
 
   // Run queries in parallel for performance
-  const [postsRes, categoriesRes, pagesRes] = await Promise.all([
+  const [
+    postsRes,
+    // categoriesRes,
+    pagesRes,
+    projectRes,
+    creatorsRes,
+  ] = await Promise.all([
     payload.find({
       collection: 'posts',
       depth: 1, // Fetch related category names
@@ -27,28 +35,44 @@ export async function globalSearch(query: string | null): Promise<GlobalSearchRe
           { 'content.text': { contains: query } }, // Adjust based on your rich text editor structure
         ],
       },
-      limit: 10, // Limit results for the UI dropdown
+      limit: 6, // Limit results for the UI dropdown
     }),
-    payload.find({
-      collection: 'categories',
-      where: {
-        title: { contains: query },
-      },
-      limit: 3,
-    }),
+    // payload.find({
+    //   collection: 'categories',
+    //   where: {
+    //     title: { contains: query },
+    //   },
+    //   limit: 6,
+    // }),
     payload.find({
       collection: 'pages',
       where: {
         title: { contains: query },
       },
-      limit: 3,
+      limit: 6,
+    }),
+    payload.find({
+      collection: 'projects',
+      where: {
+        title: { contains: query },
+      },
+      limit: 6,
+    }),
+    payload.find({
+      collection: 'creators',
+      where: {
+        title: { contains: query },
+      },
+      limit: 6,
     }),
   ])
 
   return {
     posts: postsRes.docs,
-    categories: categoriesRes.docs,
+    categories: [], // categoriesRes.docs,
     pages: pagesRes.docs,
+    projects: projectRes.docs,
+    creators: creatorsRes.docs,
   }
 }
 

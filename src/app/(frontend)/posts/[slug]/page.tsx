@@ -11,7 +11,7 @@ import RichText from '@/components/RichText'
 import type { Post } from '@/payload-types'
 
 import { PostHero } from '@/heros/PostHero'
-import { generateMeta } from '@/utilities/generateMeta'
+import { generatePageOrPostMeta } from '@/utilities/generatePageOrPostMeta'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 
@@ -51,8 +51,6 @@ export default async function Post({ params: paramsPromise }: Args) {
   const url = '/posts/' + decodedSlug
   const post = await queryPostBySlug({ slug: decodedSlug })
 
-  console.debug('posts/[slug].page => ', { url: url, decodedSlug: decodedSlug, post: post })
-
   if (!post) return <PayloadRedirects url={url} />
 
   return (
@@ -87,7 +85,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const decodedSlug = decodeURIComponent(slug)
   const post = await queryPostBySlug({ slug: decodedSlug })
 
-  return generateMeta({ doc: post })
+  return generatePageOrPostMeta({ pageOrPost: post })
 }
 
 const queryPostBySlug = cache(async ({ slug }: { slug: string }) => {
