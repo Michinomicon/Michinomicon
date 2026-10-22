@@ -9,7 +9,7 @@ on:
 
 jobs:
   standalone-deployment:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     # ONLY IF branch is 'main' or 'dev'
     if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
